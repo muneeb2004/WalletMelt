@@ -6,9 +6,11 @@ import '../../constants/categories.dart';
 import '../../services/export/expense_csv_export_service.dart';
 import '../../services/export/export_share_service.dart';
 import '../../services/export/file_picker_service.dart';
+import '../../services/export/wallet_melt_json_backup_conflict_service.dart';
 import '../../services/export/wallet_melt_json_backup_import_validation_service.dart';
 import '../../services/export/wallet_melt_json_backup_preview_service.dart';
 import '../../services/export/wallet_melt_json_backup_service.dart';
+import '../../services/export/wallet_melt_json_restore_dry_run_planner.dart';
 import '../../state/app_state.dart';
 import '../../theme/wallet_melt_theme.dart';
 import '../../types/settings.dart';
@@ -22,6 +24,8 @@ class SettingsScreen extends StatefulWidget {
     this.importValidationService =
         const WalletMeltJsonBackupImportValidationService(),
     this.previewService = const WalletMeltJsonBackupPreviewService(),
+    this.conflictService = const WalletMeltJsonBackupConflictService(),
+    this.restoreDryRunPlanner = const WalletMeltJsonRestoreDryRunPlanner(),
     super.key,
   });
 
@@ -31,6 +35,8 @@ class SettingsScreen extends StatefulWidget {
   final FilePickerService filePickerService;
   final WalletMeltJsonBackupImportValidationService importValidationService;
   final WalletMeltJsonBackupPreviewService previewService;
+  final WalletMeltJsonBackupConflictService conflictService;
+  final WalletMeltJsonRestoreDryRunPlanner restoreDryRunPlanner;
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -344,7 +350,40 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
         final preview = widget.previewService.generatePreview(content);
         if (preview.isValid) {
-          _showBackupPreviewDialog(preview);
+          // Run read-only conflict detection against current app data.
+          final state = context.read<AppState>();
+          BackupConflictSummary? conflictSummary;
+          RestoreDryRunPlan? dryRunPlan;
+          try {
+            final groceryItems = await state.listAllGroceryItemsForExport();
+            final budgets = await state.listAllBudgetsForExport();
+            if (!mounted) return;
+            final snapshot = LocalAppSnapshot(
+              expenses: state.expenses,
+              deletedExpenses: state.deletedExpenses,
+              categories: state.categories,
+              budgets: budgets,
+              groceryItems: groceryItems,
+              settings: state.settings,
+            );
+            conflictSummary = widget.conflictService.detect(
+              jsonText: content,
+              localSnapshot: snapshot,
+            );
+            dryRunPlan = widget.restoreDryRunPlanner.plan(
+              jsonText: content,
+              localSnapshot: snapshot,
+              conflictSummary: conflictSummary,
+            );
+          } catch (_) {
+            // Conflict detection failure is non-blocking; preview still shows.
+          }
+          if (!mounted) return;
+          _showBackupPreviewDialog(
+            preview,
+            conflictSummary: conflictSummary,
+            dryRunPlan: dryRunPlan,
+          );
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -370,7 +409,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  void _showBackupPreviewDialog(WalletMeltBackupPreview preview) {
+  void _showBackupPreviewDialog(
+    WalletMeltBackupPreview preview, {
+    BackupConflictSummary? conflictSummary,
+    RestoreDryRunPlan? dryRunPlan,
+  }) {
     showDialog(
       context: context,
       builder: (context) {
@@ -379,9 +422,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         final bodyStyle = Theme.of(context).textTheme.bodyMedium;
 
         return Dialog(
-          backgroundColor: isDark
-              ? const Color(0xFF161616)
-              : const Color(0xFFFAFAF6),
+          backgroundColor:
+              isDark ? const Color(0xFF161616) : const Color(0xFFFAFAF6),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(28),
           ),
@@ -411,8 +453,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   Text('Metadata', style: sectionTitleStyle),
                   const SizedBox(height: 8),
                   _buildMetadataRow('Format', preview.format ?? 'Unknown'),
-                  _buildMetadataRow(
-                      'Format Version', '${preview.formatVersion ?? "Unknown"}'),
+                  _buildMetadataRow('Format Version',
+                      '${preview.formatVersion ?? "Unknown"}'),
                   _buildMetadataRow(
                       'App Version', preview.appVersion ?? 'Unknown'),
                   _buildMetadataRow('Exported At',
@@ -420,8 +462,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   const SizedBox(height: 16),
                   Text('Contents', style: sectionTitleStyle),
                   const SizedBox(height: 8),
-                  _buildContentCountRow(Icons.monetization_on_outlined,
-                      'Expenses', '${preview.expensesCount} (${preview.deletedExpensesCount} deleted)'),
+                  _buildContentCountRow(
+                      Icons.monetization_on_outlined,
+                      'Expenses',
+                      '${preview.expensesCount} (${preview.deletedExpensesCount} deleted)'),
                   _buildContentCountRow(Icons.shopping_basket_outlined,
                       'Grocery Items', '${preview.groceryItemsCount} items'),
                   _buildContentCountRow(Icons.category_outlined, 'Categories',
@@ -432,6 +476,84 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       Icons.settings_suggest_outlined,
                       'Settings Configuration',
                       preview.hasSettings ? 'Included' : 'Missing'),
+                  // Conflict check section.
+                  if (conflictSummary != null) ...[
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Icon(
+                          conflictSummary.hasAnyConflict
+                              ? Icons.rule_rounded
+                              : Icons.check_circle_outline_rounded,
+                          color: conflictSummary.hasAnyConflict
+                              ? WalletMeltColors.warning
+                              : Colors.green,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Conflict check',
+                            style: sectionTitleStyle?.copyWith(
+                              color: conflictSummary.hasAnyConflict
+                                  ? WalletMeltColors.warning
+                                  : Colors.green,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    if (!conflictSummary.hasAnyConflict)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Text(
+                          'No conflicts detected with current local data.',
+                          style: bodyStyle?.copyWith(
+                            color: Colors.green,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                    for (final line in conflictSummary.summaryLines)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 6),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(
+                              Icons.warning_amber_rounded,
+                              color: WalletMeltColors.warning,
+                              size: 16,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                line,
+                                style: bodyStyle?.copyWith(
+                                  color: WalletMeltColors.warning,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Restore is not available yet. No data has been '
+                      'imported or changed.',
+                      style: bodyStyle?.copyWith(
+                        fontSize: 12,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ],
+                  if (dryRunPlan != null) ...[
+                    const SizedBox(height: 16),
+                    _buildDryRunPlanSection(dryRunPlan),
+                  ],
                   if (preview.warnings.isNotEmpty) ...[
                     const SizedBox(height: 16),
                     Text('Warnings',
@@ -508,10 +630,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         child: ElevatedButton(
                           onPressed: null,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: WalletMeltColors.brand.withValues(alpha: 0.5),
-                            disabledBackgroundColor: isDark
-                                ? Colors.white12
-                                : Colors.black12,
+                            backgroundColor:
+                                WalletMeltColors.brand.withValues(alpha: 0.5),
+                            disabledBackgroundColor:
+                                isDark ? Colors.white12 : Colors.black12,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(14),
                             ),
@@ -530,6 +652,81 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildDryRunPlanSection(RestoreDryRunPlan plan) {
+    final theme = Theme.of(context);
+    final sectionTitleStyle = theme.textTheme.titleMedium;
+    final bodyStyle = theme.textTheme.bodyMedium;
+    final pendingSafetyGates = plan.unsatisfiedSafetyGates
+        .map((gate) => gate.label)
+        .take(3)
+        .join(', ');
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(
+              plan.hasBlockers
+                  ? Icons.report_problem_outlined
+                  : Icons.fact_check_outlined,
+              color: plan.hasBlockers ? WalletMeltColors.warning : Colors.green,
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Dry-run restore plan',
+                style: sectionTitleStyle?.copyWith(
+                  color: plan.hasBlockers
+                      ? WalletMeltColors.warning
+                      : Colors.green,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        _buildContentCountRow(
+          Icons.category_outlined,
+          'Planned categories',
+          '${plan.plannedCounts.categories}',
+        ),
+        _buildContentCountRow(
+          Icons.monetization_on_outlined,
+          'Planned expenses',
+          '${plan.plannedCounts.expenses}',
+        ),
+        _buildContentCountRow(
+          Icons.shopping_basket_outlined,
+          'Planned grocery items',
+          '${plan.plannedCounts.groceryItems}',
+        ),
+        _buildContentCountRow(
+          Icons.calendar_month_outlined,
+          'Planned budgets',
+          '${plan.plannedCounts.budgets}',
+        ),
+        _buildContentCountRow(
+          Icons.warning_amber_outlined,
+          'Blockers / warnings',
+          '${plan.blockerCount} / ${plan.warningCount}',
+        ),
+        const SizedBox(height: 8),
+        Text(
+          pendingSafetyGates.isEmpty
+              ? 'Dry-run only. Restore is still unavailable.'
+              : 'Dry-run only. Pending gates: $pendingSafetyGates.',
+          style: bodyStyle?.copyWith(
+            fontSize: 12,
+            color: theme.colorScheme.onSurfaceVariant,
+            fontStyle: FontStyle.italic,
+          ),
+        ),
+      ],
     );
   }
 

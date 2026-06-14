@@ -194,3 +194,6 @@ The current version of the backup format does **not** support:
 
 - **Format Version Bump:** Any additions to the schemas, changes in nullable fields, or change in ordering will require incrementing `format_version` in the `metadata`.
 - **Validation-Readiness:** Decoders must run the read-only validator before attempting to read any arrays. If validation fails, import must abort immediately.
+- **Restore Implication:** Backup IDs are source identifiers, not guaranteed safe destination identifiers. A future restore planner must preserve IDs only when they do not collide locally, otherwise it must remap IDs and update references such as `expenses.category_id`, `grocery_items.expense_id`, and `budgets.category_id`.
+- **Settings Implication:** The `settings` object is exportable for portability, but future restore flows must treat settings import as an explicit option and must not silently overwrite local preferences.
+- **Receipt Implication:** `receipt_image_uri` is a text reference only. Future restore flows must warn when receipt paths may be missing and must not claim media recovery unless a later archive/receipt packaging format is introduced.

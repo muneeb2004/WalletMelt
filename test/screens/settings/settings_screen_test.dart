@@ -11,9 +11,12 @@ import 'package:wallet_melt/src/services/export/expense_csv_export_service.dart'
 import 'package:wallet_melt/src/services/export/export_file_writer.dart';
 import 'package:wallet_melt/src/services/export/export_share_service.dart';
 import 'package:wallet_melt/src/services/export/file_picker_service.dart';
+import 'package:wallet_melt/src/services/export/wallet_melt_json_backup_conflict_service.dart';
 import 'package:wallet_melt/src/services/export/wallet_melt_json_backup_import_validation_service.dart';
 import 'package:wallet_melt/src/services/export/wallet_melt_json_backup_preview_service.dart';
 import 'package:wallet_melt/src/services/export/wallet_melt_json_backup_service.dart';
+import 'package:wallet_melt/src/services/export/wallet_melt_json_restore_dry_run_planner.dart';
+import 'package:wallet_melt/src/services/export/wallet_melt_json_restore_plan.dart';
 import 'package:wallet_melt/src/services/settings/settings_service.dart';
 import 'package:wallet_melt/src/state/app_state.dart';
 import 'package:wallet_melt/src/types/budget.dart';
@@ -317,12 +320,15 @@ void main() {
       expect(find.text('Receipt warning example'), findsOneWidget);
 
       // Close preview
+      await tester.ensureVisible(find.text('Close'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Close'));
       await tester.pumpAndSettle();
       expect(find.text('Backup Preview'), findsNothing);
     });
 
-    testWidgets('does not show preview dialog when an invalid backup is selected',
+    testWidgets(
+        'does not show preview dialog when an invalid backup is selected',
         (tester) async {
       final filePicker = FakeFilePickerService()
         ..resultText = '{"invalid": "json"}';
@@ -422,6 +428,359 @@ void main() {
       expect(filePicker.pickCalled, isTrue);
     });
   });
+
+  group('SettingsScreen conflict detection UI', () {
+    testWidgets('preview dialog shows conflict section with duplicate warnings',
+        (tester) async {
+      tester.view.physicalSize = const Size(800, 1200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      final filePicker = FakeFilePickerService()
+        ..resultText = '{"valid": "json"}';
+      final validationService =
+          FakeWalletMeltJsonBackupImportValidationService()
+            ..onValidate = (content) => const BackupValidationResult(
+                  isValid: true,
+                  expensesCount: 2,
+                  groceryItemsCount: 0,
+                  categoriesCount: 1,
+                  budgetsCount: 0,
+                );
+      final previewService = FakeWalletMeltJsonBackupPreviewService()
+        ..onPreview = (content) => const WalletMeltBackupPreview(
+              isValid: true,
+              format: 'walletmelt.local_json_backup',
+              formatVersion: 1,
+              appVersion: '0.1.1',
+              exportedAt: '2026-06-14T09:08:07.000',
+              expensesCount: 2,
+              deletedExpensesCount: 0,
+              groceryItemsCount: 0,
+              categoriesCount: 1,
+              budgetsCount: 0,
+              hasSettings: true,
+            );
+      final conflictService = FakeWalletMeltJsonBackupConflictService()
+        ..onDetect = (_, __) => const BackupConflictSummary(
+              duplicateExpenseIdCount: 2,
+              hasAnyConflict: true,
+            );
+
+      await tester.pumpWidget(
+        _settingsHarness(
+          appState: _appState(),
+          exportService: FakeExpenseCsvExportService(),
+          jsonBackupService: FakeWalletMeltJsonBackupService(),
+          shareService: FakeExportShareService(),
+          filePickerService: filePicker,
+          importValidationService: validationService,
+          previewService: previewService,
+          conflictService: conflictService,
+        ),
+      );
+
+      await tester.scrollUntilVisible(
+        find.text('Validate backup file'),
+        100.0,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Validate backup file'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Backup Preview'), findsOneWidget);
+      expect(find.text('Conflict check'), findsOneWidget);
+      expect(
+        find.textContaining('2 expense ID(s) already exist'),
+        findsOneWidget,
+      );
+      // Restore must still be disabled.
+      expect(find.text('Restore (N/A)'), findsOneWidget);
+      final restoreButton =
+          find.widgetWithText(ElevatedButton, 'Restore (N/A)');
+      expect(
+        tester.widget<ElevatedButton>(restoreButton).onPressed,
+        isNull,
+      );
+    });
+
+    testWidgets(
+        'preview dialog shows no-conflict message when clean backup selected',
+        (tester) async {
+      tester.view.physicalSize = const Size(800, 1200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      final filePicker = FakeFilePickerService()
+        ..resultText = '{"valid": "json"}';
+      final validationService =
+          FakeWalletMeltJsonBackupImportValidationService()
+            ..onValidate = (content) => const BackupValidationResult(
+                  isValid: true,
+                  expensesCount: 1,
+                  groceryItemsCount: 0,
+                  categoriesCount: 1,
+                  budgetsCount: 0,
+                );
+      final previewService = FakeWalletMeltJsonBackupPreviewService()
+        ..onPreview = (content) => const WalletMeltBackupPreview(
+              isValid: true,
+              format: 'walletmelt.local_json_backup',
+              formatVersion: 1,
+              appVersion: '0.1.1',
+              exportedAt: '2026-06-14T09:08:07.000',
+              expensesCount: 1,
+              deletedExpensesCount: 0,
+              groceryItemsCount: 0,
+              categoriesCount: 1,
+              budgetsCount: 0,
+              hasSettings: true,
+            );
+      final conflictService = FakeWalletMeltJsonBackupConflictService()
+        ..onDetect =
+            (_, __) => const BackupConflictSummary(hasAnyConflict: false);
+      final dryRunPlanner = FakeWalletMeltJsonRestoreDryRunPlanner()
+        ..onPlan = (_, __) => _dryRunPlan();
+
+      await tester.pumpWidget(
+        _settingsHarness(
+          appState: _appState(),
+          exportService: FakeExpenseCsvExportService(),
+          jsonBackupService: FakeWalletMeltJsonBackupService(),
+          shareService: FakeExportShareService(),
+          filePickerService: filePicker,
+          importValidationService: validationService,
+          previewService: previewService,
+          conflictService: conflictService,
+          dryRunPlanner: dryRunPlanner,
+        ),
+      );
+
+      await tester.scrollUntilVisible(
+        find.text('Validate backup file'),
+        100.0,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Validate backup file'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Backup Preview'), findsOneWidget);
+      expect(find.text('Conflict check'), findsOneWidget);
+      expect(
+        find.text('No conflicts detected with current local data.'),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining('Restore is not available yet'),
+        findsOneWidget,
+      );
+      expect(find.text('Dry-run restore plan'), findsOneWidget);
+      expect(find.text('Planned categories'), findsOneWidget);
+      expect(find.text('Planned expenses'), findsOneWidget);
+      expect(find.text('Blockers / warnings'), findsOneWidget);
+      expect(find.textContaining('Dry-run only'), findsOneWidget);
+    });
+
+    testWidgets('preview opens without crash when conflict detection throws',
+        (tester) async {
+      tester.view.physicalSize = const Size(800, 1200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      final filePicker = FakeFilePickerService()
+        ..resultText = '{"valid": "json"}';
+      final validationService =
+          FakeWalletMeltJsonBackupImportValidationService()
+            ..onValidate = (content) => const BackupValidationResult(
+                  isValid: true,
+                  expensesCount: 0,
+                  groceryItemsCount: 0,
+                  categoriesCount: 0,
+                  budgetsCount: 0,
+                );
+      final previewService = FakeWalletMeltJsonBackupPreviewService()
+        ..onPreview = (content) => const WalletMeltBackupPreview(
+              isValid: true,
+              format: 'walletmelt.local_json_backup',
+              formatVersion: 1,
+              appVersion: '0.1.1',
+              exportedAt: '2026-06-14T09:08:07.000',
+              expensesCount: 0,
+              deletedExpensesCount: 0,
+              groceryItemsCount: 0,
+              categoriesCount: 0,
+              budgetsCount: 0,
+              hasSettings: false,
+            );
+      // Fake that throws to simulate a detection failure.
+      final conflictService = FakeWalletMeltJsonBackupConflictService()
+        ..onDetect = (_, __) => throw Exception('Simulated detection failure');
+
+      await tester.pumpWidget(
+        _settingsHarness(
+          appState: _appState(),
+          exportService: FakeExpenseCsvExportService(),
+          jsonBackupService: FakeWalletMeltJsonBackupService(),
+          shareService: FakeExportShareService(),
+          filePickerService: filePicker,
+          importValidationService: validationService,
+          previewService: previewService,
+          conflictService: conflictService,
+        ),
+      );
+
+      await tester.scrollUntilVisible(
+        find.text('Validate backup file'),
+        100.0,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Validate backup file'));
+      await tester.pumpAndSettle();
+
+      // Dialog opens without crash; conflict section absent.
+      expect(find.text('Backup Preview'), findsOneWidget);
+      expect(find.text('Conflict check'), findsNothing);
+      expect(find.text('Dry-run restore plan'), findsNothing);
+    });
+
+    testWidgets('Restore (N/A) button is always disabled in preview dialog',
+        (tester) async {
+      tester.view.physicalSize = const Size(800, 1200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      final filePicker = FakeFilePickerService()
+        ..resultText = '{"valid": "json"}';
+      final validationService =
+          FakeWalletMeltJsonBackupImportValidationService()
+            ..onValidate = (content) => const BackupValidationResult(
+                  isValid: true,
+                  expensesCount: 0,
+                  groceryItemsCount: 0,
+                  categoriesCount: 0,
+                  budgetsCount: 0,
+                );
+      final previewService = FakeWalletMeltJsonBackupPreviewService()
+        ..onPreview = (content) => const WalletMeltBackupPreview(
+              isValid: true,
+              format: 'walletmelt.local_json_backup',
+              formatVersion: 1,
+              appVersion: '0.1.1',
+              exportedAt: '2026-06-14T09:08:07.000',
+              expensesCount: 0,
+              deletedExpensesCount: 0,
+              groceryItemsCount: 0,
+              categoriesCount: 0,
+              budgetsCount: 0,
+              hasSettings: false,
+            );
+      final conflictService = FakeWalletMeltJsonBackupConflictService()
+        ..onDetect =
+            (_, __) => const BackupConflictSummary(hasAnyConflict: false);
+
+      await tester.pumpWidget(
+        _settingsHarness(
+          appState: _appState(),
+          exportService: FakeExpenseCsvExportService(),
+          jsonBackupService: FakeWalletMeltJsonBackupService(),
+          shareService: FakeExportShareService(),
+          filePickerService: filePicker,
+          importValidationService: validationService,
+          previewService: previewService,
+          conflictService: conflictService,
+        ),
+      );
+
+      await tester.scrollUntilVisible(
+        find.text('Validate backup file'),
+        100.0,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Validate backup file'));
+      await tester.pumpAndSettle();
+
+      final restoreButton =
+          find.widgetWithText(ElevatedButton, 'Restore (N/A)');
+      expect(restoreButton, findsOneWidget);
+      expect(
+        tester.widget<ElevatedButton>(restoreButton).onPressed,
+        isNull,
+        reason: 'Restore button must remain disabled — no mutation allowed.',
+      );
+    });
+
+    testWidgets('preview dialog shows dry-run blockers and warnings',
+        (tester) async {
+      tester.view.physicalSize = const Size(800, 1200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      final filePicker = FakeFilePickerService()
+        ..resultText = '{"valid": "json"}';
+      final validationService =
+          FakeWalletMeltJsonBackupImportValidationService()
+            ..onValidate = (content) => const BackupValidationResult(
+                  isValid: true,
+                  expensesCount: 1,
+                  groceryItemsCount: 1,
+                  categoriesCount: 1,
+                  budgetsCount: 1,
+                );
+      final previewService = FakeWalletMeltJsonBackupPreviewService();
+      final conflictService = FakeWalletMeltJsonBackupConflictService();
+      final dryRunPlanner = FakeWalletMeltJsonRestoreDryRunPlanner()
+        ..onPlan = (_, __) => _dryRunPlan(blockers: 1, warnings: 2);
+
+      await tester.pumpWidget(
+        _settingsHarness(
+          appState: _appState(),
+          exportService: FakeExpenseCsvExportService(),
+          jsonBackupService: FakeWalletMeltJsonBackupService(),
+          shareService: FakeExportShareService(),
+          filePickerService: filePicker,
+          importValidationService: validationService,
+          previewService: previewService,
+          conflictService: conflictService,
+          dryRunPlanner: dryRunPlanner,
+        ),
+      );
+
+      await tester.scrollUntilVisible(
+        find.text('Validate backup file'),
+        100.0,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Validate backup file'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Dry-run restore plan'), findsOneWidget);
+      expect(find.text('1 / 2'), findsOneWidget);
+      expect(find.text('Restore (N/A)'), findsOneWidget);
+      expect(
+        tester
+            .widget<ElevatedButton>(
+              find.widgetWithText(ElevatedButton, 'Restore (N/A)'),
+            )
+            .onPressed,
+        isNull,
+      );
+    });
+  });
 }
 
 Widget _settingsHarness({
@@ -434,6 +793,10 @@ Widget _settingsHarness({
       const WalletMeltJsonBackupImportValidationService(),
   WalletMeltJsonBackupPreviewService previewService =
       const WalletMeltJsonBackupPreviewService(),
+  WalletMeltJsonBackupConflictService conflictService =
+      const WalletMeltJsonBackupConflictService(),
+  WalletMeltJsonRestoreDryRunPlanner dryRunPlanner =
+      const WalletMeltJsonRestoreDryRunPlanner(),
 }) {
   return ChangeNotifierProvider.value(
     value: appState,
@@ -445,6 +808,8 @@ Widget _settingsHarness({
         filePickerService: filePickerService,
         importValidationService: importValidationService,
         previewService: previewService,
+        conflictService: conflictService,
+        restoreDryRunPlanner: dryRunPlanner,
       ),
     ),
   );
@@ -690,4 +1055,93 @@ class FakeWalletMeltJsonBackupPreviewService extends Fake
       warnings: ['Receipt warning example'],
     );
   }
+}
+
+class FakeWalletMeltJsonBackupConflictService extends Fake
+    implements WalletMeltJsonBackupConflictService {
+  BackupConflictSummary Function(
+      String jsonText, LocalAppSnapshot localSnapshot)? onDetect;
+
+  @override
+  BackupConflictSummary detect({
+    required String jsonText,
+    required LocalAppSnapshot localSnapshot,
+  }) {
+    if (onDetect != null) {
+      return onDetect!(jsonText, localSnapshot);
+    }
+    return const BackupConflictSummary(hasAnyConflict: false);
+  }
+}
+
+class FakeWalletMeltJsonRestoreDryRunPlanner extends Fake
+    implements WalletMeltJsonRestoreDryRunPlanner {
+  RestoreDryRunPlan Function(String jsonText, LocalAppSnapshot localSnapshot)?
+      onPlan;
+
+  @override
+  RestoreDryRunPlan plan({
+    required String jsonText,
+    required LocalAppSnapshot localSnapshot,
+    BackupConflictSummary? conflictSummary,
+    bool previewGenerated = true,
+    bool settingsImportSelected = false,
+  }) {
+    if (onPlan != null) {
+      return onPlan!(jsonText, localSnapshot);
+    }
+    return _dryRunPlan();
+  }
+}
+
+RestoreDryRunPlan _dryRunPlan({
+  int blockers = 0,
+  int warnings = 0,
+}) {
+  final issues = <RestoreDryRunIssue>[
+    for (var index = 0; index < blockers; index++)
+      RestoreDryRunIssue(
+        severity: RestoreDryRunIssueSeverity.blocker,
+        message: 'Blocker $index',
+      ),
+    for (var index = 0; index < warnings; index++)
+      RestoreDryRunIssue(
+        severity: RestoreDryRunIssueSeverity.warning,
+        message: 'Warning $index',
+      ),
+  ];
+
+  return RestoreDryRunPlan(
+    isValid: true,
+    backupCounts: const RestoreDryRunEntityCounts(
+      categories: 1,
+      expenses: 1,
+      groceryItems: 1,
+      budgets: 1,
+      settings: 1,
+    ),
+    plannedCounts: const RestoreDryRunEntityCounts(
+      categories: 1,
+      expenses: 1,
+      groceryItems: 1,
+      budgets: 1,
+    ),
+    actions: const [],
+    idMappings: const [],
+    issues: issues,
+    safetyGates: const [
+      RestoreDryRunSafetyGateStatus(
+        gate: RestoreDryRunSafetyGate.backupFormatSupported,
+        label: 'Backup format supported',
+        satisfied: true,
+      ),
+      RestoreDryRunSafetyGateStatus(
+        gate: RestoreDryRunSafetyGate.explicitConfirmationRequiredLater,
+        label: 'Explicit confirmation still required later',
+        satisfied: false,
+      ),
+    ],
+    futureExecutionSteps: RestorePlan.mutationPlanningSteps,
+    restorePlan: RestorePlan.safeMerge(),
+  );
 }
