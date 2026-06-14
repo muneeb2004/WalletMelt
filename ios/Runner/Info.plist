@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDisplayName</key>
+	<string>WalletMelt</string>
+	<key>CFBundleName</key>
+	<string>wallet_melt</string>
+	<key>NSCameraUsageDescription</key>
+	<string>WalletMelt uses the camera to attach bill and receipt images to local expenses.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>WalletMelt uses your photo library to attach existing bill and receipt images to local expenses.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>WalletMelt stores optimized receipt images locally on this device.</string>
+</dict>
+</plist>

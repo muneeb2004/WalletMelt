@@ -1,0 +1,52 @@
+name: wallet_melt
+description: "WalletMelt - Know where your money went."
+publish_to: "none"
+version: 0.1.1+2
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  collection: ^1.18.0
+  cupertino_icons: ^1.0.8
+  fl_chart: ^1.2.0
+  flutter_image_compress: ^2.3.0
+  go_router: ^17.3.0
+  image_picker: ^1.1.2
+  intl: ^0.20.2
+  path: ^1.9.0
+  path_provider: ^2.1.4
+  provider: ^6.1.2
+  shared_preferences: ^2.3.2
+  sqflite: ^2.3.3+1
+  uuid: ^4.5.1
+  drift: ^2.34.0
+  drift_flutter: ^0.3.0
+  sqlite3_flutter_libs: ^0.6.0+eol
+  sqlite3: ^3.3.3
+  flutter_riverpod: ^3.3.2
+  share_plus: ^13.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  build_runner: ^2.15.0
+  drift_dev: ^2.34.0
+  flutter_launcher_icons: ^0.14.4
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/brand/walletmelt_app_icon.webp
+    - assets/brand/walletmelt_main_logo_mono.webp
+    - assets/brand/walletmelt_main_logo.webp
+    - assets/brand/walletmelt_icon_only_mark.webp
+    - assets/brand/optimized/walletmelt_main_logo_960.webp
+
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/brand/generated/walletmelt_app_icon_launcher.png"
