@@ -18,22 +18,39 @@ void main() {
     final units = await db.select(db.units).get();
     final ids = units.map((unit) => unit.id).toSet();
 
-    expect(ids, containsAll(['piece', 'dozen', 'kg', 'g', 'litre', 'ml', 'pack', 'bag', 'bottle', 'bill']));
+    expect(
+        ids,
+        containsAll([
+          'piece',
+          'dozen',
+          'kg',
+          'g',
+          'litre',
+          'ml',
+          'pack',
+          'bag',
+          'bottle',
+          'bill'
+        ]));
     expect(units, hasLength(10));
   });
 
-  test('V1 fixture migrates to V2 while preserving core records and totals', () async {
-    final tempDir = await Directory.systemTemp.createTemp('wallet_melt_migration_test_');
+  test('V1 fixture migrates to V2 while preserving core records and totals',
+      () async {
+    final tempDir =
+        await Directory.systemTemp.createTemp('wallet_melt_migration_test_');
     addTearDown(() async {
       if (await tempDir.exists()) {
         await tempDir.delete(recursive: true);
       }
     });
 
-    final dbFile = File('${tempDir.path}${Platform.pathSeparator}${DatabaseSchema.databaseName}');
+    final dbFile = File(
+        '${tempDir.path}${Platform.pathSeparator}${DatabaseSchema.databaseName}');
     _createV1Fixture(dbFile.path);
 
-    final backupPath = await WalletMeltDatabase.createPreV2BackupIfNeeded(dbFile.path);
+    final backupPath =
+        await WalletMeltDatabase.createPreV2BackupIfNeeded(dbFile.path);
     expect(backupPath, isNotNull);
     expect(await File(backupPath!).exists(), isTrue);
 
@@ -65,14 +82,22 @@ void main() {
     expect(milk.createdAt, '2026-06-14T10:00:00.000');
 
     final canonicalItems = await db.select(db.items).get();
-    expect(canonicalItems.map((item) => item.normalizedName), containsAll(['milk', 'eggs', 'legacy deleted item']));
+    expect(canonicalItems.map((item) => item.normalizedName),
+        containsAll(['milk', 'eggs', 'legacy deleted item']));
     expect(milk.itemId, isNotNull);
 
     final receipts = await db.select(db.receipts).get();
     expect(receipts, hasLength(2));
-    expect(receipts.map((receipt) => receipt.uri), containsAll(['file:///receipts/grocery.jpg', 'file:///receipts/electricity.jpg']));
+    expect(
+        receipts.map((receipt) => receipt.uri),
+        containsAll([
+          'file:///receipts/grocery.jpg',
+          'file:///receipts/electricity.jpg'
+        ]));
 
-    final deletedRows = await (db.select(db.expenses)..where((expense) => expense.deletedAt.isNotNull())).get();
+    final deletedRows = await (db.select(db.expenses)
+          ..where((expense) => expense.deletedAt.isNotNull()))
+        .get();
     expect(deletedRows, hasLength(1));
     expect(deletedRows.single.id, 'exp_grocery_deleted');
 
@@ -81,13 +106,29 @@ void main() {
     final budgetRepository = DriftBudgetRepository(db);
     final receiptRepository = DriftReceiptRepository(db);
 
-    expect((await categoryRepository.listCategories()).map((category) => category.id), containsAll(['grocery', 'electricity', 'rent']));
-    expect((await expenseRepository.listActive()).map((expense) => expense.id), ['exp_grocery_active', 'exp_electricity_active']);
-    expect((await expenseRepository.listDeleted()).map((expense) => expense.id), ['exp_grocery_deleted']);
-    expect((await expenseRepository.groceryItemsForExpense('exp_grocery_active')).map((item) => item.name), ['Milk', 'Eggs']);
-    expect((await expenseRepository.expenseItemsForExpense('exp_grocery_active')).map((item) => item.nameSnapshot), ['Milk', 'Eggs']);
-    expect((await budgetRepository.listForMonth('2026-06')).single.categoryId, 'grocery');
-    expect((await receiptRepository.listForExpense('exp_grocery_active')).single.uri, 'file:///receipts/grocery.jpg');
+    expect(
+        (await categoryRepository.listCategories())
+            .map((category) => category.id),
+        containsAll(['grocery', 'electricity', 'rent']));
+    expect((await expenseRepository.listActive()).map((expense) => expense.id),
+        ['exp_grocery_active', 'exp_electricity_active']);
+    expect((await expenseRepository.listDeleted()).map((expense) => expense.id),
+        ['exp_grocery_deleted']);
+    expect(
+        (await expenseRepository.groceryItemsForExpense('exp_grocery_active'))
+            .map((item) => item.name),
+        ['Milk', 'Eggs']);
+    expect(
+        (await expenseRepository.expenseItemsForExpense('exp_grocery_active'))
+            .map((item) => item.nameSnapshot),
+        ['Milk', 'Eggs']);
+    expect((await budgetRepository.listForMonth('2026-06')).single.categoryId,
+        'grocery');
+    expect(
+        (await receiptRepository.listForExpense('exp_grocery_active'))
+            .single
+            .uri,
+        'file:///receipts/grocery.jpg');
 
     final audits = await db.select(db.migrationAudit).get();
     expect(audits, hasLength(1));
@@ -106,17 +147,28 @@ void _createV1Fixture(String path) {
       ..execute(DatabaseSchema.createGroceryItems)
       ..execute(DatabaseSchema.createBudgets)
       ..execute(DatabaseSchema.createSyncMetadata)
-      ..execute("INSERT INTO categories (id, name, icon, color, isDefault, createdAt, updatedAt) VALUES ('grocery', 'Grocery', 'shopping_basket', '#8FD6B5', 1, '2026-06-01T00:00:00.000', '2026-06-01T00:00:00.000');")
-      ..execute("INSERT INTO categories (id, name, icon, color, isDefault, createdAt, updatedAt) VALUES ('electricity', 'Electricity', 'bolt', '#F4B740', 1, '2026-06-01T00:00:00.000', '2026-06-01T00:00:00.000');")
-      ..execute("INSERT INTO categories (id, name, icon, color, isDefault, createdAt, updatedAt) VALUES ('rent', 'Rent', 'home', '#A88CC2', 1, '2026-06-01T00:00:00.000', '2026-06-01T00:00:00.000');")
-      ..execute("INSERT INTO expenses (id, amount, currency, categoryId, title, vendor, date, notes, receiptImageUri, isRecurring, recurrenceFrequency, createdAt, updatedAt, deletedAt) VALUES ('exp_grocery_active', 8450, 'PKR', 'grocery', 'Imtiaz grocery', 'Imtiaz', '2026-06-14T00:00:00.000', 'Monthly stock', 'file:///receipts/grocery.jpg', 0, NULL, '2026-06-14T10:00:00.000', '2026-06-14T10:00:00.000', NULL);")
-      ..execute("INSERT INTO expenses (id, amount, currency, categoryId, title, vendor, date, notes, receiptImageUri, isRecurring, recurrenceFrequency, createdAt, updatedAt, deletedAt) VALUES ('exp_electricity_active', 5000, 'PKR', 'electricity', 'Electricity bill', 'K-Electric', '2026-06-10T00:00:00.000', NULL, 'file:///receipts/electricity.jpg', 0, NULL, '2026-06-10T09:00:00.000', '2026-06-10T09:00:00.000', NULL);")
-      ..execute("INSERT INTO expenses (id, amount, currency, categoryId, title, vendor, date, notes, receiptImageUri, isRecurring, recurrenceFrequency, createdAt, updatedAt, deletedAt) VALUES ('exp_grocery_deleted', 1000, 'PKR', 'grocery', 'Deleted grocery', 'Old Store', '2026-05-11T00:00:00.000', NULL, NULL, 0, NULL, '2026-05-11T10:00:00.000', '2026-05-12T10:00:00.000', '2026-05-12T10:00:00.000');")
-      ..execute("INSERT INTO grocery_items (id, expenseId, name, amount, createdAt) VALUES ('gi_milk', 'exp_grocery_active', 'Milk', 520, '2026-06-14T10:00:00.000');")
-      ..execute("INSERT INTO grocery_items (id, expenseId, name, amount, createdAt) VALUES ('gi_eggs', 'exp_grocery_active', 'Eggs', 420, '2026-06-14T10:00:00.000');")
-      ..execute("INSERT INTO grocery_items (id, expenseId, name, amount, createdAt) VALUES ('gi_deleted', 'exp_grocery_deleted', 'Legacy Deleted Item', 1000, '2026-05-11T10:00:00.000');")
-      ..execute("INSERT INTO category_budgets (id, categoryId, amount, currency, month, createdAt, updatedAt) VALUES ('budget_grocery_june', 'grocery', 30000, 'PKR', '2026-06', '2026-06-01T00:00:00.000', '2026-06-01T00:00:00.000');")
-      ..execute("INSERT INTO sync_metadata (entityType, entityId, localVersion, remoteId, lastSyncedAt, syncState) VALUES ('expense', 'exp_grocery_active', 1, NULL, NULL, 'local_only');")
+      ..execute(
+          "INSERT INTO categories (id, name, icon, color, isDefault, createdAt, updatedAt) VALUES ('grocery', 'Grocery', 'shopping_basket', '#8FD6B5', 1, '2026-06-01T00:00:00.000', '2026-06-01T00:00:00.000');")
+      ..execute(
+          "INSERT INTO categories (id, name, icon, color, isDefault, createdAt, updatedAt) VALUES ('electricity', 'Electricity', 'bolt', '#F4B740', 1, '2026-06-01T00:00:00.000', '2026-06-01T00:00:00.000');")
+      ..execute(
+          "INSERT INTO categories (id, name, icon, color, isDefault, createdAt, updatedAt) VALUES ('rent', 'Rent', 'home', '#A88CC2', 1, '2026-06-01T00:00:00.000', '2026-06-01T00:00:00.000');")
+      ..execute(
+          "INSERT INTO expenses (id, amount, currency, categoryId, title, vendor, date, notes, receiptImageUri, isRecurring, recurrenceFrequency, createdAt, updatedAt, deletedAt) VALUES ('exp_grocery_active', 8450, 'PKR', 'grocery', 'Imtiaz grocery', 'Imtiaz', '2026-06-14T00:00:00.000', 'Monthly stock', 'file:///receipts/grocery.jpg', 0, NULL, '2026-06-14T10:00:00.000', '2026-06-14T10:00:00.000', NULL);")
+      ..execute(
+          "INSERT INTO expenses (id, amount, currency, categoryId, title, vendor, date, notes, receiptImageUri, isRecurring, recurrenceFrequency, createdAt, updatedAt, deletedAt) VALUES ('exp_electricity_active', 5000, 'PKR', 'electricity', 'Electricity bill', 'K-Electric', '2026-06-10T00:00:00.000', NULL, 'file:///receipts/electricity.jpg', 0, NULL, '2026-06-10T09:00:00.000', '2026-06-10T09:00:00.000', NULL);")
+      ..execute(
+          "INSERT INTO expenses (id, amount, currency, categoryId, title, vendor, date, notes, receiptImageUri, isRecurring, recurrenceFrequency, createdAt, updatedAt, deletedAt) VALUES ('exp_grocery_deleted', 1000, 'PKR', 'grocery', 'Deleted grocery', 'Old Store', '2026-05-11T00:00:00.000', NULL, NULL, 0, NULL, '2026-05-11T10:00:00.000', '2026-05-12T10:00:00.000', '2026-05-12T10:00:00.000');")
+      ..execute(
+          "INSERT INTO grocery_items (id, expenseId, name, amount, createdAt) VALUES ('gi_milk', 'exp_grocery_active', 'Milk', 520, '2026-06-14T10:00:00.000');")
+      ..execute(
+          "INSERT INTO grocery_items (id, expenseId, name, amount, createdAt) VALUES ('gi_eggs', 'exp_grocery_active', 'Eggs', 420, '2026-06-14T10:00:00.000');")
+      ..execute(
+          "INSERT INTO grocery_items (id, expenseId, name, amount, createdAt) VALUES ('gi_deleted', 'exp_grocery_deleted', 'Legacy Deleted Item', 1000, '2026-05-11T10:00:00.000');")
+      ..execute(
+          "INSERT INTO category_budgets (id, categoryId, amount, currency, month, createdAt, updatedAt) VALUES ('budget_grocery_june', 'grocery', 30000, 'PKR', '2026-06', '2026-06-01T00:00:00.000', '2026-06-01T00:00:00.000');")
+      ..execute(
+          "INSERT INTO sync_metadata (entityType, entityId, localVersion, remoteId, lastSyncedAt, syncState) VALUES ('expense', 'exp_grocery_active', 1, NULL, NULL, 'local_only');")
       ..execute('PRAGMA user_version = 1;');
   } finally {
     db.close();

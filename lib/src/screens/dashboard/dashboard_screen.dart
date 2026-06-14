@@ -33,9 +33,11 @@ class DashboardScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('WalletMelt', style: Theme.of(context).textTheme.headlineMedium),
+                        Text('WalletMelt',
+                            style: Theme.of(context).textTheme.headlineMedium),
                         const SizedBox(height: 4),
-                        Text('Where did your money go this month?', style: Theme.of(context).textTheme.bodyMedium),
+                        Text('Where did your money go this month?',
+                            style: Theme.of(context).textTheme.bodyMedium),
                       ],
                     ),
                   ),
@@ -64,17 +66,27 @@ class DashboardScreen extends StatelessWidget {
                         height: 140,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: WalletMeltColors.brandSoft.withValues(alpha: 0.32),
-                          boxShadow: [BoxShadow(color: WalletMeltColors.brand.withValues(alpha: 0.22), blurRadius: 48)],
+                          color: WalletMeltColors.brandSoft
+                              .withValues(alpha: 0.32),
+                          boxShadow: [
+                            BoxShadow(
+                                color: WalletMeltColors.brand
+                                    .withValues(alpha: 0.22),
+                                blurRadius: 48)
+                          ],
                         ),
                       ),
                     ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(readableMonth(state.selectedMonth), style: Theme.of(context).textTheme.labelLarge),
+                        Text(readableMonth(state.selectedMonth),
+                            style: Theme.of(context).textTheme.labelLarge),
                         const SizedBox(height: 12),
-                        Text(formatMoney(insights.total, state.settings.currency), style: Theme.of(context).textTheme.displaySmall),
+                        Text(
+                            formatMoney(
+                                insights.total, state.settings.currency),
+                            style: Theme.of(context).textTheme.displaySmall),
                         const SizedBox(height: 10),
                         Text(
                           insights.highestCategory == null
@@ -88,12 +100,15 @@ class DashboardScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              if (state.expenses.isEmpty) _EmptyDashboard(onAdd: () => context.push('/expense/new')) else ...[
+              if (state.expenses.isEmpty)
+                _EmptyDashboard(onAdd: () => context.push('/expense/new'))
+              else ...[
                 LiquidGlass(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Category melt', style: Theme.of(context).textTheme.titleLarge),
+                      Text('Category melt',
+                          style: Theme.of(context).textTheme.titleLarge),
                       const SizedBox(height: 12),
                       CategoryBreakdownChart(items: insights.categorySpend),
                     ],
@@ -104,7 +119,8 @@ class DashboardScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Grocery vs utilities', style: Theme.of(context).textTheme.titleLarge),
+                      Text('Grocery vs utilities',
+                          style: Theme.of(context).textTheme.titleLarge),
                       const SizedBox(height: 14),
                       _ComparisonBar(
                         leftLabel: 'Grocery',
@@ -121,7 +137,8 @@ class DashboardScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Recent expenses', style: Theme.of(context).textTheme.titleLarge),
+                      Text('Recent expenses',
+                          style: Theme.of(context).textTheme.titleLarge),
                       const SizedBox(height: 8),
                       for (final expense in insights.recentExpenses)
                         ExpenseListTile(
@@ -152,11 +169,17 @@ class _EmptyDashboard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('No expenses yet', style: Theme.of(context).textTheme.titleLarge),
+          Text('No expenses yet',
+              style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 8),
-          Text('Start with rent, utilities, groceries, or a bill receipt. WalletMelt will build the month view from local data.', style: Theme.of(context).textTheme.bodyMedium),
+          Text(
+              'Start with rent, utilities, groceries, or a bill receipt. WalletMelt will build the month view from local data.',
+              style: Theme.of(context).textTheme.bodyMedium),
           const SizedBox(height: 18),
-          ElevatedButton.icon(onPressed: onAdd, icon: const Icon(Icons.add_rounded), label: const Text('Add first expense')),
+          ElevatedButton.icon(
+              onPressed: onAdd,
+              icon: const Icon(Icons.add_rounded),
+              label: const Text('Add first expense')),
         ],
       ),
     );
@@ -192,8 +215,12 @@ class _ComparisonBar extends StatelessWidget {
             height: 16,
             child: Row(
               children: [
-                Expanded(flex: leftFlex, child: const ColoredBox(color: WalletMeltColors.positive)),
-                Expanded(flex: rightFlex, child: const ColoredBox(color: WalletMeltColors.brand)),
+                Expanded(
+                    flex: leftFlex,
+                    child: const ColoredBox(color: WalletMeltColors.positive)),
+                Expanded(
+                    flex: rightFlex,
+                    child: const ColoredBox(color: WalletMeltColors.brand)),
               ],
             ),
           ),
@@ -201,8 +228,11 @@ class _ComparisonBar extends StatelessWidget {
         const SizedBox(height: 12),
         Row(
           children: [
-            Expanded(child: Text('$leftLabel\n${formatMoney(leftValue, currency)}')),
-            Expanded(child: Text('$rightLabel\n${formatMoney(rightValue, currency)}', textAlign: TextAlign.end)),
+            Expanded(
+                child: Text('$leftLabel\n${formatMoney(leftValue, currency)}')),
+            Expanded(
+                child: Text('$rightLabel\n${formatMoney(rightValue, currency)}',
+                    textAlign: TextAlign.end)),
           ],
         ),
       ],

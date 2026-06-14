@@ -36,11 +36,14 @@ class DriftItemRepository {
             updatedAt: now,
           ),
         );
-    return (await (_db.select(_db.items)..where((item) => item.id.equals(id))).getSingle());
+    return (await (_db.select(_db.items)..where((item) => item.id.equals(id)))
+        .getSingle());
   }
 
   Future<local.Item?> getByNormalizedName(String normalizedName) {
-    return (_db.select(_db.items)..where((item) => item.normalizedName.equals(normalizedName))).getSingleOrNull();
+    return (_db.select(_db.items)
+          ..where((item) => item.normalizedName.equals(normalizedName)))
+        .getSingleOrNull();
   }
 
   Future<void> addAlias({
@@ -65,7 +68,8 @@ class DriftItemRepository {
   Future<local.Item?> resolveAlias(String alias) async {
     final normalizedAlias = normalizeName(alias);
     final query = _db.select(_db.items).join([
-      innerJoin(_db.itemAliases, _db.itemAliases.itemId.equalsExp(_db.items.id)),
+      innerJoin(
+          _db.itemAliases, _db.itemAliases.itemId.equalsExp(_db.items.id)),
     ])
       ..where(_db.itemAliases.normalizedAlias.equals(normalizedAlias));
     final row = await query.getSingleOrNull();

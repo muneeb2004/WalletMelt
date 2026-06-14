@@ -73,10 +73,15 @@ class FakeExpenseRepository extends Fake implements ExpenseRepository {
   Future<List<Expense>> listDeleted() async => deleted;
 
   @override
-  Future<List<GroceryItem>> groceryItemsForExpense(String expenseId) async => groceryItems;
+  Future<List<GroceryItem>> groceryItemsForExpense(String expenseId) async =>
+      groceryItems;
 
   @override
-  Future<Expense?> getById(String id, {bool includeDeleted = false}) async => singleExpense;
+  Future<List<GroceryItem>> listAllGroceryItems() async => groceryItems;
+
+  @override
+  Future<Expense?> getById(String id, {bool includeDeleted = false}) async =>
+      singleExpense;
 
   @override
   Future<void> permanentlyDelete(String id) async {
@@ -97,23 +102,25 @@ class FakeExpenseRepository extends Fake implements ExpenseRepository {
   Future<Expense> create(ExpenseDraft draft) async {
     createCalled = true;
     lastDraft = draft;
-    final expense = createdExpense ?? Expense(
-      id: 'sqflite-created-id',
-      amount: draft.amount,
-      currency: draft.currency,
-      categoryId: draft.categoryId,
-      title: draft.title.isEmpty ? 'Household expense' : draft.title,
-      date: draft.date.toIso8601String(),
-      isRecurring: false,
-      createdAt: '2026-06-14',
-      updatedAt: '2026-06-14',
-    );
+    final expense = createdExpense ??
+        Expense(
+          id: 'sqflite-created-id',
+          amount: draft.amount,
+          currency: draft.currency,
+          categoryId: draft.categoryId,
+          title: draft.title.isEmpty ? 'Household expense' : draft.title,
+          date: draft.date.toIso8601String(),
+          isRecurring: false,
+          createdAt: '2026-06-14',
+          updatedAt: '2026-06-14',
+        );
     active.add(expense);
     return expense;
   }
 
   @override
-  Future<void> update(Expense expense, {List<GroceryItemDraft>? groceryItems}) async {
+  Future<void> update(Expense expense,
+      {List<GroceryItemDraft>? groceryItems}) async {
     updateCalled = true;
     lastUpdatedExpense = expense;
     lastUpdatedGroceryItems = groceryItems;
@@ -128,6 +135,9 @@ class FakeBudgetRepository extends Fake implements BudgetRepository {
   @override
   Future<List<CategoryBudget>> listForMonth(String month) async =>
       budgets.where((b) => b.month == month).toList();
+
+  @override
+  Future<List<CategoryBudget>> listAll() async => budgets;
 
   @override
   Future<void> upsert({
@@ -156,7 +166,8 @@ class FakeBudgetRepository extends Fake implements BudgetRepository {
   }
 }
 
-class FakeDriftCategoryRepository extends Fake implements DriftCategoryRepository {
+class FakeDriftCategoryRepository extends Fake
+    implements DriftCategoryRepository {
   List<wm.Category>? categories;
   bool shouldThrow = false;
   bool createCustomCalled = false;
@@ -189,6 +200,7 @@ class FakeDriftCategoryRepository extends Fake implements DriftCategoryRepositor
 class FakeDriftBudgetRepository extends Fake implements DriftBudgetRepository {
   List<CategoryBudget>? budgets;
   bool shouldThrowList = false;
+  bool shouldThrowListAll = false;
   bool shouldThrowUpsert = false;
   bool shouldThrowDelete = false;
   bool upsertCalled = false;
@@ -198,6 +210,12 @@ class FakeDriftBudgetRepository extends Fake implements DriftBudgetRepository {
   Future<List<CategoryBudget>> listForMonth(String month) async {
     if (shouldThrowList) throw Exception('Drift error');
     return budgets?.where((b) => b.month == month).toList() ?? [];
+  }
+
+  @override
+  Future<List<CategoryBudget>> listAll() async {
+    if (shouldThrowListAll) throw Exception('Drift error');
+    return budgets ?? [];
   }
 
   @override
@@ -218,7 +236,8 @@ class FakeDriftBudgetRepository extends Fake implements DriftBudgetRepository {
   }
 }
 
-class FakeDriftExpenseRepository extends Fake implements DriftExpenseRepository {
+class FakeDriftExpenseRepository extends Fake
+    implements DriftExpenseRepository {
   List<Expense>? active;
   List<Expense>? deleted;
   List<GroceryItem>? groceryItems;
@@ -226,6 +245,7 @@ class FakeDriftExpenseRepository extends Fake implements DriftExpenseRepository 
   bool shouldThrowListActive = false;
   bool shouldThrowListDeleted = false;
   bool shouldThrowGroceryItems = false;
+  bool shouldThrowListAllGroceryItems = false;
   bool shouldThrowGetById = false;
   bool softDeleteCalled = false;
   bool restoreCalled = false;
@@ -262,6 +282,12 @@ class FakeDriftExpenseRepository extends Fake implements DriftExpenseRepository 
   }
 
   @override
+  Future<List<GroceryItem>> listAllGroceryItems() async {
+    if (shouldThrowListAllGroceryItems) throw Exception('Drift error');
+    return groceryItems ?? [];
+  }
+
+  @override
   Future<Expense?> getById(String id, {bool includeDeleted = false}) async {
     getByIdCalled = true;
     if (shouldThrowGetById) throw Exception('Drift error');
@@ -291,22 +317,24 @@ class FakeDriftExpenseRepository extends Fake implements DriftExpenseRepository 
     createCalled = true;
     lastDraft = draft;
     if (shouldThrowCreate) throw Exception('Drift error');
-    final expense = createdExpense ?? Expense(
-      id: 'drift-created-id',
-      amount: draft.amount,
-      currency: draft.currency,
-      categoryId: draft.categoryId,
-      title: draft.title.isEmpty ? 'Household expense' : draft.title,
-      date: draft.date.toIso8601String(),
-      isRecurring: false,
-      createdAt: '2026-06-14',
-      updatedAt: '2026-06-14',
-    );
+    final expense = createdExpense ??
+        Expense(
+          id: 'drift-created-id',
+          amount: draft.amount,
+          currency: draft.currency,
+          categoryId: draft.categoryId,
+          title: draft.title.isEmpty ? 'Household expense' : draft.title,
+          date: draft.date.toIso8601String(),
+          isRecurring: false,
+          createdAt: '2026-06-14',
+          updatedAt: '2026-06-14',
+        );
     return expense;
   }
 
   @override
-  Future<void> update(Expense expense, {List<GroceryItemDraft>? groceryItems}) async {
+  Future<void> update(Expense expense,
+      {List<GroceryItemDraft>? groceryItems}) async {
     updateCalled = true;
     lastUpdatedExpense = expense;
     lastUpdatedGroceryItems = groceryItems;
@@ -404,7 +432,9 @@ void main() {
       expect(appState.deletedExpenses, [mockDeletedExpense]);
     });
 
-    test('refresh() falls back to sqflite when Drift active/deleted lists throw', () async {
+    test(
+        'refresh() falls back to sqflite when Drift active/deleted lists throw',
+        () async {
       driftExpenseRepo.shouldThrowListActive = true;
       driftExpenseRepo.shouldThrowListDeleted = true;
       expenseRepo.active = [mockExpense];
@@ -441,7 +471,8 @@ void main() {
       expect(result, [mockGroceryItem]);
     });
 
-    test('groceryItemsForExpense() falls back to sqflite when Drift throws', () async {
+    test('groceryItemsForExpense() falls back to sqflite when Drift throws',
+        () async {
       driftExpenseRepo.shouldThrowGroceryItems = true;
       expenseRepo.groceryItems = [mockGroceryItem];
 
@@ -458,7 +489,45 @@ void main() {
       expect(result, [mockGroceryItem]);
     });
 
-    test('permanentlyDeleteExpense() uses Drift permanentlyDelete when available', () async {
+    test('listAllGroceryItemsForExport() reads from Drift when available',
+        () async {
+      driftExpenseRepo.groceryItems = [mockGroceryItem];
+
+      final appState = AppState.test(
+        categoryRepository: categoryRepo,
+        expenseRepository: expenseRepo,
+        budgetRepository: budgetRepo,
+        driftCategoryRepository: driftCategoryRepo,
+        driftBudgetRepository: driftBudgetRepo,
+        driftExpenseRepository: driftExpenseRepo,
+      );
+
+      final result = await appState.listAllGroceryItemsForExport();
+      expect(result, [mockGroceryItem]);
+    });
+
+    test(
+        'listAllGroceryItemsForExport() falls back to sqflite when Drift throws',
+        () async {
+      driftExpenseRepo.shouldThrowListAllGroceryItems = true;
+      expenseRepo.groceryItems = [mockGroceryItem];
+
+      final appState = AppState.test(
+        categoryRepository: categoryRepo,
+        expenseRepository: expenseRepo,
+        budgetRepository: budgetRepo,
+        driftCategoryRepository: driftCategoryRepo,
+        driftBudgetRepository: driftBudgetRepo,
+        driftExpenseRepository: driftExpenseRepo,
+      );
+
+      final result = await appState.listAllGroceryItemsForExport();
+      expect(result, [mockGroceryItem]);
+    });
+
+    test(
+        'permanentlyDeleteExpense() uses Drift permanentlyDelete when available',
+        () async {
       driftExpenseRepo.singleExpense = mockExpense;
       final appState = AppState.test(
         categoryRepository: categoryRepo,
@@ -475,7 +544,9 @@ void main() {
       expect(expenseRepo.permanentlyDeleteCalled, isFalse);
     });
 
-    test('permanentlyDeleteExpense() falls back to sqflite when Drift permanentlyDelete throws', () async {
+    test(
+        'permanentlyDeleteExpense() falls back to sqflite when Drift permanentlyDelete throws',
+        () async {
       driftExpenseRepo.singleExpense = mockExpense;
       driftExpenseRepo.shouldThrowPermanentlyDelete = true;
       final appState = AppState.test(
@@ -492,7 +563,9 @@ void main() {
       expect(expenseRepo.permanentlyDeleteCalled, isTrue);
     });
 
-    test('permanentlyDeleteExpense() uses sqflite when Drift repository is unavailable', () async {
+    test(
+        'permanentlyDeleteExpense() uses sqflite when Drift repository is unavailable',
+        () async {
       expenseRepo.singleExpense = mockExpense;
       final appState = AppState.test(
         categoryRepository: categoryRepo,
@@ -508,7 +581,9 @@ void main() {
       expect(expenseRepo.permanentlyDeleteCalled, isTrue);
     });
 
-    test('permanentlyDeleteExpense() performs Drift-first deleted-expense lookup before deletion', () async {
+    test(
+        'permanentlyDeleteExpense() performs Drift-first deleted-expense lookup before deletion',
+        () async {
       driftExpenseRepo.singleExpense = mockExpense;
       final appState = AppState.test(
         categoryRepository: categoryRepo,
@@ -524,7 +599,8 @@ void main() {
       expect(driftExpenseRepo.getByIdCalled, isTrue);
     });
 
-    test('permanentlyDeleteExpense() calls refresh() after successful deletion', () async {
+    test('permanentlyDeleteExpense() calls refresh() after successful deletion',
+        () async {
       driftExpenseRepo.singleExpense = mockExpense;
       driftExpenseRepo.active = [mockExpense];
 
@@ -547,7 +623,9 @@ void main() {
       expect(appState.expenses, isEmpty);
     });
 
-    test('permanentlyDeleteExpense() preserves receipt cleanup behavior for expenses with receipt paths', () async {
+    test(
+        'permanentlyDeleteExpense() preserves receipt cleanup behavior for expenses with receipt paths',
+        () async {
       final mockExpenseWithReceipt = Expense(
         id: '1',
         amount: 100,
@@ -580,7 +658,9 @@ void main() {
       expect(fakeReceiptStorage.deletedUri, 'file:///receipts/test.jpg');
     });
 
-    test('permanentlyDeleteExpense() missing expense behavior remains unchanged', () async {
+    test(
+        'permanentlyDeleteExpense() missing expense behavior remains unchanged',
+        () async {
       driftExpenseRepo.singleExpense = null;
       final fakeReceiptStorage = FakeReceiptStorageService();
 
@@ -617,7 +697,8 @@ void main() {
       expect(appState.categories, [mockCategory]);
     });
 
-    test('refresh() falls back to sqflite category read when Drift throws', () async {
+    test('refresh() falls back to sqflite category read when Drift throws',
+        () async {
       driftCategoryRepo.shouldThrow = true;
       categoryRepo.categories = [mockCategory];
 
@@ -635,7 +716,8 @@ void main() {
       expect(appState.categories, [mockCategory]);
     });
 
-    test('refresh() loads current month budgets from Drift when available', () async {
+    test('refresh() loads current month budgets from Drift when available',
+        () async {
       driftBudgetRepo.budgets = [mockBudget];
 
       final appState = AppState.test(
@@ -655,7 +737,8 @@ void main() {
       expect(appState.currentBudgets.map((b) => b.id), ['b1']);
     });
 
-    test('refresh() falls back to sqflite budget read when Drift throws', () async {
+    test('refresh() falls back to sqflite budget read when Drift throws',
+        () async {
       driftBudgetRepo.shouldThrowList = true;
       budgetRepo.budgets = [mockBudget];
 
@@ -674,7 +757,43 @@ void main() {
       expect(appState.currentBudgets.map((b) => b.id), ['b1']);
     });
 
-    test('previousMonth() and nextMonth() refresh budgets using Drift-first behavior', () async {
+    test('listAllBudgetsForExport() reads from Drift when available', () async {
+      driftBudgetRepo.budgets = [mockBudget];
+
+      final appState = AppState.test(
+        categoryRepository: categoryRepo,
+        expenseRepository: expenseRepo,
+        budgetRepository: budgetRepo,
+        driftCategoryRepository: driftCategoryRepo,
+        driftBudgetRepository: driftBudgetRepo,
+        driftExpenseRepository: driftExpenseRepo,
+      );
+
+      final result = await appState.listAllBudgetsForExport();
+      expect(result, [mockBudget]);
+    });
+
+    test('listAllBudgetsForExport() falls back to sqflite when Drift throws',
+        () async {
+      driftBudgetRepo.shouldThrowListAll = true;
+      budgetRepo.budgets = [mockBudget];
+
+      final appState = AppState.test(
+        categoryRepository: categoryRepo,
+        expenseRepository: expenseRepo,
+        budgetRepository: budgetRepo,
+        driftCategoryRepository: driftCategoryRepo,
+        driftBudgetRepository: driftBudgetRepo,
+        driftExpenseRepository: driftExpenseRepo,
+      );
+
+      final result = await appState.listAllBudgetsForExport();
+      expect(result, [mockBudget]);
+    });
+
+    test(
+        'previousMonth() and nextMonth() refresh budgets using Drift-first behavior',
+        () async {
       final juneBudget = mockBudget;
       final mayBudget = CategoryBudget(
         id: 'b2',
@@ -709,7 +828,8 @@ void main() {
       expect(appState.currentBudgets.map((b) => b.id), ['b1']);
     });
 
-    test('setBudget() writes through DriftBudgetRepository when available', () async {
+    test('setBudget() writes through DriftBudgetRepository when available',
+        () async {
       final appState = AppState.test(
         categoryRepository: categoryRepo,
         expenseRepository: expenseRepo,
@@ -726,7 +846,9 @@ void main() {
       expect(budgetRepo.upsertCalled, isFalse);
     });
 
-    test('setBudget() falls back to sqflite BudgetRepository when Drift upsert throws', () async {
+    test(
+        'setBudget() falls back to sqflite BudgetRepository when Drift upsert throws',
+        () async {
       driftBudgetRepo.shouldThrowUpsert = true;
 
       final appState = AppState.test(
@@ -744,7 +866,8 @@ void main() {
       expect(budgetRepo.upsertCalled, isTrue);
     });
 
-    test('clearBudget() deletes through DriftBudgetRepository when available', () async {
+    test('clearBudget() deletes through DriftBudgetRepository when available',
+        () async {
       final appState = AppState.test(
         categoryRepository: categoryRepo,
         expenseRepository: expenseRepo,
@@ -761,7 +884,9 @@ void main() {
       expect(budgetRepo.deleteCalled, isFalse);
     });
 
-    test('clearBudget() falls back to sqflite BudgetRepository when Drift delete throws', () async {
+    test(
+        'clearBudget() falls back to sqflite BudgetRepository when Drift delete throws',
+        () async {
       driftBudgetRepo.shouldThrowDelete = true;
 
       final appState = AppState.test(
@@ -779,7 +904,8 @@ void main() {
       expect(budgetRepo.deleteCalled, isTrue);
     });
 
-    test('softDeleteExpense uses DriftExpenseRepository when available', () async {
+    test('softDeleteExpense uses DriftExpenseRepository when available',
+        () async {
       final appState = AppState.test(
         categoryRepository: categoryRepo,
         expenseRepository: expenseRepo,
@@ -1060,10 +1186,13 @@ void main() {
 
       await appState.addExpense(draft);
 
-      expect(driftExpenseRepo.lastDraft?.receiptImageUri, 'file:///receipts/test.jpg');
+      expect(driftExpenseRepo.lastDraft?.receiptImageUri,
+          'file:///receipts/test.jpg');
     });
 
-    test('addExpense() Drift failure does not prevent sqflite fallback from creating the expense', () async {
+    test(
+        'addExpense() Drift failure does not prevent sqflite fallback from creating the expense',
+        () async {
       final draft = ExpenseDraft(
         amount: 150,
         currency: 'USD',
@@ -1190,7 +1319,8 @@ void main() {
       expect(expenseRepo.updateCalled, isTrue);
     });
 
-    test('updateExpense() still calls refresh() after successful update', () async {
+    test('updateExpense() still calls refresh() after successful update',
+        () async {
       final updatedExpense = mockExpense.copyWith(amount: 150);
       driftExpenseRepo.active = [];
 
@@ -1233,7 +1363,8 @@ void main() {
     });
 
     test('updateExpense() preserves receipt URI/path behavior', () async {
-      final updatedExpense = mockExpense.copyWith(receiptImageUri: 'file:///receipts/updated.jpg');
+      final updatedExpense =
+          mockExpense.copyWith(receiptImageUri: 'file:///receipts/updated.jpg');
 
       final appState = AppState.test(
         categoryRepository: categoryRepo,
@@ -1246,10 +1377,13 @@ void main() {
 
       await appState.updateExpense(updatedExpense);
 
-      expect(driftExpenseRepo.lastUpdatedExpense?.receiptImageUri, 'file:///receipts/updated.jpg');
+      expect(driftExpenseRepo.lastUpdatedExpense?.receiptImageUri,
+          'file:///receipts/updated.jpg');
     });
 
-    test('updateExpense() Drift failure does not prevent sqflite fallback from updating the expense', () async {
+    test(
+        'updateExpense() Drift failure does not prevent sqflite fallback from updating the expense',
+        () async {
       driftExpenseRepo.shouldThrowUpdate = true;
       final updatedExpense = mockExpense.copyWith(amount: 180);
 
@@ -1269,7 +1403,8 @@ void main() {
       expect(expenseRepo.lastUpdatedExpense?.amount, 180);
     });
 
-    test('updateExpense() read state remains consistent after update', () async {
+    test('updateExpense() read state remains consistent after update',
+        () async {
       driftCategoryRepo.categories = [mockCategory];
       driftBudgetRepo.budgets = [mockBudget];
       driftExpenseRepo.active = [mockExpense];
@@ -1300,7 +1435,8 @@ void main() {
       expect(appState.expenses, [updatedExpense]);
     });
 
-    test('updateExpense() missing-expense behavior remains unchanged', () async {
+    test('updateExpense() missing-expense behavior remains unchanged',
+        () async {
       final nonExistentExpense = mockExpense.copyWith(id: 'non-existent');
 
       final appState = AppState.test(

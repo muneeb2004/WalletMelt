@@ -14,21 +14,24 @@ abstract class ReceiptStorageService {
 }
 
 class LocalReceiptStorageService implements ReceiptStorageService {
-  LocalReceiptStorageService({ImagePicker? picker}) : _picker = picker ?? ImagePicker();
+  LocalReceiptStorageService({ImagePicker? picker})
+      : _picker = picker ?? ImagePicker();
 
   final ImagePicker _picker;
   final _uuid = const Uuid();
 
   @override
   Future<String?> pickFromGallery() async {
-    final image = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 92);
+    final image =
+        await _picker.pickImage(source: ImageSource.gallery, imageQuality: 92);
     if (image == null) return null;
     return _persistPickedImage(image);
   }
 
   @override
   Future<String?> captureWithCamera() async {
-    final image = await _picker.pickImage(source: ImageSource.camera, imageQuality: 92);
+    final image =
+        await _picker.pickImage(source: ImageSource.camera, imageQuality: 92);
     if (image == null) return null;
     return _persistPickedImage(image);
   }

@@ -55,24 +55,47 @@ class _WalletMeltAppState extends State<WalletMeltApp> {
       },
       refreshListenable: appState,
       routes: [
-        GoRoute(path: '/onboarding', builder: (context, state) => const OnboardingScreen()),
+        GoRoute(
+            path: '/onboarding',
+            builder: (context, state) => const OnboardingScreen()),
         StatefulShellRoute.indexedStack(
-          builder: (context, state, navigationShell) => AppShell(navigationShell: navigationShell),
+          builder: (context, state, navigationShell) =>
+              AppShell(navigationShell: navigationShell),
           branches: [
-            StatefulShellBranch(routes: [GoRoute(path: '/', builder: (context, state) => const DashboardScreen())]),
-            StatefulShellBranch(routes: [GoRoute(path: '/history', builder: (context, state) => const HistoryScreen())]),
-            StatefulShellBranch(routes: [GoRoute(path: '/insights', builder: (context, state) => const InsightsScreen())]),
-            StatefulShellBranch(routes: [GoRoute(path: '/settings', builder: (context, state) => const SettingsScreen())]),
+            StatefulShellBranch(routes: [
+              GoRoute(
+                  path: '/',
+                  builder: (context, state) => const DashboardScreen())
+            ]),
+            StatefulShellBranch(routes: [
+              GoRoute(
+                  path: '/history',
+                  builder: (context, state) => const HistoryScreen())
+            ]),
+            StatefulShellBranch(routes: [
+              GoRoute(
+                  path: '/insights',
+                  builder: (context, state) => const InsightsScreen())
+            ]),
+            StatefulShellBranch(routes: [
+              GoRoute(
+                  path: '/settings',
+                  builder: (context, state) => const SettingsScreen())
+            ]),
           ],
         ),
-        GoRoute(path: '/expense/new', builder: (context, state) => const AddExpenseScreen()),
+        GoRoute(
+            path: '/expense/new',
+            builder: (context, state) => const AddExpenseScreen()),
         GoRoute(
           path: '/expense/:id',
-          builder: (context, state) => ExpenseDetailScreen(expenseId: state.pathParameters['id']!),
+          builder: (context, state) =>
+              ExpenseDetailScreen(expenseId: state.pathParameters['id']!),
         ),
         GoRoute(
           path: '/expense/:id/edit',
-          builder: (context, state) => AddExpenseScreen(expenseId: state.pathParameters['id']),
+          builder: (context, state) =>
+              AddExpenseScreen(expenseId: state.pathParameters['id']),
         ),
       ],
     );

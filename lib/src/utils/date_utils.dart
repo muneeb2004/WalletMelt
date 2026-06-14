@@ -6,4 +6,5 @@ String readableMonth(DateTime date) => DateFormat('MMMM yyyy').format(date);
 
 DateTime parseIsoDate(String value) => DateTime.parse(value).toLocal();
 
-bool isSameMonth(DateTime a, DateTime b) => a.year == b.year && a.month == b.month;
+bool isSameMonth(DateTime a, DateTime b) =>
+    a.year == b.year && a.month == b.month;

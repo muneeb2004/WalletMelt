@@ -37,7 +37,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ),
             ),
             const SizedBox(height: 28),
-            Text('Know where your money went.', style: Theme.of(context).textTheme.titleLarge?.copyWith(color: WalletMeltColors.brandDeep)),
+            Text('Know where your money went.',
+                style: Theme.of(context)
+                    .textTheme
+                    .titleLarge
+                    ?.copyWith(color: WalletMeltColors.brandDeep)),
             const SizedBox(height: 18),
             Text(
               'Track household expenses, attach bills and receipts, and see where the month’s money melted. Your v1 data stays on this device.',
@@ -48,13 +52,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               initialValue: _currency,
               decoration: const InputDecoration(labelText: 'Default currency'),
               items: [
-                for (final currency in defaultCurrencyCodes) DropdownMenuItem(value: currency, child: Text(currency)),
+                for (final currency in defaultCurrencyCodes)
+                  DropdownMenuItem(value: currency, child: Text(currency)),
               ],
-              onChanged: (value) => setState(() => _currency = value ?? _currency),
+              onChanged: (value) =>
+                  setState(() => _currency = value ?? _currency),
             ),
             const Spacer(),
             ElevatedButton(
-              onPressed: () => context.read<AppState>().completeOnboarding(_currency),
+              onPressed: () =>
+                  context.read<AppState>().completeOnboarding(_currency),
               child: const Text('Start tracking'),
             ),
           ],

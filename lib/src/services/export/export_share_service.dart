@@ -20,6 +20,8 @@ abstract class ExportShareService {
   Future<ExportShareResult> shareFile(
     ExportFileResult file, {
     Rect? sharePositionOrigin,
+    String? subject,
+    String? title,
   });
 }
 
@@ -30,6 +32,8 @@ class SharePlusExportShareService implements ExportShareService {
   Future<ExportShareResult> shareFile(
     ExportFileResult file, {
     Rect? sharePositionOrigin,
+    String? subject,
+    String? title,
   }) async {
     final result = await SharePlus.instance.share(
       ShareParams(
@@ -42,8 +46,8 @@ class SharePlusExportShareService implements ExportShareService {
           ),
         ],
         fileNameOverrides: [file.fileName],
-        subject: 'WalletMelt expenses CSV',
-        title: 'Export expenses CSV',
+        subject: subject ?? 'WalletMelt expenses CSV',
+        title: title ?? 'Export expenses CSV',
         sharePositionOrigin: sharePositionOrigin,
       ),
     );

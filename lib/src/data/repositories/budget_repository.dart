@@ -19,6 +19,14 @@ class BudgetRepository {
     return rows.map(CategoryBudget.fromMap).toList();
   }
 
+  Future<List<CategoryBudget>> listAll() async {
+    final rows = await _db.query(
+      'category_budgets',
+      orderBy: 'month ASC, categoryId ASC, id ASC',
+    );
+    return rows.map(CategoryBudget.fromMap).toList();
+  }
+
   Future<void> upsert({
     required String categoryId,
     required double amount,

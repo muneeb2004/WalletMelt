@@ -62,7 +62,8 @@ class Expense {
       vendor: vendor ?? this.vendor,
       date: date ?? this.date,
       notes: notes ?? this.notes,
-      receiptImageUri: clearReceipt ? null : receiptImageUri ?? this.receiptImageUri,
+      receiptImageUri:
+          clearReceipt ? null : receiptImageUri ?? this.receiptImageUri,
       isRecurring: isRecurring ?? this.isRecurring,
       recurrenceFrequency: recurrenceFrequency ?? this.recurrenceFrequency,
       createdAt: createdAt ?? this.createdAt,
@@ -102,7 +103,8 @@ class Expense {
       notes: map['notes'] as String?,
       receiptImageUri: map['receiptImageUri'] as String?,
       isRecurring: (map['isRecurring']! as int) == 1,
-      recurrenceFrequency: _frequencyFromName(map['recurrenceFrequency'] as String?),
+      recurrenceFrequency:
+          _frequencyFromName(map['recurrenceFrequency'] as String?),
       createdAt: map['createdAt']! as String,
       updatedAt: map['updatedAt']! as String,
       deletedAt: map['deletedAt'] as String?,

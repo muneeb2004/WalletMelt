@@ -43,18 +43,27 @@ class _HistoryScreenState extends State<HistoryScreen> {
           children: [
             Row(
               children: [
-                Expanded(child: Text('History', style: Theme.of(context).textTheme.headlineMedium)),
+                Expanded(
+                    child: Text('History',
+                        style: Theme.of(context).textTheme.headlineMedium)),
                 IconButton(
-                  tooltip: _showRecycleBin ? 'Show active expenses' : 'Show recycle bin',
-                  onPressed: () => setState(() => _showRecycleBin = !_showRecycleBin),
-                  icon: Icon(_showRecycleBin ? Icons.receipt_long_rounded : Icons.delete_outline_rounded),
+                  tooltip: _showRecycleBin
+                      ? 'Show active expenses'
+                      : 'Show recycle bin',
+                  onPressed: () =>
+                      setState(() => _showRecycleBin = !_showRecycleBin),
+                  icon: Icon(_showRecycleBin
+                      ? Icons.receipt_long_rounded
+                      : Icons.delete_outline_rounded),
                 ),
               ],
             ),
             const SizedBox(height: 14),
             TextField(
               controller: _searchController,
-              decoration: const InputDecoration(prefixIcon: Icon(Icons.search_rounded), labelText: 'Search vendor, title, notes'),
+              decoration: const InputDecoration(
+                  prefixIcon: Icon(Icons.search_rounded),
+                  labelText: 'Search vendor, title, notes'),
               onChanged: (_) => setState(() {}),
             ),
             const SizedBox(height: 12),
@@ -62,10 +71,16 @@ class _HistoryScreenState extends State<HistoryScreen> {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  FilterChip(label: const Text('All'), selected: _categoryId == null, onSelected: (_) => setState(() => _categoryId = null)),
+                  FilterChip(
+                      label: const Text('All'),
+                      selected: _categoryId == null,
+                      onSelected: (_) => setState(() => _categoryId = null)),
                   const SizedBox(width: 8),
                   for (final category in state.categories) ...[
-                    WalletCategoryChip(category: category, selected: _categoryId == category.id, onTap: () => setState(() => _categoryId = category.id)),
+                    WalletCategoryChip(
+                        category: category,
+                        selected: _categoryId == category.id,
+                        onTap: () => setState(() => _categoryId = category.id)),
                     const SizedBox(width: 8),
                   ],
                 ],
@@ -76,21 +91,32 @@ class _HistoryScreenState extends State<HistoryScreen> {
               initialValue: _sort,
               decoration: const InputDecoration(labelText: 'Sort'),
               items: const [
-                DropdownMenuItem(value: ExpenseSort.newest, child: Text('Newest')),
-                DropdownMenuItem(value: ExpenseSort.oldest, child: Text('Oldest')),
-                DropdownMenuItem(value: ExpenseSort.amountHigh, child: Text('Amount high to low')),
-                DropdownMenuItem(value: ExpenseSort.amountLow, child: Text('Amount low to high')),
+                DropdownMenuItem(
+                    value: ExpenseSort.newest, child: Text('Newest')),
+                DropdownMenuItem(
+                    value: ExpenseSort.oldest, child: Text('Oldest')),
+                DropdownMenuItem(
+                    value: ExpenseSort.amountHigh,
+                    child: Text('Amount high to low')),
+                DropdownMenuItem(
+                    value: ExpenseSort.amountLow,
+                    child: Text('Amount low to high')),
               ],
               onChanged: (value) => setState(() => _sort = value ?? _sort),
             ),
             const SizedBox(height: 18),
             if (filtered.isEmpty)
-              Text(_showRecycleBin ? 'The recycle bin is empty.' : 'No expenses match these filters.', style: Theme.of(context).textTheme.bodyMedium)
+              Text(
+                  _showRecycleBin
+                      ? 'The recycle bin is empty.'
+                      : 'No expenses match these filters.',
+                  style: Theme.of(context).textTheme.bodyMedium)
             else
               for (final entry in grouped.entries) ...[
                 Padding(
                   padding: const EdgeInsets.only(top: 14, bottom: 6),
-                  child: Text(entry.key, style: Theme.of(context).textTheme.titleMedium),
+                  child: Text(entry.key,
+                      style: Theme.of(context).textTheme.titleMedium),
                 ),
                 for (final expense in entry.value)
                   ExpenseListTile(
@@ -108,8 +134,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
   List<Expense> _filtered(List<Expense> expenses) {
     final query = _searchController.text.trim().toLowerCase();
     final result = expenses.where((expense) {
-      final matchesCategory = _categoryId == null || expense.categoryId == _categoryId;
-      final haystack = '${expense.title} ${expense.vendor ?? ''} ${expense.notes ?? ''}'.toLowerCase();
+      final matchesCategory =
+          _categoryId == null || expense.categoryId == _categoryId;
+      final haystack =
+          '${expense.title} ${expense.vendor ?? ''} ${expense.notes ?? ''}'
+              .toLowerCase();
       final matchesQuery = query.isEmpty || haystack.contains(query);
       return matchesCategory && matchesQuery;
     }).toList();

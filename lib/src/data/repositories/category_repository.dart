@@ -10,12 +10,14 @@ class CategoryRepository {
   final _uuid = const Uuid();
 
   Future<List<Category>> listCategories() async {
-    final rows = await _db.query('categories', orderBy: 'isDefault DESC, name COLLATE NOCASE ASC');
+    final rows = await _db.query('categories',
+        orderBy: 'isDefault DESC, name COLLATE NOCASE ASC');
     return rows.map(Category.fromMap).toList();
   }
 
   Future<Category?> getById(String id) async {
-    final rows = await _db.query('categories', where: 'id = ?', whereArgs: [id], limit: 1);
+    final rows = await _db.query('categories',
+        where: 'id = ?', whereArgs: [id], limit: 1);
     if (rows.isEmpty) return null;
     return Category.fromMap(rows.first);
   }

@@ -26,6 +26,7 @@ class ExportFileWriter {
   const ExportFileWriter();
 
   static const String csvMimeType = 'text/csv';
+  static const String jsonMimeType = 'application/json';
 
   Future<ExportFileResult> writeCsv({
     required String csvText,
@@ -52,6 +53,37 @@ class ExportFileWriter {
       path: file.path,
       fileName: p.basename(file.path),
       mimeType: csvMimeType,
+      byteCount: bytes.length,
+      createdAt: timestamp,
+    );
+  }
+
+  Future<ExportFileResult> writeJson({
+    required String jsonText,
+    required String exportKind,
+    DateTime? createdAt,
+    Directory? directory,
+  }) async {
+    final timestamp = createdAt ?? DateTime.now();
+    final targetDirectory = directory ?? await getTemporaryDirectory();
+    if (!await targetDirectory.exists()) {
+      await targetDirectory.create(recursive: true);
+    }
+
+    final baseFileName = buildWalletMeltExportFileName(
+      exportKind: exportKind,
+      createdAt: timestamp,
+      extension: 'json',
+    );
+    final bytes = utf8.encode(jsonText);
+    final file = await _unusedFile(targetDirectory, baseFileName);
+
+    await file.writeAsBytes(bytes, flush: true);
+
+    return ExportFileResult(
+      path: file.path,
+      fileName: p.basename(file.path),
+      mimeType: jsonMimeType,
       byteCount: bytes.length,
       createdAt: timestamp,
     );

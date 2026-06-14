@@ -27,11 +27,15 @@ class DriftReceiptRepository {
             createdAt: now,
           ),
         );
-    return (await (_db.select(_db.receipts)..where((receipt) => receipt.id.equals(id))).getSingle());
+    return (await (_db.select(_db.receipts)
+          ..where((receipt) => receipt.id.equals(id)))
+        .getSingle());
   }
 
-  Future<List<local.Receipt>> listForExpense(String expenseId, {bool includeDeleted = false}) {
-    final query = _db.select(_db.receipts)..where((receipt) => receipt.expenseId.equals(expenseId));
+  Future<List<local.Receipt>> listForExpense(String expenseId,
+      {bool includeDeleted = false}) {
+    final query = _db.select(_db.receipts)
+      ..where((receipt) => receipt.expenseId.equals(expenseId));
     if (!includeDeleted) {
       query.where((receipt) => receipt.deletedAt.isNull());
     }
@@ -42,7 +46,8 @@ class DriftReceiptRepository {
   }
 
   Future<void> softDelete(String id) async {
-    await (_db.update(_db.receipts)..where((receipt) => receipt.id.equals(id))).write(
+    await (_db.update(_db.receipts)..where((receipt) => receipt.id.equals(id)))
+        .write(
       local.ReceiptsCompanion(
         deletedAt: Value(DateTime.now().toIso8601String()),
       ),

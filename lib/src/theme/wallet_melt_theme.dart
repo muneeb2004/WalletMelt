@@ -58,20 +58,26 @@ class WalletMeltTheme {
       fontFamily: 'System',
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: scheme.brightness == Brightness.dark ? const Color(0xFF232323) : Colors.white.withValues(alpha: 0.76),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none),
+        fillColor: scheme.brightness == Brightness.dark
+            ? const Color(0xFF232323)
+            : Colors.white.withValues(alpha: 0.76),
+        border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(18),
+            borderSide: BorderSide.none),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: BorderSide(color: scheme.primary, width: 1.4),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: WalletMeltColors.brand,
           foregroundColor: WalletMeltColors.textPrimary,
           minimumSize: const Size.fromHeight(52),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
           textStyle: const TextStyle(fontWeight: FontWeight.w800),
         ),
       ),
@@ -79,17 +85,38 @@ class WalletMeltTheme {
   }
 
   static TextTheme _textTheme(Brightness brightness) {
-    final primary = brightness == Brightness.dark ? WalletMeltColors.darkTextPrimary : WalletMeltColors.textPrimary;
-    final secondary = brightness == Brightness.dark ? WalletMeltColors.darkTextSecondary : WalletMeltColors.textSecondary;
+    final primary = brightness == Brightness.dark
+        ? WalletMeltColors.darkTextPrimary
+        : WalletMeltColors.textPrimary;
+    final secondary = brightness == Brightness.dark
+        ? WalletMeltColors.darkTextSecondary
+        : WalletMeltColors.textSecondary;
     return TextTheme(
-      displaySmall: TextStyle(fontSize: 40, fontWeight: FontWeight.w900, color: primary, height: 1.02),
-      headlineMedium: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: primary, height: 1.08),
-      titleLarge: TextStyle(fontSize: 21, fontWeight: FontWeight.w800, color: primary),
-      titleMedium: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: primary),
-      bodyLarge: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: primary),
-      bodyMedium: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: secondary, height: 1.35),
-      labelLarge: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: primary),
-      labelMedium: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: secondary),
+      displaySmall: TextStyle(
+          fontSize: 40,
+          fontWeight: FontWeight.w900,
+          color: primary,
+          height: 1.02),
+      headlineMedium: TextStyle(
+          fontSize: 28,
+          fontWeight: FontWeight.w800,
+          color: primary,
+          height: 1.08),
+      titleLarge:
+          TextStyle(fontSize: 21, fontWeight: FontWeight.w800, color: primary),
+      titleMedium:
+          TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: primary),
+      bodyLarge:
+          TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: primary),
+      bodyMedium: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: secondary,
+          height: 1.35),
+      labelLarge:
+          TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: primary),
+      labelMedium: TextStyle(
+          fontSize: 12, fontWeight: FontWeight.w700, color: secondary),
     );
   }
 }
@@ -118,8 +145,12 @@ class LiquidGlass extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final fill = isDark ? const Color.fromRGBO(28, 28, 28, 0.72) : const Color.fromRGBO(255, 255, 255, 0.68);
-    final border = isDark ? const Color.fromRGBO(255, 255, 255, 0.12) : const Color.fromRGBO(255, 255, 255, 0.55);
+    final fill = isDark
+        ? const Color.fromRGBO(28, 28, 28, 0.72)
+        : const Color.fromRGBO(255, 255, 255, 0.68);
+    final border = isDark
+        ? const Color.fromRGBO(255, 255, 255, 0.12)
+        : const Color.fromRGBO(255, 255, 255, 0.55);
     final content = ClipRRect(
       borderRadius: BorderRadius.circular(radius),
       child: BackdropFilter(
@@ -143,6 +174,9 @@ class LiquidGlass extends StatelessWidget {
     );
 
     if (onTap == null) return content;
-    return InkWell(borderRadius: BorderRadius.circular(radius), onTap: onTap, child: content);
+    return InkWell(
+        borderRadius: BorderRadius.circular(radius),
+        onTap: onTap,
+        child: content);
   }
 }

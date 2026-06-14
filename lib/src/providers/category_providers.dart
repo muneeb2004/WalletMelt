@@ -8,7 +8,8 @@ final categoriesProvider = FutureProvider<List<Category>>((ref) async {
   return repository.listCategories();
 });
 
-final categoryByIdProvider = FutureProvider.family<Category?, String>((ref, id) async {
+final categoryByIdProvider =
+    FutureProvider.family<Category?, String>((ref, id) async {
   final categories = await ref.watch(categoriesProvider.future);
   for (final category in categories) {
     if (category.id == id) return category;

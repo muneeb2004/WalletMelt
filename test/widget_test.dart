@@ -5,7 +5,8 @@ import 'package:wallet_melt/src/app/wallet_melt_app.dart';
 import 'package:wallet_melt/src/state/app_state.dart';
 
 void main() {
-  testWidgets('WalletMelt app boots to loading state', (WidgetTester tester) async {
+  testWidgets('WalletMelt app boots to loading state',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       ChangeNotifierProvider(
         create: (_) => AppState(),

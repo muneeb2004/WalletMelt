@@ -21,7 +21,9 @@ import 'package:wallet_melt/src/services/receipt_storage/receipt_storage_service
 import 'package:wallet_melt/src/services/settings/settings_service.dart';
 
 void main() {
-  testWidgets('WalletMeltBootstrap includes ProviderScope without breaking startup', (tester) async {
+  testWidgets(
+      'WalletMeltBootstrap includes ProviderScope without breaking startup',
+      (tester) async {
     await tester.pumpWidget(const WalletMeltBootstrap());
 
     expect(find.byType(ProviderScope), findsOneWidget);
@@ -53,10 +55,13 @@ void main() {
     addTearDown(container.dispose);
 
     expect(container.read(settingsServiceProvider), isA<SettingsService>());
-    expect(container.read(receiptStorageServiceProvider), isA<ReceiptStorageService>());
+    expect(container.read(receiptStorageServiceProvider),
+        isA<ReceiptStorageService>());
   });
 
-  test('sqflite repository providers resolve when supplied an existing database dependency', () async {
+  test(
+      'sqflite repository providers resolve when supplied an existing database dependency',
+      () async {
     final container = ProviderContainer(
       overrides: [
         sqfliteDatabaseProvider.overrideWith((ref) async => _FakeDatabase()),
@@ -64,12 +69,17 @@ void main() {
     );
     addTearDown(container.dispose);
 
-    expect(await container.read(categoryRepositoryProvider.future), isA<CategoryRepository>());
-    expect(await container.read(expenseRepositoryProvider.future), isA<ExpenseRepository>());
-    expect(await container.read(budgetRepositoryProvider.future), isA<BudgetRepository>());
+    expect(await container.read(categoryRepositoryProvider.future),
+        isA<CategoryRepository>());
+    expect(await container.read(expenseRepositoryProvider.future),
+        isA<ExpenseRepository>());
+    expect(await container.read(budgetRepositoryProvider.future),
+        isA<BudgetRepository>());
   });
 
-  test('Drift repository providers resolve when supplied a Drift database dependency', () async {
+  test(
+      'Drift repository providers resolve when supplied a Drift database dependency',
+      () async {
     final container = ProviderContainer(
       overrides: [
         walletMeltDatabaseProvider.overrideWith((ref) async {
@@ -81,12 +91,18 @@ void main() {
     );
     addTearDown(container.dispose);
 
-    expect(await container.read(driftCategoryRepositoryProvider.future), isA<DriftCategoryRepository>());
-    expect(await container.read(driftExpenseRepositoryProvider.future), isA<DriftExpenseRepository>());
-    expect(await container.read(driftBudgetRepositoryProvider.future), isA<DriftBudgetRepository>());
-    expect(await container.read(driftItemRepositoryProvider.future), isA<DriftItemRepository>());
-    expect(await container.read(driftStoreRepositoryProvider.future), isA<DriftStoreRepository>());
-    expect(await container.read(driftReceiptRepositoryProvider.future), isA<DriftReceiptRepository>());
+    expect(await container.read(driftCategoryRepositoryProvider.future),
+        isA<DriftCategoryRepository>());
+    expect(await container.read(driftExpenseRepositoryProvider.future),
+        isA<DriftExpenseRepository>());
+    expect(await container.read(driftBudgetRepositoryProvider.future),
+        isA<DriftBudgetRepository>());
+    expect(await container.read(driftItemRepositoryProvider.future),
+        isA<DriftItemRepository>());
+    expect(await container.read(driftStoreRepositoryProvider.future),
+        isA<DriftStoreRepository>());
+    expect(await container.read(driftReceiptRepositoryProvider.future),
+        isA<DriftReceiptRepository>());
   });
 }
 

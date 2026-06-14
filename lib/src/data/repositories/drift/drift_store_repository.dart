@@ -31,10 +31,14 @@ class DriftStoreRepository {
             updatedAt: now,
           ),
         );
-    return (await (_db.select(_db.stores)..where((store) => store.id.equals(id))).getSingle());
+    return (await (_db.select(_db.stores)
+          ..where((store) => store.id.equals(id)))
+        .getSingle());
   }
 
   Future<local.Store?> getByNormalizedName(String normalizedName) {
-    return (_db.select(_db.stores)..where((store) => store.normalizedName.equals(normalizedName))).getSingleOrNull();
+    return (_db.select(_db.stores)
+          ..where((store) => store.normalizedName.equals(normalizedName)))
+        .getSingleOrNull();
   }
 }

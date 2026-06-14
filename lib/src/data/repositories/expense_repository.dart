@@ -72,7 +72,8 @@ class ExpenseRepository {
 
   Future<Expense> create(ExpenseDraft draft) async {
     final now = DateTime.now().toIso8601String();
-    final title = draft.title.trim().isEmpty ? 'Household expense' : draft.title.trim();
+    final title =
+        draft.title.trim().isEmpty ? 'Household expense' : draft.title.trim();
     final expense = Expense(
       id: _uuid.v4(),
       amount: draft.amount,
@@ -80,7 +81,8 @@ class ExpenseRepository {
       categoryId: draft.categoryId,
       title: title,
       vendor: _blankToNull(draft.vendor),
-      date: DateTime(draft.date.year, draft.date.month, draft.date.day).toIso8601String(),
+      date: DateTime(draft.date.year, draft.date.month, draft.date.day)
+          .toIso8601String(),
       notes: _blankToNull(draft.notes),
       receiptImageUri: draft.receiptImageUri,
       isRecurring: false,
@@ -95,7 +97,8 @@ class ExpenseRepository {
     return expense;
   }
 
-  Future<void> update(Expense expense, {List<GroceryItemDraft>? groceryItems}) async {
+  Future<void> update(Expense expense,
+      {List<GroceryItemDraft>? groceryItems}) async {
     await _db.transaction((txn) async {
       await txn.update(
         'expenses',
@@ -104,7 +107,8 @@ class ExpenseRepository {
         whereArgs: [expense.id],
       );
       if (groceryItems != null) {
-        await _replaceGroceryItems(txn, expense.id, groceryItems, DateTime.now().toIso8601String());
+        await _replaceGroceryItems(
+            txn, expense.id, groceryItems, DateTime.now().toIso8601String());
       }
     });
   }
@@ -142,14 +146,24 @@ class ExpenseRepository {
     return rows.map(GroceryItem.fromMap).toList();
   }
 
+  Future<List<GroceryItem>> listAllGroceryItems() async {
+    final rows = await _db.query(
+      'grocery_items',
+      orderBy: 'expenseId ASC, createdAt ASC, id ASC',
+    );
+    return rows.map(GroceryItem.fromMap).toList();
+  }
+
   Future<void> _replaceGroceryItems(
     DatabaseExecutor txn,
     String expenseId,
     List<GroceryItemDraft> items,
     String now,
   ) async {
-    await txn.delete('grocery_items', where: 'expenseId = ?', whereArgs: [expenseId]);
-    for (final item in items.where((item) => item.name.trim().isNotEmpty && item.amount > 0)) {
+    await txn.delete('grocery_items',
+        where: 'expenseId = ?', whereArgs: [expenseId]);
+    for (final item in items
+        .where((item) => item.name.trim().isNotEmpty && item.amount > 0)) {
       await txn.insert(
         'grocery_items',
         GroceryItem(

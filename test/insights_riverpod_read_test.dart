@@ -13,7 +13,9 @@ import 'package:wallet_melt/src/types/category.dart';
 import 'package:wallet_melt/src/types/expense.dart';
 
 void main() {
-  testWidgets('Insights budget section reads category and budget data from Riverpod', (tester) async {
+  testWidgets(
+      'Insights budget section reads category and budget data from Riverpod',
+      (tester) async {
     await tester.binding.setSurfaceSize(const Size(900, 1200));
     addTearDown(() => tester.binding.setSurfaceSize(null));
 

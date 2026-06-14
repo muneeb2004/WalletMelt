@@ -29,17 +29,25 @@ class Expenses extends Table {
   TextColumn get id => text()();
   RealColumn get amount => real()();
   TextColumn get currency => text()();
-  TextColumn get categoryId => text().named('categoryId').references(Categories, #id)();
+  TextColumn get categoryId =>
+      text().named('categoryId').references(Categories, #id)();
   TextColumn get title => text()();
   TextColumn get vendor => text().nullable()();
-  TextColumn get storeId => text().named('storeId').nullable().references(Stores, #id)();
+  TextColumn get storeId =>
+      text().named('storeId').nullable().references(Stores, #id)();
   TextColumn get date => text()();
   TextColumn get notes => text().nullable()();
-  TextColumn get receiptImageUri => text().named('receiptImageUri').nullable()();
-  BoolColumn get isRecurring => boolean().named('isRecurring').withDefault(const Constant(false))();
-  TextColumn get recurrenceFrequency => text().named('recurrenceFrequency').nullable()();
-  TextColumn get itemizationStatus => text().named('itemizationStatus').nullable()();
-  BoolColumn get itemTotalMismatchApproved => boolean().named('itemTotalMismatchApproved').withDefault(const Constant(false))();
+  TextColumn get receiptImageUri =>
+      text().named('receiptImageUri').nullable()();
+  BoolColumn get isRecurring =>
+      boolean().named('isRecurring').withDefault(const Constant(false))();
+  TextColumn get recurrenceFrequency =>
+      text().named('recurrenceFrequency').nullable()();
+  TextColumn get itemizationStatus =>
+      text().named('itemizationStatus').nullable()();
+  BoolColumn get itemTotalMismatchApproved => boolean()
+      .named('itemTotalMismatchApproved')
+      .withDefault(const Constant(false))();
   TextColumn get createdAt => text().named('createdAt')();
   TextColumn get updatedAt => text().named('updatedAt')();
   TextColumn get deletedAt => text().named('deletedAt').nullable()();
@@ -53,7 +61,9 @@ class GroceryItems extends Table {
   String get tableName => 'grocery_items';
 
   TextColumn get id => text()();
-  TextColumn get expenseId => text().named('expenseId').references(Expenses, #id, onDelete: KeyAction.cascade)();
+  TextColumn get expenseId => text()
+      .named('expenseId')
+      .references(Expenses, #id, onDelete: KeyAction.cascade)();
   TextColumn get name => text()();
   RealColumn get amount => real()();
   TextColumn get createdAt => text().named('createdAt')();
@@ -67,7 +77,8 @@ class CategoryBudgets extends Table {
   String get tableName => 'category_budgets';
 
   TextColumn get id => text()();
-  TextColumn get categoryId => text().named('categoryId').references(Categories, #id)();
+  TextColumn get categoryId =>
+      text().named('categoryId').references(Categories, #id)();
   RealColumn get amount => real()();
   TextColumn get currency => text()();
   TextColumn get month => text()();
@@ -89,10 +100,12 @@ class SyncMetadata extends Table {
 
   TextColumn get entityType => text().named('entityType')();
   TextColumn get entityId => text().named('entityId')();
-  IntColumn get localVersion => integer().named('localVersion').withDefault(const Constant(1))();
+  IntColumn get localVersion =>
+      integer().named('localVersion').withDefault(const Constant(1))();
   TextColumn get remoteId => text().named('remoteId').nullable()();
   TextColumn get lastSyncedAt => text().named('lastSyncedAt').nullable()();
-  TextColumn get syncState => text().named('syncState').withDefault(const Constant('local_only'))();
+  TextColumn get syncState =>
+      text().named('syncState').withDefault(const Constant('local_only'))();
 
   @override
   Set<Column<Object>> get primaryKey => {entityType, entityId};
@@ -103,9 +116,11 @@ class Units extends Table {
   TextColumn get name => text()();
   TextColumn get abbreviation => text()();
   TextColumn get dimension => text()();
-  TextColumn get baseUnitId => text().named('baseUnitId').nullable().references(Units, #id)();
+  TextColumn get baseUnitId =>
+      text().named('baseUnitId').nullable().references(Units, #id)();
   RealColumn get factorToBase => real().named('factorToBase').nullable()();
-  BoolColumn get isDefault => boolean().named('isDefault').withDefault(const Constant(true))();
+  BoolColumn get isDefault =>
+      boolean().named('isDefault').withDefault(const Constant(true))();
   TextColumn get createdAt => text().named('createdAt')();
   TextColumn get updatedAt => text().named('updatedAt')();
 
@@ -135,8 +150,10 @@ class Items extends Table {
   TextColumn get id => text()();
   TextColumn get name => text()();
   TextColumn get normalizedName => text().named('normalizedName')();
-  TextColumn get defaultUnitId => text().named('defaultUnitId').nullable().references(Units, #id)();
-  TextColumn get categoryId => text().named('categoryId').nullable().references(Categories, #id)();
+  TextColumn get defaultUnitId =>
+      text().named('defaultUnitId').nullable().references(Units, #id)();
+  TextColumn get categoryId =>
+      text().named('categoryId').nullable().references(Categories, #id)();
   TextColumn get createdAt => text().named('createdAt')();
   TextColumn get updatedAt => text().named('updatedAt')();
   TextColumn get archivedAt => text().named('archivedAt').nullable()();
@@ -155,7 +172,9 @@ class ItemAliases extends Table {
   String get tableName => 'item_aliases';
 
   TextColumn get id => text()();
-  TextColumn get itemId => text().named('itemId').references(Items, #id, onDelete: KeyAction.cascade)();
+  TextColumn get itemId => text()
+      .named('itemId')
+      .references(Items, #id, onDelete: KeyAction.cascade)();
   TextColumn get alias => text()();
   TextColumn get normalizedAlias => text().named('normalizedAlias')();
   TextColumn get createdAt => text().named('createdAt')();
@@ -174,18 +193,24 @@ class ExpenseItems extends Table {
   String get tableName => 'expense_items';
 
   TextColumn get id => text()();
-  TextColumn get expenseId => text().named('expenseId').references(Expenses, #id, onDelete: KeyAction.cascade)();
-  TextColumn get itemId => text().named('itemId').nullable().references(Items, #id)();
+  TextColumn get expenseId => text()
+      .named('expenseId')
+      .references(Expenses, #id, onDelete: KeyAction.cascade)();
+  TextColumn get itemId =>
+      text().named('itemId').nullable().references(Items, #id)();
   TextColumn get nameSnapshot => text().named('nameSnapshot')();
   RealColumn get quantity => real().nullable()();
-  TextColumn get unitId => text().named('unitId').nullable().references(Units, #id)();
+  TextColumn get unitId =>
+      text().named('unitId').nullable().references(Units, #id)();
   RealColumn get unitPrice => real().named('unitPrice').nullable()();
   RealColumn get totalPrice => real().named('totalPrice')();
   TextColumn get currency => text()();
   TextColumn get brand => text().nullable()();
-  TextColumn get storeId => text().named('storeId').nullable().references(Stores, #id)();
+  TextColumn get storeId =>
+      text().named('storeId').nullable().references(Stores, #id)();
   TextColumn get dateOverride => text().named('dateOverride').nullable()();
-  TextColumn get categoryId => text().named('categoryId').nullable().references(Categories, #id)();
+  TextColumn get categoryId =>
+      text().named('categoryId').nullable().references(Categories, #id)();
   TextColumn get subcategory => text().nullable()();
   TextColumn get notes => text().nullable()();
   TextColumn get createdAt => text().named('createdAt')();
@@ -198,7 +223,9 @@ class ExpenseItems extends Table {
 
 class Receipts extends Table {
   TextColumn get id => text()();
-  TextColumn get expenseId => text().named('expenseId').references(Expenses, #id, onDelete: KeyAction.cascade)();
+  TextColumn get expenseId => text()
+      .named('expenseId')
+      .references(Expenses, #id, onDelete: KeyAction.cascade)();
   TextColumn get uri => text()();
   TextColumn get mimeType => text().named('mimeType').nullable()();
   IntColumn get fileSizeBytes => integer().named('fileSizeBytes').nullable()();
@@ -220,7 +247,8 @@ class MigrationAudit extends Table {
   TextColumn get completedAt => text().named('completedAt').nullable()();
   TextColumn get status => text()();
   TextColumn get errorMessage => text().named('errorMessage').nullable()();
-  TextColumn get preMigrationBackupPath => text().named('preMigrationBackupPath').nullable()();
+  TextColumn get preMigrationBackupPath =>
+      text().named('preMigrationBackupPath').nullable()();
 
   @override
   Set<Column<Object>> get primaryKey => {id};
@@ -396,14 +424,16 @@ class WalletMeltDatabase extends _$WalletMeltDatabase {
       final after = await readV1MigrationMetrics();
       await validateV1ToV2Migration(before: before, after: after);
 
-      await (update(migrationAudit)..where((row) => row.id.equals(auditId))).write(
+      await (update(migrationAudit)..where((row) => row.id.equals(auditId)))
+          .write(
         MigrationAuditCompanion(
           completedAt: Value(DateTime.now().toIso8601String()),
           status: const Value('completed'),
         ),
       );
     } catch (error) {
-      await (update(migrationAudit)..where((row) => row.id.equals(auditId))).write(
+      await (update(migrationAudit)..where((row) => row.id.equals(auditId)))
+          .write(
         MigrationAuditCompanion(
           completedAt: Value(DateTime.now().toIso8601String()),
           status: const Value('failed'),
@@ -421,7 +451,8 @@ class WalletMeltDatabase extends _$WalletMeltDatabase {
       budgetCount: await _count('category_budgets'),
       groceryItemCount: await _count('grocery_items'),
       activeExpenseTotal: await _activeExpenseTotal(),
-      softDeletedExpenseCount: await _countWhere('expenses', 'deletedAt IS NOT NULL'),
+      softDeletedExpenseCount:
+          await _countWhere('expenses', 'deletedAt IS NOT NULL'),
       receiptPathCount: await _countWhere(
         'expenses',
         "receiptImageUri IS NOT NULL AND TRIM(receiptImageUri) <> ''",
@@ -438,29 +469,38 @@ class WalletMeltDatabase extends _$WalletMeltDatabase {
 
     final failures = <String>[];
     if (before.expenseCount != after.expenseCount) {
-      failures.add('expense count changed: ${before.expenseCount} -> ${after.expenseCount}');
+      failures.add(
+          'expense count changed: ${before.expenseCount} -> ${after.expenseCount}');
     }
     if (before.categoryCount != after.categoryCount) {
-      failures.add('category count changed: ${before.categoryCount} -> ${after.categoryCount}');
+      failures.add(
+          'category count changed: ${before.categoryCount} -> ${after.categoryCount}');
     }
     if (before.budgetCount != after.budgetCount) {
-      failures.add('budget count changed: ${before.budgetCount} -> ${after.budgetCount}');
+      failures.add(
+          'budget count changed: ${before.budgetCount} -> ${after.budgetCount}');
     }
     if (before.groceryItemCount != migratedExpenseItemCount) {
-      failures.add('grocery item migration count mismatch: ${before.groceryItemCount} -> $migratedExpenseItemCount');
+      failures.add(
+          'grocery item migration count mismatch: ${before.groceryItemCount} -> $migratedExpenseItemCount');
     }
     if ((before.activeExpenseTotal - after.activeExpenseTotal).abs() > 0.0001) {
-      failures.add('active expense total changed: ${before.activeExpenseTotal} -> ${after.activeExpenseTotal}');
+      failures.add(
+          'active expense total changed: ${before.activeExpenseTotal} -> ${after.activeExpenseTotal}');
     }
     if (before.softDeletedExpenseCount != after.softDeletedExpenseCount) {
-      failures.add('soft deleted row count changed: ${before.softDeletedExpenseCount} -> ${after.softDeletedExpenseCount}');
+      failures.add(
+          'soft deleted row count changed: ${before.softDeletedExpenseCount} -> ${after.softDeletedExpenseCount}');
     }
-    if (before.receiptPathCount != after.receiptPathCount || before.receiptPathCount != migratedReceiptCount) {
-      failures.add('receipt path preservation mismatch: ${before.receiptPathCount} -> ${after.receiptPathCount}, receipts rows: $migratedReceiptCount');
+    if (before.receiptPathCount != after.receiptPathCount ||
+        before.receiptPathCount != migratedReceiptCount) {
+      failures.add(
+          'receipt path preservation mismatch: ${before.receiptPathCount} -> ${after.receiptPathCount}, receipts rows: $migratedReceiptCount');
     }
 
     if (failures.isNotEmpty) {
-      throw StateError('WalletMelt V1 to V2 migration validation failed: ${failures.join('; ')}');
+      throw StateError(
+          'WalletMelt V1 to V2 migration validation failed: ${failures.join('; ')}');
     }
   }
 
@@ -550,7 +590,18 @@ INSERT OR IGNORE INTO expense_items (
 )
 VALUES (?, ?, ?, ?, NULL, NULL, NULL, ?, ?, NULL, ?, NULL, ?, NULL, NULL, ?, ?, NULL);
 ''',
-        [id, expenseId, itemId, name, amount, currency, storeId, categoryId, createdAt, createdAt],
+        [
+          id,
+          expenseId,
+          itemId,
+          name,
+          amount,
+          currency,
+          storeId,
+          categoryId,
+          createdAt,
+          createdAt
+        ],
       );
     }
   }
@@ -567,12 +618,15 @@ WHERE receiptImageUri IS NOT NULL AND TRIM(receiptImageUri) <> '';
   }
 
   Future<int> _count(String tableName) async {
-    final row = await customSelect('SELECT COUNT(*) AS value FROM $tableName;').getSingle();
+    final row = await customSelect('SELECT COUNT(*) AS value FROM $tableName;')
+        .getSingle();
     return row.read<int>('value');
   }
 
   Future<int> _countWhere(String tableName, String whereClause) async {
-    final row = await customSelect('SELECT COUNT(*) AS value FROM $tableName WHERE $whereClause;').getSingle();
+    final row = await customSelect(
+            'SELECT COUNT(*) AS value FROM $tableName WHERE $whereClause;')
+        .getSingle();
     return row.read<int>('value');
   }
 

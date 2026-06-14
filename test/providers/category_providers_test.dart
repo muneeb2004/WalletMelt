@@ -11,26 +11,35 @@ void main() {
     final container = _containerWithMemoryDatabase();
     addTearDown(container.dispose);
 
-    final repository = await container.read(driftCategoryRepositoryProvider.future);
-    await repository.createCustom(name: 'Zoo Custom', icon: 'more_horiz', color: '#111111');
-    await repository.createCustom(name: 'Alpha Custom', icon: 'more_horiz', color: '#222222');
+    final repository =
+        await container.read(driftCategoryRepositoryProvider.future);
+    await repository.createCustom(
+        name: 'Zoo Custom', icon: 'more_horiz', color: '#111111');
+    await repository.createCustom(
+        name: 'Alpha Custom', icon: 'more_horiz', color: '#222222');
 
     container.invalidate(categoriesProvider);
     final categories = await container.read(categoriesProvider.future);
-    final defaultCategories = categories.where((category) => category.isDefault).toList();
-    final customCategories = categories.where((category) => !category.isDefault).toList();
+    final defaultCategories =
+        categories.where((category) => category.isDefault).toList();
+    final customCategories =
+        categories.where((category) => !category.isDefault).toList();
 
     expect(defaultCategories, isNotEmpty);
-    expect(customCategories.map((category) => category.name), ['Alpha Custom', 'Zoo Custom']);
-    expect(categories.indexOf(defaultCategories.last), lessThan(categories.indexOf(customCategories.first)));
+    expect(customCategories.map((category) => category.name),
+        ['Alpha Custom', 'Zoo Custom']);
+    expect(categories.indexOf(defaultCategories.last),
+        lessThan(categories.indexOf(customCategories.first)));
     expect(categories.map((category) => category.id), contains('grocery'));
   });
 
-  test('categoryByIdProvider resolves categories from categoriesProvider', () async {
+  test('categoryByIdProvider resolves categories from categoriesProvider',
+      () async {
     final container = _containerWithMemoryDatabase();
     addTearDown(container.dispose);
 
-    final category = await container.read(categoryByIdProvider('grocery').future);
+    final category =
+        await container.read(categoryByIdProvider('grocery').future);
 
     expect(category?.name, 'Grocery');
     expect(category?.icon, 'shopping_basket');

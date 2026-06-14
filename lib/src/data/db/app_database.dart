@@ -48,7 +48,8 @@ class AppDatabase {
   Future<void> _seedDefaultCategories(Database db) async {
     final batch = db.batch();
     for (final category in buildDefaultCategories(DateTime.now())) {
-      batch.insert('categories', category.toMap(), conflictAlgorithm: ConflictAlgorithm.ignore);
+      batch.insert('categories', category.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.ignore);
     }
     await batch.commit(noResult: true);
   }

@@ -25,15 +25,18 @@ class InsightsScreen extends StatelessWidget {
           children: [
             Text('Insights', style: Theme.of(context).textTheme.headlineMedium),
             const SizedBox(height: 4),
-            Text(readableMonth(state.selectedMonth), style: Theme.of(context).textTheme.bodyMedium),
+            Text(readableMonth(state.selectedMonth),
+                style: Theme.of(context).textTheme.bodyMedium),
             const SizedBox(height: 18),
             LiquidGlass(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Monthly trend', style: Theme.of(context).textTheme.titleLarge),
+                  Text('Monthly trend',
+                      style: Theme.of(context).textTheme.titleLarge),
                   const SizedBox(height: 10),
-                  Text(formatMoney(insights.total, state.settings.currency), style: Theme.of(context).textTheme.displaySmall),
+                  Text(formatMoney(insights.total, state.settings.currency),
+                      style: Theme.of(context).textTheme.displaySmall),
                   const SizedBox(height: 8),
                   Text(
                     insights.monthOverMonthDelta == null
@@ -49,7 +52,8 @@ class InsightsScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Where it melted', style: Theme.of(context).textTheme.titleLarge),
+                  Text('Where it melted',
+                      style: Theme.of(context).textTheme.titleLarge),
                   const SizedBox(height: 12),
                   CategoryBreakdownChart(items: insights.categorySpend),
                 ],
@@ -60,21 +64,22 @@ class InsightsScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Budgets', style: Theme.of(context).textTheme.titleLarge),
+                  Text('Budgets',
+                      style: Theme.of(context).textTheme.titleLarge),
                   const SizedBox(height: 12),
                   _BudgetRowsCategoryGate(
                     fallbackHasCategories: state.categories.isNotEmpty,
                     rows: [
                       for (final spend in insights.categorySpend)
-                      _BudgetRow(
-                        categoryId: spend.category.id,
-                        label: spend.category.name,
-                        color: colorFromHex(spend.category.color),
-                        spent: spend.total,
-                        fallbackBudget: spend.budget?.amount,
-                        month: state.currentMonthKey,
-                        currency: state.settings.currency,
-                      ),
+                        _BudgetRow(
+                          categoryId: spend.category.id,
+                          label: spend.category.name,
+                          color: colorFromHex(spend.category.color),
+                          spent: spend.total,
+                          fallbackBudget: spend.budget?.amount,
+                          month: state.currentMonthKey,
+                          currency: state.settings.currency,
+                        ),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -103,30 +108,45 @@ class InsightsScreen extends StatelessWidget {
         return StatefulBuilder(
           builder: (context, setSheetState) {
             return Padding(
-              padding: EdgeInsets.fromLTRB(20, 8, 20, 20 + MediaQuery.of(context).viewInsets.bottom),
+              padding: EdgeInsets.fromLTRB(
+                  20, 8, 20, 20 + MediaQuery.of(context).viewInsets.bottom),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Monthly budget', style: Theme.of(context).textTheme.titleLarge),
+                  Text('Monthly budget',
+                      style: Theme.of(context).textTheme.titleLarge),
                   const SizedBox(height: 14),
                   DropdownButtonFormField<String>(
                     initialValue: categoryId,
                     decoration: const InputDecoration(labelText: 'Category'),
                     items: [
-                      for (final category in state.categories) DropdownMenuItem(value: category.id, child: Text(category.name)),
+                      for (final category in state.categories)
+                        DropdownMenuItem(
+                            value: category.id, child: Text(category.name)),
                     ],
-                    onChanged: (value) => setSheetState(() => categoryId = value),
+                    onChanged: (value) =>
+                        setSheetState(() => categoryId = value),
                   ),
                   const SizedBox(height: 12),
-                  TextField(controller: amountController, keyboardType: const TextInputType.numberWithOptions(), decoration: InputDecoration(labelText: 'Budget amount (${state.settings.currency})')),
+                  TextField(
+                      controller: amountController,
+                      keyboardType: const TextInputType.numberWithOptions(),
+                      decoration: InputDecoration(
+                          labelText:
+                              'Budget amount (${state.settings.currency})')),
                   const SizedBox(height: 18),
                   ElevatedButton(
                     onPressed: () async {
-                      final amount = double.tryParse(amountController.text.trim());
-                      if (categoryId == null || amount == null || amount <= 0) return;
+                      final amount =
+                          double.tryParse(amountController.text.trim());
+                      if (categoryId == null || amount == null || amount <= 0) {
+                        return;
+                      }
                       await state.setBudget(categoryId!, amount);
-                      if (context.mounted) Navigator.pop(context);
+                      if (context.mounted) {
+                        Navigator.pop(context);
+                      }
                     },
                     child: const Text('Save budget'),
                   ),
@@ -160,7 +180,8 @@ class _BudgetRowsCategoryGate extends ConsumerWidget {
     );
 
     if (!hasCategories) {
-      return Text('No categories available.', style: Theme.of(context).textTheme.bodyMedium);
+      return Text('No categories available.',
+          style: Theme.of(context).textTheme.bodyMedium);
     }
 
     return Column(
@@ -191,13 +212,15 @@ class _BudgetRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final budgetValue = ref.watch(budgetByCategoryProvider(BudgetLookup(month: month, categoryId: categoryId)));
+    final budgetValue = ref.watch(budgetByCategoryProvider(
+        BudgetLookup(month: month, categoryId: categoryId)));
     final budget = budgetValue.when(
       data: (budget) => budget?.amount,
       loading: () => fallbackBudget,
       error: (_, __) => fallbackBudget,
     );
-    final progress = budget == null || budget == 0 ? 0.0 : (spent / budget).clamp(0.0, 1.0);
+    final progress =
+        budget == null || budget == 0 ? 0.0 : (spent / budget).clamp(0.0, 1.0);
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Column(
@@ -205,8 +228,12 @@ class _BudgetRow extends ConsumerWidget {
         children: [
           Row(
             children: [
-              Expanded(child: Text(label, style: Theme.of(context).textTheme.titleMedium)),
-              Text(budget == null ? formatMoney(spent, currency) : '${formatMoney(spent, currency)} / ${formatMoney(budget, currency)}'),
+              Expanded(
+                  child: Text(label,
+                      style: Theme.of(context).textTheme.titleMedium)),
+              Text(budget == null
+                  ? formatMoney(spent, currency)
+                  : '${formatMoney(spent, currency)} / ${formatMoney(budget, currency)}'),
             ],
           ),
           const SizedBox(height: 6),
@@ -216,7 +243,8 @@ class _BudgetRow extends ConsumerWidget {
               value: budget == null ? null : progress,
               minHeight: 10,
               backgroundColor: color.withValues(alpha: 0.14),
-              valueColor: AlwaysStoppedAnimation<Color>(progress >= 1 ? WalletMeltColors.warning : color),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                  progress >= 1 ? WalletMeltColors.warning : color),
             ),
           ),
         ],

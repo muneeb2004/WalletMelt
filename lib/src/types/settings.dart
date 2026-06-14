@@ -22,7 +22,8 @@ class WalletMeltSettings {
     return WalletMeltSettings(
       currency: currency ?? this.currency,
       themePreference: themePreference ?? this.themePreference,
-      hasCompletedOnboarding: hasCompletedOnboarding ?? this.hasCompletedOnboarding,
+      hasCompletedOnboarding:
+          hasCompletedOnboarding ?? this.hasCompletedOnboarding,
       lastExportedAt: lastExportedAt ?? this.lastExportedAt,
     );
   }

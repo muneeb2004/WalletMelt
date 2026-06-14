@@ -5,20 +5,62 @@ import 'package:wallet_melt/src/types/expense.dart';
 import 'package:wallet_melt/src/utils/insights.dart';
 
 void main() {
-  test('buildMonthlyInsights calculates totals, highest category, utilities, grocery, and budget state', () {
+  test(
+      'buildMonthlyInsights calculates totals, highest category, utilities, grocery, and budget state',
+      () {
     final now = DateTime(2026, 6, 13).toIso8601String();
     final categories = [
-      Category(id: 'grocery', name: 'Grocery', icon: 'shopping_basket', color: '#8FD6B5', isDefault: true, createdAt: now, updatedAt: now),
-      Category(id: 'electricity', name: 'Electricity', icon: 'bolt', color: '#F4B740', isDefault: true, createdAt: now, updatedAt: now),
-      Category(id: 'rent', name: 'Rent', icon: 'home', color: '#A88CC2', isDefault: true, createdAt: now, updatedAt: now),
+      Category(
+          id: 'grocery',
+          name: 'Grocery',
+          icon: 'shopping_basket',
+          color: '#8FD6B5',
+          isDefault: true,
+          createdAt: now,
+          updatedAt: now),
+      Category(
+          id: 'electricity',
+          name: 'Electricity',
+          icon: 'bolt',
+          color: '#F4B740',
+          isDefault: true,
+          createdAt: now,
+          updatedAt: now),
+      Category(
+          id: 'rent',
+          name: 'Rent',
+          icon: 'home',
+          color: '#A88CC2',
+          isDefault: true,
+          createdAt: now,
+          updatedAt: now),
     ];
     final expenses = [
-      _expense(id: '1', amount: 5000, categoryId: 'grocery', date: DateTime(2026, 6, 3)),
-      _expense(id: '2', amount: 6500, categoryId: 'electricity', date: DateTime(2026, 6, 5)),
-      _expense(id: '3', amount: 3000, categoryId: 'grocery', date: DateTime(2026, 5, 5)),
+      _expense(
+          id: '1',
+          amount: 5000,
+          categoryId: 'grocery',
+          date: DateTime(2026, 6, 3)),
+      _expense(
+          id: '2',
+          amount: 6500,
+          categoryId: 'electricity',
+          date: DateTime(2026, 6, 5)),
+      _expense(
+          id: '3',
+          amount: 3000,
+          categoryId: 'grocery',
+          date: DateTime(2026, 5, 5)),
     ];
     final budgets = [
-      CategoryBudget(id: 'b1', categoryId: 'electricity', amount: 4000, currency: 'PKR', month: '2026-06', createdAt: now, updatedAt: now),
+      CategoryBudget(
+          id: 'b1',
+          categoryId: 'electricity',
+          amount: 4000,
+          currency: 'PKR',
+          month: '2026-06',
+          createdAt: now,
+          updatedAt: now),
     ];
 
     final insights = buildMonthlyInsights(

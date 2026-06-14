@@ -8,12 +8,15 @@ import 'package:wallet_melt/src/data/repositories/drift/drift_store_repository.d
 import 'package:wallet_melt/src/data/repositories/expense_repository.dart';
 
 void main() {
-  test('item repository normalizes names, reuses canonical items, and resolves aliases', () async {
+  test(
+      'item repository normalizes names, reuses canonical items, and resolves aliases',
+      () async {
     final db = WalletMeltDatabase(NativeDatabase.memory());
     addTearDown(db.close);
     final repository = DriftItemRepository(db);
 
-    final milk = await repository.createOrGet(name: '  Milk  ', categoryId: 'grocery', defaultUnitId: 'litre');
+    final milk = await repository.createOrGet(
+        name: '  Milk  ', categoryId: 'grocery', defaultUnitId: 'litre');
     final sameMilk = await repository.createOrGet(name: 'milk');
     expect(sameMilk.id, milk.id);
     expect(milk.normalizedName, 'milk');
@@ -23,19 +26,22 @@ void main() {
     expect(resolved?.id, milk.id);
   });
 
-  test('store repository normalizes names and reuses canonical stores', () async {
+  test('store repository normalizes names and reuses canonical stores',
+      () async {
     final db = WalletMeltDatabase(NativeDatabase.memory());
     addTearDown(db.close);
     final repository = DriftStoreRepository(db);
 
     final store = await repository.createOrGet(name: '  Imtiaz Super Market  ');
-    final sameStore = await repository.createOrGet(name: 'imtiaz   super market');
+    final sameStore =
+        await repository.createOrGet(name: 'imtiaz   super market');
 
     expect(store.id, sameStore.id);
     expect(store.normalizedName, 'imtiaz super market');
   });
 
-  test('receipt repository creates, lists, and soft deletes receipt records', () async {
+  test('receipt repository creates, lists, and soft deletes receipt records',
+      () async {
     final db = WalletMeltDatabase(NativeDatabase.memory());
     addTearDown(db.close);
     final expenseRepository = DriftExpenseRepository(db);
@@ -65,7 +71,8 @@ void main() {
     await receiptRepository.softDelete(receipt.id);
     receipts = await receiptRepository.listForExpense(expense.id);
     expect(receipts, isEmpty);
-    receipts = await receiptRepository.listForExpense(expense.id, includeDeleted: true);
+    receipts = await receiptRepository.listForExpense(expense.id,
+        includeDeleted: true);
     expect(receipts.single.deletedAt, isNotNull);
   });
 }

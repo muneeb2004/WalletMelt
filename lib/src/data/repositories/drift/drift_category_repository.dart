@@ -32,7 +32,9 @@ ORDER BY isDefault DESC, name COLLATE NOCASE ASC;
   }
 
   Future<domain.Category?> getById(String id) async {
-    final row = await (_db.select(_db.categories)..where((category) => category.id.equals(id))).getSingleOrNull();
+    final row = await (_db.select(_db.categories)
+          ..where((category) => category.id.equals(id)))
+        .getSingleOrNull();
     if (row == null) return null;
     return _toDomain(row);
   }

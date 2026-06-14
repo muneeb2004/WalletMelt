@@ -188,6 +188,30 @@ class AppState extends ChangeNotifier {
     return _expenseRepository.groceryItemsForExpense(expenseId);
   }
 
+  Future<List<GroceryItem>> listAllGroceryItemsForExport() async {
+    final repository = _driftExpenseRepository;
+    if (repository != null) {
+      try {
+        return await repository.listAllGroceryItems();
+      } catch (_) {
+        // Fall through to the proven sqflite path if the new read path fails.
+      }
+    }
+    return _expenseRepository.listAllGroceryItems();
+  }
+
+  Future<List<CategoryBudget>> listAllBudgetsForExport() async {
+    final repository = _driftBudgetRepository;
+    if (repository != null) {
+      try {
+        return await repository.listAll();
+      } catch (_) {
+        // Fall through to the proven sqflite path if the new read path fails.
+      }
+    }
+    return _budgetRepository.listAll();
+  }
+
   Future<void> softDeleteExpense(String id) async {
     await _softDeleteExpense(id);
     await refresh();

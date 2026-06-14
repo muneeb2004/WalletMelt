@@ -27,10 +27,26 @@ class AppShell extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _NavItem(icon: Icons.dashboard_rounded, label: 'Home', index: 0, shell: navigationShell),
-                    _NavItem(icon: Icons.receipt_long_rounded, label: 'History', index: 1, shell: navigationShell),
-                    _NavItem(icon: Icons.insights_rounded, label: 'Insights', index: 2, shell: navigationShell),
-                    _NavItem(icon: Icons.tune_rounded, label: 'Settings', index: 3, shell: navigationShell),
+                    _NavItem(
+                        icon: Icons.dashboard_rounded,
+                        label: 'Home',
+                        index: 0,
+                        shell: navigationShell),
+                    _NavItem(
+                        icon: Icons.receipt_long_rounded,
+                        label: 'History',
+                        index: 1,
+                        shell: navigationShell),
+                    _NavItem(
+                        icon: Icons.insights_rounded,
+                        label: 'Insights',
+                        index: 2,
+                        shell: navigationShell),
+                    _NavItem(
+                        icon: Icons.tune_rounded,
+                        label: 'Settings',
+                        index: 3,
+                        shell: navigationShell),
                   ],
                 ),
               ),
@@ -54,7 +70,11 @@ class AppShell extends StatelessWidget {
 }
 
 class _NavItem extends StatelessWidget {
-  const _NavItem({required this.icon, required this.label, required this.index, required this.shell});
+  const _NavItem(
+      {required this.icon,
+      required this.label,
+      required this.index,
+      required this.shell});
 
   final IconData icon;
   final String label;
@@ -71,21 +91,32 @@ class _NavItem extends StatelessWidget {
         label: label,
         child: InkWell(
           borderRadius: BorderRadius.circular(999),
-          onTap: () => shell.goBranch(index, initialLocation: index == shell.currentIndex),
+          onTap: () => shell.goBranch(index,
+              initialLocation: index == shell.currentIndex),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 220),
             curve: Curves.easeOutCubic,
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
             decoration: BoxDecoration(
-              color: active ? WalletMeltColors.brand.withValues(alpha: 0.22) : Colors.transparent,
+              color: active
+                  ? WalletMeltColors.brand.withValues(alpha: 0.22)
+                  : Colors.transparent,
               borderRadius: BorderRadius.circular(999),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(icon, color: active ? WalletMeltColors.brandDeep : Theme.of(context).textTheme.bodyMedium?.color, size: 22),
+                Icon(icon,
+                    color: active
+                        ? WalletMeltColors.brandDeep
+                        : Theme.of(context).textTheme.bodyMedium?.color,
+                    size: 22),
                 const SizedBox(height: 2),
-                Text(label, style: Theme.of(context).textTheme.labelMedium?.copyWith(fontSize: 11)),
+                Text(label,
+                    style: Theme.of(context)
+                        .textTheme
+                        .labelMedium
+                        ?.copyWith(fontSize: 11)),
               ],
             ),
           ),

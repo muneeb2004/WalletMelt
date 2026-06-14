@@ -19,7 +19,9 @@ class ExpenseDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
-    final expense = [...state.expenses, ...state.deletedExpenses].where((item) => item.id == expenseId).firstOrNull;
+    final expense = [...state.expenses, ...state.deletedExpenses]
+        .where((item) => item.id == expenseId)
+        .firstOrNull;
     if (expense == null) {
       return const Scaffold(body: Center(child: Text('Expense not found')));
     }
@@ -31,9 +33,21 @@ class ExpenseDetailScreen extends StatelessWidget {
           children: [
             Row(
               children: [
-                IconButton(tooltip: 'Back', onPressed: () => context.pop(), icon: const Icon(Icons.arrow_back_rounded)),
-                Expanded(child: Text(expense.title, style: Theme.of(context).textTheme.headlineMedium, maxLines: 1, overflow: TextOverflow.ellipsis)),
-                if (!expense.isDeleted) IconButton(tooltip: 'Edit', onPressed: () => context.push('/expense/${expense.id}/edit'), icon: const Icon(Icons.edit_rounded)),
+                IconButton(
+                    tooltip: 'Back',
+                    onPressed: () => context.pop(),
+                    icon: const Icon(Icons.arrow_back_rounded)),
+                Expanded(
+                    child: Text(expense.title,
+                        style: Theme.of(context).textTheme.headlineMedium,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis)),
+                if (!expense.isDeleted)
+                  IconButton(
+                      tooltip: 'Edit',
+                      onPressed: () =>
+                          context.push('/expense/${expense.id}/edit'),
+                      icon: const Icon(Icons.edit_rounded)),
               ],
             ),
             const SizedBox(height: 18),
@@ -41,13 +55,19 @@ class ExpenseDetailScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(formatMoney(expense.amount, expense.currency), style: Theme.of(context).textTheme.displaySmall),
+                  Text(formatMoney(expense.amount, expense.currency),
+                      style: Theme.of(context).textTheme.displaySmall),
                   const SizedBox(height: 8),
-                  Text('${category?.name ?? 'Unknown category'} • ${readableMonth(parseIsoDate(expense.date))}', style: Theme.of(context).textTheme.bodyMedium),
-                  if (expense.vendor != null) Text(expense.vendor!, style: Theme.of(context).textTheme.bodyMedium),
+                  Text(
+                      '${category?.name ?? 'Unknown category'} • ${readableMonth(parseIsoDate(expense.date))}',
+                      style: Theme.of(context).textTheme.bodyMedium),
+                  if (expense.vendor != null)
+                    Text(expense.vendor!,
+                        style: Theme.of(context).textTheme.bodyMedium),
                   if (expense.notes != null) ...[
                     const SizedBox(height: 14),
-                    Text(expense.notes!, style: Theme.of(context).textTheme.bodyLarge),
+                    Text(expense.notes!,
+                        style: Theme.of(context).textTheme.bodyLarge),
                   ],
                 ],
               ),
@@ -58,14 +78,16 @@ class ExpenseDetailScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Receipt', style: Theme.of(context).textTheme.titleLarge),
+                    Text('Receipt',
+                        style: Theme.of(context).textTheme.titleLarge),
                     const SizedBox(height: 12),
                     Hero(
                       tag: expense.receiptImageUri!,
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(22),
                         child: Image.file(
-                          File(Uri.parse(expense.receiptImageUri!).toFilePath()),
+                          File(
+                              Uri.parse(expense.receiptImageUri!).toFilePath()),
                           height: 320,
                           width: double.infinity,
                           fit: BoxFit.cover,
@@ -73,7 +95,8 @@ class ExpenseDetailScreen extends StatelessWidget {
                             height: 180,
                             alignment: Alignment.center,
                             color: Colors.black.withValues(alpha: 0.08),
-                            child: const Text('Receipt file is missing or unreadable.'),
+                            child: const Text(
+                                'Receipt file is missing or unreadable.'),
                           ),
                         ),
                       ),
@@ -83,7 +106,8 @@ class ExpenseDetailScreen extends StatelessWidget {
               ),
             if (category?.id == 'grocery') ...[
               const SizedBox(height: 16),
-              _GroceryItemsCard(expenseId: expense.id, currency: expense.currency),
+              _GroceryItemsCard(
+                  expenseId: expense.id, currency: expense.currency),
             ],
             const SizedBox(height: 18),
             if (expense.isDeleted)
@@ -101,7 +125,11 @@ class ExpenseDetailScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 10),
-                  Expanded(child: OutlinedButton(onPressed: () => _confirmPermanentDelete(context, state, expense), child: const Text('Delete forever'))),
+                  Expanded(
+                      child: OutlinedButton(
+                          onPressed: () =>
+                              _confirmPermanentDelete(context, state, expense),
+                          child: const Text('Delete forever'))),
                 ],
               )
             else
@@ -116,7 +144,8 @@ class ExpenseDetailScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _confirmSoftDelete(BuildContext context, AppState state, Expense expense) async {
+  Future<void> _confirmSoftDelete(
+      BuildContext context, AppState state, Expense expense) async {
     final router = GoRouter.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
@@ -124,8 +153,12 @@ class ExpenseDetailScreen extends StatelessWidget {
         title: const Text('Move expense to recycle bin?'),
         content: const Text('You can restore it later from History.'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-          ElevatedButton(onPressed: () => Navigator.pop(context, true), child: const Text('Move')),
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel')),
+          ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Move')),
         ],
       ),
     );
@@ -136,16 +169,22 @@ class ExpenseDetailScreen extends StatelessWidget {
     }
   }
 
-  Future<void> _confirmPermanentDelete(BuildContext context, AppState state, Expense expense) async {
+  Future<void> _confirmPermanentDelete(
+      BuildContext context, AppState state, Expense expense) async {
     final router = GoRouter.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete forever?'),
-        content: const Text('This removes the expense and its local receipt file.'),
+        content:
+            const Text('This removes the expense and its local receipt file.'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-          ElevatedButton(onPressed: () => Navigator.pop(context, true), child: const Text('Delete')),
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel')),
+          ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Delete')),
         ],
       ),
     );
@@ -176,15 +215,19 @@ class _GroceryItemsCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Grocery items', style: Theme.of(context).textTheme.titleLarge),
+              Text('Grocery items',
+                  style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 10),
               for (final item in items)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 6),
                   child: Row(
                     children: [
-                      Expanded(child: Text(item.name, style: Theme.of(context).textTheme.bodyLarge)),
-                      Text(formatMoney(item.amount, currency), style: Theme.of(context).textTheme.bodyLarge),
+                      Expanded(
+                          child: Text(item.name,
+                              style: Theme.of(context).textTheme.bodyLarge)),
+                      Text(formatMoney(item.amount, currency),
+                          style: Theme.of(context).textTheme.bodyLarge),
                     ],
                   ),
                 ),

@@ -5,6 +5,10 @@ import '../../components/glass/app_background.dart';
 import '../../constants/categories.dart';
 import '../../services/export/expense_csv_export_service.dart';
 import '../../services/export/export_share_service.dart';
+import '../../services/export/file_picker_service.dart';
+import '../../services/export/wallet_melt_json_backup_import_validation_service.dart';
+import '../../services/export/wallet_melt_json_backup_preview_service.dart';
+import '../../services/export/wallet_melt_json_backup_service.dart';
 import '../../state/app_state.dart';
 import '../../theme/wallet_melt_theme.dart';
 import '../../types/settings.dart';
@@ -12,12 +16,21 @@ import '../../types/settings.dart';
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({
     this.expenseCsvExportService = const ExpenseCsvExportService(),
+    this.jsonBackupService = const WalletMeltJsonBackupService(),
     this.exportShareService = const SharePlusExportShareService(),
+    this.filePickerService = const FilePickerService(),
+    this.importValidationService =
+        const WalletMeltJsonBackupImportValidationService(),
+    this.previewService = const WalletMeltJsonBackupPreviewService(),
     super.key,
   });
 
   final ExpenseCsvExportService expenseCsvExportService;
+  final WalletMeltJsonBackupService jsonBackupService;
   final ExportShareService exportShareService;
+  final FilePickerService filePickerService;
+  final WalletMeltJsonBackupImportValidationService importValidationService;
+  final WalletMeltJsonBackupPreviewService previewService;
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -25,7 +38,9 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   bool _isExportingExpenses = false;
+  bool _isCreatingJsonBackup = false;
   bool _includeDeletedExpenses = false;
+  bool _isValidatingBackup = false;
 
   @override
   Widget build(BuildContext context) {
@@ -118,8 +133,58 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: _isCreatingJsonBackup
+                          ? null
+                          : () => _createJsonBackup(state),
+                      icon: _isCreatingJsonBackup
+                          ? const SizedBox.square(
+                              dimension: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.backup_outlined),
+                      label: Text(_isCreatingJsonBackup
+                          ? 'Preparing backup'
+                          : 'Back up JSON'),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
                   Text(
                     _exportStatusText(state),
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            LiquidGlass(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Data import',
+                      style: Theme.of(context).textTheme.titleLarge),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed:
+                          _isValidatingBackup ? null : _validateBackupFile,
+                      icon: _isValidatingBackup
+                          ? const SizedBox.square(
+                              dimension: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.file_open_outlined),
+                      label: Text(_isValidatingBackup
+                          ? 'Validating...'
+                          : 'Validate backup file'),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Select a backup JSON file to verify its structure and compatibility before importing. No changes will be made to your data.',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
@@ -207,6 +272,317 @@ class _SettingsScreenState extends State<SettingsScreen> {
         setState(() => _isExportingExpenses = false);
       }
     }
+  }
+
+  Future<void> _createJsonBackup(AppState state) async {
+    setState(() => _isCreatingJsonBackup = true);
+
+    try {
+      final file = await widget.jsonBackupService.createBackup(
+        expenses: [...state.expenses, ...state.deletedExpenses],
+        groceryItems: await state.listAllGroceryItemsForExport(),
+        categories: state.categories,
+        budgets: await state.listAllBudgetsForExport(),
+        settings: state.settings,
+      );
+      final shareResult = await widget.exportShareService.shareFile(
+        file,
+        subject: 'WalletMelt JSON backup',
+        title: 'Back up WalletMelt data',
+      );
+      if (!mounted) return;
+
+      await state.recordExportedAt(file.createdAt);
+      if (!mounted) return;
+
+      final message = switch (shareResult.status) {
+        ExportShareStatus.success => 'JSON backup shared.',
+        ExportShareStatus.dismissed => 'JSON backup canceled.',
+        ExportShareStatus.unavailable => 'JSON backup file is ready.',
+      };
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(message)));
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('JSON backup failed.')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isCreatingJsonBackup = false);
+      }
+    }
+  }
+
+  Future<void> _validateBackupFile() async {
+    setState(() => _isValidatingBackup = true);
+
+    try {
+      final content = await widget.filePickerService.pickJsonFileContent();
+      if (!mounted) return;
+
+      if (content == null) {
+        return;
+      }
+
+      final result = widget.importValidationService.validateBackup(content);
+      if (!mounted) return;
+
+      if (result.isValid) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Backup file is valid!\n'
+              'Found: ${result.expensesCount} expenses, '
+              '${result.groceryItemsCount} items, '
+              '${result.categoriesCount} categories, '
+              '${result.budgetsCount} budgets.',
+            ),
+            backgroundColor: Colors.green[800],
+          ),
+        );
+
+        final preview = widget.previewService.generatePreview(content);
+        if (preview.isValid) {
+          _showBackupPreviewDialog(preview);
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content:
+                Text('Invalid backup file: ${result.error ?? "Unknown error"}'),
+            backgroundColor: Colors.red[800],
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error reading file: $e'),
+          backgroundColor: Colors.red[800],
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isValidatingBackup = false);
+      }
+    }
+  }
+
+  void _showBackupPreviewDialog(WalletMeltBackupPreview preview) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final sectionTitleStyle = Theme.of(context).textTheme.titleMedium;
+        final bodyStyle = Theme.of(context).textTheme.bodyMedium;
+
+        return Dialog(
+          backgroundColor: isDark
+              ? const Color(0xFF161616)
+              : const Color(0xFFFAFAF6),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(28),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.preview_rounded,
+                          color: WalletMeltColors.brand, size: 28),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'Backup Preview',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  const Divider(height: 1),
+                  const SizedBox(height: 16),
+                  Text('Metadata', style: sectionTitleStyle),
+                  const SizedBox(height: 8),
+                  _buildMetadataRow('Format', preview.format ?? 'Unknown'),
+                  _buildMetadataRow(
+                      'Format Version', '${preview.formatVersion ?? "Unknown"}'),
+                  _buildMetadataRow(
+                      'App Version', preview.appVersion ?? 'Unknown'),
+                  _buildMetadataRow('Exported At',
+                      _formatExportedAt(preview.exportedAt) ?? 'Unknown'),
+                  const SizedBox(height: 16),
+                  Text('Contents', style: sectionTitleStyle),
+                  const SizedBox(height: 8),
+                  _buildContentCountRow(Icons.monetization_on_outlined,
+                      'Expenses', '${preview.expensesCount} (${preview.deletedExpensesCount} deleted)'),
+                  _buildContentCountRow(Icons.shopping_basket_outlined,
+                      'Grocery Items', '${preview.groceryItemsCount} items'),
+                  _buildContentCountRow(Icons.category_outlined, 'Categories',
+                      '${preview.categoriesCount} categories'),
+                  _buildContentCountRow(Icons.calendar_month_outlined,
+                      'Budgets', '${preview.budgetsCount} budgets'),
+                  _buildContentCountRow(
+                      Icons.settings_suggest_outlined,
+                      'Settings Configuration',
+                      preview.hasSettings ? 'Included' : 'Missing'),
+                  if (preview.warnings.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    Text('Warnings',
+                        style: sectionTitleStyle?.copyWith(
+                            color: WalletMeltColors.warning)),
+                    const SizedBox(height: 8),
+                    for (final warning in preview.warnings)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 6),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(Icons.warning_amber_rounded,
+                                color: WalletMeltColors.warning, size: 18),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                warning,
+                                style: bodyStyle?.copyWith(
+                                    color: WalletMeltColors.warning,
+                                    fontSize: 13),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                  const SizedBox(height: 20),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: WalletMeltColors.brand.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: WalletMeltColors.brand.withValues(alpha: 0.2),
+                      ),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.info_outline_rounded,
+                            color: WalletMeltColors.brandDeep, size: 20),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'No data has been imported yet. You are looking at a read-only preview of the backup file.',
+                            style: bodyStyle?.copyWith(
+                              color: isDark
+                                  ? WalletMeltColors.brandSoft
+                                  : WalletMeltColors.brandDeep,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: OutlinedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                          child: const Text('Close'),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: WalletMeltColors.brand.withValues(alpha: 0.5),
+                            disabledBackgroundColor: isDark
+                                ? Colors.white12
+                                : Colors.black12,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                          child: const Text(
+                            'Restore (N/A)',
+                            style: TextStyle(color: Colors.white24),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildMetadataRow(String label, String value) {
+    final style = Theme.of(context).textTheme.bodyMedium;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: style),
+          Text(
+            value,
+            style: style?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? WalletMeltColors.darkTextPrimary
+                    : WalletMeltColors.textPrimary),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContentCountRow(IconData icon, String label, String value) {
+    final style = Theme.of(context).textTheme.bodyMedium;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: WalletMeltColors.textSecondary),
+          const SizedBox(width: 10),
+          Expanded(child: Text(label, style: style)),
+          Text(
+            value,
+            style: style?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? WalletMeltColors.darkTextPrimary
+                    : WalletMeltColors.textPrimary),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String? _formatExportedAt(String? isoString) {
+    if (isoString == null) return null;
+    final parsed = DateTime.tryParse(isoString);
+    if (parsed == null) return isoString;
+    final local = parsed.toLocal();
+    return '${local.year}-${_twoDigits(local.month)}-${_twoDigits(local.day)} '
+        '${_twoDigits(local.hour)}:${_twoDigits(local.minute)}';
   }
 
   String _exportStatusText(AppState state) {

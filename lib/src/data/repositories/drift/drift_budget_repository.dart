@@ -20,6 +20,17 @@ class DriftBudgetRepository {
     return rows.map(_toDomain).toList();
   }
 
+  Future<List<domain.CategoryBudget>> listAll() async {
+    final rows = await (_db.select(_db.categoryBudgets)
+          ..orderBy([
+            (budget) => OrderingTerm(expression: budget.month),
+            (budget) => OrderingTerm(expression: budget.categoryId),
+            (budget) => OrderingTerm(expression: budget.id),
+          ]))
+        .get();
+    return rows.map(_toDomain).toList();
+  }
+
   Future<void> upsert({
     required String categoryId,
     required double amount,
@@ -38,7 +49,9 @@ VALUES (?, ?, ?, ?, ?, ?, ?);
 
   Future<void> delete(String categoryId, String month) async {
     await (_db.delete(_db.categoryBudgets)
-          ..where((budget) => budget.categoryId.equals(categoryId) & budget.month.equals(month)))
+          ..where((budget) =>
+              budget.categoryId.equals(categoryId) &
+              budget.month.equals(month)))
         .go();
   }
 

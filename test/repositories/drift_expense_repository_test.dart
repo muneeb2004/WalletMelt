@@ -5,7 +5,9 @@ import 'package:wallet_melt/src/data/repositories/drift/drift_expense_repository
 import 'package:wallet_melt/src/data/repositories/expense_repository.dart';
 
 void main() {
-  test('mirrors V1 expense CRUD, sorting, soft-delete, grocery, and receipt behavior', () async {
+  test(
+      'mirrors V1 expense CRUD, sorting, soft-delete, grocery, and receipt behavior',
+      () async {
     final db = WalletMeltDatabase(NativeDatabase.memory());
     addTearDown(db.close);
     final repository = DriftExpenseRepository(db);
@@ -45,7 +47,8 @@ void main() {
 
     final active = await repository.listActive();
     expect(active.map((expense) => expense.id), [grocery.id, older.id]);
-    expect(active.fold<double>(0, (sum, expense) => sum + expense.amount), 13450);
+    expect(
+        active.fold<double>(0, (sum, expense) => sum + expense.amount), 13450);
 
     final loaded = await repository.getById(grocery.id);
     expect(loaded?.receiptImageUri, 'file:///receipts/grocery.jpg');
@@ -57,9 +60,16 @@ void main() {
 
     final expenseItems = await repository.expenseItemsForExpense(grocery.id);
     expect(expenseItems.map((item) => item.nameSnapshot), ['Milk', 'Eggs']);
-    expect(expenseItems.every((item) => item.quantity == null && item.unitId == null && item.unitPrice == null), isTrue);
+    expect(
+        expenseItems.every((item) =>
+            item.quantity == null &&
+            item.unitId == null &&
+            item.unitPrice == null),
+        isTrue);
 
-    var receipts = await (db.select(db.receipts)..where((receipt) => receipt.expenseId.equals(grocery.id))).get();
+    var receipts = await (db.select(db.receipts)
+          ..where((receipt) => receipt.expenseId.equals(grocery.id)))
+        .get();
     expect(receipts.single.uri, 'file:///receipts/grocery.jpg');
 
     await repository.update(
@@ -78,14 +88,19 @@ void main() {
     expect(updated?.receiptImageUri, isNull);
     groceryItems = await repository.groceryItemsForExpense(grocery.id);
     expect(groceryItems.map((item) => item.name), ['Rice']);
-    receipts = await (db.select(db.receipts)..where((receipt) => receipt.expenseId.equals(grocery.id))).get();
+    receipts = await (db.select(db.receipts)
+          ..where((receipt) => receipt.expenseId.equals(grocery.id)))
+        .get();
     expect(receipts, isEmpty);
 
     await repository.softDelete(grocery.id);
     expect(await repository.getById(grocery.id), isNull);
-    expect(await repository.getById(grocery.id, includeDeleted: true), isNotNull);
-    expect((await repository.listActive()).map((expense) => expense.id), [older.id]);
-    expect((await repository.listDeleted()).map((expense) => expense.id), [grocery.id]);
+    expect(
+        await repository.getById(grocery.id, includeDeleted: true), isNotNull);
+    expect((await repository.listActive()).map((expense) => expense.id),
+        [older.id]);
+    expect((await repository.listDeleted()).map((expense) => expense.id),
+        [grocery.id]);
 
     await repository.restore(grocery.id);
     expect(await repository.getById(grocery.id), isNotNull);

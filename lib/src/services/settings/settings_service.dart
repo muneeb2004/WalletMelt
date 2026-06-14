@@ -11,7 +11,8 @@ class SettingsService {
   Future<WalletMeltSettings> load() async {
     final prefs = await SharedPreferences.getInstance();
     return WalletMeltSettings(
-      currency: prefs.getString(_currencyKey) ?? WalletMeltSettings.defaults.currency,
+      currency:
+          prefs.getString(_currencyKey) ?? WalletMeltSettings.defaults.currency,
       themePreference: _themeFromName(prefs.getString(_themeKey)),
       hasCompletedOnboarding: prefs.getBool(_onboardingKey) ?? false,
       lastExportedAt: prefs.getString(_lastExportKey),

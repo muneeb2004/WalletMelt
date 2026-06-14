@@ -35,6 +35,45 @@ void main() {
       expect(utf8.decode(bytes), csv);
     });
 
+    test('writes UTF-8 JSON content', () async {
+      const writer = ExportFileWriter();
+      const json = '{"title":"Café receipt","city":"کراچی"}';
+
+      final result = await writer.writeJson(
+        jsonText: json,
+        exportKind: 'backup',
+        createdAt: DateTime(2026, 6, 14, 9, 8, 7),
+        directory: tempDirectory,
+      );
+
+      final bytes = await File(result.path).readAsBytes();
+      expect(utf8.decode(bytes), json);
+      expect(result.fileName, 'walletmelt-backup-20260614-090807.json');
+      expect(result.mimeType, ExportFileWriter.jsonMimeType);
+      expect(result.byteCount, utf8.encode(json).length);
+    });
+
+    test('avoids overwriting same-second JSON backups', () async {
+      const writer = ExportFileWriter();
+      final createdAt = DateTime(2026, 6, 14, 9, 8, 7);
+
+      final first = await writer.writeJson(
+        jsonText: '{"id":1}',
+        exportKind: 'backup',
+        createdAt: createdAt,
+        directory: tempDirectory,
+      );
+      final second = await writer.writeJson(
+        jsonText: '{"id":2}',
+        exportKind: 'backup',
+        createdAt: createdAt,
+        directory: tempDirectory,
+      );
+
+      expect(first.fileName, 'walletmelt-backup-20260614-090807.json');
+      expect(second.fileName, 'walletmelt-backup-20260614-090807-2.json');
+    });
+
     test('returns correct file name and path', () async {
       const writer = ExportFileWriter();
 
