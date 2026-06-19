@@ -1,12 +1,12 @@
 # WalletMelt Restore Transaction Design
 
-Phase: 14D/14E - Restore Transaction Design, Rollback Planning, and Dry-Run Preconditions, Still No Mutation
+Phase: 14D/14E/14F/14G/14H - Restore Transaction Design, Dry-Run Preconditions, Safe-Merge Mutation Candidate, Restore Hardening, and UX Recovery Messaging
 
-Status: Design and dry-run planning only. No restore execution, database import, merge, overwrite, ID remapping execution, rollback execution, transaction execution, or backup-driven mutation exists in this phase.
+Status: Safe-merge restore execution exists behind validation, preview, conflict detection, dry-run planning, explicit confirmation, pre-restore safety backup creation, duplicate-heavy backup preflight, pre-commit relationship verification, idempotent Drift V1-to-V2 migration replay guards, and one Drift transaction. Phase 14H polished user-facing recovery messages without changing restore scope. Full replace, overwrite, uncontrolled merge, conflict resolution execution, manual ID remapping UI, receipt recovery, URI rewriting, and ZIP restore remain unsupported.
 
 ## 1. Current Boundary
 
-WalletMelt currently supports export, backup generation, file picking, parse-only validation, preview, read-only conflict detection, and read-only dry-run restore planning. The Settings restore surface intentionally stops at a disabled `Restore (N/A)` placeholder.
+WalletMelt currently supports export, backup generation, file picking, parse-only validation, preview, read-only conflict detection, dry-run restore planning, and a tightly gated safe-merge restore candidate. The Settings restore surface keeps restore disabled for invalid plans and only enables `Safe merge` when the dry-run plan has no unresolved blockers.
 
 The current safe path is:
 
@@ -17,9 +17,13 @@ The current safe path is:
 5. Compare backup content against current local data.
 6. Show warnings/conflicts.
 7. Build a dry-run plan with proposed future actions, proposed ID mappings, blockers, warnings, and safety-gate status.
-8. Make no data changes.
+8. If the dry-run plan has blockers, keep restore disabled and make no data changes.
+9. If the dry-run plan is valid and blocker-free, require explicit user confirmation.
+10. Create a pre-restore safety backup of current local data.
+11. Execute safe merge inside one Drift transaction.
+12. Refresh AppState after commit succeeds.
 
-Any future mutation phase must preserve this read-only path as the mandatory precondition sequence.
+Any future mutation phase must preserve this validation, preview, conflict, dry-run, confirmation, and safety-backup sequence as the mandatory precondition path.
 
 ## 2. Restore Modes
 
@@ -35,7 +39,7 @@ Preview-only is the current and default mode.
 
 ### Safe Merge
 
-Safe merge is the recommended first mutation mode for a later phase.
+Safe merge is the first supported mutation mode as of Phase 14F.
 
 - Adds missing records from a backup into the current local database.
 - Preserves local data by default.
@@ -45,7 +49,7 @@ Safe merge is the recommended first mutation mode for a later phase.
 - Runs inside one database transaction.
 - Rolls back the transaction on any failure.
 
-Safe merge should be implemented before any full replace mode.
+Safe merge remains the only supported restore mutation mode.
 
 ### Full Replace / Import
 
@@ -63,12 +67,9 @@ Full replace remains unsupported until those controls exist.
 
 ## 3. Recommended First Mutation Mode
 
-The first future mutation phase should implement either:
+Phase 14F implemented explicit-confirmed safe merge. Phase 14G hardened that path with duplicate-heavy backup blockers, service-level duplicate preflight, relationship verification before commit, restore-in-progress UI gating, idempotent migration replay guards for stale `user_version` databases, and additional rollback/refresh tests. Phase 14H improved the Settings restore wording, recovery messages, safety-backup communication, receipt limitation copy, and restore-in-progress messaging without adding a new restore mode.
 
-1. Explicit-confirmed safe merge, or
-2. A sandboxed import path that writes to temporary tables or an isolated temporary database before promoting records.
-
-The safer practical first step is explicit-confirmed safe merge because it can preserve current data and use ID remapping for collisions.
+Future full restore work should continue from this baseline and must not add full replace, overwrite, or silent merge until separate controls exist.
 
 ## 4. Entities Covered
 
@@ -142,6 +143,9 @@ Dry-run blockers include:
 
 - Invalid or unsupported backup format/version.
 - Missing required IDs on planned entities.
+- Duplicate IDs inside the backup for categories, expenses, grocery items, or budgets.
+- Duplicate category names inside the backup.
+- Duplicate budget `month + category_id` pairs inside the backup.
 - Expense category references that cannot resolve.
 - Grocery items whose parent expense cannot resolve.
 - Budgets whose category cannot resolve.
@@ -172,6 +176,52 @@ The dry-run planner reports safety gates, including:
 
 Because explicit confirmation, pre-restore backup creation, and transaction runtime are deliberately not implemented in Phase 14E, the dry-run plan cannot start mutation.
 
+## 5.5 Implemented Safe-Merge Execution
+
+Phase 14F added `WalletMeltJsonRestoreService`.
+
+The restore service:
+
+- Supports safe merge only.
+- Rejects full replace and unsupported restore modes.
+- Requires `WalletMeltJsonRestoreOptions.confirmed == true`.
+- Requires a valid, blocker-free `RestoreDryRunPlan`.
+- Requires a non-empty `ExportFileResult` safety backup file before any write.
+- Validates backup JSON again before mutation.
+- Repeats duplicate-heavy backup preflight checks before transaction start.
+- Uses dry-run ID mappings as the source of category, expense, grocery item, and budget target IDs.
+- Writes database entities inside one Drift transaction.
+- Verifies inserted expense/category, grocery item/expense, and budget/category relationships before commit.
+- Rolls back the transaction on insert failures, unresolved mappings, foreign-key failures, count mismatches, relationship verification failures, or test-simulated failures.
+- Returns `WalletMeltJsonRestoreResult` with inserted counts, skipped counts, warnings, safety backup path, and error text.
+
+The Settings UI calls restore through `AppState.restoreJsonBackupSafeMerge`, not directly as a database consumer. AppState passes the existing Drift database runtime that it opened during initialization into the restore service, so the restore path does not open a competing database handle. If that Drift runtime is unavailable, production restore fails closed with a user-facing failure instead of attempting mutation through a new handle. AppState refresh runs only after the restore service reports success.
+
+Phase 14G also hardened the Drift migration runtime used before restore. If a previous failed or interrupted V1-to-V2 migration left V2 tables/columns in place while `PRAGMA user_version` remained `1`, migration replay now skips already-existing V2 tables/columns instead of failing on duplicate table/column SQL. This does not change the schema version, add a migration, or edit generated Drift code; it only makes the existing V1-to-V2 migration idempotent for partially applied schemas.
+
+Phase 14H keeps the same execution semantics and only improves user-facing communication:
+
+- Validation success states the backup is valid, summarizes counts, and says no data has been imported.
+- Preview text explains that safe merge preserves local data and does not recover receipt files.
+- Blocker text says restore is unavailable until blockers are resolved and WalletMelt will not resolve conflicts automatically.
+- Confirmation text explains safe merge, local preservation, duplicate ID remapping, safety backup creation, and receipt limitations.
+- Success text reports inserted counts, safety backup filename when available, local-data preservation, and receipt text-reference behavior.
+- Failure text avoids stack traces, states the restore failed safely, and explains transaction rollback should prevent partial imports.
+- Safety-backup creation failure is shown immediately and states restore did not start and no data changed.
+
+## 5.6 Implemented Safety Backup Behavior
+
+Before safe merge starts, Settings creates a current-data JSON backup through the existing `WalletMeltJsonBackupService`.
+
+The restore service verifies:
+
+- the safety backup result has a path,
+- the file exists,
+- the reported byte count is greater than zero,
+- the file length is greater than zero.
+
+If any safety-backup check fails, restore aborts before transaction start.
+
 ## 6. Transaction Boundary
 
 All future database writes must run inside a single transaction owned by one database runtime for the duration of the restore.
@@ -184,7 +234,7 @@ Required transaction properties:
 - No mixed uncontrolled handles: do not open competing database connections during restore.
 - No UI state refresh until after commit succeeds.
 
-The future implementation must decide the primary write runtime before mutation. Given the current migration track, Drift should be preferred for transactional restore if it can cover all required tables safely. sqflite fallback must remain intact and must not be removed.
+Phase 14F/14G uses the AppState-owned Drift database instance as the restore transaction runtime because the migrated Drift database covers `categories`, `expenses`, `grocery_items`, `expense_items`, `category_budgets`, and `receipts`. sqflite fallback remains intact and was not removed. Restore does not use sqflite fallback for mutation.
 
 ## 7. Rollback Strategy
 
@@ -199,6 +249,7 @@ Any failure inside the transaction must abort and roll back all writes:
 - Unique constraint failure.
 - Failed ID remap lookup.
 - Count mismatch.
+- Relationship verification mismatch before commit.
 - Unexpected database exception.
 - Settings write failure if settings import is selected and included in the transaction boundary.
 
@@ -210,17 +261,18 @@ The safety backup should be retained if restore fails so the user has a recovery
 
 ### Post-Restore Verification
 
-After transaction commit, verify:
+Before transaction commit, verify:
 
 - Imported category count matches the accepted plan.
 - Imported expense count matches the accepted plan.
 - Imported grocery item count matches the accepted plan.
 - Imported budget count matches the accepted plan.
-- No grocery items reference missing expenses.
-- No budgets reference missing categories.
+- Every inserted expense references an existing category.
+- Every inserted grocery item references an existing expense.
+- Every inserted budget references an existing category.
 - Settings changed only if settings import was selected.
 
-If verification fails before commit, rollback. If verification fails after commit, surface a high-priority failure message and preserve the pre-restore backup for manual recovery.
+If verification fails before commit, rollback. If any future post-commit verification is added and fails, surface a high-priority failure message and preserve the pre-restore backup for manual recovery.
 
 ## 8. ID Strategy
 
@@ -322,6 +374,8 @@ If selected:
 - Consider applying settings after database entity writes, but still inside the broader restore operation boundary.
 - Refresh AppState after commit.
 
+Phase 14F keeps Settings UI import disabled. The restore service supports explicit settings import for future callers, but the production Settings action uses the safe default: `importSettings: false`.
+
 ## 12. Safety Gates
 
 Future mutation cannot start unless all safety gates pass:
@@ -381,18 +435,42 @@ Required future restore QA:
 - Post-restore dashboard/history/insights consistency.
 - No database double-open warning.
 
-## 15. Phase 14D/14E Exclusions
+## 14.1 Phase 14G Runtime QA Matrix
+
+Target device: `Test_API_36` / `emulator-5554`.
+
+Performed runtime scenarios:
+
+- Clean install launched with empty dashboard state.
+- Clean Settings JSON backup opened Android share sheet and returned stable.
+- Valid backup selection opened preview, conflict/risk section, dry-run plan, and enabled safe merge when blockers were absent.
+- Malformed JSON selection failed gracefully with an invalid-backup SnackBar.
+- Cancelled picker returned to Settings without crash.
+- Restore confirmation cancel returned to Settings without mutation.
+- Confirmed safe merge created the pre-restore safety backup before mutation.
+- Confirmed clean safe merge imported 1 expense, 1 grocery item, 1 category, and 1 budget.
+- Dashboard, History, and Insights refreshed after successful commit.
+- Receipt paths remained text references only; no receipt file was copied or URI rewritten.
+- Old/inconsistent DB state reproduced a stale `user_version` migration failure, failed closed before mutation, and then passed after the idempotent migration guard.
+- No `MissingPluginException`, Drift double-open warning, or runtime crash loop was observed in filtered logs.
+
+Runtime scenario documented as automated-only:
+
+- Non-empty duplicate-ID remap is covered by restore service tests and Settings widget tests. It was not repeated manually after the clean runtime restore because the stale `user_version` migration replay bug became the higher-risk emulator finding.
+
+## 15. Phase 14D/14E/14F/14G Exclusions
 
 These phases do not implement:
 
-- Restore execution.
-- Database import.
-- Merge or overwrite mutation.
-- ID remapping execution.
-- Rollback execution.
-- Transaction code.
-- Receipt recovery.
+- Full replace restore.
+- Overwrite restore.
+- Silent merge.
+- Conflict-resolution UI for category or budget ambiguity.
+- Receipt recovery or file packaging.
 - Receipt URI rewriting.
 - ZIP/archive packaging.
-- AppState restore mutation methods.
-- Settings UI restore enablement.
+- Receipt packaging.
+- Cloud backup.
+- Broad storage permissions.
+- Settings import controls in Settings UI.
+- sqflite restore executor.

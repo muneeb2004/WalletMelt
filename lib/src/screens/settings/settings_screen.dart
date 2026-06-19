@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' as p;
 import 'package:provider/provider.dart';
 
 import '../../components/glass/app_background.dart';
@@ -11,6 +12,7 @@ import '../../services/export/wallet_melt_json_backup_import_validation_service.
 import '../../services/export/wallet_melt_json_backup_preview_service.dart';
 import '../../services/export/wallet_melt_json_backup_service.dart';
 import '../../services/export/wallet_melt_json_restore_dry_run_planner.dart';
+import '../../services/export/wallet_melt_json_restore_service.dart';
 import '../../state/app_state.dart';
 import '../../theme/wallet_melt_theme.dart';
 import '../../types/settings.dart';
@@ -26,6 +28,7 @@ class SettingsScreen extends StatefulWidget {
     this.previewService = const WalletMeltJsonBackupPreviewService(),
     this.conflictService = const WalletMeltJsonBackupConflictService(),
     this.restoreDryRunPlanner = const WalletMeltJsonRestoreDryRunPlanner(),
+    this.restoreService = const WalletMeltJsonRestoreService(),
     super.key,
   });
 
@@ -37,6 +40,7 @@ class SettingsScreen extends StatefulWidget {
   final WalletMeltJsonBackupPreviewService previewService;
   final WalletMeltJsonBackupConflictService conflictService;
   final WalletMeltJsonRestoreDryRunPlanner restoreDryRunPlanner;
+  final WalletMeltJsonRestoreService restoreService;
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -47,6 +51,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _isCreatingJsonBackup = false;
   bool _includeDeletedExpenses = false;
   bool _isValidatingBackup = false;
+  bool _isRestoringBackup = false;
 
   @override
   Widget build(BuildContext context) {
@@ -175,8 +180,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
-                      onPressed:
-                          _isValidatingBackup ? null : _validateBackupFile,
+                      onPressed: _isValidatingBackup || _isRestoringBackup
+                          ? null
+                          : _validateBackupFile,
                       icon: _isValidatingBackup
                           ? const SizedBox.square(
                               dimension: 18,
@@ -338,11 +344,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Backup file is valid!\n'
-              'Found: ${result.expensesCount} expenses, '
+              'Backup file is valid.\n'
+              'Preview found ${result.expensesCount} expenses, '
               '${result.groceryItemsCount} items, '
-              '${result.categoriesCount} categories, '
-              '${result.budgetsCount} budgets.',
+              '${result.categoriesCount} categories, and '
+              '${result.budgetsCount} budgets. No data has been imported.',
             ),
             backgroundColor: Colors.green[800],
           ),
@@ -380,6 +386,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           }
           if (!mounted) return;
           _showBackupPreviewDialog(
+            content,
             preview,
             conflictSummary: conflictSummary,
             dryRunPlan: dryRunPlan,
@@ -388,8 +395,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content:
-                Text('Invalid backup file: ${result.error ?? "Unknown error"}'),
+            content: Text(
+              'Invalid backup file: '
+              '${_safeRestoreErrorMessage(result.error ?? "Unknown error")}',
+            ),
             backgroundColor: Colors.red[800],
           ),
         );
@@ -398,7 +407,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error reading file: $e'),
+          content: Text(
+            'Could not read the selected backup file. No data was changed. '
+            '${_safeRestoreErrorMessage(e.toString())}',
+          ),
           backgroundColor: Colors.red[800],
         ),
       );
@@ -410,6 +422,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _showBackupPreviewDialog(
+    String jsonText,
     WalletMeltBackupPreview preview, {
     BackupConflictSummary? conflictSummary,
     RestoreDryRunPlan? dryRunPlan,
@@ -420,6 +433,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         final isDark = Theme.of(context).brightness == Brightness.dark;
         final sectionTitleStyle = Theme.of(context).textTheme.titleMedium;
         final bodyStyle = Theme.of(context).textTheme.bodyMedium;
+        final canRestore = dryRunPlan != null && _canRestoreSafely(dryRunPlan);
 
         return Dialog(
           backgroundColor:
@@ -541,8 +555,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     const SizedBox(height: 4),
                     Text(
-                      'Restore is not available yet. No data has been '
-                      'imported or changed.',
+                      canRestore
+                          ? 'Safe merge is available after confirmation. '
+                              'Local data will be preserved and no receipt '
+                              'files will be recovered.'
+                          : _disabledRestoreReason(dryRunPlan),
                       style: bodyStyle?.copyWith(
                         fontSize: 12,
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -628,7 +645,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: null,
+                          onPressed: canRestore && !_isRestoringBackup
+                              ? () {
+                                  Navigator.pop(context);
+                                  _confirmAndRestoreBackup(
+                                    jsonText,
+                                    dryRunPlan,
+                                  );
+                                }
+                              : null,
                           style: ElevatedButton.styleFrom(
                             backgroundColor:
                                 WalletMeltColors.brand.withValues(alpha: 0.5),
@@ -638,9 +663,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               borderRadius: BorderRadius.circular(14),
                             ),
                           ),
-                          child: const Text(
-                            'Restore (N/A)',
-                            style: TextStyle(color: Colors.white24),
+                          child: Text(
+                            _isRestoringBackup
+                                ? 'Restoring...'
+                                : canRestore
+                                    ? 'Safe merge'
+                                    : 'Restore (N/A)',
+                            style: TextStyle(
+                              color: canRestore ? Colors.white : Colors.white24,
+                            ),
                           ),
                         ),
                       ),
@@ -653,6 +684,197 @@ class _SettingsScreenState extends State<SettingsScreen> {
         );
       },
     );
+  }
+
+  Future<void> _confirmAndRestoreBackup(
+    String jsonText,
+    RestoreDryRunPlan dryRunPlan,
+  ) async {
+    if (_isRestoringBackup) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        final bodyStyle = Theme.of(context).textTheme.bodyMedium;
+        return AlertDialog(
+          title: const Text('Safe merge backup?'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Safe merge adds only restorable backup records. Existing local data is preserved.',
+                  style: bodyStyle,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Duplicate IDs may be remapped, but local records and budgets will not be overwritten.',
+                  style: bodyStyle,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Receipt paths stay as text references only. Receipt image files are not recovered or copied.',
+                  style: bodyStyle,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'A safety backup of current local data is created before restore. If that backup cannot be created, restore stops before any import.',
+                  style: bodyStyle,
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Create safety backup and merge'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true || !mounted) return;
+    if (_isRestoringBackup) return;
+
+    setState(() => _isRestoringBackup = true);
+    try {
+      final state = context.read<AppState>();
+      final safetyBackup = await widget.jsonBackupService.createBackup(
+        expenses: [...state.expenses, ...state.deletedExpenses],
+        groceryItems: await state.listAllGroceryItemsForExport(),
+        categories: state.categories,
+        budgets: await state.listAllBudgetsForExport(),
+        settings: state.settings,
+      );
+      if (!mounted) return;
+
+      final result = await state.restoreJsonBackupSafeMerge(
+        jsonText: jsonText,
+        dryRunPlan: dryRunPlan,
+        safetyBackup: safetyBackup,
+        restoreService: widget.restoreService,
+        options: const WalletMeltJsonRestoreOptions(confirmed: true),
+      );
+      if (!mounted) return;
+
+      final messenger = ScaffoldMessenger.of(context);
+      messenger.clearSnackBars();
+      if (result.success) {
+        messenger.showSnackBar(_restoreSuccessSnackBar(result));
+      } else {
+        messenger.showSnackBar(_restoreFailureSnackBar(result));
+      }
+    } catch (error) {
+      if (!mounted) return;
+      final messenger = ScaffoldMessenger.of(context);
+      messenger.clearSnackBars();
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            'Restore did not start. No data was changed. '
+            'Check that a safety backup can be created, then try again. '
+            '${_safeRestoreErrorMessage(error.toString())}',
+          ),
+          backgroundColor: Colors.red[800],
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isRestoringBackup = false);
+      }
+    }
+  }
+
+  bool _canRestoreSafely(RestoreDryRunPlan plan) {
+    if (!plan.isValid || plan.hasBlockers) return false;
+    final requiredGates = {
+      RestoreDryRunSafetyGate.backupFormatSupported,
+      RestoreDryRunSafetyGate.formatVersionSupported,
+      RestoreDryRunSafetyGate.previewGenerated,
+      RestoreDryRunSafetyGate.conflictSummaryReviewed,
+      RestoreDryRunSafetyGate.noUnresolvedBlockers,
+    };
+    for (final gate in requiredGates) {
+      final status = plan.safetyGates.where((entry) => entry.gate == gate);
+      if (status.isEmpty || !status.first.satisfied) return false;
+    }
+    return true;
+  }
+
+  SnackBar _restoreSuccessSnackBar(WalletMeltJsonRestoreResult result) {
+    final safetyBackupName = _safetyBackupName(result.safetyBackupPath);
+    final backupText = safetyBackupName == null
+        ? 'A pre-restore safety backup was created.'
+        : 'Safety backup created: $safetyBackupName.';
+    return SnackBar(
+      content: Text(
+        'Safe merge complete: ${result.insertedExpenses} expenses, '
+        '${result.insertedGroceryItems} items, '
+        '${result.insertedCategories} categories, and '
+        '${result.insertedBudgets} budgets imported. '
+        'Local data was preserved. $backupText '
+        'Receipt paths remain text references only.',
+      ),
+      backgroundColor: Colors.green[800],
+    );
+  }
+
+  SnackBar _restoreFailureSnackBar(WalletMeltJsonRestoreResult result) {
+    final safetyBackupName = _safetyBackupName(result.safetyBackupPath);
+    final backupText = safetyBackupName == null
+        ? 'No verified safety backup was reported.'
+        : 'Safety backup created before the failed restore: $safetyBackupName.';
+    return SnackBar(
+      content: Text(
+        'Restore failed safely. No partial import should remain because '
+        'WalletMelt rolls back the transaction. $backupText '
+        'Reason: ${_safeRestoreErrorMessage(result.errorMessage ?? "Unknown restore error.")}',
+      ),
+      backgroundColor: Colors.red[800],
+    );
+  }
+
+  String? _safetyBackupName(String? path) {
+    if (path == null || path.trim().isEmpty) return null;
+    return p.basename(path);
+  }
+
+  String _safeRestoreErrorMessage(String message) {
+    final firstLine = message
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .split(RegExp(r'[#\n\r]'))
+        .first
+        .trim();
+    var sanitized = firstLine
+        .replaceFirst(RegExp(r'^Exception:\s*'), '')
+        .replaceFirst(RegExp(r'^StateError:\s*'), '')
+        .replaceFirst(RegExp(r'^SqliteException\(\d+\):\s*'), '')
+        .replaceAll(RegExp(r'at package:[^ ]+'), '')
+        .trim();
+    const maxLength = 180;
+    if (sanitized.length > maxLength) {
+      sanitized = '${sanitized.substring(0, maxLength).trimRight()}...';
+    }
+    return sanitized.isEmpty ? 'Unknown restore error.' : sanitized;
+  }
+
+  String _disabledRestoreReason(RestoreDryRunPlan? plan) {
+    if (_isRestoringBackup) {
+      return 'Restore is already running. Wait for it to finish before selecting another backup.';
+    }
+    if (plan == null || !plan.isValid) {
+      return 'Restore is unavailable because the backup could not be fully planned. No data has been changed.';
+    }
+    if (plan.hasBlockers) {
+      return 'Restore is unavailable because blockers must be resolved first. WalletMelt will not resolve conflicts automatically.';
+    }
+    return 'Restore is unavailable until validation, preview, conflict review, confirmation, safety backup, and transaction checks are complete.';
   }
 
   Widget _buildDryRunPlanSection(RestoreDryRunPlan plan) {
@@ -718,8 +940,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         const SizedBox(height: 8),
         Text(
           pendingSafetyGates.isEmpty
-              ? 'Dry-run only. Restore is still unavailable.'
-              : 'Dry-run only. Pending gates: $pendingSafetyGates.',
+              ? _disabledRestoreReason(plan)
+              : 'Dry-run only. Pending safety checks: $pendingSafetyGates.',
           style: bodyStyle?.copyWith(
             fontSize: 12,
             color: theme.colorScheme.onSurfaceVariant,

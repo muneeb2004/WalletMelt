@@ -60,6 +60,49 @@ void main() {
       expect(plan.hasBlockers, isFalse);
     });
 
+    test('duplicate-heavy backup is blocked before mutation eligibility', () {
+      final plan = planner.plan(
+        jsonText: _backupJson(
+          categories: [
+            _categoryJson(id: 'cat_1', name: 'Groceries'),
+            _categoryJson(id: 'cat_1', name: 'Groceries duplicate'),
+            _categoryJson(id: 'cat_2', name: 'Groceries'),
+          ],
+          expenses: [
+            _expenseJson(id: 'expense_1'),
+            _expenseJson(id: 'expense_1'),
+          ],
+          groceryItems: [
+            _groceryItemJson(id: 'item_1'),
+            _groceryItemJson(id: 'item_1'),
+          ],
+          budgets: [
+            _budgetJson(id: 'budget_1'),
+            _budgetJson(id: 'budget_1'),
+            _budgetJson(id: 'budget_2'),
+          ],
+        ),
+        localSnapshot: _snapshot(),
+        conflictSummary: const BackupConflictSummary(),
+      );
+
+      expect(plan.hasBlockers, isTrue);
+      expect(plan.canStartFutureMutation, isFalse);
+      expect(
+        plan.issues.where((issue) => issue.message.contains('more than once')),
+        isNotEmpty,
+      );
+      expect(
+        plan.issues.where((issue) => issue.message.contains('Category name')),
+        isNotEmpty,
+      );
+      expect(
+        plan.issues.where(
+            (issue) => issue.message.contains('Multiple backup budgets')),
+        isNotEmpty,
+      );
+    });
+
     test('duplicate equivalent category ID maps to existing category', () {
       final plan = planner.plan(
         jsonText: _backupJson(),

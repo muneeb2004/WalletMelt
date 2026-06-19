@@ -224,6 +224,12 @@ class WalletMeltJsonRestoreDryRunPlanner {
       settingsImportSelected: settingsImportSelected,
     );
 
+    builder.detectBackupDuplicates(
+      categories: categories,
+      expenses: expenses,
+      groceryItems: groceryItems,
+      budgets: budgets,
+    );
     builder.planCategories(categories);
     builder.planExpenses(expenses);
     builder.planGroceryItems(groceryItems);
@@ -354,6 +360,20 @@ class _DryRunBuilder {
   int plannedGroceryItemCount = 0;
   int plannedBudgetCount = 0;
   int plannedSettingsCount = 0;
+
+  void detectBackupDuplicates({
+    required List<Map<String, Object?>> categories,
+    required List<Map<String, Object?>> expenses,
+    required List<Map<String, Object?>> groceryItems,
+    required List<Map<String, Object?>> budgets,
+  }) {
+    _detectDuplicateIds(RestoreDryRunEntity.category, categories);
+    _detectDuplicateIds(RestoreDryRunEntity.expense, expenses);
+    _detectDuplicateIds(RestoreDryRunEntity.groceryItem, groceryItems);
+    _detectDuplicateIds(RestoreDryRunEntity.budget, budgets);
+    _detectDuplicateCategoryNames(categories);
+    _detectDuplicateBudgetPairs(budgets);
+  }
 
   void planCategories(List<Map<String, Object?>> categories) {
     final localById = {
@@ -802,6 +822,73 @@ class _DryRunBuilder {
       sourceId: sourceId,
       message: message,
     ));
+  }
+
+  void _detectDuplicateIds(
+    RestoreDryRunEntity entity,
+    List<Map<String, Object?>> rows,
+  ) {
+    final seen = <String>{};
+    final reported = <String>{};
+    for (final row in rows) {
+      final id = _stringValue(row['id']);
+      if (id == null) continue;
+      if (!seen.add(id) && reported.add(id)) {
+        _addBlocker(
+          entity,
+          id,
+          '${_entityLabel(entity)} "$id" appears more than once in the backup.',
+        );
+      }
+    }
+  }
+
+  void _detectDuplicateCategoryNames(List<Map<String, Object?>> categories) {
+    final seen = <String>{};
+    final reported = <String>{};
+    for (final category in categories) {
+      final name = _stringValue(category['name']);
+      if (name == null) continue;
+      final normalized = _normalize(name);
+      if (normalized.isEmpty) continue;
+      if (!seen.add(normalized) && reported.add(normalized)) {
+        _addBlocker(
+          RestoreDryRunEntity.category,
+          _stringValue(category['id']),
+          'Category name "$name" appears more than once in the backup.',
+        );
+      }
+    }
+  }
+
+  void _detectDuplicateBudgetPairs(List<Map<String, Object?>> budgets) {
+    final seen = <String>{};
+    final reported = <String>{};
+    for (final budget in budgets) {
+      final month = _stringValue(budget['month']);
+      final categoryId = _stringValue(budget['category_id']);
+      if (month == null || categoryId == null) continue;
+      final pair = _budgetPair(month, categoryId);
+      if (!seen.add(pair) && reported.add(pair)) {
+        _addBlocker(
+          RestoreDryRunEntity.budget,
+          _stringValue(budget['id']),
+          'Multiple backup budgets target month "$month" and category '
+          '"$categoryId".',
+        );
+      }
+    }
+  }
+
+  String _entityLabel(RestoreDryRunEntity entity) {
+    return switch (entity) {
+      RestoreDryRunEntity.category => 'Category',
+      RestoreDryRunEntity.expense => 'Expense',
+      RestoreDryRunEntity.groceryItem => 'Grocery item',
+      RestoreDryRunEntity.budget => 'Budget',
+      RestoreDryRunEntity.settings => 'Settings',
+      RestoreDryRunEntity.receiptReference => 'Receipt reference',
+    };
   }
 
   String _proposedId(String entity, String sourceId, Set<String> usedIds) {

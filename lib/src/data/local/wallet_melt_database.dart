@@ -392,16 +392,24 @@ class WalletMeltDatabase extends _$WalletMeltDatabase {
   Future<void> _upgradeFromV1ToV2(Migrator m, int from, int to) async {
     final before = await readV1MigrationMetrics();
 
-    await m.createTable(units);
-    await m.createTable(stores);
-    await m.createTable(items);
-    await m.createTable(itemAliases);
-    await m.addColumn(expenses, expenses.storeId);
-    await m.addColumn(expenses, expenses.itemizationStatus);
-    await m.addColumn(expenses, expenses.itemTotalMismatchApproved);
-    await m.createTable(expenseItems);
-    await m.createTable(receipts);
-    await m.createTable(migrationAudit);
+    if (!await _tableExists('units')) await m.createTable(units);
+    if (!await _tableExists('stores')) await m.createTable(stores);
+    if (!await _tableExists('items')) await m.createTable(items);
+    if (!await _tableExists('item_aliases')) await m.createTable(itemAliases);
+    if (!await _columnExists('expenses', 'storeId')) {
+      await m.addColumn(expenses, expenses.storeId);
+    }
+    if (!await _columnExists('expenses', 'itemizationStatus')) {
+      await m.addColumn(expenses, expenses.itemizationStatus);
+    }
+    if (!await _columnExists('expenses', 'itemTotalMismatchApproved')) {
+      await m.addColumn(expenses, expenses.itemTotalMismatchApproved);
+    }
+    if (!await _tableExists('expense_items')) await m.createTable(expenseItems);
+    if (!await _tableExists('receipts')) await m.createTable(receipts);
+    if (!await _tableExists('migration_audit')) {
+      await m.createTable(migrationAudit);
+    }
 
     await _seedDefaultUnits();
 
@@ -442,6 +450,23 @@ class WalletMeltDatabase extends _$WalletMeltDatabase {
       );
       rethrow;
     }
+  }
+
+  Future<bool> _tableExists(String tableName) async {
+    final rows = await customSelect(
+      "SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?;",
+      variables: [Variable.withString(tableName)],
+    ).get();
+    return rows.isNotEmpty;
+  }
+
+  Future<bool> _columnExists(String tableName, String columnName) async {
+    if (!await _tableExists(tableName)) return false;
+    final escapedTableName = tableName.replaceAll('"', '""');
+    final rows = await customSelect(
+      'PRAGMA table_info("$escapedTableName");',
+    ).get();
+    return rows.any((row) => row.read<String>('name') == columnName);
   }
 
   Future<V1MigrationMetrics> readV1MigrationMetrics() async {

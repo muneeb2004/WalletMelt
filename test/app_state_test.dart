@@ -1,10 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:wallet_melt/src/data/local/wallet_melt_database.dart' as local;
 import 'package:wallet_melt/src/data/repositories/budget_repository.dart';
 import 'package:wallet_melt/src/data/repositories/category_repository.dart';
 import 'package:wallet_melt/src/data/repositories/drift/drift_budget_repository.dart';
 import 'package:wallet_melt/src/data/repositories/drift/drift_category_repository.dart';
 import 'package:wallet_melt/src/data/repositories/drift/drift_expense_repository.dart';
 import 'package:wallet_melt/src/data/repositories/expense_repository.dart';
+import 'package:wallet_melt/src/services/export/export_file_writer.dart';
+import 'package:wallet_melt/src/services/export/wallet_melt_json_restore_dry_run_planner.dart';
+import 'package:wallet_melt/src/services/export/wallet_melt_json_restore_service.dart';
 import 'package:wallet_melt/src/state/app_state.dart';
 import 'package:wallet_melt/src/types/expense.dart';
 import 'package:wallet_melt/src/types/category.dart' as wm;
@@ -342,6 +346,34 @@ class FakeDriftExpenseRepository extends Fake
   }
 }
 
+class FakeWalletMeltJsonRestoreService extends WalletMeltJsonRestoreService {
+  bool restoreCalled = false;
+  WalletMeltJsonRestoreResult result =
+      const WalletMeltJsonRestoreResult(success: true);
+
+  @override
+  Future<WalletMeltJsonRestoreResult> restoreSafeMerge({
+    required String jsonText,
+    required RestoreDryRunPlan dryRunPlan,
+    required WalletMeltJsonRestoreOptions options,
+    required ExportFileResult safetyBackup,
+    local.WalletMeltDatabase? database,
+  }) async {
+    restoreCalled = true;
+    return result;
+  }
+}
+
+ExportFileResult _safetyBackup() {
+  return ExportFileResult(
+    path: 'memory/safety.json',
+    fileName: 'safety.json',
+    mimeType: ExportFileWriter.jsonMimeType,
+    byteCount: 16,
+    createdAt: DateTime(2026, 6, 15),
+  );
+}
+
 void main() {
   group('AppState Migrated Read Paths and Fallback', () {
     late FakeCategoryRepository categoryRepo;
@@ -411,6 +443,80 @@ void main() {
       driftCategoryRepo = FakeDriftCategoryRepository();
       driftBudgetRepo = FakeDriftBudgetRepository();
       driftExpenseRepo = FakeDriftExpenseRepository();
+    });
+
+    test('restore aborts before mutation when Drift runtime is unavailable',
+        () async {
+      final restoreService = FakeWalletMeltJsonRestoreService();
+      final appState = AppState.test(
+        categoryRepository: categoryRepo,
+        expenseRepository: expenseRepo,
+        budgetRepository: budgetRepo,
+        driftCategoryRepository: driftCategoryRepo,
+        driftBudgetRepository: driftBudgetRepo,
+        driftExpenseRepository: driftExpenseRepo,
+        requiresDriftRestoreRuntime: true,
+      );
+
+      final result = await appState.restoreJsonBackupSafeMerge(
+        jsonText: '{}',
+        dryRunPlan: RestoreDryRunPlan.invalid('unused'),
+        safetyBackup: _safetyBackup(),
+        restoreService: restoreService,
+      );
+
+      expect(result.success, isFalse);
+      expect(result.errorMessage, contains('Drift database runtime'));
+      expect(restoreService.restoreCalled, isFalse);
+    });
+
+    test('restore refreshes AppState only after successful commit', () async {
+      final restoredCategory = wm.Category(
+        id: 'restored',
+        name: 'Restored',
+        icon: 'restore',
+        color: '#123456',
+        isDefault: false,
+        createdAt: '2026-06-15',
+        updatedAt: '2026-06-15',
+      );
+      final restoreService = FakeWalletMeltJsonRestoreService();
+      categoryRepo.categories = [];
+
+      final appState = AppState.test(
+        categoryRepository: categoryRepo,
+        expenseRepository: expenseRepo,
+        budgetRepository: budgetRepo,
+        driftCategoryRepository: null,
+        driftBudgetRepository: null,
+        driftExpenseRepository: null,
+      );
+
+      await appState.refresh();
+      expect(appState.categories, isEmpty);
+
+      categoryRepo.categories = [restoredCategory];
+      await appState.restoreJsonBackupSafeMerge(
+        jsonText: '{}',
+        dryRunPlan: RestoreDryRunPlan.invalid('unused'),
+        safetyBackup: _safetyBackup(),
+        restoreService: restoreService,
+      );
+
+      expect(restoreService.restoreCalled, isTrue);
+      expect(appState.categories, [restoredCategory]);
+
+      restoreService.result =
+          WalletMeltJsonRestoreResult.failure('simulated failure');
+      categoryRepo.categories = [];
+      await appState.restoreJsonBackupSafeMerge(
+        jsonText: '{}',
+        dryRunPlan: RestoreDryRunPlan.invalid('unused'),
+        safetyBackup: _safetyBackup(),
+        restoreService: restoreService,
+      );
+
+      expect(appState.categories, [restoredCategory]);
     });
 
     test('refresh() loads expenses from Drift when available', () async {

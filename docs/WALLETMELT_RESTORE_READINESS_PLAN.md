@@ -124,21 +124,155 @@ To ensure safety and robust operation, the restore functionality will be built a
   - Receipt URI rewriting.
   - Settings import execution.
 
-### Phase 14F — Transactional Restore/Import Mutation Candidate
-- **Objective:** Execute database writes safely and atomically only after dry-run planning is complete and no unresolved dry-run blockers remain.
-- **Actions:**
-  - Prompt the user with a high-visibility, explicit confirmation dialog warning them of any overrides.
-  - Create and verify a pre-restore safety backup.
-  - Execute selected database writes inside a single transaction.
-  - Roll back the transaction if any constraint, remap, count, or write check fails.
-  - Refresh AppState only after commit succeeds.
+### Phase 14F — Transactional Restore/Import Mutation Candidate (Completed)
+- **Status:** PASS
+- **Objective:** Implement the first tightly gated restore mutation path as safe merge only.
+- **Implemented Features:**
+  - Added `WalletMeltJsonRestoreService` for safe-merge restore execution.
+  - Added explicit `WalletMeltJsonRestoreOptions` and structured `WalletMeltJsonRestoreResult`.
+  - Added a narrow `AppState.restoreJsonBackupSafeMerge` gateway so Settings does not become a direct database write consumer.
+  - Reuses the AppState-owned Drift database runtime for restore transactions and fails closed if that runtime is unavailable.
+  - Requires validated JSON, preview generation, conflict review, a no-blocker dry-run plan, explicit user confirmation, and a verified non-empty pre-restore safety backup before any database write.
+  - Uses the existing JSON backup path to create a current-data safety backup before mutation starts.
+  - Executes category, expense, grocery item, budget, and optional settings merge behavior through one Drift transaction for database entities.
+  - Preserves local data by default; no local expenses, categories, budgets, grocery items, settings, or receipt paths are overwritten silently.
+  - Applies dry-run ID mappings for duplicate category, expense, grocery item, and budget IDs.
+  - Preserves `receipt_image_uri` values as text-only references and records a warning; receipt files are not copied or recovered.
+  - Inserts restored grocery rows into `grocery_items` and mirrors them into `expense_items` without creating canonical `items` records.
+  - Blocks restore when dry-run blockers remain, including orphaned grocery items and budget month/category collisions.
+  - Refreshes AppState only after the restore service reports a successful transaction commit.
+  - Replaces `Restore (N/A)` with an enabled `Safe merge` action only for valid no-blocker plans; otherwise restore remains disabled.
+  - Adds a high-visibility confirmation dialog explaining safe merge, preserved local data, ID remapping, receipt limitations, and safety backup creation.
+- **Still Excluded:**
+  - Full replace restore.
+  - Overwrite-local-data restore.
+  - Silent merge.
+  - Conflict-resolution UI for budget/category ambiguity.
+  - Receipt file packaging, copying, recovery, or URI rewriting.
+  - Settings import option in the Settings UI; the service supports explicit settings import but the UI keeps it off.
+  - ZIP/archive restore.
 
-### Phase 14G — Android Runtime Data Recovery QA
-- **Objective:** End-to-end verification of recovery states on host platforms after mutation exists.
-- **Actions:**
-  - Conduct manual smoke tests on the Android emulator (`Test_API_36` / `emulator-5554`).
-  - Import a known backup file onto a clean install and verify data parity (dashboard counts, category icons/colors, insights charts, budget calculations, settings defaults).
-  - Test crash resilience, double-open scenarios, and verify that no duplicate active database handles are created during import recovery.
+### Phase 14G — Android Runtime Data Recovery QA and Restore Hardening (Completed)
+- **Status:** PASS. Code hardening, automated coverage, APK builds, and Android runtime QA completed on `Test_API_36` / `emulator-5554`.
+- **Objective:** Stabilize safe-merge restore behavior after the first mutation implementation through focused defensive checks, edge-case tests, and runtime QA planning.
+- **Implemented Hardening:**
+  - Dry-run planning now fails closed for duplicate-heavy backup content:
+    - duplicate category IDs,
+    - duplicate category names,
+    - duplicate expense IDs,
+    - duplicate grocery item IDs,
+    - duplicate budget IDs,
+    - duplicate budget `month + category_id` pairs.
+  - Restore service repeats duplicate-heavy backup preflight checks, so direct service callers cannot bypass the planner with a stale or forged dry-run plan.
+  - Restore transaction verifies inserted relationships before commit:
+    - every inserted expense category resolves,
+    - every inserted grocery item parent expense resolves,
+    - every inserted budget category resolves.
+  - Relationship verification failure rolls back the transaction.
+  - Settings import remains off by default and is only applied when `WalletMeltJsonRestoreOptions.importSettings` is explicitly true.
+  - `AppState.restoreJsonBackupSafeMerge` still refreshes AppState only after successful restore service completion.
+  - Production restore still fails closed if AppState cannot provide a Drift database runtime.
+  - Settings validation/restore controls are disabled while a restore is in progress to prevent double-submit restore attempts.
+  - Drift V1-to-V2 migration replay now tolerates partially applied V2 tables/columns when `PRAGMA user_version` is stale, preventing duplicate-column failure during restore runtime startup.
+- **Automated Test Coverage Added/Extended:**
+  - Safe merge into empty local data.
+  - Safe merge into non-empty local data with duplicate expense ID remapping.
+  - Duplicate-heavy backup blockers.
+  - Duplicate categories by ID/name.
+  - Duplicate expenses by ID.
+  - Soft-deleted expense import remains soft-deleted.
+  - Grocery items remap to remapped expense IDs.
+  - Orphan grocery item fails closed.
+  - Budget month/category collision fails closed without overwrite.
+  - Settings remain unchanged by default.
+  - Settings import runs only when explicitly enabled.
+  - Receipt URI/path text survives restore and is warned as text-only.
+  - Missing/empty safety backup aborts before transaction.
+  - Drift runtime unavailable aborts before mutation at the AppState boundary.
+  - Transaction rollback on simulated mid-restore failure.
+  - Relationship verification rollback on simulated pre-commit relationship loss.
+  - AppState refresh occurs after success and not after failure.
+  - Invalid backup cannot trigger restore.
+  - Dry-run blockers cannot trigger restore.
+  - Confirmation cancel causes no mutation in Settings widget tests.
+- **Runtime QA Completed (`Test_API_36` / `emulator-5554`):**
+  - Clean install launched with an empty dashboard.
+  - Clean Settings JSON backup opened the Android share sheet and returned stable.
+  - Valid backup preview opened, including metadata, contents, conflict/risk warnings, dry-run restore plan, and enabled safe-merge action.
+  - Malformed JSON selection failed gracefully with an invalid-backup SnackBar.
+  - Cancelled picker returned to Settings without crash.
+  - Restore confirmation cancel returned to Settings without mutation.
+  - Confirmed safe merge created a pre-restore safety backup before mutation.
+  - Confirmed clean safe merge committed 1 expense, 1 grocery item, 1 category, and 1 budget.
+  - Dashboard, History, and Insights refreshed after successful commit.
+  - Receipt URI text survived restore as a text reference; no receipt file was copied or rewritten.
+  - Old/inconsistent emulator state reproduced a stale `user_version` migration failure, failed closed before mutation, then passed after the idempotent migration guard.
+  - No `MissingPluginException`, Drift double-open warning, warning loop, or runtime crash loop was observed in filtered logs.
+  - Duplicate-ID remap in a non-empty app remains covered by service/widget tests; runtime manual duplication was not repeated because the clean restore and stale-migration recovery were the higher-risk emulator paths.
+- **Still Excluded:**
+  - Full replace restore.
+  - Overwrite restore.
+  - Silent conflict resolution.
+  - ZIP/archive backup or restore.
+  - Receipt file packaging, copying, recovery, or URI rewriting.
+  - Cloud backup.
+  - Broad storage permissions.
+  - Broad Settings redesign.
+  - Drift schema changes or database migrations.
+
+### Phase 14H — Restore UX Polish and Recovery Messaging (Completed)
+- **Status:** PASS. Restore UX messaging, automated Settings coverage, APK builds, and Android runtime QA completed on `Test_API_36` / `emulator-5554`.
+- **Objective:** Improve the user-facing safe-merge restore experience without changing restore scope or adding new restore modes.
+- **Implemented UX Polish:**
+  - Validation success now clearly states that the backup is valid, lists preview counts, and confirms no data has been imported.
+  - Preview copy now explains safe merge in plain language:
+    - safe merge is only available after confirmation,
+    - existing local data is preserved,
+    - receipt files are not recovered.
+  - Blocker copy now states that restore is unavailable until blockers are resolved and WalletMelt will not resolve conflicts automatically.
+  - Dry-run copy now distinguishes blockers from pending safety gates and keeps the dry-run-only status visible.
+  - Confirmation dialog now explicitly covers safe merge, local preservation, duplicate ID remapping, safety backup creation, and receipt limitations.
+  - Restore action text shows `Restoring...` while a restore is running, and validation/restore actions remain disabled during restore.
+- **Implemented Recovery Messaging:**
+  - Restore success now reports inserted expense, grocery item, category, and budget counts.
+  - Restore success mentions the safety backup filename when available.
+  - Restore success states local data was preserved and receipt paths remain text-only references.
+  - Restore failure now uses a user-safe message that avoids stack traces and explains that transaction rollback prevents partial import state.
+  - Restore failure mentions whether a safety backup was reported.
+  - Safety-backup creation failure now clears older validation SnackBars and immediately explains that restore did not start and no data changed.
+- **Automated Test Coverage Added/Extended:**
+  - Success message includes inserted counts and safety backup filename.
+  - Failure message is user-safe and does not expose stack traces.
+  - Safety-backup creation failure message is clear and non-technical.
+  - Blockers disable restore and show the reason.
+  - Restore-in-progress disables validation action.
+  - Confirmation dialog copy mentions safe merge, local preservation, safety backup, and receipt limitations.
+  - Confirmation cancel still causes no mutation.
+  - Invalid backup and malformed JSON messaging remain graceful.
+  - Restore success still refreshes only after commit through the existing AppState tests.
+- **Runtime QA Completed (`Test_API_36` / `emulator-5554`):**
+  - App launched, Dashboard loaded, and Settings opened.
+  - Existing CSV export and JSON backup actions still opened the Android share sheet and returned stable.
+  - Validate backup action remained visible.
+  - Valid backup preview opened with conflict/risk and dry-run sections.
+  - Confirmation wording was reviewed before safe merge.
+  - Confirmation cancel caused no data change.
+  - Confirmed safe merge created a pre-restore safety backup first and imported only safe records.
+  - Success message showed inserted counts and local-data preservation/receipt text-reference messaging.
+  - Malformed JSON failed gracefully with a non-technical invalid-backup message.
+  - Cancelled picker returned to Settings without crash.
+  - Dashboard, History, and Insights refreshed after successful commit.
+  - No `MissingPluginException`, Drift double-open warning, warning loop, or runtime crash loop was observed in filtered logs.
+  - Blocker disabled-copy and restore-in-progress disabled-action behavior were covered by widget tests; no additional manual blocker backup was created during runtime QA.
+- **Still Excluded:**
+  - Full replace restore.
+  - Overwrite restore.
+  - Conflict resolution UI or conflict resolution execution.
+  - Manual ID remapping UI.
+  - Receipt file packaging, copying, recovery, or URI rewriting.
+  - ZIP/archive backup or restore.
+  - Cloud backup.
+  - Broad storage permissions.
 
 ---
 
@@ -146,12 +280,12 @@ To ensure safety and robust operation, the restore functionality will be built a
 
 | Risk | Impact | Mitigation Strategy |
 |---|---|---|
-| **Duplicate IDs** | Primary key constraint violations, crash, or data corruption. | Run pre-import scan comparing backup IDs with active database. Use `insertOnConflictUpdate` or filter out existing records during merge. |
-| **Category ID Conflicts** | Expenses linked to wrong categories, UI display anomalies. | Match categories by name as fallback. Generate new IDs for categories with duplicate names and rewrite `category_id` in referring expenses. |
-| **Budget Month/Category Conflicts** | Double budget allocations for a single month. | Update existing budget amount or warn the user that existing budgets will be overwritten. |
+| **Duplicate IDs** | Primary key constraint violations, crash, or data corruption. | Run dry-run planning before restore and apply deterministic safe-merge ID mappings inside the transaction. |
+| **Category ID Conflicts** | Expenses linked to wrong categories, UI display anomalies. | Map equivalent/default-like categories only when dry-run marks them safe; otherwise generate a new ID or block ambiguity. |
+| **Budget Month/Category Conflicts** | Double budget allocations for a single month. | Block safe merge when a local month/category budget already exists; do not overwrite local budgets. |
 | **Orphaned Grocery Items** | Foreign key constraints block insert, or items exist without parent. | Filter out or reject grocery items whose parent `expense_id` is missing from both the database and the backup. |
-| **Soft-deleted Expense Conflicts**| Stale/deleted expenses override newer active data. | Check `updated_at` timestamps. Keep the record with the latest timestamp. |
-| **Receipt URI/Path Invalidity** | Missing image warnings, broken UI thumbnail previews. | Mark physical files as missing if they do not exist. In later phases, copy files to `receipts/` directory and update URIs to match the new host path. |
+| **Soft-deleted Expense Conflicts**| Deleted backup rows could be restored as active by mistake. | Preserve `deleted_at` exactly; imported soft-deleted expenses remain soft-deleted. |
+| **Receipt URI/Path Invalidity** | Missing image warnings, broken UI thumbnail previews. | Preserve URI text only and warn. Do not copy files or rewrite URIs in JSON safe merge. |
 | **Format/App Version Mismatch** | Parsing crashes due to unexpected/new fields. | Reject backups where `format_version` is greater than the current app format version support. |
 | **Partial Restore Failure** | Database left in an inconsistent/corrupt state. | Always perform database writes inside a single SQL Transaction, allowing complete rollback on error. |
 
@@ -162,4 +296,4 @@ To ensure safety and robust operation, the restore functionality will be built a
 To preserve stability, future developers must adhere to these hard restrictions:
 1. **Never Fail Silently:** If validation fails at any point during parsing or execution, fail loud and revert the transaction.
 2. **Explicit User Choice:** Database overwrites must require confirmation. A backup should never overwrite active local database records automatically on load.
-3. **Receipt Storage Alignment:** Restoring receipts should align with `LocalReceiptStorageService` configurations.
+3. **Receipt Storage Alignment:** JSON safe merge preserves receipt URI text only. Receipt file packaging or URI rewriting requires a future, separate archive format and explicit design.

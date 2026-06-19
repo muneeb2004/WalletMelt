@@ -135,6 +135,48 @@ void main() {
     expect(audits.single.status, 'completed');
     expect(audits.single.preMigrationBackupPath, backupPath);
   });
+
+  test('V1 migration tolerates partially applied V2 schema artifacts',
+      () async {
+    final tempDir = await Directory.systemTemp
+        .createTemp('wallet_melt_partial_migration_test_');
+    addTearDown(() async {
+      if (await tempDir.exists()) {
+        await tempDir.delete(recursive: true);
+      }
+    });
+
+    final dbFile = File(
+        '${tempDir.path}${Platform.pathSeparator}${DatabaseSchema.databaseName}');
+    _createV1Fixture(dbFile.path);
+    _addPartiallyAppliedV2Shape(dbFile.path);
+
+    final db = WalletMeltDatabase(NativeDatabase.createInBackground(dbFile));
+    addTearDown(db.close);
+
+    final expenses = await db.select(db.expenses).get();
+    expect(expenses, hasLength(3));
+    expect(
+        expenses.singleWhere((row) => row.id == 'exp_grocery_active').storeId,
+        isNull);
+
+    final stores = await db.select(db.stores).get();
+    expect(stores, isEmpty);
+
+    final expenseItems = await db.select(db.expenseItems).get();
+    expect(expenseItems.map((item) => item.id),
+        containsAll(['gi_milk', 'gi_eggs', 'gi_deleted']));
+
+    final audits = await db.select(db.migrationAudit).get();
+    expect(audits.single.status, 'completed');
+
+    final raw = sqlite3.sqlite3.open(dbFile.path);
+    try {
+      expect(raw.select('PRAGMA user_version;').first['user_version'], 2);
+    } finally {
+      raw.close();
+    }
+  });
 }
 
 void _createV1Fixture(String path) {
@@ -169,6 +211,33 @@ void _createV1Fixture(String path) {
           "INSERT INTO category_budgets (id, categoryId, amount, currency, month, createdAt, updatedAt) VALUES ('budget_grocery_june', 'grocery', 30000, 'PKR', '2026-06', '2026-06-01T00:00:00.000', '2026-06-01T00:00:00.000');")
       ..execute(
           "INSERT INTO sync_metadata (entityType, entityId, localVersion, remoteId, lastSyncedAt, syncState) VALUES ('expense', 'exp_grocery_active', 1, NULL, NULL, 'local_only');")
+      ..execute('PRAGMA user_version = 1;');
+  } finally {
+    db.close();
+  }
+}
+
+void _addPartiallyAppliedV2Shape(String path) {
+  final db = sqlite3.sqlite3.open(path);
+  try {
+    db
+      ..execute('''
+CREATE TABLE stores (
+  id TEXT NOT NULL PRIMARY KEY,
+  name TEXT NOT NULL,
+  normalizedName TEXT NOT NULL UNIQUE,
+  notes TEXT NULL,
+  createdAt TEXT NOT NULL,
+  updatedAt TEXT NOT NULL,
+  archivedAt TEXT NULL
+);
+''')
+      ..execute(
+          'ALTER TABLE expenses ADD COLUMN "storeId" TEXT NULL REFERENCES stores (id);')
+      ..execute(
+          'ALTER TABLE expenses ADD COLUMN "itemizationStatus" TEXT NULL;')
+      ..execute(
+          'ALTER TABLE expenses ADD COLUMN "itemTotalMismatchApproved" INTEGER NOT NULL DEFAULT 0 CHECK ("itemTotalMismatchApproved" IN (0, 1));')
       ..execute('PRAGMA user_version = 1;');
   } finally {
     db.close();

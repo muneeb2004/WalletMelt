@@ -9,6 +9,9 @@ import '../data/repositories/drift/drift_category_repository.dart';
 import '../data/repositories/drift/drift_expense_repository.dart';
 import '../data/repositories/expense_repository.dart';
 import '../services/receipt_storage/receipt_storage_service.dart';
+import '../services/export/export_file_writer.dart';
+import '../services/export/wallet_melt_json_restore_dry_run_planner.dart';
+import '../services/export/wallet_melt_json_restore_service.dart';
 import '../services/settings/settings_service.dart';
 import '../types/budget.dart';
 import '../types/category.dart' as wm;
@@ -23,6 +26,7 @@ class AppState extends ChangeNotifier {
     SettingsService? settingsService,
     ReceiptStorageService? receiptStorageService,
   })  : _settingsService = settingsService ?? SettingsService(),
+        _requiresDriftRestoreRuntime = true,
         receiptStorage = receiptStorageService ?? LocalReceiptStorageService();
 
   @visibleForTesting
@@ -35,7 +39,9 @@ class AppState extends ChangeNotifier {
     DriftExpenseRepository? driftExpenseRepository,
     SettingsService? settingsService,
     ReceiptStorageService? receiptStorageService,
+    bool requiresDriftRestoreRuntime = false,
   })  : _settingsService = settingsService ?? SettingsService(),
+        _requiresDriftRestoreRuntime = requiresDriftRestoreRuntime,
         receiptStorage = receiptStorageService ?? LocalReceiptStorageService() {
     _categoryRepository = categoryRepository;
     _expenseRepository = expenseRepository;
@@ -48,10 +54,12 @@ class AppState extends ChangeNotifier {
 
   final SettingsService _settingsService;
   final ReceiptStorageService receiptStorage;
+  final bool _requiresDriftRestoreRuntime;
 
   late CategoryRepository _categoryRepository;
   late ExpenseRepository _expenseRepository;
   late BudgetRepository _budgetRepository;
+  local.WalletMeltDatabase? _driftDatabase;
   DriftCategoryRepository? _driftCategoryRepository;
   DriftBudgetRepository? _driftBudgetRepository;
   DriftExpenseRepository? _driftExpenseRepository;
@@ -126,6 +134,32 @@ class AppState extends ChangeNotifier {
     settings = settings.copyWith(lastExportedAt: exportedAt.toIso8601String());
     await _settingsService.save(settings);
     notifyListeners();
+  }
+
+  Future<WalletMeltJsonRestoreResult> restoreJsonBackupSafeMerge({
+    required String jsonText,
+    required RestoreDryRunPlan dryRunPlan,
+    required ExportFileResult safetyBackup,
+    required WalletMeltJsonRestoreService restoreService,
+    WalletMeltJsonRestoreOptions options =
+        const WalletMeltJsonRestoreOptions(confirmed: true),
+  }) async {
+    if (_driftDatabase == null && _requiresDriftRestoreRuntime) {
+      return WalletMeltJsonRestoreResult.failure(
+        'Safe merge restore requires an available Drift database runtime.',
+      );
+    }
+    final result = await restoreService.restoreSafeMerge(
+      jsonText: jsonText,
+      dryRunPlan: dryRunPlan,
+      options: options,
+      safetyBackup: safetyBackup,
+      database: _driftDatabase,
+    );
+    if (result.success) {
+      await refresh();
+    }
+    return result;
   }
 
   Future<wm.Category> addCategory(
@@ -269,10 +303,12 @@ class AppState extends ChangeNotifier {
   Future<void> _initializeDriftReadRepositories() async {
     try {
       final database = await local.WalletMeltDatabase.open();
+      _driftDatabase = database;
       _driftCategoryRepository = DriftCategoryRepository(database);
       _driftBudgetRepository = DriftBudgetRepository(database);
       _driftExpenseRepository = DriftExpenseRepository(database);
     } catch (_) {
+      _driftDatabase = null;
       _driftCategoryRepository = null;
       _driftBudgetRepository = null;
       _driftExpenseRepository = null;
