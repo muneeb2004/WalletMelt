@@ -39,7 +39,8 @@ class WalletMeltJsonBackupPreviewService {
   final WalletMeltJsonBackupValidator _validator;
 
   const WalletMeltJsonBackupPreviewService({
-    WalletMeltJsonBackupValidator validator = const WalletMeltJsonBackupValidator(),
+    WalletMeltJsonBackupValidator validator =
+        const WalletMeltJsonBackupValidator(),
   }) : _validator = validator;
 
   /// Parses the raw JSON string and generates a read-only preview summary.

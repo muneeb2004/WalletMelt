@@ -100,6 +100,10 @@ class DashboardScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
+              if (state.getMonthlyBudgetAmount() != null) ...[
+                _DashboardBudgetCard(state: state),
+                const SizedBox(height: 16),
+              ],
               if (state.expenses.isEmpty)
                 _EmptyDashboard(onAdd: () => context.push('/expense/new'))
               else ...[
@@ -236,6 +240,101 @@ class _ComparisonBar extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+}
+
+class _DashboardBudgetCard extends StatelessWidget {
+  const _DashboardBudgetCard({required this.state});
+
+  final AppState state;
+
+  @override
+  Widget build(BuildContext context) {
+    final monthlyBudget = state.getMonthlyBudgetAmount() ?? 0.0;
+    final totalSpent = state.getCurrentMonthTotalSpent();
+    final remaining = monthlyBudget - totalSpent;
+    final isOverBudget = remaining < 0;
+
+    final ratio = monthlyBudget > 0 ? totalSpent / monthlyBudget : 0.0;
+
+    final Color budgetColor;
+    if (ratio < 0.70) {
+      budgetColor = WalletMeltColors.positive;
+    } else if (ratio < 0.90) {
+      budgetColor = WalletMeltColors.brand;
+    } else if (ratio <= 1.0) {
+      budgetColor = WalletMeltColors.warning;
+    } else {
+      budgetColor = WalletMeltColors.danger;
+    }
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return LiquidGlass(
+      onTap: () => context.push('/budget'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "This Month's Budget",
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              InkWell(
+                onTap: () => context.push('/budget'),
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                  child: Text(
+                    'Details →',
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(999),
+            child: SizedBox(
+              height: 8,
+              child: LinearProgressIndicator(
+                value: ratio.clamp(0.0, 1.0),
+                backgroundColor: isDark
+                    ? const Color.fromRGBO(255, 255, 255, 0.08)
+                    : const Color.fromRGBO(0, 0, 0, 0.06),
+                valueColor: AlwaysStoppedAnimation<Color>(budgetColor),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Spent: ${formatMoney(totalSpent, state.settings.currency)}',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+              Text(
+                isOverBudget
+                    ? 'Over by ${formatMoney(-remaining, state.settings.currency)}'
+                    : 'Remaining: ${formatMoney(remaining, state.settings.currency)}',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: isOverBudget ? WalletMeltColors.danger : null,
+                    ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

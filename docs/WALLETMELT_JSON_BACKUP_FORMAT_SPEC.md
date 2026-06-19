@@ -157,6 +157,7 @@ Represents global application preferences.
 | `theme_preference` | String | No | Theme preference name (e.g., `"system"`, `"light"`, `"dark"`). |
 | `has_completed_onboarding`| Boolean | No | Onboarding flow completion status. |
 | `last_exported_at` | String | Yes | Date string of last export activity (format `YYYY-MM-DD`). |
+| `monthly_budget_amount` | Number | Yes | Primary monthly spending limit (e.g. `150000.00`). |
 
 ---
 

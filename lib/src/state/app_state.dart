@@ -136,6 +136,65 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  double? getMonthlyBudgetAmount() {
+    return settings.monthlyBudgetAmount;
+  }
+
+  Future<void> setMonthlyBudgetAmount(double amount) async {
+    settings = settings.copyWith(monthlyBudgetAmount: amount);
+    await _settingsService.save(settings);
+    notifyListeners();
+  }
+
+  Future<void> clearMonthlyBudgetAmount() async {
+    settings = settings.copyWith(clearMonthlyBudget: true);
+    await _settingsService.save(settings);
+    notifyListeners();
+  }
+
+  double getCurrentMonthTotalSpent() {
+    var total = 0.0;
+    for (final expense in expenses) {
+      if (expense.deletedAt == null) {
+        try {
+          final date = parseIsoDate(expense.date);
+          if (isSameMonth(date, selectedMonth)) {
+            total += expense.amount;
+          }
+        } catch (_) {}
+      }
+    }
+    return total;
+  }
+
+  double? getCurrentMonthBudgetRemaining() {
+    final budget = getMonthlyBudgetAmount();
+    if (budget == null) return null;
+    return budget - getCurrentMonthTotalSpent();
+  }
+
+  Future<void> setCategoryBudget({
+    required String categoryId,
+    required double amount,
+    required String month,
+  }) async {
+    await _upsertBudget(
+      categoryId: categoryId,
+      amount: amount,
+      currency: settings.currency,
+      month: month,
+    );
+    await refresh();
+  }
+
+  Future<void> clearCategoryBudget({
+    required String categoryId,
+    required String month,
+  }) async {
+    await _deleteBudget(categoryId, month);
+    await refresh();
+  }
+
   Future<WalletMeltJsonRestoreResult> restoreJsonBackupSafeMerge({
     required String jsonText,
     required RestoreDryRunPlan dryRunPlan,

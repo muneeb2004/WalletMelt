@@ -43,7 +43,13 @@ String _buildBackupJson({
       'format_version': 1,
       'app_version': appVersion,
       'exported_at': '2026-06-14T09:08:07.000',
-      'includes': ['expenses', 'grocery_items', 'categories', 'budgets', 'settings'],
+      'includes': [
+        'expenses',
+        'grocery_items',
+        'categories',
+        'budgets',
+        'settings'
+      ],
     },
     'expenses': expenses,
     'grocery_items': groceryItems,
@@ -156,7 +162,9 @@ void main() {
         expenses: [_expense(id: 'exp-local')],
         deletedExpenses: [],
         categories: [_category(id: 'cat-local', name: 'Food')],
-        budgets: [_budget(id: 'bud-local', categoryId: 'cat-local', month: '2026-06')],
+        budgets: [
+          _budget(id: 'bud-local', categoryId: 'cat-local', month: '2026-06')
+        ],
         groceryItems: [],
       );
 
@@ -223,7 +231,11 @@ void main() {
     test('counts soft-deleted backup expenses', () {
       final json = _buildBackupJson(
         expenses: [
-          {'id': 'exp1', 'deleted_at': '2026-06-15T00:00:00.000', 'receipt_image_uri': null},
+          {
+            'id': 'exp1',
+            'deleted_at': '2026-06-15T00:00:00.000',
+            'receipt_image_uri': null
+          },
           {'id': 'exp2', 'deleted_at': null, 'receipt_image_uri': null},
         ],
       );
@@ -358,7 +370,8 @@ void main() {
   });
 
   group('WalletMeltJsonBackupConflictService — budget conflicts', () {
-    test('detects same month + category_id budget already existing locally', () {
+    test('detects same month + category_id budget already existing locally',
+        () {
       final json = _buildBackupJson(
         categories: [
           {'id': 'cat1', 'name': 'Food'},
@@ -371,7 +384,9 @@ void main() {
         expenses: [],
         deletedExpenses: [],
         categories: [],
-        budgets: [_budget(id: 'bud-local', categoryId: 'cat1', month: '2026-06')],
+        budgets: [
+          _budget(id: 'bud-local', categoryId: 'cat1', month: '2026-06')
+        ],
         groceryItems: [],
       );
 
@@ -397,7 +412,9 @@ void main() {
         expenses: [],
         deletedExpenses: [],
         categories: [],
-        budgets: [_budget(id: 'bud-local', categoryId: 'cat1', month: '2026-06')],
+        budgets: [
+          _budget(id: 'bud-local', categoryId: 'cat1', month: '2026-06')
+        ],
         groceryItems: [],
       );
 
@@ -428,7 +445,8 @@ void main() {
   });
 
   group('WalletMeltJsonBackupConflictService — grocery item conflicts', () {
-    test('detects orphan grocery item referencing missing backup expense_id', () {
+    test('detects orphan grocery item referencing missing backup expense_id',
+        () {
       final json = _buildBackupJson(
         expenses: [],
         groceryItems: [
@@ -450,7 +468,8 @@ void main() {
       expect(result.hasAnyConflict, isTrue);
     });
 
-    test('does not flag grocery item whose expense_id is in backup expenses', () {
+    test('does not flag grocery item whose expense_id is in backup expenses',
+        () {
       final json = _buildBackupJson(
         expenses: [
           {'id': 'exp1', 'deleted_at': null, 'receipt_image_uri': null},
@@ -502,7 +521,8 @@ void main() {
     });
   });
 
-  group('WalletMeltJsonBackupConflictService — metadata / settings warnings', () {
+  group('WalletMeltJsonBackupConflictService — metadata / settings warnings',
+      () {
     test('warns when app_version is null', () {
       final json = _buildBackupJson(appVersion: null);
 
@@ -559,7 +579,8 @@ void main() {
       );
     });
 
-    test('warns when backup settings currency differs from current settings', () {
+    test('warns when backup settings currency differs from current settings',
+        () {
       final json = _buildBackupJson(
         settings: {
           'currency': 'USD',
@@ -638,7 +659,12 @@ void main() {
           },
         ],
         groceryItems: [
-          {'id': 'item-orphan', 'expense_id': 'ghost-id', 'name': 'X', 'amount': 1},
+          {
+            'id': 'item-orphan',
+            'expense_id': 'ghost-id',
+            'name': 'X',
+            'amount': 1
+          },
         ],
         categories: [
           {'id': 'cat-dup', 'name': 'Food'},
@@ -651,7 +677,9 @@ void main() {
         expenses: [_expense(id: 'exp-dup')],
         deletedExpenses: [],
         categories: [_category(id: 'cat-dup', name: 'Food')],
-        budgets: [_budget(id: 'bud-local', categoryId: 'cat-dup', month: '2026-06')],
+        budgets: [
+          _budget(id: 'bud-local', categoryId: 'cat-dup', month: '2026-06')
+        ],
         groceryItems: [],
       );
 

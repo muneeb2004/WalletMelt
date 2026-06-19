@@ -132,7 +132,10 @@ void main() {
 
       expect(preview.isValid, isTrue);
       expect(preview.receiptImageCount, 1);
-      expect(preview.warnings, contains('Receipt images are references only. Physical receipt files are not packaged in this backup.'));
+      expect(
+          preview.warnings,
+          contains(
+              'Receipt images are references only. Physical receipt files are not packaged in this backup.'));
     });
   });
 }

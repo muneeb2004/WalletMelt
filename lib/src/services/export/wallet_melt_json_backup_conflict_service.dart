@@ -216,14 +216,10 @@ class WalletMeltJsonBackupConflictService {
       return const BackupConflictSummary(hasAnyConflict: true);
     }
 
-    final backupExpenses =
-        _asMaps(backupMap['expenses']);
-    final backupGroceryItems =
-        _asMaps(backupMap['grocery_items']);
-    final backupCategories =
-        _asMaps(backupMap['categories']);
-    final backupBudgets =
-        _asMaps(backupMap['budgets']);
+    final backupExpenses = _asMaps(backupMap['expenses']);
+    final backupGroceryItems = _asMaps(backupMap['grocery_items']);
+    final backupCategories = _asMaps(backupMap['categories']);
+    final backupBudgets = _asMaps(backupMap['budgets']);
     final backupSettings = backupMap['settings'] as Map?;
     final backupMetadata = backupMap['metadata'] as Map?;
 
@@ -313,8 +309,7 @@ class WalletMeltJsonBackupConflictService {
     required LocalAppSnapshot localSnapshot,
     required _ConflictCounts out,
   }) {
-    final localExpenseIds =
-        localSnapshot.allExpenses.map((e) => e.id).toSet();
+    final localExpenseIds = localSnapshot.allExpenses.map((e) => e.id).toSet();
 
     for (final exp in backupExpenses) {
       final id = exp['id']?.toString();
@@ -337,8 +332,7 @@ class WalletMeltJsonBackupConflictService {
     required LocalAppSnapshot localSnapshot,
     required _ConflictCounts out,
   }) {
-    final localExpenseIds =
-        localSnapshot.allExpenses.map((e) => e.id).toSet();
+    final localExpenseIds = localSnapshot.allExpenses.map((e) => e.id).toSet();
 
     for (final item in backupGroceryItems) {
       final refId = item['expense_id']?.toString();
@@ -373,8 +367,7 @@ class WalletMeltJsonBackupConflictService {
         out.duplicateCategoryIdCount++;
         // Additionally check if the name differs (same ID, different name).
         final localCat = localById[id]!;
-        if (name != null &&
-            name.toLowerCase() != localCat.name.toLowerCase()) {
+        if (name != null && name.toLowerCase() != localCat.name.toLowerCase()) {
           out.categoryNameIdMismatchCount++;
         }
         continue;
@@ -397,9 +390,8 @@ class WalletMeltJsonBackupConflictService {
     required _ConflictCounts out,
   }) {
     // Build a set of (month, categoryId) pairs from local budgets.
-    final localPairs = localSnapshot.budgets
-        .map((b) => '${b.month}|${b.categoryId}')
-        .toSet();
+    final localPairs =
+        localSnapshot.budgets.map((b) => '${b.month}|${b.categoryId}').toSet();
 
     for (final budget in backupBudgets) {
       final month = budget['month']?.toString();
@@ -450,8 +442,8 @@ class WalletMeltJsonBackupConflictService {
     final backupCurrency = backupSettings['currency']?.toString();
     final backupTheme = backupSettings['theme_preference']?.toString();
 
-    final currencyDiffers = backupCurrency != null &&
-        backupCurrency != currentSettings.currency;
+    final currencyDiffers =
+        backupCurrency != null && backupCurrency != currentSettings.currency;
     final themeDiffers = backupTheme != null &&
         backupTheme != currentSettings.themePreference.name;
 

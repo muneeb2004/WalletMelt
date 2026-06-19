@@ -7,6 +7,7 @@ class SettingsService {
   static const _themeKey = 'settings.themePreference';
   static const _onboardingKey = 'settings.hasCompletedOnboarding';
   static const _lastExportKey = 'settings.lastExportedAt';
+  static const _monthlyBudgetAmountKey = 'settings.monthlyBudgetAmount';
 
   Future<WalletMeltSettings> load() async {
     final prefs = await SharedPreferences.getInstance();
@@ -16,6 +17,9 @@ class SettingsService {
       themePreference: _themeFromName(prefs.getString(_themeKey)),
       hasCompletedOnboarding: prefs.getBool(_onboardingKey) ?? false,
       lastExportedAt: prefs.getString(_lastExportKey),
+      monthlyBudgetAmount: prefs.containsKey(_monthlyBudgetAmountKey)
+          ? prefs.getDouble(_monthlyBudgetAmountKey)
+          : null,
     );
   }
 
@@ -27,6 +31,12 @@ class SettingsService {
     final lastExportedAt = settings.lastExportedAt;
     if (lastExportedAt != null) {
       await prefs.setString(_lastExportKey, lastExportedAt);
+    }
+    final monthlyBudget = settings.monthlyBudgetAmount;
+    if (monthlyBudget != null) {
+      await prefs.setDouble(_monthlyBudgetAmountKey, monthlyBudget);
+    } else {
+      await prefs.remove(_monthlyBudgetAmountKey);
     }
   }
 

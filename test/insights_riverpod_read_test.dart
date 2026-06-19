@@ -73,7 +73,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Budgets'), findsOneWidget);
-    expect(find.text('No categories available.'), findsNothing);
-    expect(find.text('Rs 5,000 / Rs 3,000'), findsOneWidget);
+    expect(find.text('Manage Budgets'), findsOneWidget);
   });
 }

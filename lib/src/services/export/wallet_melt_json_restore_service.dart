@@ -551,6 +551,11 @@ class WalletMeltJsonRestoreService {
       (value) => value.name == themeName,
       orElse: () => ThemePreference.system,
     );
+    final monthlyBudgetVal = json['monthly_budget_amount'];
+    double? monthlyBudget;
+    if (monthlyBudgetVal is num) {
+      monthlyBudget = monthlyBudgetVal.toDouble();
+    }
     return WalletMeltSettings(
       currency: _nullableString(json['currency']) ??
           WalletMeltSettings.defaults.currency,
@@ -558,6 +563,7 @@ class WalletMeltJsonRestoreService {
       hasCompletedOnboarding: json['has_completed_onboarding'] == true ||
           json['has_completed_onboarding'] == 1,
       lastExportedAt: _nullableString(json['last_exported_at']),
+      monthlyBudgetAmount: monthlyBudget,
     );
   }
 

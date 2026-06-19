@@ -38,14 +38,19 @@ class AppShell extends StatelessWidget {
                         index: 1,
                         shell: navigationShell),
                     _NavItem(
+                        icon: Icons.account_balance_wallet_rounded,
+                        label: 'Budget',
+                        index: 2,
+                        shell: navigationShell),
+                    _NavItem(
                         icon: Icons.insights_rounded,
                         label: 'Insights',
-                        index: 2,
+                        index: 3,
                         shell: navigationShell),
                     _NavItem(
                         icon: Icons.tune_rounded,
                         label: 'Settings',
-                        index: 3,
+                        index: 4,
                         shell: navigationShell),
                   ],
                 ),

@@ -141,6 +141,7 @@ class WalletMeltJsonBackupEncoder {
       'theme_preference': settings.themePreference.name,
       'has_completed_onboarding': settings.hasCompletedOnboarding,
       'last_exported_at': settings.lastExportedAt,
+      'monthly_budget_amount': settings.monthlyBudgetAmount,
     };
   }
 }
