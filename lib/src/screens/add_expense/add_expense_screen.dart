@@ -10,6 +10,7 @@ import '../../data/repositories/expense_repository.dart';
 import '../../state/app_state.dart';
 import '../../theme/wallet_melt_theme.dart';
 import '../../utils/expense_validation.dart';
+import '../../widgets/primary_button.dart';
 
 class AddExpenseScreen extends StatefulWidget {
   const AddExpenseScreen({super.key, this.expenseId});
@@ -178,14 +179,11 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                     setState(() => _groceryItems.removeAt(index)),
               ),
             ],
-            const SizedBox(height: 22),
-            ElevatedButton(
-              onPressed: _saving ? null : () => _save(state),
-              child: Text(_saving
-                  ? 'Saving...'
-                  : isEditing
-                      ? 'Save changes'
-                      : 'Save expense'),
+            const SizedBox(height: 24),
+            PrimaryButton(
+              onPressed: () => _save(state),
+              label: isEditing ? 'Save changes' : 'Save expense',
+              isLoading: _saving,
             ),
           ],
         ),
@@ -301,54 +299,57 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     await showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
+      isScrollControlled: true,
       builder: (sheetContext) {
         return StatefulBuilder(
           builder: (context, setSheetState) {
-            return Padding(
-              padding: EdgeInsets.fromLTRB(
-                  20, 10, 20, 20 + MediaQuery.of(context).viewInsets.bottom),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Custom category',
-                      style: Theme.of(context).textTheme.titleLarge),
-                  const SizedBox(height: 14),
-                  TextField(
-                      controller: nameController,
-                      autofocus: true,
-                      decoration: const InputDecoration(labelText: 'Name')),
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 10,
-                    children: [
-                      for (final color in colors)
-                        ChoiceChip(
-                          label: const Text(''),
-                          selected: selectedColor == color,
-                          avatar: CircleAvatar(
-                              backgroundColor: colorFromHex(color)),
-                          onSelected: (_) =>
-                              setSheetState(() => selectedColor = color),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 18),
-                  ElevatedButton(
-                    onPressed: () async {
-                      if (nameController.text.trim().isEmpty) return;
-                      final navigator = Navigator.of(sheetContext);
-                      final category = await appState.addCategory(
-                          name: nameController.text,
-                          icon: 'more_horiz',
-                          color: selectedColor);
-                      if (!mounted || !sheetContext.mounted) return;
-                      setState(() => _categoryId = category.id);
-                      navigator.pop();
-                    },
-                    child: const Text('Create category'),
-                  ),
-                ],
+            return SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                    20, 10, 20, 20 + MediaQuery.of(context).viewInsets.bottom),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Custom category',
+                        style: Theme.of(context).textTheme.titleLarge),
+                    const SizedBox(height: 14),
+                    TextField(
+                        controller: nameController,
+                        autofocus: true,
+                        decoration: const InputDecoration(labelText: 'Name')),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 10,
+                      children: [
+                        for (final color in colors)
+                          ChoiceChip(
+                            label: const Text(''),
+                            selected: selectedColor == color,
+                            avatar: CircleAvatar(
+                                backgroundColor: colorFromHex(color)),
+                            onSelected: (_) =>
+                                setSheetState(() => selectedColor = color),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 18),
+                    PrimaryButton(
+                      label: 'Create category',
+                      onPressed: () async {
+                        if (nameController.text.trim().isEmpty) return;
+                        final navigator = Navigator.of(sheetContext);
+                        final category = await appState.addCategory(
+                            name: nameController.text,
+                            icon: 'more_horiz',
+                            color: selectedColor);
+                        if (!mounted || !sheetContext.mounted) return;
+                        setState(() => _categoryId = category.id);
+                        navigator.pop();
+                      },
+                    ),
+                  ],
+                ),
               ),
             );
           },

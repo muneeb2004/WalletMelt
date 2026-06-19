@@ -9,6 +9,9 @@ import '../../state/app_state.dart';
 import '../../theme/wallet_melt_theme.dart';
 import '../../utils/currency_format.dart';
 import '../../utils/date_utils.dart';
+import '../../widgets/empty_state.dart';
+import '../../widgets/progress_bar.dart';
+import '../../widgets/section_header.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -27,6 +30,7 @@ class DashboardScreen extends StatelessWidget {
           child: ListView(
             padding: EdgeInsets.zero,
             children: [
+              // ── Header row ──────────────────────────────────────────────
               Row(
                 children: [
                   Expanded(
@@ -35,7 +39,7 @@ class DashboardScreen extends StatelessWidget {
                       children: [
                         Text('WalletMelt',
                             style: Theme.of(context).textTheme.headlineMedium),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: AppSpacing.xs),
                         Text('Where did your money go this month?',
                             style: Theme.of(context).textTheme.bodyMedium),
                       ],
@@ -53,9 +57,11 @@ class DashboardScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 18),
+              const SizedBox(height: AppSpacing.md + 2),
+
+              // ── Hero spend card ─────────────────────────────────────────
               LiquidGlass(
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.all(AppSpacing.lg),
                 child: Stack(
                   children: [
                     Positioned(
@@ -82,12 +88,12 @@ class DashboardScreen extends StatelessWidget {
                       children: [
                         Text(readableMonth(state.selectedMonth),
                             style: Theme.of(context).textTheme.labelLarge),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: AppSpacing.sm),
                         Text(
                             formatMoney(
                                 insights.total, state.settings.currency),
                             style: Theme.of(context).textTheme.displaySmall),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: AppSpacing.sm),
                         Text(
                           insights.highestCategory == null
                               ? 'Add your first expense to reveal where the month melted.'
@@ -99,33 +105,48 @@ class DashboardScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
+
+              // ── Budget summary card ─────────────────────────────────────
               if (state.getMonthlyBudgetAmount() != null) ...[
                 _DashboardBudgetCard(state: state),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.md),
               ],
+
+              // ── Content: empty or charts + recent ──────────────────────
               if (state.expenses.isEmpty)
-                _EmptyDashboard(onAdd: () => context.push('/expense/new'))
+                EmptyState(
+                  icon: Icons.receipt_long_outlined,
+                  title: 'No expenses yet',
+                  subtitle: 'Tap + to add your first expense.',
+                )
               else ...[
                 LiquidGlass(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Category melt',
-                          style: Theme.of(context).textTheme.titleLarge),
-                      const SizedBox(height: 12),
-                      CategoryBreakdownChart(items: insights.categorySpend),
+                      SectionHeader(
+                        title: 'Category melt',
+                        icon: Icons.donut_small_rounded,
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      RepaintBoundary(
+                        child: CategoryBreakdownChart(
+                            items: insights.categorySpend),
+                      ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.md),
                 LiquidGlass(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Grocery vs utilities',
-                          style: Theme.of(context).textTheme.titleLarge),
-                      const SizedBox(height: 14),
+                      SectionHeader(
+                        title: 'Grocery vs utilities',
+                        icon: Icons.compare_arrows_rounded,
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
                       _ComparisonBar(
                         leftLabel: 'Grocery',
                         leftValue: insights.groceryTotal,
@@ -136,14 +157,16 @@ class DashboardScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.md),
                 LiquidGlass(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Recent expenses',
-                          style: Theme.of(context).textTheme.titleLarge),
-                      const SizedBox(height: 8),
+                      const SectionHeader(
+                        title: 'Recent expenses',
+                        icon: Icons.history_rounded,
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
                       for (final expense in insights.recentExpenses)
                         ExpenseListTile(
                           expense: expense,
@@ -162,33 +185,7 @@ class DashboardScreen extends StatelessWidget {
   }
 }
 
-class _EmptyDashboard extends StatelessWidget {
-  const _EmptyDashboard({required this.onAdd});
-
-  final VoidCallback onAdd;
-
-  @override
-  Widget build(BuildContext context) {
-    return LiquidGlass(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('No expenses yet',
-              style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: 8),
-          Text(
-              'Start with rent, utilities, groceries, or a bill receipt. WalletMelt will build the month view from local data.',
-              style: Theme.of(context).textTheme.bodyMedium),
-          const SizedBox(height: 18),
-          ElevatedButton.icon(
-              onPressed: onAdd,
-              icon: const Icon(Icons.add_rounded),
-              label: const Text('Add first expense')),
-        ],
-      ),
-    );
-  }
-}
+// ── Private widgets ──────────────────────────────────────────────────────────
 
 class _ComparisonBar extends StatelessWidget {
   const _ComparisonBar({
@@ -229,7 +226,7 @@ class _ComparisonBar extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.sm),
         Row(
           children: [
             Expanded(
@@ -255,21 +252,8 @@ class _DashboardBudgetCard extends StatelessWidget {
     final totalSpent = state.getCurrentMonthTotalSpent();
     final remaining = monthlyBudget - totalSpent;
     final isOverBudget = remaining < 0;
-
     final ratio = monthlyBudget > 0 ? totalSpent / monthlyBudget : 0.0;
-
-    final Color budgetColor;
-    if (ratio < 0.70) {
-      budgetColor = WalletMeltColors.positive;
-    } else if (ratio < 0.90) {
-      budgetColor = WalletMeltColors.brand;
-    } else if (ratio <= 1.0) {
-      budgetColor = WalletMeltColors.warning;
-    } else {
-      budgetColor = WalletMeltColors.danger;
-    }
-
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final Color budgetColor = budgetProgressColor(ratio);
 
     return LiquidGlass(
       onTap: () => context.push('/budget'),
@@ -286,8 +270,8 @@ class _DashboardBudgetCard extends StatelessWidget {
               InkWell(
                 onTap: () => context.push('/budget'),
                 child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                  padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.xs, horizontal: AppSpacing.sm),
                   child: Text(
                     'Details →',
                     style: Theme.of(context).textTheme.labelMedium?.copyWith(
@@ -298,21 +282,9 @@ class _DashboardBudgetCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(999),
-            child: SizedBox(
-              height: 8,
-              child: LinearProgressIndicator(
-                value: ratio.clamp(0.0, 1.0),
-                backgroundColor: isDark
-                    ? const Color.fromRGBO(255, 255, 255, 0.08)
-                    : const Color.fromRGBO(0, 0, 0, 0.06),
-                valueColor: AlwaysStoppedAnimation<Color>(budgetColor),
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.sm),
+          ProgressBar(fraction: ratio, color: budgetColor),
+          const SizedBox(height: AppSpacing.sm),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [

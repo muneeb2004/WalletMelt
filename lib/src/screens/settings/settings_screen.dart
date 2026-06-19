@@ -16,6 +16,8 @@ import '../../services/export/wallet_melt_json_restore_service.dart';
 import '../../state/app_state.dart';
 import '../../theme/wallet_melt_theme.dart';
 import '../../types/settings.dart';
+import '../../widgets/app_snackbar.dart';
+import '../../widgets/confirm_dialog.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({
@@ -272,13 +274,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ExportShareStatus.dismissed => 'CSV export canceled.',
         ExportShareStatus.unavailable => 'CSV export file is ready.',
       };
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(message)));
+      showSuccessSnackbar(context, message);
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('CSV export failed.')),
-      );
+      showErrorSnackbar(context, 'CSV export failed.');
     } finally {
       if (mounted) {
         setState(() => _isExportingExpenses = false);
@@ -312,13 +311,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ExportShareStatus.dismissed => 'JSON backup canceled.',
         ExportShareStatus.unavailable => 'JSON backup file is ready.',
       };
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(message)));
+      showSuccessSnackbar(context, message);
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('JSON backup failed.')),
-      );
+      showErrorSnackbar(context, 'JSON backup failed.');
     } finally {
       if (mounted) {
         setState(() => _isCreatingJsonBackup = false);
@@ -350,7 +346,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               '${result.categoriesCount} categories, and '
               '${result.budgetsCount} budgets. No data has been imported.',
             ),
-            backgroundColor: Colors.green[800],
+            backgroundColor: WalletMeltColors.positive,
           ),
         );
 
@@ -385,6 +381,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             // Conflict detection failure is non-blocking; preview still shows.
           }
           if (!mounted) return;
+
           _showBackupPreviewDialog(
             content,
             preview,
@@ -393,26 +390,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
           );
         }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Invalid backup file: '
-              '${_safeRestoreErrorMessage(result.error ?? "Unknown error")}',
-            ),
-            backgroundColor: Colors.red[800],
-          ),
+        showErrorSnackbar(
+          context,
+          'Invalid backup file: '
+          '${_safeRestoreErrorMessage(result.error ?? "Unknown error")}',
         );
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Could not read the selected backup file. No data was changed. '
-            '${_safeRestoreErrorMessage(e.toString())}',
-          ),
-          backgroundColor: Colors.red[800],
-        ),
+      showErrorSnackbar(
+        context,
+        'Could not read the selected backup file. No data was changed. '
+        '${_safeRestoreErrorMessage(e.toString())}',
       );
     } finally {
       if (mounted) {
@@ -692,51 +681,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
   ) async {
     if (_isRestoringBackup) return;
 
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) {
-        final bodyStyle = Theme.of(context).textTheme.bodyMedium;
-        return AlertDialog(
-          title: const Text('Safe merge backup?'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Safe merge adds only restorable backup records. Existing local data is preserved.',
-                  style: bodyStyle,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Duplicate IDs may be remapped, but local records and budgets will not be overwritten.',
-                  style: bodyStyle,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Receipt paths stay as text references only. Receipt image files are not recovered or copied.',
-                  style: bodyStyle,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'A safety backup of current local data is created before restore. If that backup cannot be created, restore stops before any import.',
-                  style: bodyStyle,
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('Create safety backup and merge'),
-            ),
-          ],
-        );
-      },
+    final confirmed = await showConfirmDialog(
+      context,
+      title: 'Safe merge backup?',
+      confirmLabel: 'Create safety backup and merge',
+      body:
+          'Safe merge adds only restorable backup records. Existing local data is preserved.\n\n'
+          'Duplicate IDs may be remapped, but local records and budgets will not be overwritten.\n\n'
+          'Receipt paths stay as text references only. Receipt image files are not recovered or copied.\n\n'
+          'A safety backup of current local data is created before restore. If that backup cannot be created, restore stops before any import.',
     );
 
     if (confirmed != true || !mounted) return;
@@ -763,26 +716,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
       );
       if (!mounted) return;
 
-      final messenger = ScaffoldMessenger.of(context);
-      messenger.clearSnackBars();
       if (result.success) {
-        messenger.showSnackBar(_restoreSuccessSnackBar(result));
+        _showRestoreSuccessSnackbar(context, result);
       } else {
-        messenger.showSnackBar(_restoreFailureSnackBar(result));
+        _showRestoreFailureSnackbar(context, result);
       }
     } catch (error) {
       if (!mounted) return;
-      final messenger = ScaffoldMessenger.of(context);
-      messenger.clearSnackBars();
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(
-            'Restore did not start. No data was changed. '
-            'Check that a safety backup can be created, then try again. '
-            '${_safeRestoreErrorMessage(error.toString())}',
-          ),
-          backgroundColor: Colors.red[800],
-        ),
+      showErrorSnackbar(
+        context,
+        'Restore did not start. No data was changed. '
+        'Check that a safety backup can be created, then try again. '
+        '${_safeRestoreErrorMessage(error.toString())}',
       );
     } finally {
       if (mounted) {
@@ -807,36 +752,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return true;
   }
 
-  SnackBar _restoreSuccessSnackBar(WalletMeltJsonRestoreResult result) {
+  void _showRestoreSuccessSnackbar(
+      BuildContext context, WalletMeltJsonRestoreResult result) {
     final safetyBackupName = _safetyBackupName(result.safetyBackupPath);
     final backupText = safetyBackupName == null
         ? 'A pre-restore safety backup was created.'
         : 'Safety backup created: $safetyBackupName.';
-    return SnackBar(
-      content: Text(
-        'Safe merge complete: ${result.insertedExpenses} expenses, '
-        '${result.insertedGroceryItems} items, '
-        '${result.insertedCategories} categories, and '
-        '${result.insertedBudgets} budgets imported. '
-        'Local data was preserved. $backupText '
-        'Receipt paths remain text references only.',
-      ),
-      backgroundColor: Colors.green[800],
+    showSuccessSnackbar(
+      context,
+      'Safe merge complete: ${result.insertedExpenses} expenses, '
+      '${result.insertedGroceryItems} items, '
+      '${result.insertedCategories} categories, and '
+      '${result.insertedBudgets} budgets imported. '
+      'Local data was preserved. $backupText '
+      'Receipt paths remain text references only.',
     );
   }
 
-  SnackBar _restoreFailureSnackBar(WalletMeltJsonRestoreResult result) {
+  void _showRestoreFailureSnackbar(
+      BuildContext context, WalletMeltJsonRestoreResult result) {
     final safetyBackupName = _safetyBackupName(result.safetyBackupPath);
     final backupText = safetyBackupName == null
         ? 'No verified safety backup was reported.'
         : 'Safety backup created before the failed restore: $safetyBackupName.';
-    return SnackBar(
-      content: Text(
-        'Restore failed safely. No partial import should remain because '
-        'WalletMelt rolls back the transaction. $backupText '
-        'Reason: ${_safeRestoreErrorMessage(result.errorMessage ?? "Unknown restore error.")}',
-      ),
-      backgroundColor: Colors.red[800],
+    showErrorSnackbar(
+      context,
+      'Restore failed safely. No partial import should remain because '
+      'WalletMelt rolls back the transaction. $backupText '
+      'Reason: ${_safeRestoreErrorMessage(result.errorMessage ?? "Unknown restore error.")}',
     );
   }
 
@@ -895,7 +838,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               plan.hasBlockers
                   ? Icons.report_problem_outlined
                   : Icons.fact_check_outlined,
-              color: plan.hasBlockers ? WalletMeltColors.warning : Colors.green,
+              color: plan.hasBlockers
+                  ? WalletMeltColors.warning
+                  : WalletMeltColors.positive,
               size: 20,
             ),
             const SizedBox(width: 8),

@@ -73,15 +73,25 @@ class AppState extends ChangeNotifier {
   bool isLoading = true;
   String? errorMessage;
 
+  double? _cachedTotalSpent;
+  MonthlyInsights? _cachedInsights;
+
+  void _clearCache() {
+    _cachedTotalSpent = null;
+    _cachedInsights = null;
+  }
+
   String get currentMonthKey => monthKey(selectedMonth);
 
   MonthlyInsights get monthlyInsights {
-    return buildMonthlyInsights(
+    if (_cachedInsights != null) return _cachedInsights!;
+    _cachedInsights = buildMonthlyInsights(
       expenses: expenses,
       categories: categories,
       budgets: currentBudgets,
       month: selectedMonth,
     );
+    return _cachedInsights!;
   }
 
   Future<void> initialize() async {
@@ -104,6 +114,7 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> refresh() async {
+    _clearCache();
     categories = await _listCategories();
     expenses = await _listActiveExpenses();
     deletedExpenses = await _listDeletedExpenses();
@@ -119,6 +130,7 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> updateCurrency(String currency) async {
+    _clearCache();
     settings = settings.copyWith(currency: currency);
     await _settingsService.save(settings);
     notifyListeners();
@@ -141,18 +153,21 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> setMonthlyBudgetAmount(double amount) async {
+    _clearCache();
     settings = settings.copyWith(monthlyBudgetAmount: amount);
     await _settingsService.save(settings);
     notifyListeners();
   }
 
   Future<void> clearMonthlyBudgetAmount() async {
+    _clearCache();
     settings = settings.copyWith(clearMonthlyBudget: true);
     await _settingsService.save(settings);
     notifyListeners();
   }
 
   double getCurrentMonthTotalSpent() {
+    if (_cachedTotalSpent != null) return _cachedTotalSpent!;
     var total = 0.0;
     for (final expense in expenses) {
       if (expense.deletedAt == null) {
@@ -164,6 +179,7 @@ class AppState extends ChangeNotifier {
         } catch (_) {}
       }
     }
+    _cachedTotalSpent = total;
     return total;
   }
 
@@ -341,12 +357,14 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> previousMonth() async {
+    _clearCache();
     selectedMonth = DateTime(selectedMonth.year, selectedMonth.month - 1);
     currentBudgets = await _listBudgetsForMonth(currentMonthKey);
     notifyListeners();
   }
 
   Future<void> nextMonth() async {
+    _clearCache();
     selectedMonth = DateTime(selectedMonth.year, selectedMonth.month + 1);
     currentBudgets = await _listBudgetsForMonth(currentMonthKey);
     notifyListeners();

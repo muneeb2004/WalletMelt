@@ -10,6 +10,8 @@ import '../../theme/wallet_melt_theme.dart';
 import '../../types/expense.dart';
 import '../../utils/currency_format.dart';
 import '../../utils/date_utils.dart';
+import '../../widgets/confirm_dialog.dart';
+import '../../widgets/section_header.dart';
 
 class ExpenseDetailScreen extends StatelessWidget {
   const ExpenseDetailScreen({required this.expenseId, super.key});
@@ -28,9 +30,11 @@ class ExpenseDetailScreen extends StatelessWidget {
     final category = state.categoryById(expense.categoryId);
     return Scaffold(
       body: AppBackground(
-        padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
+        padding: const EdgeInsets.fromLTRB(
+            AppSpacing.md, AppSpacing.md + 2, AppSpacing.md, AppSpacing.lg),
         child: ListView(
           children: [
+            // ── Title row ─────────────────────────────────────────────
             Row(
               children: [
                 IconButton(
@@ -50,14 +54,16 @@ class ExpenseDetailScreen extends StatelessWidget {
                       icon: const Icon(Icons.edit_rounded)),
               ],
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: AppSpacing.md + 2),
+
+            // ── Amount + meta card ─────────────────────────────────────
             LiquidGlass(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(formatMoney(expense.amount, expense.currency),
                       style: Theme.of(context).textTheme.displaySmall),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.sm),
                   Text(
                       '${category?.name ?? 'Unknown category'} • ${readableMonth(parseIsoDate(expense.date))}',
                       style: Theme.of(context).textTheme.bodyMedium),
@@ -65,22 +71,24 @@ class ExpenseDetailScreen extends StatelessWidget {
                     Text(expense.vendor!,
                         style: Theme.of(context).textTheme.bodyMedium),
                   if (expense.notes != null) ...[
-                    const SizedBox(height: 14),
+                    const SizedBox(height: AppSpacing.md),
                     Text(expense.notes!,
                         style: Theme.of(context).textTheme.bodyLarge),
                   ],
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.md),
+
+            // ── Receipt image ─────────────────────────────────────────
             if (expense.receiptImageUri != null)
               LiquidGlass(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Receipt',
-                        style: Theme.of(context).textTheme.titleLarge),
-                    const SizedBox(height: 12),
+                    const SectionHeader(
+                        title: 'Receipt', icon: Icons.receipt_rounded),
+                    const SizedBox(height: AppSpacing.sm),
                     Hero(
                       tag: expense.receiptImageUri!,
                       child: ClipRRect(
@@ -104,32 +112,43 @@ class ExpenseDetailScreen extends StatelessWidget {
                   ],
                 ),
               ),
+
+            // ── Grocery items ─────────────────────────────────────────
             if (category?.id == 'grocery') ...[
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
               _GroceryItemsCard(
                   expenseId: expense.id, currency: expense.currency),
             ],
-            const SizedBox(height: 18),
+            const SizedBox(height: AppSpacing.md + 2),
+
+            // ── Soft delete / restore actions ─────────────────────────
             if (expense.isDeleted)
               Row(
                 children: [
                   Expanded(
-                    child: ElevatedButton(
+                    child: ElevatedButton.icon(
                       onPressed: () async {
                         final router = GoRouter.of(context);
                         await state.restoreExpense(expense.id);
                         if (!context.mounted) return;
                         router.pop();
                       },
-                      child: const Text('Restore'),
+                      icon: const Icon(Icons.restore_rounded),
+                      label: const Text('Restore'),
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: AppSpacing.sm),
                   Expanded(
-                      child: OutlinedButton(
-                          onPressed: () =>
-                              _confirmPermanentDelete(context, state, expense),
-                          child: const Text('Delete forever'))),
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: WalletMeltColors.danger,
+                      ),
+                      onPressed: () =>
+                          _confirmPermanentDelete(context, state, expense),
+                      icon: const Icon(Icons.delete_forever_rounded),
+                      label: const Text('Delete forever'),
+                    ),
+                  ),
                 ],
               )
             else
@@ -147,20 +166,12 @@ class ExpenseDetailScreen extends StatelessWidget {
   Future<void> _confirmSoftDelete(
       BuildContext context, AppState state, Expense expense) async {
     final router = GoRouter.of(context);
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Move expense to recycle bin?'),
-        content: const Text('You can restore it later from History.'),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel')),
-          ElevatedButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('Move')),
-        ],
-      ),
+    final confirmed = await showConfirmDialog(
+      context,
+      title: 'Move expense to recycle bin?',
+      body: 'You can restore it later from History.',
+      confirmLabel: 'Move',
+      isDestructive: true,
     );
     if (confirmed == true) {
       await state.softDeleteExpense(expense.id);
@@ -172,21 +183,12 @@ class ExpenseDetailScreen extends StatelessWidget {
   Future<void> _confirmPermanentDelete(
       BuildContext context, AppState state, Expense expense) async {
     final router = GoRouter.of(context);
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete forever?'),
-        content:
-            const Text('This removes the expense and its local receipt file.'),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel')),
-          ElevatedButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('Delete')),
-        ],
-      ),
+    final confirmed = await showConfirmDialog(
+      context,
+      title: 'Delete forever?',
+      body: 'This removes the expense and its local receipt file.',
+      confirmLabel: 'Delete',
+      isDestructive: true,
     );
     if (confirmed == true) {
       await state.permanentlyDeleteExpense(expense.id);
@@ -208,19 +210,18 @@ class _GroceryItemsCard extends StatelessWidget {
       future: context.read<AppState>().groceryItemsForExpense(expenseId),
       builder: (context, snapshot) {
         final items = snapshot.data ?? [];
-        if (items.isEmpty) {
-          return const SizedBox.shrink();
-        }
+        if (items.isEmpty) return const SizedBox.shrink();
         return LiquidGlass(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Grocery items',
-                  style: Theme.of(context).textTheme.titleLarge),
-              const SizedBox(height: 10),
+              const SectionHeader(
+                  title: 'Grocery items', icon: Icons.shopping_cart_outlined),
+              const SizedBox(height: AppSpacing.sm),
               for (final item in items)
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: AppSpacing.xs + 2),
                   child: Row(
                     children: [
                       Expanded(

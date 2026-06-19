@@ -2,6 +2,8 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+export 'app_spacing.dart';
+
 class WalletMeltColors {
   const WalletMeltColors._();
 
@@ -21,6 +23,14 @@ class WalletMeltColors {
   static const darkTextPrimary = Color(0xFFFAF7EF);
   static const darkTextSecondary = Color(0xFFBEB7AA);
 }
+
+// ── Budget threshold color aliases ──────────────────────────────────────────
+// These are the ONLY raw Color literals permitted in budget-progress logic.
+// All other budget-color code must reference these constants.
+const Color kBudgetSafe = WalletMeltColors.positive; // < 70 %
+const Color kBudgetWarning = WalletMeltColors.brand; // 70–90 %
+const Color kBudgetDanger = WalletMeltColors.warning; // 90–100 %
+const Color kBudgetOverrun = WalletMeltColors.danger; // > 100 %
 
 class WalletMeltTheme {
   const WalletMeltTheme._();
@@ -117,6 +127,11 @@ class WalletMeltTheme {
           TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: primary),
       labelMedium: TextStyle(
           fontSize: 12, fontWeight: FontWeight.w700, color: secondary),
+      bodySmall: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w400,
+          color: secondary,
+          height: 1.4),
     );
   }
 }
@@ -124,6 +139,15 @@ class WalletMeltTheme {
 Color colorFromHex(String value) {
   final hex = value.replaceFirst('#', '');
   return Color(int.parse('FF$hex', radix: 16));
+}
+
+/// Shared budget progress color based on spend ratio thresholds.
+/// Used by DashboardScreen and BudgetScreen to stay consistent.
+Color budgetProgressColor(double ratio) {
+  if (ratio < 0.70) return WalletMeltColors.positive;
+  if (ratio < 0.90) return WalletMeltColors.brand;
+  if (ratio <= 1.0) return WalletMeltColors.warning;
+  return WalletMeltColors.danger;
 }
 
 class LiquidGlass extends StatelessWidget {

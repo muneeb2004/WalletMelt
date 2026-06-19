@@ -6,10 +6,29 @@ import '../../components/category/category_chip.dart';
 import '../../components/expense/expense_list_tile.dart';
 import '../../components/glass/app_background.dart';
 import '../../state/app_state.dart';
+import '../../theme/wallet_melt_theme.dart';
 import '../../types/expense.dart';
 import '../../utils/insights.dart';
+import '../../widgets/empty_state.dart';
+import '../../widgets/section_header.dart';
 
 enum ExpenseSort { newest, oldest, amountHigh, amountLow }
+
+// ── Sealed list-item types for ListView.builder ──────────────────────────────
+
+sealed class _ListItem {}
+
+final class _HeaderItem extends _ListItem {
+  _HeaderItem(this.label);
+  final String label;
+}
+
+final class _ExpenseItem extends _ListItem {
+  _ExpenseItem(this.expense);
+  final Expense expense;
+}
+
+// ── Screen ───────────────────────────────────────────────────────────────────
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -30,101 +49,148 @@ class _HistoryScreenState extends State<HistoryScreen> {
     super.dispose();
   }
 
+  List<_ListItem> _buildItems(Map<String, List<Expense>> grouped) {
+    final items = <_ListItem>[];
+    for (final entry in grouped.entries) {
+      items.add(_HeaderItem(entry.key));
+      for (final expense in entry.value) {
+        items.add(_ExpenseItem(expense));
+      }
+    }
+    return items;
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
     final base = _showRecycleBin ? state.deletedExpenses : state.expenses;
     final filtered = _filtered(base);
     final grouped = groupExpensesByMonth(filtered);
+    final items = _buildItems(grouped);
+
     return Scaffold(
       body: AppBackground(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                    child: Text('History',
-                        style: Theme.of(context).textTheme.headlineMedium)),
-                IconButton(
-                  tooltip: _showRecycleBin
-                      ? 'Show active expenses'
-                      : 'Show recycle bin',
-                  onPressed: () =>
-                      setState(() => _showRecycleBin = !_showRecycleBin),
-                  icon: Icon(_showRecycleBin
-                      ? Icons.receipt_long_rounded
-                      : Icons.delete_outline_rounded),
-                ),
-              ],
-            ),
-            const SizedBox(height: 14),
-            TextField(
-              controller: _searchController,
-              decoration: const InputDecoration(
-                  prefixIcon: Icon(Icons.search_rounded),
-                  labelText: 'Search vendor, title, notes'),
-              onChanged: (_) => setState(() {}),
-            ),
-            const SizedBox(height: 12),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  FilterChip(
-                      label: const Text('All'),
-                      selected: _categoryId == null,
-                      onSelected: (_) => setState(() => _categoryId = null)),
-                  const SizedBox(width: 8),
-                  for (final category in state.categories) ...[
-                    WalletCategoryChip(
-                        category: category,
-                        selected: _categoryId == category.id,
-                        onTap: () => setState(() => _categoryId = category.id)),
-                    const SizedBox(width: 8),
-                  ],
+                  // ── Title row ─────────────────────────────────────────
+                  Row(
+                    children: [
+                      Expanded(
+                          child: Text('History',
+                              style:
+                                  Theme.of(context).textTheme.headlineMedium)),
+                      IconButton(
+                        tooltip: _showRecycleBin
+                            ? 'Show active expenses'
+                            : 'Show recycle bin',
+                        onPressed: () =>
+                            setState(() => _showRecycleBin = !_showRecycleBin),
+                        icon: Icon(_showRecycleBin
+                            ? Icons.receipt_long_rounded
+                            : Icons.delete_outline_rounded),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+
+                  // ── Search ────────────────────────────────────────────
+                  TextField(
+                    controller: _searchController,
+                    decoration: const InputDecoration(
+                        prefixIcon: Icon(Icons.search_rounded),
+                        labelText: 'Search vendor, title, notes'),
+                    onChanged: (_) => setState(() {}),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+
+                  // ── Category filter chips ─────────────────────────────
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        FilterChip(
+                            label: const Text('All'),
+                            selected: _categoryId == null,
+                            onSelected: (_) =>
+                                setState(() => _categoryId = null)),
+                        const SizedBox(width: AppSpacing.sm),
+                        for (final category in state.categories) ...[
+                          WalletCategoryChip(
+                              category: category,
+                              selected: _categoryId == category.id,
+                              onTap: () =>
+                                  setState(() => _categoryId = category.id)),
+                          const SizedBox(width: AppSpacing.sm),
+                        ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+
+                  // ── Sort dropdown ─────────────────────────────────────
+                  DropdownButtonFormField<ExpenseSort>(
+                    initialValue: _sort,
+                    decoration: const InputDecoration(labelText: 'Sort'),
+                    items: const [
+                      DropdownMenuItem(
+                          value: ExpenseSort.newest, child: Text('Newest')),
+                      DropdownMenuItem(
+                          value: ExpenseSort.oldest, child: Text('Oldest')),
+                      DropdownMenuItem(
+                          value: ExpenseSort.amountHigh,
+                          child: Text('Amount high to low')),
+                      DropdownMenuItem(
+                          value: ExpenseSort.amountLow,
+                          child: Text('Amount low to high')),
+                    ],
+                    onChanged: (value) =>
+                        setState(() => _sort = value ?? _sort),
+                  ),
+                  const SizedBox(height: AppSpacing.md + 2),
                 ],
               ),
             ),
-            const SizedBox(height: 12),
-            DropdownButtonFormField<ExpenseSort>(
-              initialValue: _sort,
-              decoration: const InputDecoration(labelText: 'Sort'),
-              items: const [
-                DropdownMenuItem(
-                    value: ExpenseSort.newest, child: Text('Newest')),
-                DropdownMenuItem(
-                    value: ExpenseSort.oldest, child: Text('Oldest')),
-                DropdownMenuItem(
-                    value: ExpenseSort.amountHigh,
-                    child: Text('Amount high to low')),
-                DropdownMenuItem(
-                    value: ExpenseSort.amountLow,
-                    child: Text('Amount low to high')),
-              ],
-              onChanged: (value) => setState(() => _sort = value ?? _sort),
-            ),
-            const SizedBox(height: 18),
+
+            // ── Empty state ──────────────────────────────────────────────
             if (filtered.isEmpty)
-              Text(
-                  _showRecycleBin
-                      ? 'The recycle bin is empty.'
-                      : 'No expenses match these filters.',
-                  style: Theme.of(context).textTheme.bodyMedium)
-            else
-              for (final entry in grouped.entries) ...[
-                Padding(
-                  padding: const EdgeInsets.only(top: 14, bottom: 6),
-                  child: Text(entry.key,
-                      style: Theme.of(context).textTheme.titleMedium),
+              SliverToBoxAdapter(
+                child: EmptyState(
+                  icon: _showRecycleBin
+                      ? Icons.delete_sweep_outlined
+                      : Icons.search_off_rounded,
+                  title: _showRecycleBin
+                      ? 'Recycle bin is empty'
+                      : 'No expenses found',
+                  subtitle: _showRecycleBin
+                      ? 'Deleted expenses will appear here.'
+                      : 'Try a different search term or category filter.',
                 ),
-                for (final expense in entry.value)
-                  ExpenseListTile(
-                    expense: expense,
-                    category: state.categoryById(expense.categoryId),
-                    onTap: () => context.push('/expense/${expense.id}'),
-                  ),
-              ],
+              )
+            else
+              // ── Lazy expense list with date-group headers ───────────────
+              SliverList.builder(
+                itemCount: items.length,
+                itemBuilder: (context, index) {
+                  final item = items[index];
+                  if (item is _HeaderItem) {
+                    return SectionHeader(
+                      title: item.label,
+                      padding: const EdgeInsets.only(
+                          top: AppSpacing.md, bottom: AppSpacing.xs),
+                    );
+                  }
+                  final expItem = item as _ExpenseItem;
+                  return ExpenseListTile(
+                    expense: expItem.expense,
+                    category: state.categoryById(expItem.expense.categoryId),
+                    onTap: () => context.push('/expense/${expItem.expense.id}'),
+                  );
+                },
+              ),
           ],
         ),
       ),

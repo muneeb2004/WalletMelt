@@ -8,6 +8,8 @@ import '../../state/app_state.dart';
 import '../../theme/wallet_melt_theme.dart';
 import '../../utils/currency_format.dart';
 import '../../utils/date_utils.dart';
+import '../../widgets/empty_state.dart';
+import '../../widgets/section_header.dart';
 
 class InsightsScreen extends StatelessWidget {
   const InsightsScreen({super.key});
@@ -22,62 +24,87 @@ class InsightsScreen extends StatelessWidget {
           padding: EdgeInsets.zero,
           children: [
             Text('Insights', style: Theme.of(context).textTheme.headlineMedium),
-            const SizedBox(height: 4),
-            Text(readableMonth(state.selectedMonth),
-                style: Theme.of(context).textTheme.bodyMedium),
-            const SizedBox(height: 18),
-            LiquidGlass(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Monthly trend',
-                      style: Theme.of(context).textTheme.titleLarge),
-                  const SizedBox(height: 10),
-                  Text(formatMoney(insights.total, state.settings.currency),
-                      style: Theme.of(context).textTheme.displaySmall),
-                  const SizedBox(height: 8),
-                  Text(
-                    insights.monthOverMonthDelta == null
-                        ? 'Add another month of expenses to compare trends.'
-                        : '${insights.monthOverMonthDelta! >= 0 ? '+' : ''}${insights.monthOverMonthDelta!.toStringAsFixed(1)}% vs previous month',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ],
-              ),
+            const SizedBox(height: AppSpacing.xs),
+            Row(
+              children: [
+                const Icon(Icons.calendar_today_rounded,
+                    size: 14, color: WalletMeltColors.textMuted),
+                const SizedBox(width: AppSpacing.xs + 2),
+                Text(readableMonth(state.selectedMonth),
+                    style: Theme.of(context).textTheme.bodyMedium),
+              ],
             ),
-            const SizedBox(height: 16),
-            LiquidGlass(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Where it melted',
-                      style: Theme.of(context).textTheme.titleLarge),
-                  const SizedBox(height: 12),
-                  CategoryBreakdownChart(items: insights.categorySpend),
-                ],
+            const SizedBox(height: AppSpacing.md + 2),
+            if (insights.total == 0) ...[
+              EmptyState(
+                icon: Icons.insights_rounded,
+                title: 'No data yet',
+                subtitle:
+                    'Add expenses to see your monthly trend, category breakdown, and spending insights.',
               ),
-            ),
-            const SizedBox(height: 16),
-            LiquidGlass(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Budgets',
-                      style: Theme.of(context).textTheme.titleLarge),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Track your monthly spend ceiling and optional category limits.',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  const SizedBox(height: 14),
-                  OutlinedButton.icon(
-                    onPressed: () => context.go('/budget'),
-                    icon: const Icon(Icons.account_balance_wallet_rounded),
-                    label: const Text('Manage Budgets'),
-                  ),
-                ],
+            ] else ...[
+              LiquidGlass(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SectionHeader(
+                      title: 'Monthly trend',
+                      icon: Icons.trending_up_rounded,
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(formatMoney(insights.total, state.settings.currency),
+                        style: Theme.of(context).textTheme.displaySmall),
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      insights.monthOverMonthDelta == null
+                          ? 'Add another month of expenses to compare trends.'
+                          : '${insights.monthOverMonthDelta! >= 0 ? '+' : ''}${insights.monthOverMonthDelta!.toStringAsFixed(1)}% vs previous month',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
+                ),
               ),
-            ),
+              const SizedBox(height: AppSpacing.md),
+              LiquidGlass(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SectionHeader(
+                      title: 'Where it melted',
+                      icon: Icons.pie_chart_outline_rounded,
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    RepaintBoundary(
+                      child:
+                          CategoryBreakdownChart(items: insights.categorySpend),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              LiquidGlass(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SectionHeader(
+                      title: 'Budgets',
+                      icon: Icons.account_balance_wallet_rounded,
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      'Track your monthly spend ceiling and optional category limits.',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    OutlinedButton.icon(
+                      onPressed: () => context.go('/budget'),
+                      icon: const Icon(Icons.account_balance_wallet_rounded),
+                      label: const Text('Manage Budgets'),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ],
         ),
       ),

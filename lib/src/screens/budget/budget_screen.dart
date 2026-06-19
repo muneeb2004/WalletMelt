@@ -7,6 +7,13 @@ import '../../theme/wallet_melt_theme.dart';
 import '../../utils/currency_format.dart';
 import '../../utils/date_utils.dart';
 import '../../types/budget.dart';
+import '../../widgets/confirm_dialog.dart';
+import '../../widgets/app_snackbar.dart';
+import '../../widgets/empty_state.dart';
+import '../../widgets/progress_bar.dart';
+import '../../widgets/section_header.dart';
+import '../../widgets/sheet_handle.dart';
+import '../../widgets/stat_tile.dart';
 
 class BudgetScreen extends StatefulWidget {
   const BudgetScreen({super.key});
@@ -37,7 +44,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
         : 0.0;
 
     // Get color based on threshold ratio
-    final budgetColor = _getBudgetColor(ratio);
+    final budgetColor = budgetProgressColor(ratio);
 
     return Scaffold(
       body: AppBackground(
@@ -93,7 +100,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                 isDark,
               ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.lg),
 
             // SECTION 2: CATEGORY BUDGETS (SECONDARY)
             _buildCategoryBudgetsSection(context, state),
@@ -126,12 +133,12 @@ class _BudgetScreenState extends State<BudgetScreen> {
             style: Theme.of(context).textTheme.bodyMedium,
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 18),
-          FilledButton.icon(
-            style: FilledButton.styleFrom(
+          const SizedBox(height: AppSpacing.sm),
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
               minimumSize: const Size(180, 48),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18)),
+                  borderRadius: BorderRadius.circular(AppSpacing.buttonRadius)),
             ),
             onPressed: () => _showSetBudgetSheet(context, state, null),
             icon: const Icon(Icons.add_rounded),
@@ -192,10 +199,10 @@ class _BudgetScreenState extends State<BudgetScreen> {
                     child: Row(
                       children: [
                         Icon(Icons.delete_outline_rounded,
-                            size: 18, color: Colors.red),
+                            size: 18, color: WalletMeltColors.danger),
                         SizedBox(width: 8),
                         Text('Clear Budget',
-                            style: TextStyle(color: Colors.red)),
+                            style: TextStyle(color: WalletMeltColors.danger)),
                       ],
                     ),
                   ),
@@ -228,59 +235,41 @@ class _BudgetScreenState extends State<BudgetScreen> {
           ),
           const SizedBox(height: 10),
 
-          // Linear Progress Indicator
-          ClipRRect(
-            borderRadius: BorderRadius.circular(6),
-            child: SizedBox(
-              height: 12,
-              child: LinearProgressIndicator(
-                value: ratio.clamp(0.0, 1.0),
-                backgroundColor: isDark
-                    ? const Color.fromRGBO(255, 255, 255, 0.08)
-                    : const Color.fromRGBO(0, 0, 0, 0.06),
-                valueColor: AlwaysStoppedAnimation<Color>(budgetColor),
-              ),
-            ),
-          ),
+          ProgressBar(fraction: ratio, color: budgetColor, height: 12),
           if (isOverBudget) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             Text(
               'You exceeded your budget this month.',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: WalletMeltColors.danger,
-                      ) ??
-                  const TextStyle(color: WalletMeltColors.danger, fontSize: 12),
+                    color: WalletMeltColors.danger,
+                  ),
             ),
           ],
-          const SizedBox(height: 20),
+          const SizedBox(height: AppSpacing.md + 4),
 
-          // Stats Chips Row
           Row(
             children: [
               Expanded(
-                child: _buildStatTile(
-                  'Spent',
-                  formatMoney(totalSpent, state.settings.currency),
-                  context,
+                child: StatTile(
+                  label: 'Spent',
+                  value: formatMoney(totalSpent, state.settings.currency),
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: AppSpacing.sm),
               Expanded(
-                child: _buildStatTile(
-                  isOverBudget ? 'Over by' : 'Remaining',
-                  isOverBudget
+                child: StatTile(
+                  label: isOverBudget ? 'Over by' : 'Remaining',
+                  value: isOverBudget
                       ? formatMoney(-remaining, state.settings.currency)
                       : formatMoney(remaining, state.settings.currency),
-                  context,
                   valueColor: isOverBudget ? WalletMeltColors.danger : null,
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: AppSpacing.sm),
               Expanded(
-                child: _buildStatTile(
-                  'Days Left',
-                  '$daysLeft',
-                  context,
+                child: StatTile(
+                  label: 'Days Left',
+                  value: '$daysLeft',
                 ),
               ),
             ],
@@ -290,77 +279,26 @@ class _BudgetScreenState extends State<BudgetScreen> {
     );
   }
 
-  Widget _buildStatTile(String label, String value, BuildContext context,
-      {Color? valueColor}) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-      decoration: BoxDecoration(
-        color: isDark
-            ? const Color.fromRGBO(255, 255, 255, 0.04)
-            : const Color.fromRGBO(0, 0, 0, 0.02),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        children: [
-          Text(
-            label,
-            style:
-                Theme.of(context).textTheme.labelMedium?.copyWith(fontSize: 11),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 6),
-          Text(
-            value,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: valueColor,
-                  fontSize: 14,
-                ),
-          ),
-        ],
-      ),
-    );
-  }
+  // _buildStatTile replaced by shared StatTile widget from lib/src/widgets/stat_tile.dart
 
   Widget _buildCategoryBudgetsSection(BuildContext context, AppState state) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Category Budgets',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'Optional — track spending limits by category',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ],
-            ),
-            IconButton.filledTonal(
-              onPressed: () => _showCategoryBudgetSheet(context, state, null),
-              icon: const Icon(Icons.add_rounded),
-            ),
-          ],
+        SectionHeader(
+          title: 'Category Budgets',
+          icon: Icons.pie_chart_outline_rounded,
+          trailing: IconButton.filledTonal(
+            onPressed: () => _showCategoryBudgetSheet(context, state, null),
+            icon: const Icon(Icons.add_rounded),
+          ),
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: AppSpacing.sm + 2),
         if (state.currentBudgets.isEmpty)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 24),
-            child: Center(
-              child: Text(
-                'No category budgets for this month. Tap + to add one.',
-                style: Theme.of(context).textTheme.bodyMedium,
-                textAlign: TextAlign.center,
-              ),
-            ),
+          const EmptyState(
+            icon: Icons.pie_chart_outline_rounded,
+            title: 'No category budgets set',
+            subtitle: 'Add a budget for a specific spending category.',
           )
         else
           Column(
@@ -386,7 +324,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
     final isOverBudget = remaining < 0;
 
     final ratio = budget.amount > 0 ? spent / budget.amount : 0.0;
-    final progressColor = _getBudgetColor(ratio);
+    final progressColor = budgetProgressColor(ratio);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -440,21 +378,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
               ],
             ),
             const SizedBox(height: 8),
-            // Linear Progress Indicator
-            ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: SizedBox(
-                height: 8,
-                child: LinearProgressIndicator(
-                  value: ratio.clamp(0.0, 1.0),
-                  backgroundColor:
-                      Theme.of(context).brightness == Brightness.dark
-                          ? const Color.fromRGBO(255, 255, 255, 0.06)
-                          : const Color.fromRGBO(0, 0, 0, 0.04),
-                  valueColor: AlwaysStoppedAnimation<Color>(progressColor),
-                ),
-              ),
-            ),
+            ProgressBar(fraction: ratio, color: progressColor),
           ],
         ),
       ),
@@ -476,17 +400,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
     return spent;
   }
 
-  Color _getBudgetColor(double ratio) {
-    if (ratio < 0.70) {
-      return WalletMeltColors.positive;
-    } else if (ratio < 0.90) {
-      return WalletMeltColors.brand;
-    } else if (ratio <= 1.0) {
-      return WalletMeltColors.warning;
-    } else {
-      return WalletMeltColors.danger;
-    }
-  }
+  // _getBudgetColor removed — use top-level budgetProgressColor() from wallet_melt_theme.dart
 
   int _getDaysLeftInMonth(DateTime month) {
     final now = DateTime.now();
@@ -511,23 +425,26 @@ class _BudgetScreenState extends State<BudgetScreen> {
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      showDragHandle: true,
       builder: (context) {
         return SingleChildScrollView(
           child: Padding(
             padding: EdgeInsets.fromLTRB(
-                20, 8, 20, 20 + MediaQuery.of(context).viewInsets.bottom),
+                AppSpacing.lg,
+                AppSpacing.sm,
+                AppSpacing.lg,
+                AppSpacing.lg + MediaQuery.of(context).viewInsets.bottom),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const SheetHandle(),
                 Text(
                   currentAmount != null
                       ? 'Edit Monthly Budget'
                       : 'Set Monthly Budget',
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.sm),
                 TextField(
                   controller: controller,
                   keyboardType:
@@ -538,7 +455,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                     hintText: 'e.g. 50000',
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: AppSpacing.md + 4),
                 Row(
                   children: [
                     Expanded(
@@ -546,37 +463,32 @@ class _BudgetScreenState extends State<BudgetScreen> {
                         style: OutlinedButton.styleFrom(
                           minimumSize: const Size.fromHeight(50),
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(18)),
+                              borderRadius: BorderRadius.circular(
+                                  AppSpacing.buttonRadius)),
                         ),
                         onPressed: () => Navigator.pop(context),
                         child: const Text('Cancel'),
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           minimumSize: const Size.fromHeight(50),
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(18)),
+                              borderRadius: BorderRadius.circular(
+                                  AppSpacing.buttonRadius)),
                         ),
                         onPressed: () async {
                           final parsed =
                               double.tryParse(controller.text.trim());
                           if (parsed == null || parsed <= 0) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                    'Please enter a valid amount greater than 0.'),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
+                            showErrorSnackbar(context,
+                                'Please enter a valid amount greater than 0.');
                             return;
                           }
                           await state.setMonthlyBudgetAmount(parsed);
-                          if (context.mounted) {
-                            Navigator.pop(context);
-                          }
+                          if (context.mounted) Navigator.pop(context);
                         },
                         child: const Text('Save'),
                       ),
@@ -594,28 +506,14 @@ class _BudgetScreenState extends State<BudgetScreen> {
 
   // Clear total budget confirmation
   Future<void> _confirmClearBudget(BuildContext context, AppState state) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Clear Monthly Budget?'),
-          content: const Text(
-              'This will clear the monthly spend ceiling. Your expenses and category budgets will remain intact.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              style: TextButton.styleFrom(foregroundColor: Colors.red),
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('Clear'),
-            ),
-          ],
-        );
-      },
+    final confirm = await showConfirmDialog(
+      context,
+      title: 'Clear Monthly Budget?',
+      body:
+          'This will clear the monthly spend ceiling. Your expenses and category budgets will remain intact.',
+      confirmLabel: 'Clear',
+      isDestructive: true,
     );
-
     if (confirm == true) {
       await state.clearMonthlyBudgetAmount();
     }
@@ -635,7 +533,6 @@ class _BudgetScreenState extends State<BudgetScreen> {
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      showDragHandle: true,
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setSheetState) {
@@ -643,11 +540,15 @@ class _BudgetScreenState extends State<BudgetScreen> {
             return SingleChildScrollView(
               child: Padding(
                 padding: EdgeInsets.fromLTRB(
-                    20, 8, 20, 20 + MediaQuery.of(context).viewInsets.bottom),
+                    AppSpacing.lg,
+                    AppSpacing.sm,
+                    AppSpacing.lg,
+                    AppSpacing.lg + MediaQuery.of(context).viewInsets.bottom),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    const SheetHandle(),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -660,13 +561,13 @@ class _BudgetScreenState extends State<BudgetScreen> {
                         if (isEdit)
                           IconButton(
                             icon: const Icon(Icons.delete_outline_rounded,
-                                color: Colors.red),
+                                color: WalletMeltColors.danger),
                             onPressed: () => _confirmDeleteCategoryBudget(
                                 context, state, existingBudget),
                           ),
                       ],
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: AppSpacing.sm + 2),
 
                     // Category selector dropdown
                     DropdownButtonFormField<String>(
@@ -683,7 +584,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                           ? null // Category is read-only during edit
                           : (val) => setSheetState(() => categoryId = val),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.sm),
 
                     // Amount textfield
                     TextField(
@@ -695,7 +596,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                         hintText: 'e.g. 5000',
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: AppSpacing.md + 4),
 
                     Row(
                       children: [
@@ -704,19 +605,21 @@ class _BudgetScreenState extends State<BudgetScreen> {
                             style: OutlinedButton.styleFrom(
                               minimumSize: const Size.fromHeight(50),
                               shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(18)),
+                                  borderRadius: BorderRadius.circular(
+                                      AppSpacing.buttonRadius)),
                             ),
                             onPressed: () => Navigator.pop(context),
                             child: const Text('Cancel'),
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: AppSpacing.sm),
                         Expanded(
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               minimumSize: const Size.fromHeight(50),
                               shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(18)),
+                                  borderRadius: BorderRadius.circular(
+                                      AppSpacing.buttonRadius)),
                             ),
                             onPressed: () async {
                               final parsed =
@@ -724,42 +627,26 @@ class _BudgetScreenState extends State<BudgetScreen> {
                               if (categoryId == null ||
                                   parsed == null ||
                                   parsed <= 0) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                        'Please select a category and enter an amount > 0.'),
-                                    backgroundColor: Colors.red,
-                                  ),
-                                );
+                                showErrorSnackbar(context,
+                                    'Please select a category and enter an amount > 0.');
                                 return;
                               }
-
-                              // Duplicate validation (only for new budgets)
                               if (!isEdit) {
                                 final duplicate = state.currentBudgets
                                     .any((b) => b.categoryId == categoryId);
                                 if (duplicate) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                          'Budget already exists for this category this month. Edit it instead.'),
-                                      backgroundColor: Colors.red,
-                                    ),
-                                  );
+                                  showErrorSnackbar(context,
+                                      'Budget already exists for this category this month. Edit it instead.');
                                   return;
                                 }
                               }
-
                               final month = monthKey(state.selectedMonth);
                               await state.setCategoryBudget(
                                 categoryId: categoryId!,
                                 amount: parsed,
                                 month: month,
                               );
-
-                              if (context.mounted) {
-                                Navigator.pop(context);
-                              }
+                              if (context.mounted) Navigator.pop(context);
                             },
                             child: const Text('Save'),
                           ),
@@ -774,35 +661,20 @@ class _BudgetScreenState extends State<BudgetScreen> {
         );
       },
     );
-
     amountController.dispose();
   }
 
   // Delete category budget confirmation
   Future<void> _confirmDeleteCategoryBudget(
       BuildContext context, AppState state, CategoryBudget budget) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Delete Category Budget?'),
-          content: const Text(
-              'Are you sure you want to remove the spend limit for this category? This will not affect your expenses.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              style: TextButton.styleFrom(foregroundColor: Colors.red),
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('Delete'),
-            ),
-          ],
-        );
-      },
+    final confirm = await showConfirmDialog(
+      context,
+      title: 'Delete Category Budget?',
+      body:
+          'Are you sure you want to remove the spend limit for this category? This will not affect your expenses.',
+      confirmLabel: 'Delete',
+      isDestructive: true,
     );
-
     if (confirm == true && context.mounted) {
       Navigator.pop(context); // Close the bottom sheet
       await state.clearCategoryBudget(

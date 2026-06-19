@@ -44,10 +44,6 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/brand/walletmelt_app_icon.webp
-    - assets/brand/walletmelt_main_logo_mono.webp
-    - assets/brand/walletmelt_main_logo.webp
-    - assets/brand/walletmelt_icon_only_mark.webp
     - assets/brand/optimized/walletmelt_main_logo_960.webp
 
 flutter_launcher_icons:
