@@ -426,6 +426,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      useRootNavigator: true,
       builder: (context) {
         return SingleChildScrollView(
           child: Padding(
@@ -534,6 +535,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      useRootNavigator: true,
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setSheetState) {

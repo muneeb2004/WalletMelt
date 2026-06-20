@@ -61,13 +61,40 @@ class AppShell extends StatelessWidget {
       ),
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 84),
-        child: FloatingActionButton(
-          heroTag: 'add-expense',
-          tooltip: 'Add expense',
-          backgroundColor: WalletMeltColors.brand,
-          foregroundColor: WalletMeltColors.textPrimary,
-          onPressed: () => context.push('/expense/new'),
-          child: const Icon(Icons.add_rounded),
+        child: Container(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFFFCD34D), // Soft golden brand highlight
+                Color(0xFFF59E0B), // Premium amber brand shade
+              ],
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFFF59E0B).withValues(alpha: 0.36),
+                blurRadius: 18,
+                offset: const Offset(0, 8),
+              ),
+              BoxShadow(
+                color: const Color(0xFFB87912).withValues(alpha: 0.20),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: FloatingActionButton(
+            elevation: 0,
+            hoverElevation: 0,
+            focusElevation: 0,
+            highlightElevation: 0,
+            backgroundColor: Colors.transparent,
+            foregroundColor: WalletMeltColors.textPrimary,
+            onPressed: () => context.push('/expense/new'),
+            child: const Icon(Icons.add_rounded, size: 28),
+          ),
         ),
       ),
     );

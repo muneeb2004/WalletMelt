@@ -196,31 +196,36 @@ class LiquidGlass extends StatelessWidget {
         ? const Color.fromRGBO(255, 255, 255, 0.16)
         : const Color.fromRGBO(255, 255, 255, 0.64);
 
-    final content = ClipRRect(
-      borderRadius: BorderRadius.circular(radius),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: fillGradient,
-            borderRadius: BorderRadius.circular(radius),
-            border: Border.all(color: borderColor, width: 1.1),
-            boxShadow: [
-              // Broad soft ambient occlusion shadow
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.28 : 0.04),
-                blurRadius: 32,
-                offset: const Offset(0, 16),
-              ),
-              // Crisp contact shadow for depth separation
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.20 : 0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
+    final content = Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(radius),
+        boxShadow: [
+          // Broad soft ambient occlusion shadow
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.36 : 0.08),
+            blurRadius: 36,
+            offset: const Offset(0, 16),
           ),
-          child: Padding(padding: padding, child: child),
+          // Crisp contact shadow for depth separation
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.24 : 0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(radius),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: fillGradient,
+              borderRadius: BorderRadius.circular(radius),
+              border: Border.all(color: borderColor, width: 1.2),
+            ),
+            child: Padding(padding: padding, child: child),
+          ),
         ),
       ),
     );
