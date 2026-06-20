@@ -69,14 +69,29 @@ class WalletMeltTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: scheme.brightness == Brightness.dark
-            ? const Color(0xFF232323)
-            : Colors.white.withValues(alpha: 0.76),
+            ? const Color(0xFF16161C).withValues(alpha: 0.6)
+            : Colors.white.withValues(alpha: 0.6),
         border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(18),
-            borderSide: BorderSide.none),
+          borderRadius: BorderRadius.circular(18),
+          borderSide: BorderSide(
+            color: scheme.brightness == Brightness.dark
+                ? const Color.fromRGBO(255, 255, 255, 0.08)
+                : const Color.fromRGBO(0, 0, 0, 0.06),
+            width: 1.2,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: BorderSide(
+            color: scheme.brightness == Brightness.dark
+                ? const Color.fromRGBO(255, 255, 255, 0.08)
+                : const Color.fromRGBO(0, 0, 0, 0.06),
+            width: 1.2,
+          ),
+        ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: BorderSide(color: scheme.primary, width: 1.4),
+          borderSide: BorderSide(color: scheme.primary, width: 1.6),
         ),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -88,6 +103,24 @@ class WalletMeltTheme {
           minimumSize: const Size.fromHeight(52),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          textStyle: const TextStyle(fontWeight: FontWeight.w800),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: scheme.primary,
+          side: BorderSide(color: scheme.primary.withValues(alpha: 0.28), width: 1.4),
+          minimumSize: const Size.fromHeight(52),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          textStyle: const TextStyle(fontWeight: FontWeight.w800),
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: scheme.primary,
+          foregroundColor: scheme.brightness == Brightness.dark ? Colors.black : Colors.white,
+          minimumSize: const Size.fromHeight(52),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
           textStyle: const TextStyle(fontWeight: FontWeight.w800),
         ),
       ),
@@ -191,18 +224,49 @@ class LiquidGlass extends StatelessWidget {
             stops: const [0.0, 1.0],
           );
 
-    // Light-reflecting thin highlight edge
-    final borderColor = isDark
-        ? const Color.fromRGBO(255, 255, 255, 0.16)
-        : const Color.fromRGBO(255, 255, 255, 0.64);
+    // Light-reflecting thin highlight edge gradient
+    final borderGradient = isDark
+        ? LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              const Color(0xFFFFFFFF).withValues(alpha: 0.24),
+              const Color(0xFFFFFFFF).withValues(alpha: 0.04),
+            ],
+          )
+        : LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              const Color(0xFFFFFFFF).withValues(alpha: 0.72),
+              const Color(0xFFFFFFFF).withValues(alpha: 0.12),
+            ],
+          );
 
     final innerContainer = Container(
       decoration: BoxDecoration(
         gradient: fillGradient,
-        borderRadius: BorderRadius.circular(radius),
-        border: Border.all(color: borderColor, width: 1.2),
+        borderRadius: BorderRadius.circular(radius - 1.2),
       ),
-      child: Padding(padding: padding, child: child),
+      child: onTap == null
+          ? Padding(padding: padding, child: child)
+          : Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(radius - 1.2),
+                onTap: onTap,
+                child: Padding(padding: padding, child: child),
+              ),
+            ),
+    );
+
+    final borderContainer = Container(
+      padding: const EdgeInsets.all(1.2), // simulating a 1.2px thick border
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(radius),
+        gradient: borderGradient,
+      ),
+      child: innerContainer,
     );
 
     final Widget glassContent = blur > 0.0
@@ -214,12 +278,12 @@ class LiquidGlass extends StatelessWidget {
                 sigmaY: blur,
                 tileMode: TileMode.decal,
               ),
-              child: innerContainer,
+              child: borderContainer,
             ),
           )
-        : innerContainer;
+        : borderContainer;
 
-    final content = Container(
+    return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(radius),
         boxShadow: [
@@ -238,16 +302,6 @@ class LiquidGlass extends StatelessWidget {
         ],
       ),
       child: glassContent,
-    );
-
-    if (onTap == null) return content;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(radius),
-        onTap: onTap,
-        child: content,
-      ),
     );
   }
 }

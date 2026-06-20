@@ -260,18 +260,23 @@ class _CategoryAllChip extends StatelessWidget {
       child: AnimatedScale(
         duration: const Duration(milliseconds: 160),
         scale: selected ? 1.03 : 1.0,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(999),
-          onTap: onTap,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 180),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: BoxDecoration(
-              color: fill,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          decoration: BoxDecoration(
+            color: fill,
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(color: border, width: 1.2),
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
               borderRadius: BorderRadius.circular(999),
-              border: Border.all(color: border),
+              onTap: onTap,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                child: Text('All', style: Theme.of(context).textTheme.labelLarge),
+              ),
             ),
-            child: Text('All', style: Theme.of(context).textTheme.labelLarge),
           ),
         ),
       ),

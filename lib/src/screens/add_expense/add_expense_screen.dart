@@ -334,16 +334,53 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                         decoration: const InputDecoration(labelText: 'Name')),
                     const SizedBox(height: 12),
                     Wrap(
-                      spacing: 10,
+                      spacing: 12,
+                      runSpacing: 12,
                       children: [
                         for (final color in colors)
-                          ChoiceChip(
-                            label: const Text(''),
-                            selected: selectedColor == color,
-                            avatar: CircleAvatar(
-                                backgroundColor: colorFromHex(color)),
-                            onSelected: (_) =>
-                                setSheetState(() => selectedColor = color),
+                          GestureDetector(
+                            onTap: () => setSheetState(() => selectedColor = color),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              curve: Curves.easeOutBack,
+                              width: 44,
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: colorFromHex(color),
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: selectedColor == color
+                                      ? (Theme.of(context).brightness == Brightness.dark
+                                          ? Colors.white
+                                          : Colors.black)
+                                      : Colors.transparent,
+                                  width: 2.5,
+                                ),
+                                boxShadow: selectedColor == color
+                                    ? [
+                                        BoxShadow(
+                                          color: colorFromHex(color).withValues(alpha: 0.4),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ]
+                                    : [],
+                              ),
+                              child: selectedColor == color
+                                  ? Icon(
+                                      Icons.check_rounded,
+                                      color: Colors.white,
+                                      size: 20,
+                                      shadows: [
+                                        Shadow(
+                                          color: Colors.black.withValues(alpha: 0.5),
+                                          offset: const Offset(0, 1),
+                                          blurRadius: 2,
+                                        ),
+                                      ],
+                                    )
+                                  : null,
+                            ),
                           ),
                       ],
                     ),

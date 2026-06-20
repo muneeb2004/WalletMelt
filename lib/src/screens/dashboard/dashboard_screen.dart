@@ -207,6 +207,7 @@ class _ComparisonBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final total = leftValue + rightValue;
     final leftPercent = total == 0 ? 0.5 : leftValue / total;
     final leftFlex = (leftPercent * 100).round().clamp(1, 99).toInt();
@@ -216,27 +217,90 @@ class _ComparisonBar extends StatelessWidget {
         ClipRRect(
           borderRadius: BorderRadius.circular(999),
           child: SizedBox(
-            height: 16,
+            height: 12,
             child: Row(
               children: [
                 Expanded(
-                    flex: leftFlex,
-                    child: const ColoredBox(color: WalletMeltColors.positive)),
+                  flex: leftFlex,
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Color(0xFF8FD6B5),
+                          Color(0xFF5AB693),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                Container(
+                  width: 2,
+                  color: isDark ? const Color(0xFF1E1E24) : Colors.white,
+                ),
                 Expanded(
-                    flex: rightFlex,
-                    child: const ColoredBox(color: WalletMeltColors.brand)),
+                  flex: rightFlex,
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Color(0xFFFFD98A),
+                          Color(0xFFF4B740),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
         ),
-        const SizedBox(height: AppSpacing.sm),
+        const SizedBox(height: AppSpacing.sm + 2),
         Row(
           children: [
             Expanded(
-                child: Text('$leftLabel\n${formatMoney(leftValue, currency)}')),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    leftLabel,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.8),
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    formatMoney(leftValue, currency),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: WalletMeltColors.positive,
+                          fontSize: 15,
+                        ),
+                  ),
+                ],
+              ),
+            ),
             Expanded(
-                child: Text('$rightLabel\n${formatMoney(rightValue, currency)}',
-                    textAlign: TextAlign.end)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    rightLabel,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.8),
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    formatMoney(rightValue, currency),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: WalletMeltColors.brand,
+                          fontSize: 15,
+                        ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ],
@@ -270,17 +334,14 @@ class _DashboardBudgetCard extends StatelessWidget {
                 "This Month's Budget",
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
-              InkWell(
-                onTap: () => context.go('/budget'),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: AppSpacing.xs, horizontal: AppSpacing.sm),
-                  child: Text(
-                    'Details →',
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                  ),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                    vertical: AppSpacing.xs, horizontal: AppSpacing.sm),
+                child: Text(
+                  'Details →',
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                 ),
               ),
             ],

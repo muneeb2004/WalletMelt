@@ -100,41 +100,70 @@ class AppShell extends StatelessWidget {
         ),
       ],
     ),
-    floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 84),
-        child: Container(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Color(0xFFFCD34D), // Soft golden brand highlight
-                Color(0xFFF59E0B), // Premium amber brand shade
+    floatingActionButton: const _AppFloatingActionButton(),
+    );
+  }
+}
+
+class _AppFloatingActionButton extends StatefulWidget {
+  const _AppFloatingActionButton();
+
+  @override
+  State<_AppFloatingActionButton> createState() => _AppFloatingActionButtonState();
+}
+
+class _AppFloatingActionButtonState extends State<_AppFloatingActionButton> {
+  double _scale = 1.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 84),
+      child: GestureDetector(
+        onTapDown: (_) => setState(() => _scale = 0.90),
+        onTapUp: (_) => setState(() => _scale = 1.0),
+        onTapCancel: () => setState(() => _scale = 1.0),
+        child: AnimatedScale(
+          scale: _scale,
+          duration: const Duration(milliseconds: 100),
+          curve: Curves.easeInOut,
+          child: Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFFFCD34D), // Soft golden brand highlight
+                  Color(0xFFF59E0B), // Premium amber brand shade
+                ],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFFF59E0B).withValues(alpha: 0.36),
+                  blurRadius: 18,
+                  offset: const Offset(0, 8),
+                ),
+                BoxShadow(
+                  color: const Color(0xFFB87912).withValues(alpha: 0.20),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
               ],
             ),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFFF59E0B).withValues(alpha: 0.36),
-                blurRadius: 18,
-                offset: const Offset(0, 8),
+            child: RawMaterialButton(
+              shape: const CircleBorder(),
+              elevation: 0,
+              fillColor: Colors.transparent,
+              onPressed: () => context.push('/expense/new'),
+              child: const Icon(
+                Icons.add_rounded,
+                size: 28,
+                color: WalletMeltColors.textPrimary,
               ),
-              BoxShadow(
-                color: const Color(0xFFB87912).withValues(alpha: 0.20),
-                blurRadius: 6,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: FloatingActionButton(
-            elevation: 0,
-            hoverElevation: 0,
-            focusElevation: 0,
-            highlightElevation: 0,
-            backgroundColor: Colors.transparent,
-            foregroundColor: WalletMeltColors.textPrimary,
-            onPressed: () => context.push('/expense/new'),
-            child: const Icon(Icons.add_rounded, size: 28),
+            ),
           ),
         ),
       ),

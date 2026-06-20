@@ -55,13 +55,62 @@ class InsightsScreen extends StatelessWidget {
                     const SizedBox(height: AppSpacing.sm),
                     Text(formatMoney(insights.total, state.settings.currency),
                         style: Theme.of(context).textTheme.displaySmall),
-                    const SizedBox(height: AppSpacing.sm),
-                    Text(
-                      insights.monthOverMonthDelta == null
-                          ? 'Add another month of expenses to compare trends.'
-                          : '${insights.monthOverMonthDelta! >= 0 ? '+' : ''}${insights.monthOverMonthDelta!.toStringAsFixed(1)}% vs previous month',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
+                    if (insights.monthOverMonthDelta != null) ...[
+                      const SizedBox(height: AppSpacing.sm + 2),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: insights.monthOverMonthDelta! <= 0
+                              ? WalletMeltColors.positive.withValues(alpha: 0.16)
+                              : WalletMeltColors.danger.withValues(alpha: 0.16),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: insights.monthOverMonthDelta! <= 0
+                                ? WalletMeltColors.positive.withValues(alpha: 0.28)
+                                : WalletMeltColors.danger.withValues(alpha: 0.28),
+                            width: 1.0,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              insights.monthOverMonthDelta! <= 0
+                                  ? Icons.trending_down_rounded
+                                  : Icons.trending_up_rounded,
+                              color: insights.monthOverMonthDelta! <= 0
+                                  ? (Theme.of(context).brightness == Brightness.dark
+                                      ? WalletMeltColors.positive
+                                      : const Color(0xFF1E7E52))
+                                  : (Theme.of(context).brightness == Brightness.dark
+                                      ? WalletMeltColors.danger
+                                      : const Color(0xFFC0392B)),
+                              size: 16,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              '${insights.monthOverMonthDelta! >= 0 ? '+' : ''}${insights.monthOverMonthDelta!.toStringAsFixed(1)}% vs previous month',
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    fontWeight: FontWeight.w800,
+                                    color: insights.monthOverMonthDelta! <= 0
+                                        ? (Theme.of(context).brightness == Brightness.dark
+                                            ? Colors.white
+                                            : const Color(0xFF1E7E52))
+                                        : (Theme.of(context).brightness == Brightness.dark
+                                            ? Colors.white
+                                            : const Color(0xFFC0392B)),
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ] else ...[
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        'Add another month of expenses to compare trends.',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ],
                   ],
                 ),
               ),
