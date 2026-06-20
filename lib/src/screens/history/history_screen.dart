@@ -115,10 +115,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       scrollDirection: Axis.horizontal,
                       child: Row(
                         children: [
-                          FilterChip(
-                              label: const Text('All'),
+                          _CategoryAllChip(
                               selected: _categoryId == null,
-                              onSelected: (_) =>
+                              onTap: () =>
                                   setState(() => _categoryId = null)),
                           const SizedBox(width: AppSpacing.sm),
                           for (final category in state.categories) ...[
@@ -227,5 +226,51 @@ class _HistoryScreenState extends State<HistoryScreen> {
       };
     });
     return result;
+  }
+}
+
+class _CategoryAllChip extends StatelessWidget {
+  const _CategoryAllChip({required this.selected, required this.onTap});
+
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final color = Theme.of(context).colorScheme.primary;
+    final fill = selected
+        ? color.withValues(alpha: 0.28)
+        : (isDark
+            ? const Color(0xFF1E1E24).withValues(alpha: 0.48)
+            : Colors.white.withValues(alpha: 0.42));
+    final border = selected
+        ? color
+        : (isDark
+            ? const Color.fromRGBO(255, 255, 255, 0.12)
+            : Colors.white.withValues(alpha: 0.4));
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: 'All categories',
+      child: AnimatedScale(
+        duration: const Duration(milliseconds: 160),
+        scale: selected ? 1.03 : 1.0,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(999),
+          onTap: onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: fill,
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(color: border),
+            ),
+            child: Text('All', style: Theme.of(context).textTheme.labelLarge),
+          ),
+        ),
+      ),
+    );
   }
 }

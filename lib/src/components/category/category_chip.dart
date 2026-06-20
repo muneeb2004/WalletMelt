@@ -17,7 +17,18 @@ class WalletCategoryChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final color = colorFromHex(category.color);
+    final fill = selected
+        ? color.withValues(alpha: 0.28)
+        : (isDark
+            ? const Color(0xFF1E1E24).withValues(alpha: 0.48)
+            : Colors.white.withValues(alpha: 0.42));
+    final border = selected
+        ? color
+        : (isDark
+            ? const Color.fromRGBO(255, 255, 255, 0.12)
+            : Colors.white.withValues(alpha: 0.4));
     return Semantics(
       button: true,
       selected: selected,
@@ -32,13 +43,9 @@ class WalletCategoryChip extends StatelessWidget {
             duration: const Duration(milliseconds: 180),
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
-              color: selected
-                  ? color.withValues(alpha: 0.28)
-                  : Colors.white.withValues(alpha: 0.42),
+              color: fill,
               borderRadius: BorderRadius.circular(999),
-              border: Border.all(
-                  color:
-                      selected ? color : Colors.white.withValues(alpha: 0.4)),
+              border: Border.all(color: border),
             ),
             child: Text(category.name,
                 style: Theme.of(context).textTheme.labelLarge),

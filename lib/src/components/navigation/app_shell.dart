@@ -24,42 +24,83 @@ class AppShell extends StatelessWidget {
                 radius: 999,
                 blur: 32,
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _NavItem(
-                        icon: Icons.dashboard_rounded,
-                        label: 'Home',
-                        index: 0,
-                        shell: navigationShell),
-                    _NavItem(
-                        icon: Icons.receipt_long_rounded,
-                        label: 'History',
-                        index: 1,
-                        shell: navigationShell),
-                    _NavItem(
-                        icon: Icons.account_balance_wallet_rounded,
-                        label: 'Budget',
-                        index: 2,
-                        shell: navigationShell),
-                    _NavItem(
-                        icon: Icons.insights_rounded,
-                        label: 'Insights',
-                        index: 3,
-                        shell: navigationShell),
-                    _NavItem(
-                        icon: Icons.tune_rounded,
-                        label: 'Settings',
-                        index: 4,
-                        shell: navigationShell),
-                  ],
-                ),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final totalWidth = constraints.maxWidth;
+                  final tabWidth = totalWidth / 5;
+                  final activeIndex = navigationShell.currentIndex;
+
+                  return Stack(
+                    children: [
+                      // Smoothly sliding active indicator tab background
+                      AnimatedPositioned(
+                        duration: const Duration(milliseconds: 320),
+                        curve: Curves.easeOutBack,
+                        left: activeIndex * tabWidth,
+                        width: tabWidth,
+                        top: 0,
+                        bottom: 0,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .primary
+                                  .withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(999),
+                              border: Border.all(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withValues(alpha: 0.18),
+                                width: 1.0,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Tab Items Row
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          _NavItem(
+                              icon: Icons.dashboard_rounded,
+                              label: 'Home',
+                              index: 0,
+                              shell: navigationShell),
+                          _NavItem(
+                              icon: Icons.receipt_long_rounded,
+                              label: 'History',
+                              index: 1,
+                              shell: navigationShell),
+                          _NavItem(
+                              icon: Icons.account_balance_wallet_rounded,
+                              label: 'Budget',
+                              index: 2,
+                              shell: navigationShell),
+                          _NavItem(
+                              icon: Icons.insights_rounded,
+                              label: 'Insights',
+                              index: 3,
+                              shell: navigationShell),
+                          _NavItem(
+                              icon: Icons.tune_rounded,
+                              label: 'Settings',
+                              index: 4,
+                              shell: navigationShell),
+                        ],
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
           ),
-        ],
-      ),
-      floatingActionButton: Padding(
+        ),
+      ],
+    ),
+    floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 84),
         child: Container(
           decoration: BoxDecoration(
@@ -131,15 +172,10 @@ class _NavItem extends StatelessWidget {
           borderRadius: BorderRadius.circular(999),
           onTap: () => shell.goBranch(index,
               initialLocation: index == shell.currentIndex),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 220),
-            curve: Curves.easeOutCubic,
+          child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-            decoration: BoxDecoration(
-              color: active
-                  ? colorScheme.primary.withValues(alpha: 0.12)
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(999),
+            decoration: const BoxDecoration(
+              color: Colors.transparent,
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
