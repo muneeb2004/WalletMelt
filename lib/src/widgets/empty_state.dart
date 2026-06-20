@@ -10,12 +10,16 @@ class EmptyState extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.subtitle,
+    this.actionLabel,
+    this.onActionPressed,
     super.key,
   });
 
   final IconData icon;
   final String title;
   final String subtitle;
+  final String? actionLabel;
+  final VoidCallback? onActionPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -65,6 +69,43 @@ class EmptyState extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
             ),
+            if (actionLabel != null && onActionPressed != null) ...[
+              const SizedBox(height: AppSpacing.md + 4),
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(999),
+                  gradient: const LinearGradient(
+                    colors: [
+                      Color(0xFFFCD34D),
+                      Color(0xFFF59E0B),
+                    ],
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFF59E0B).withValues(alpha: 0.28),
+                      blurRadius: 12,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(180, 46),
+                    backgroundColor: Colors.transparent,
+                    foregroundColor: WalletMeltColors.textPrimary,
+                    shadowColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
+                  onPressed: onActionPressed,
+                  child: Text(
+                    actionLabel!,
+                    style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14),
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),

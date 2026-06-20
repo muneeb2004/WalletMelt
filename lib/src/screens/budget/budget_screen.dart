@@ -112,40 +112,12 @@ class _BudgetScreenState extends State<BudgetScreen> {
   }
 
   Widget _buildEmptyHeroCard(BuildContext context, AppState state) {
-    return LiquidGlass(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        children: [
-          const Icon(
-            Icons.savings_outlined,
-            size: 48,
-            color: WalletMeltColors.brand,
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'No monthly budget set',
-            style: Theme.of(context).textTheme.titleLarge,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Set a monthly limit to track your total spending.',
-            style: Theme.of(context).textTheme.bodyMedium,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          ElevatedButton.icon(
-            style: ElevatedButton.styleFrom(
-              minimumSize: const Size(180, 48),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.buttonRadius)),
-            ),
-            onPressed: () => _showSetBudgetSheet(context, state, null),
-            icon: const Icon(Icons.add_rounded),
-            label: const Text('Set Budget'),
-          ),
-        ],
-      ),
+    return EmptyState(
+      icon: Icons.savings_outlined,
+      title: 'No monthly budget set',
+      subtitle: 'Set a monthly limit to track your total spending.',
+      actionLabel: 'Set Budget',
+      onActionPressed: () => _showSetBudgetSheet(context, state, null),
     );
   }
 
