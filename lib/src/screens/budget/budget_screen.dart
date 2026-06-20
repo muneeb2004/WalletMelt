@@ -548,6 +548,10 @@ class _BudgetScreenState extends State<BudgetScreen> {
                     DropdownButtonFormField<String>(
                       initialValue: categoryId,
                       decoration: const InputDecoration(labelText: 'Category'),
+                      dropdownColor: Theme.of(context).brightness == Brightness.dark
+                          ? const Color(0xFF1E1E24)
+                          : Colors.white,
+                      borderRadius: BorderRadius.circular(20),
                       items: [
                         for (final cat in state.categories)
                           DropdownMenuItem(

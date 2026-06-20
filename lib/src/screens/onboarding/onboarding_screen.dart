@@ -68,6 +68,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       labelText: 'Default Currency',
                       contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                     ),
+                    dropdownColor: Theme.of(context).brightness == Brightness.dark
+                        ? const Color(0xFF1E1E24)
+                        : Colors.white,
+                    borderRadius: BorderRadius.circular(20),
                     items: [
                       for (final currency in defaultCurrencyCodes)
                         DropdownMenuItem(

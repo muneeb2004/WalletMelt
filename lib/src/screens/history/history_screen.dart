@@ -137,6 +137,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     DropdownButtonFormField<ExpenseSort>(
                       initialValue: _sort,
                       decoration: const InputDecoration(labelText: 'Sort'),
+                      dropdownColor: Theme.of(context).brightness == Brightness.dark
+                          ? const Color(0xFF1E1E24)
+                          : Colors.white,
+                      borderRadius: BorderRadius.circular(20),
                       items: const [
                         DropdownMenuItem(
                             value: ExpenseSort.newest, child: Text('Newest')),

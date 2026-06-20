@@ -140,15 +140,29 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                           color: Theme.of(context).colorScheme.error))),
             const SizedBox(height: 18),
             LiquidGlass(
-              padding: const EdgeInsets.all(16),
+              onTap: _pickDate,
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
               child: Row(
                 children: [
-                  const Icon(Icons.calendar_month_rounded),
+                  const Icon(Icons.calendar_month_rounded, color: WalletMeltColors.brandDeep),
                   const SizedBox(width: 12),
                   Expanded(
-                      child: Text('${_date.day}/${_date.month}/${_date.year}',
-                          style: Theme.of(context).textTheme.titleMedium)),
-                  TextButton(onPressed: _pickDate, child: const Text('Change')),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Date', style: Theme.of(context).textTheme.labelMedium?.copyWith(fontSize: 11)),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${_date.day}/${_date.month}/${_date.year}',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.54),
+                  ),
                 ],
               ),
             ),

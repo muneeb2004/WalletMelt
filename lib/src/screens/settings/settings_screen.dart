@@ -77,6 +77,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   DropdownButtonFormField<String>(
                     initialValue: state.settings.currency,
                     decoration: const InputDecoration(labelText: 'Currency'),
+                    dropdownColor: Theme.of(context).brightness == Brightness.dark
+                        ? const Color(0xFF1E1E24)
+                        : Colors.white,
+                    borderRadius: BorderRadius.circular(20),
                     items: [
                       for (final currency in defaultCurrencyCodes)
                         DropdownMenuItem(
@@ -90,6 +94,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   DropdownButtonFormField<ThemePreference>(
                     initialValue: state.settings.themePreference,
                     decoration: const InputDecoration(labelText: 'Theme'),
+                    dropdownColor: Theme.of(context).brightness == Brightness.dark
+                        ? const Color(0xFF1E1E24)
+                        : Colors.white,
+                    borderRadius: BorderRadius.circular(20),
                     items: const [
                       DropdownMenuItem(
                           value: ThemePreference.system, child: Text('System')),
