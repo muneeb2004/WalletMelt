@@ -65,6 +65,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           children: [
             Text('Settings', style: Theme.of(context).textTheme.headlineMedium),
             const SizedBox(height: 18),
+            
+            // CARD 1: PREFERENCES
             LiquidGlass(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -104,13 +106,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
             const SizedBox(height: 16),
+            
+            // CARD 2: BACKUP & DATA MANAGEMENT
             LiquidGlass(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Data export',
+                  Text('Backup & Data Management',
                       style: Theme.of(context).textTheme.titleLarge),
                   const SizedBox(height: 12),
+                  
+                  // Data export subsection
+                  Text('Data export',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          )),
+                  const SizedBox(height: 4),
                   Material(
                     type: MaterialType.transparency,
                     child: CheckboxListTile(
@@ -163,22 +175,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           : 'Back up JSON'),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    _exportStatusText(state),
-                    style: Theme.of(context).textTheme.bodySmall,
+                  
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    child: Divider(height: 1, color: Colors.grey, thickness: 0.12),
                   ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-            LiquidGlass(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+                  
+                  // Data import subsection
                   Text('Data import',
-                      style: Theme.of(context).textTheme.titleLarge),
-                  const SizedBox(height: 12),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          )),
+                  const SizedBox(height: 8),
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
@@ -190,7 +199,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               dimension: 18,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Icon(Icons.file_open_outlined),
+                          : const Icon(Icons.restore_outlined),
                       label: Text(_isValidatingBackup
                           ? 'Validating...'
                           : 'Validate backup file'),
@@ -201,50 +210,68 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     'Select a backup JSON file to verify its structure and compatibility before importing. No changes will be made to your data.',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-            LiquidGlass(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Privacy',
-                      style: Theme.of(context).textTheme.titleLarge),
-                  const SizedBox(height: 8),
+                  
+                  const SizedBox(height: AppSpacing.md),
                   Text(
-                      'All v1 expenses, settings, categories, budgets, and receipt images stay on this device. There is no login, backend, cloud storage, or remote database.',
-                      style: Theme.of(context).textTheme.bodyMedium),
+                    _exportStatusText(state),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontStyle: FontStyle.italic,
+                        ),
+                  ),
                 ],
               ),
             ),
             const SizedBox(height: 16),
+            
+            // CARD 3: ABOUT & PRIVACY
             LiquidGlass(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Coming later',
+                  Text('About WalletMelt',
                       style: Theme.of(context).textTheme.titleLarge),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 12),
+                  Text('Privacy First',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          )),
+                  const SizedBox(height: 4),
                   Text(
-                      'Cloud sync, accounts, shared households, backup/restore, OCR, and recurring reminders are intentionally outside this v1 scope.',
-                      style: Theme.of(context).textTheme.bodyMedium),
+                    'All expenses, settings, categories, budgets, and receipt images stay stored locally on this device. There is no remote login, backend databases, or cloud tracking.',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 13),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    child: Divider(height: 1, color: Colors.grey, thickness: 0.12),
+                  ),
+                  Text('Future Scope',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          )),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Automatic cloud synchronization, shared household ledger profiles, OCR-based receipt scanning, and recurring expense reminders are planned for future versions.',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 13),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    child: Divider(height: 1, color: Colors.grey, thickness: 0.12),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Version',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
+                      Text('v0.1.1',
+                          style: Theme.of(context).textTheme.bodyMedium),
+                    ],
+                  ),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
-            LiquidGlass(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('WalletMelt',
-                      style: Theme.of(context).textTheme.titleLarge),
-                  const SizedBox(height: 6),
-                  Text('Know where your money went.',
-                      style: Theme.of(context).textTheme.bodyMedium),
-                ],
-              ),
-            ),
+            const SizedBox(height: 84), // Space for floating app navigation bar
           ],
         ),
       ),

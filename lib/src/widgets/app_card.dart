@@ -33,15 +33,10 @@ class AppCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return LiquidGlass(
       padding: padding ?? AppSpacing.paddingMd,
-      blur: blur ? 24.0 : 0.0,
+      blur: blur ? 28.0 : 0.0,
       radius: radius,
-      child: onTap != null
-          ? InkWell(
-              onTap: onTap,
-              borderRadius: BorderRadius.circular(radius),
-              child: child,
-            )
-          : child,
+      onTap: onTap,
+      child: child,
     );
   }
 }

@@ -169,26 +169,54 @@ class LiquidGlass extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final fill = isDark
-        ? const Color.fromRGBO(28, 28, 28, 0.72)
-        : const Color.fromRGBO(255, 255, 255, 0.68);
-    final border = isDark
-        ? const Color.fromRGBO(255, 255, 255, 0.12)
-        : const Color.fromRGBO(255, 255, 255, 0.55);
+    
+    // Premium translucent glass gradient fill simulating light refractions
+    final fillGradient = isDark
+        ? LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              const Color(0xFF1E1E24).withValues(alpha: 0.72),
+              const Color(0xFF121216).withValues(alpha: 0.48),
+            ],
+            stops: const [0.0, 1.0],
+          )
+        : LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.white.withValues(alpha: 0.72),
+              Colors.white.withValues(alpha: 0.36),
+            ],
+            stops: const [0.0, 1.0],
+          );
+
+    // Light-reflecting thin highlight edge
+    final borderColor = isDark
+        ? const Color.fromRGBO(255, 255, 255, 0.16)
+        : const Color.fromRGBO(255, 255, 255, 0.64);
+
     final content = ClipRRect(
       borderRadius: BorderRadius.circular(radius),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-        child: DecoratedBox(
+        child: Container(
           decoration: BoxDecoration(
-            color: fill,
+            gradient: fillGradient,
             borderRadius: BorderRadius.circular(radius),
-            border: Border.all(color: border),
+            border: Border.all(color: borderColor, width: 1.1),
             boxShadow: [
+              // Broad soft ambient occlusion shadow
               BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.18 : 0.08),
-                blurRadius: 28,
+                color: Colors.black.withValues(alpha: isDark ? 0.28 : 0.04),
+                blurRadius: 32,
                 offset: const Offset(0, 16),
+              ),
+              // Crisp contact shadow for depth separation
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.20 : 0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
@@ -198,9 +226,13 @@ class LiquidGlass extends StatelessWidget {
     );
 
     if (onTap == null) return content;
-    return InkWell(
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
         borderRadius: BorderRadius.circular(radius),
         onTap: onTap,
-        child: content);
+        child: content,
+      ),
+    );
   }
 }

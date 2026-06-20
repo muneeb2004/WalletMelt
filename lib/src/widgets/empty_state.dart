@@ -22,27 +22,51 @@ class EmptyState extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
     return AppCard(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            size: 56,
-            color: colorScheme.onSurface.withValues(alpha: 0.30),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            title,
-            style: tt.titleMedium,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            subtitle,
-            style: tt.bodySmall,
-            textAlign: TextAlign.center,
-          ),
-        ],
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.xl),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              decoration: BoxDecoration(
+                color: colorScheme.primary.withValues(alpha: 0.08),
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: colorScheme.primary.withValues(alpha: 0.16),
+                  width: 1.5,
+                ),
+              ),
+              child: Icon(
+                icon,
+                size: 38,
+                color: colorScheme.primary.withValues(alpha: 0.72),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md + 4),
+            Text(
+              title,
+              style: tt.titleMedium?.copyWith(
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.2,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+              child: Text(
+                subtitle,
+                style: tt.bodySmall?.copyWith(
+                  color: tt.bodySmall?.color?.withValues(alpha: 0.8),
+                  height: 1.4,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

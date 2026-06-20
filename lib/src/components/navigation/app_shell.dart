@@ -75,11 +75,12 @@ class AppShell extends StatelessWidget {
 }
 
 class _NavItem extends StatelessWidget {
-  const _NavItem(
-      {required this.icon,
-      required this.label,
-      required this.index,
-      required this.shell});
+  const _NavItem({
+    required this.icon,
+    required this.label,
+    required this.index,
+    required this.shell,
+  });
 
   final IconData icon;
   final String label;
@@ -89,6 +90,11 @@ class _NavItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final active = shell.currentIndex == index;
+    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final activeColor = colorScheme.primary;
+    final inactiveColor = theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.54) ?? Colors.grey;
+
     return Expanded(
       child: Semantics(
         button: true,
@@ -101,27 +107,37 @@ class _NavItem extends StatelessWidget {
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 220),
             curve: Curves.easeOutCubic,
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
             decoration: BoxDecoration(
               color: active
-                  ? WalletMeltColors.brand.withValues(alpha: 0.22)
+                  ? colorScheme.primary.withValues(alpha: 0.12)
                   : Colors.transparent,
               borderRadius: BorderRadius.circular(999),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon,
-                    color: active
-                        ? WalletMeltColors.brandDeep
-                        : Theme.of(context).textTheme.bodyMedium?.color,
-                    size: 22),
+                Icon(
+                  icon,
+                  color: active ? activeColor : inactiveColor,
+                  size: 20,
+                ),
                 const SizedBox(height: 2),
-                Text(label,
-                    style: Theme.of(context)
-                        .textTheme
-                        .labelMedium
-                        ?.copyWith(fontSize: 11)),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    softWrap: false,
+                    overflow: TextOverflow.clip,
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      fontSize: 10,
+                      fontWeight: active ? FontWeight.w800 : FontWeight.w600,
+                      color: active ? activeColor : inactiveColor,
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
