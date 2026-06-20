@@ -70,126 +70,136 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
     return Scaffold(
       body: AppBackground(
+        padding: EdgeInsets.zero,
         child: CustomScrollView(
           slivers: [
-            SliverToBoxAdapter(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // ── Title row ─────────────────────────────────────────
-                  Row(
-                    children: [
-                      Expanded(
-                          child: Text('History',
-                              style:
-                                  Theme.of(context).textTheme.headlineMedium)),
-                      IconButton(
-                        tooltip: _showRecycleBin
-                            ? 'Show active expenses'
-                            : 'Show recycle bin',
-                        onPressed: () =>
-                            setState(() => _showRecycleBin = !_showRecycleBin),
-                        icon: Icon(_showRecycleBin
-                            ? Icons.receipt_long_rounded
-                            : Icons.delete_outline_rounded),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-
-                  // ── Search ────────────────────────────────────────────
-                  TextField(
-                    controller: _searchController,
-                    decoration: const InputDecoration(
-                        prefixIcon: Icon(Icons.search_rounded),
-                        labelText: 'Search vendor, title, notes'),
-                    onChanged: (_) => setState(() {}),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-
-                  // ── Category filter chips ─────────────────────────────
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
+              sliver: SliverToBoxAdapter(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // ── Title row ─────────────────────────────────────────
+                    Row(
                       children: [
-                        FilterChip(
-                            label: const Text('All'),
-                            selected: _categoryId == null,
-                            onSelected: (_) =>
-                                setState(() => _categoryId = null)),
-                        const SizedBox(width: AppSpacing.sm),
-                        for (final category in state.categories) ...[
-                          WalletCategoryChip(
-                              category: category,
-                              selected: _categoryId == category.id,
-                              onTap: () =>
-                                  setState(() => _categoryId = category.id)),
-                          const SizedBox(width: AppSpacing.sm),
-                        ],
+                        Expanded(
+                            child: Text('History',
+                                style:
+                                    Theme.of(context).textTheme.headlineMedium)),
+                        IconButton(
+                          tooltip: _showRecycleBin
+                              ? 'Show active expenses'
+                              : 'Show recycle bin',
+                          onPressed: () =>
+                              setState(() => _showRecycleBin = !_showRecycleBin),
+                          icon: Icon(_showRecycleBin
+                              ? Icons.receipt_long_rounded
+                              : Icons.delete_outline_rounded),
+                        ),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
+                    const SizedBox(height: AppSpacing.md),
 
-                  // ── Sort dropdown ─────────────────────────────────────
-                  DropdownButtonFormField<ExpenseSort>(
-                    initialValue: _sort,
-                    decoration: const InputDecoration(labelText: 'Sort'),
-                    items: const [
-                      DropdownMenuItem(
-                          value: ExpenseSort.newest, child: Text('Newest')),
-                      DropdownMenuItem(
-                          value: ExpenseSort.oldest, child: Text('Oldest')),
-                      DropdownMenuItem(
-                          value: ExpenseSort.amountHigh,
-                          child: Text('Amount high to low')),
-                      DropdownMenuItem(
-                          value: ExpenseSort.amountLow,
-                          child: Text('Amount low to high')),
-                    ],
-                    onChanged: (value) =>
-                        setState(() => _sort = value ?? _sort),
-                  ),
-                  const SizedBox(height: AppSpacing.md + 2),
-                ],
+                    // ── Search ────────────────────────────────────────────
+                    TextField(
+                      controller: _searchController,
+                      decoration: const InputDecoration(
+                          prefixIcon: Icon(Icons.search_rounded),
+                          labelText: 'Search vendor, title, notes'),
+                      onChanged: (_) => setState(() {}),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+
+                    // ── Category filter chips ─────────────────────────────
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          FilterChip(
+                              label: const Text('All'),
+                              selected: _categoryId == null,
+                              onSelected: (_) =>
+                                  setState(() => _categoryId = null)),
+                          const SizedBox(width: AppSpacing.sm),
+                          for (final category in state.categories) ...[
+                            WalletCategoryChip(
+                                category: category,
+                                selected: _categoryId == category.id,
+                                onTap: () =>
+                                    setState(() => _categoryId = category.id)),
+                            const SizedBox(width: AppSpacing.sm),
+                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+
+                    // ── Sort dropdown ─────────────────────────────────────
+                    DropdownButtonFormField<ExpenseSort>(
+                      initialValue: _sort,
+                      decoration: const InputDecoration(labelText: 'Sort'),
+                      items: const [
+                        DropdownMenuItem(
+                            value: ExpenseSort.newest, child: Text('Newest')),
+                        DropdownMenuItem(
+                            value: ExpenseSort.oldest, child: Text('Oldest')),
+                        DropdownMenuItem(
+                            value: ExpenseSort.amountHigh,
+                            child: Text('Amount high to low')),
+                        DropdownMenuItem(
+                            value: ExpenseSort.amountLow,
+                            child: Text('Amount low to high')),
+                      ],
+                      onChanged: (value) =>
+                          setState(() => _sort = value ?? _sort),
+                    ),
+                    const SizedBox(height: AppSpacing.md + 2),
+                  ],
+                ),
               ),
             ),
 
             // ── Empty state ──────────────────────────────────────────────
             if (filtered.isEmpty)
-              SliverToBoxAdapter(
-                child: EmptyState(
-                  icon: _showRecycleBin
-                      ? Icons.delete_sweep_outlined
-                      : Icons.search_off_rounded,
-                  title: _showRecycleBin
-                      ? 'Recycle bin is empty'
-                      : 'No expenses found',
-                  subtitle: _showRecycleBin
-                      ? 'Deleted expenses will appear here.'
-                      : 'Try a different search term or category filter.',
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
+                sliver: SliverToBoxAdapter(
+                  child: EmptyState(
+                    icon: _showRecycleBin
+                        ? Icons.delete_sweep_outlined
+                        : Icons.search_off_rounded,
+                    title: _showRecycleBin
+                        ? 'Recycle bin is empty'
+                        : 'No expenses found',
+                    subtitle: _showRecycleBin
+                        ? 'Deleted expenses will appear here.'
+                        : 'Try a different search term or category filter.',
+                  ),
                 ),
               )
             else
               // ── Lazy expense list with date-group headers ───────────────
-              SliverList.builder(
-                itemCount: items.length,
-                itemBuilder: (context, index) {
-                  final item = items[index];
-                  if (item is _HeaderItem) {
-                    return SectionHeader(
-                      title: item.label,
-                      padding: const EdgeInsets.only(
-                          top: AppSpacing.md, bottom: AppSpacing.xs),
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
+                sliver: SliverList.builder(
+                  itemCount: items.length,
+                  itemBuilder: (context, index) {
+                    final item = items[index];
+                    if (item is _HeaderItem) {
+                      return SectionHeader(
+                        title: item.label,
+                        padding: const EdgeInsets.only(
+                            top: AppSpacing.md, bottom: AppSpacing.xs),
+                      );
+                    }
+                    final expItem = item as _ExpenseItem;
+                    return ExpenseListTile(
+                      expense: expItem.expense,
+                      category: state.categoryById(expItem.expense.categoryId),
+                      onTap: () => context.push('/expense/${expItem.expense.id}'),
                     );
-                  }
-                  final expItem = item as _ExpenseItem;
-                  return ExpenseListTile(
-                    expense: expItem.expense,
-                    category: state.categoryById(expItem.expense.categoryId),
-                    onTap: () => context.push('/expense/${expItem.expense.id}'),
-                  );
-                },
+                  },
+                ),
               ),
           ],
         ),

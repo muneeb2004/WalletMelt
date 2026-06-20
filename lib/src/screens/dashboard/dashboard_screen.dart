@@ -28,7 +28,7 @@ class DashboardScreen extends StatelessWidget {
         child: RefreshIndicator(
           onRefresh: state.refresh,
           child: ListView(
-            padding: EdgeInsets.zero,
+            padding: const EdgeInsets.fromLTRB(20, 18, 20, 120),
             children: [
               // ── Header row ──────────────────────────────────────────────
               Row(

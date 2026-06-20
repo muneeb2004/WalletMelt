@@ -3,10 +3,14 @@ import 'package:flutter/material.dart';
 import '../../theme/wallet_melt_theme.dart';
 
 class AppBackground extends StatelessWidget {
-  const AppBackground({required this.child, super.key, this.padding});
+  const AppBackground({
+    required this.child,
+    super.key,
+    this.padding = EdgeInsets.zero,
+  });
 
   final Widget child;
-  final EdgeInsetsGeometry? padding;
+  final EdgeInsetsGeometry padding;
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +51,7 @@ class AppBackground extends StatelessWidget {
             child: SafeArea(
               bottom: false,
               child: Padding(
-                padding: padding ?? const EdgeInsets.fromLTRB(20, 18, 20, 120),
+                padding: padding,
                 child: child,
               ),
             ),

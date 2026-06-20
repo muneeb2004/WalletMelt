@@ -49,7 +49,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
     return Scaffold(
       body: AppBackground(
         child: ListView(
-          padding: EdgeInsets.zero,
+          padding: const EdgeInsets.fromLTRB(20, 18, 20, 120),
           children: [
             Row(
               children: [

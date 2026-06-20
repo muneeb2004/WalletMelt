@@ -61,7 +61,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       body: AppBackground(
         child: ListView(
-          padding: EdgeInsets.zero,
+          padding: const EdgeInsets.fromLTRB(20, 18, 20, 120),
           children: [
             Text('Settings', style: Theme.of(context).textTheme.headlineMedium),
             const SizedBox(height: 18),

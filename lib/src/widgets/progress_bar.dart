@@ -26,16 +26,30 @@ class ProgressBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final targetValue = fraction.clamp(0.0, 1.0);
     return ClipRRect(
       borderRadius: BorderRadius.circular(999),
       child: SizedBox(
         height: height,
-        child: LinearProgressIndicator(
-          value: fraction.clamp(0.0, 1.0),
-          backgroundColor: isDark
-              ? const Color.fromRGBO(255, 255, 255, 0.08)
-              : const Color.fromRGBO(0, 0, 0, 0.06),
-          valueColor: AlwaysStoppedAnimation<Color>(color),
+        child: TweenAnimationBuilder<double>(
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeOutCubic,
+          tween: Tween<double>(end: targetValue),
+          builder: (context, animValue, _) {
+            return TweenAnimationBuilder<Color?>(
+              duration: const Duration(milliseconds: 350),
+              tween: ColorTween(end: color),
+              builder: (context, animColor, _) {
+                return LinearProgressIndicator(
+                  value: animValue,
+                  backgroundColor: isDark
+                      ? const Color.fromRGBO(255, 255, 255, 0.08)
+                      : const Color.fromRGBO(0, 0, 0, 0.06),
+                  valueColor: AlwaysStoppedAnimation<Color>(animColor ?? color),
+                );
+              },
+            );
+          },
         ),
       ),
     );
