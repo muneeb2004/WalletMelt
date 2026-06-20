@@ -87,7 +87,9 @@ class ExpenseDetailScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SectionHeader(
-                        title: 'Receipt', icon: Icons.receipt_rounded),
+                        title: 'Receipt',
+                        icon: Icons.receipt_rounded,
+                        padding: EdgeInsets.only(bottom: AppSpacing.xs)),
                     const SizedBox(height: AppSpacing.sm),
                     Hero(
                       tag: expense.receiptImageUri!,
@@ -216,7 +218,9 @@ class _GroceryItemsCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SectionHeader(
-                  title: 'Grocery items', icon: Icons.shopping_cart_outlined),
+                  title: 'Grocery items',
+                  icon: Icons.shopping_cart_outlined,
+                  padding: EdgeInsets.only(bottom: AppSpacing.xs)),
               const SizedBox(height: AppSpacing.sm),
               for (final item in items)
                 Padding(

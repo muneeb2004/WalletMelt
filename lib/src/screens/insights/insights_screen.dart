@@ -50,6 +50,7 @@ class InsightsScreen extends StatelessWidget {
                     const SectionHeader(
                       title: 'Monthly trend',
                       icon: Icons.trending_up_rounded,
+                      padding: EdgeInsets.only(bottom: AppSpacing.xs),
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     Text(formatMoney(insights.total, state.settings.currency),
@@ -72,6 +73,7 @@ class InsightsScreen extends StatelessWidget {
                     const SectionHeader(
                       title: 'Where it melted',
                       icon: Icons.pie_chart_outline_rounded,
+                      padding: EdgeInsets.only(bottom: AppSpacing.xs),
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     RepaintBoundary(
@@ -89,6 +91,7 @@ class InsightsScreen extends StatelessWidget {
                     const SectionHeader(
                       title: 'Budgets',
                       icon: Icons.account_balance_wallet_rounded,
+                      padding: EdgeInsets.only(bottom: AppSpacing.xs),
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     Text(

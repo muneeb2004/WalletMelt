@@ -437,7 +437,7 @@ class _ReceiptCard extends StatelessWidget {
                         onPressed: onCamera,
                         icon: const Icon(Icons.sync_rounded),
                         label: const Text('Replace')),
-                    const Spacer(),
+                    const Expanded(child: SizedBox.shrink()),
                     TextButton.icon(
                         onPressed: onRemove,
                         icon: const Icon(Icons.delete_outline_rounded),

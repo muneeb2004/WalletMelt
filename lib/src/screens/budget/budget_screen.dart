@@ -288,6 +288,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
         SectionHeader(
           title: 'Category Budgets',
           icon: Icons.pie_chart_outline_rounded,
+          padding: const EdgeInsets.only(bottom: AppSpacing.xs),
           trailing: IconButton.filledTonal(
             onPressed: () => _showCategoryBudgetSheet(context, state, null),
             icon: const Icon(Icons.add_rounded),

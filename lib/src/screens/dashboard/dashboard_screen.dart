@@ -128,6 +128,7 @@ class DashboardScreen extends StatelessWidget {
                       SectionHeader(
                         title: 'Category melt',
                         icon: Icons.donut_small_rounded,
+                        padding: const EdgeInsets.only(bottom: AppSpacing.xs),
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       RepaintBoundary(
@@ -145,6 +146,7 @@ class DashboardScreen extends StatelessWidget {
                       SectionHeader(
                         title: 'Grocery vs utilities',
                         icon: Icons.compare_arrows_rounded,
+                        padding: const EdgeInsets.only(bottom: AppSpacing.xs),
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       _ComparisonBar(
@@ -165,6 +167,7 @@ class DashboardScreen extends StatelessWidget {
                       const SectionHeader(
                         title: 'Recent expenses',
                         icon: Icons.history_rounded,
+                        padding: EdgeInsets.only(bottom: AppSpacing.xs),
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       for (final expense in insights.recentExpenses)
@@ -256,7 +259,7 @@ class _DashboardBudgetCard extends StatelessWidget {
     final Color budgetColor = budgetProgressColor(ratio);
 
     return LiquidGlass(
-      onTap: () => context.push('/budget'),
+      onTap: () => context.go('/budget'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -268,7 +271,7 @@ class _DashboardBudgetCard extends StatelessWidget {
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               InkWell(
-                onTap: () => context.push('/budget'),
+                onTap: () => context.go('/budget'),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                       vertical: AppSpacing.xs, horizontal: AppSpacing.sm),

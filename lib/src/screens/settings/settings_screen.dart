@@ -551,7 +551,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           : _disabledRestoreReason(dryRunPlan),
                       style: bodyStyle?.copyWith(
                         fontSize: 12,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withValues(alpha: 0.6),
                         fontStyle: FontStyle.italic,
                       ),
                     ),
@@ -889,7 +892,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               : 'Dry-run only. Pending safety checks: $pendingSafetyGates.',
           style: bodyStyle?.copyWith(
             fontSize: 12,
-            color: theme.colorScheme.onSurfaceVariant,
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
             fontStyle: FontStyle.italic,
           ),
         ),
