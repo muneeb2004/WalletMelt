@@ -12,7 +12,7 @@ class AppCard extends StatelessWidget {
     this.padding,
     this.onTap,
     this.radius = AppSpacing.cardRadius,
-    this.blur = true,
+    this.blur = false,
   });
 
   final Widget child;

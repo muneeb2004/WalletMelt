@@ -121,6 +121,29 @@ class _WalletMeltAppState extends State<WalletMeltApp> {
         ThemePreference.system => ThemeMode.system,
       },
       routerConfig: _router,
+      scrollBehavior: const WalletMeltScrollBehavior(),
+    );
+  }
+}
+
+class WalletMeltScrollBehavior extends MaterialScrollBehavior {
+  const WalletMeltScrollBehavior();
+
+  @override
+  Widget buildOverscrollIndicator(
+      BuildContext context, Widget child, ScrollableDetails details) {
+    // Under Material 3, buildOverscrollIndicator returns a StretchingOverscrollIndicator on Android.
+    // By returning child directly, we completely disable the stretch overscroll indicator,
+    // which resolves the dark shadow / black screen stretching artifact when scrolling lists.
+    return child;
+  }
+
+  @override
+  ScrollPhysics getScrollPhysics(BuildContext context) {
+    // BouncingScrollPhysics provides a premium, bouncy iOS-like scrolling experience globally,
+    // which matches the premium glassmorphic feel and behaves beautifully across all platforms.
+    return const BouncingScrollPhysics(
+      parent: AlwaysScrollableScrollPhysics(),
     );
   }
 }

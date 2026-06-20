@@ -156,7 +156,7 @@ class LiquidGlass extends StatelessWidget {
     super.key,
     this.padding = const EdgeInsets.all(18),
     this.radius = 28,
-    this.blur = 24,
+    this.blur = 0.0,
     this.onTap,
   });
 
@@ -196,38 +196,48 @@ class LiquidGlass extends StatelessWidget {
         ? const Color.fromRGBO(255, 255, 255, 0.16)
         : const Color.fromRGBO(255, 255, 255, 0.64);
 
+    final innerContainer = Container(
+      decoration: BoxDecoration(
+        gradient: fillGradient,
+        borderRadius: BorderRadius.circular(radius),
+        border: Border.all(color: borderColor, width: 1.2),
+      ),
+      child: Padding(padding: padding, child: child),
+    );
+
+    final Widget glassContent = blur > 0.0
+        ? ClipRRect(
+            borderRadius: BorderRadius.circular(radius),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(
+                sigmaX: blur,
+                sigmaY: blur,
+                tileMode: TileMode.decal,
+              ),
+              child: innerContainer,
+            ),
+          )
+        : innerContainer;
+
     final content = Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(radius),
         boxShadow: [
           // Broad soft ambient occlusion shadow
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.36 : 0.08),
-            blurRadius: 36,
-            offset: const Offset(0, 16),
+            color: Colors.black.withValues(alpha: isDark ? 0.16 : 0.03),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
           // Crisp contact shadow for depth separation
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.24 : 0.06),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            color: Colors.black.withValues(alpha: isDark ? 0.12 : 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(radius),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: fillGradient,
-              borderRadius: BorderRadius.circular(radius),
-              border: Border.all(color: borderColor, width: 1.2),
-            ),
-            child: Padding(padding: padding, child: child),
-          ),
-        ),
-      ),
+      child: glassContent,
     );
 
     if (onTap == null) return content;
