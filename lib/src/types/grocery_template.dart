@@ -10,4 +10,19 @@ class GroceryTemplate {
   final String name;
   final List<String> items;
   final String createdAt;
+
+  GroceryTemplate copyWith({
+    String? id,
+    String? name,
+    List<String>? items,
+    String? createdAt,
+  }) {
+    return GroceryTemplate(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      items: items ?? this.items,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
 }
+

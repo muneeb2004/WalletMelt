@@ -25,15 +25,49 @@ class InsightsScreen extends StatelessWidget {
     final state = context.watch<AppState>();
     double receivables = 0.0;
     double liabilities = 0.0;
+    double overdueAmount = 0.0;
+
+    final nowStr = DateTime.now().toIso8601String().substring(0, 10);
+
+    final debtorAmounts = <String, double>{};
+    final creditorAmounts = <String, double>{};
+
     for (final debt in state.debts) {
       if (debt.isSettled) continue;
-      if (debt.type == DebtType.owedToMe || debt.type == DebtType.loanGiven) {
+
+      final isReceivable = debt.type == DebtType.owedToMe || debt.type == DebtType.loanGiven;
+      if (isReceivable) {
         receivables += debt.remainingAmount;
+        debtorAmounts[debt.personName] = (debtorAmounts[debt.personName] ?? 0.0) + debt.remainingAmount;
       } else {
         liabilities += debt.remainingAmount;
+        creditorAmounts[debt.personName] = (creditorAmounts[debt.personName] ?? 0.0) + debt.remainingAmount;
+      }
+
+      if (debt.dueDate != null && debt.dueDate!.compareTo(nowStr) < 0) {
+        overdueAmount += debt.remainingAmount;
       }
     }
+
     final netDebtPosition = receivables - liabilities;
+
+    String? largestDebtorName;
+    double largestDebtorAmount = 0.0;
+    debtorAmounts.forEach((name, amount) {
+      if (amount > largestDebtorAmount) {
+        largestDebtorAmount = amount;
+        largestDebtorName = name;
+      }
+    });
+
+    String? largestCreditorName;
+    double largestCreditorAmount = 0.0;
+    creditorAmounts.forEach((name, amount) {
+      if (amount > largestCreditorAmount) {
+        largestCreditorAmount = amount;
+        largestCreditorName = name;
+      }
+    });
 
     return Scaffold(
       body: AppBackground(
@@ -176,11 +210,12 @@ class InsightsScreen extends StatelessWidget {
             ],
             const SizedBox(height: AppSpacing.md),
             WMGlassSurface.tier2(
+              padding: const EdgeInsets.all(AppSpacing.md),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SectionHeader(
-                    title: 'Lending & Debt Position',
+                    title: 'Lending & Debt Insights',
                     icon: Icons.handshake_rounded,
                     padding: EdgeInsets.only(bottom: AppSpacing.xs),
                   ),
@@ -225,9 +260,9 @@ class InsightsScreen extends StatelessWidget {
                           ],
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 8),
                       Container(width: 1, height: 28, color: const Color(0x1Fffffff)),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -240,6 +275,77 @@ class InsightsScreen extends StatelessWidget {
                             Text(
                               '${liabilities.toStringAsFixed(liabilities % 1 == 0 ? 0 : 2)} $currency',
                               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: WalletMeltColors.danger),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(width: 1, height: 28, color: const Color(0x1Fffffff)),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'OVERDUE',
+                              style: TextStyle(fontSize: 9, color: WalletMeltColors.textMuted, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              '${overdueAmount.toStringAsFixed(overdueAmount % 1 == 0 ? 0 : 2)} $currency',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                                color: overdueAmount > 0 ? WalletMeltColors.danger : WalletMeltColors.textMuted,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  const Divider(height: 1, color: Color(0x1Fffffff)),
+                  const SizedBox(height: 14),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'LARGEST DEBTOR',
+                              style: TextStyle(fontSize: 9, color: WalletMeltColors.textMuted, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              largestDebtorName != null
+                                  ? '$largestDebtorName (${largestDebtorAmount.toStringAsFixed(largestDebtorAmount % 1 == 0 ? 0 : 2)} $currency)'
+                                  : 'None',
+                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'LARGEST CREDITOR',
+                              style: TextStyle(fontSize: 9, color: WalletMeltColors.textMuted, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              largestCreditorName != null
+                                  ? '$largestCreditorName (${largestCreditorAmount.toStringAsFixed(largestCreditorAmount % 1 == 0 ? 0 : 2)} $currency)'
+                                  : 'None',
+                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ],
                         ),

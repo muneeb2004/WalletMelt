@@ -16,6 +16,11 @@ class DebtScreen extends StatefulWidget {
 }
 
 class _DebtScreenState extends State<DebtScreen> {
+  String _searchQuery = '';
+  final List<DebtType> _selectedTypesFilter = [];
+  final List<String> _selectedStatusesFilter = [];
+  bool _isFiltersExpanded = false;
+
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
@@ -36,14 +41,52 @@ class _DebtScreenState extends State<DebtScreen> {
 
     final netPosition = owedToMe - iOwe;
 
-    // Grouping
+    // Grouping & Filtering
     final activeDebts = <DebtRecord>[];
     final overdueDebts = <DebtRecord>[];
     final settledDebts = <DebtRecord>[];
 
     final nowStr = DateTime.now().toIso8601String().substring(0, 10); // yyyy-MM-dd
 
-    for (final debt in state.debts) {
+    final filteredDebts = state.debts.where((debt) {
+      // 1. Search Query
+      if (_searchQuery.isNotEmpty) {
+        final query = _searchQuery.toLowerCase();
+        final nameMatches = debt.personName.toLowerCase().contains(query);
+        final descMatches = debt.description?.toLowerCase().contains(query) ?? false;
+        final notesMatches = debt.notes?.toLowerCase().contains(query) ?? false;
+        if (!nameMatches && !descMatches && !notesMatches) {
+          return false;
+        }
+      }
+
+      // 2. Type Filter
+      if (_selectedTypesFilter.isNotEmpty) {
+        if (!_selectedTypesFilter.contains(debt.type)) {
+          return false;
+        }
+      }
+
+      // 3. Status Filter (Active, Overdue, Settled)
+      if (_selectedStatusesFilter.isNotEmpty) {
+        String debtStatus;
+        if (debt.isSettled) {
+          debtStatus = 'settled';
+        } else if (debt.dueDate != null && debt.dueDate!.compareTo(nowStr) < 0) {
+          debtStatus = 'overdue';
+        } else {
+          debtStatus = 'active';
+        }
+
+        if (!_selectedStatusesFilter.contains(debtStatus)) {
+          return false;
+        }
+      }
+
+      return true;
+    }).toList();
+
+    for (final debt in filteredDebts) {
       if (debt.isSettled) {
         settledDebts.add(debt);
       } else if (debt.dueDate != null && debt.dueDate!.compareTo(nowStr) < 0) {
@@ -126,34 +169,220 @@ class _DebtScreenState extends State<DebtScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 24),
-
-            // Overdue Section
-            if (overdueDebts.isNotEmpty) ...[
-              _buildSectionHeader(context, 'Overdue Obligations', WalletMeltColors.danger),
-              const SizedBox(height: 10),
-              for (final debt in overdueDebts) _buildDebtTile(context, debt),
-              const SizedBox(height: 18),
-            ],
-
-            // Active Section
-            _buildSectionHeader(
-              context,
-              'Active Transactions',
-              Theme.of(context).colorScheme.primary,
-            ),
-            const SizedBox(height: 10),
-            if (activeDebts.isEmpty)
-              _buildEmptyState('No active loans or repayments.')
-            else
-              for (final debt in activeDebts) _buildDebtTile(context, debt),
             const SizedBox(height: 18),
 
-            // Settled Section
-            if (settledDebts.isNotEmpty) ...[
-              _buildSectionHeader(context, 'Settled History', WalletMeltColors.textMuted),
+            // Search Bar & Filter Button
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    onChanged: (val) => setState(() => _searchQuery = val),
+                    decoration: InputDecoration(
+                      hintText: 'Search by person, notes...',
+                      prefixIcon: const Icon(Icons.search_rounded, size: 20),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                      suffixIcon: _searchQuery.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear_rounded, size: 18),
+                              onPressed: () {
+                                FocusScope.of(context).unfocus();
+                                setState(() => _searchQuery = '');
+                              },
+                            )
+                          : null,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                IconButton(
+                  tooltip: 'Filters',
+                  style: IconButton.styleFrom(
+                    backgroundColor: _selectedTypesFilter.isNotEmpty || _selectedStatusesFilter.isNotEmpty
+                        ? WalletMeltColors.brand.withValues(alpha: 0.16)
+                        : Colors.transparent,
+                  ),
+                  icon: Icon(
+                    Icons.filter_list_rounded,
+                    color: _selectedTypesFilter.isNotEmpty || _selectedStatusesFilter.isNotEmpty
+                        ? WalletMeltColors.brand
+                        : WalletMeltColors.textSecondary,
+                  ),
+                  onPressed: () => setState(() => _isFiltersExpanded = !_isFiltersExpanded),
+                ),
+              ],
+            ),
+
+            if (_isFiltersExpanded) ...[
               const SizedBox(height: 10),
-              for (final debt in settledDebts) _buildDebtTile(context, debt),
+              WMGlassSurface.tier1(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Status Filter', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: WalletMeltColors.textMuted)),
+                    const SizedBox(height: 6),
+                    Wrap(
+                      spacing: 8,
+                      children: [
+                        _buildFilterChip('Active', _selectedStatusesFilter.contains('active'), () {
+                          setState(() {
+                            if (_selectedStatusesFilter.contains('active')) {
+                              _selectedStatusesFilter.remove('active');
+                            } else {
+                              _selectedStatusesFilter.add('active');
+                            }
+                          });
+                        }),
+                        _buildFilterChip('Overdue', _selectedStatusesFilter.contains('overdue'), () {
+                          setState(() {
+                            if (_selectedStatusesFilter.contains('overdue')) {
+                              _selectedStatusesFilter.remove('overdue');
+                            } else {
+                              _selectedStatusesFilter.add('overdue');
+                            }
+                          });
+                        }),
+                        _buildFilterChip('Settled', _selectedStatusesFilter.contains('settled'), () {
+                          setState(() {
+                            if (_selectedStatusesFilter.contains('settled')) {
+                              _selectedStatusesFilter.remove('settled');
+                            } else {
+                              _selectedStatusesFilter.add('settled');
+                            }
+                          });
+                        }),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    const Text('Type Filter', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: WalletMeltColors.textMuted)),
+                    const SizedBox(height: 6),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 6,
+                      children: [
+                        _buildFilterChip('Owed to me', _selectedTypesFilter.contains(DebtType.owedToMe), () {
+                          setState(() {
+                            if (_selectedTypesFilter.contains(DebtType.owedToMe)) {
+                              _selectedTypesFilter.remove(DebtType.owedToMe);
+                            } else {
+                              _selectedTypesFilter.add(DebtType.owedToMe);
+                            }
+                          });
+                        }),
+                        _buildFilterChip('I owe', _selectedTypesFilter.contains(DebtType.iOwe), () {
+                          setState(() {
+                            if (_selectedTypesFilter.contains(DebtType.iOwe)) {
+                              _selectedTypesFilter.remove(DebtType.iOwe);
+                            } else {
+                              _selectedTypesFilter.add(DebtType.iOwe);
+                            }
+                          });
+                        }),
+                        _buildFilterChip('Loan Given', _selectedTypesFilter.contains(DebtType.loanGiven), () {
+                          setState(() {
+                            if (_selectedTypesFilter.contains(DebtType.loanGiven)) {
+                              _selectedTypesFilter.remove(DebtType.loanGiven);
+                            } else {
+                              _selectedTypesFilter.add(DebtType.loanGiven);
+                            }
+                          });
+                        }),
+                        _buildFilterChip('Loan Taken', _selectedTypesFilter.contains(DebtType.loanTaken), () {
+                          setState(() {
+                            if (_selectedTypesFilter.contains(DebtType.loanTaken)) {
+                              _selectedTypesFilter.remove(DebtType.loanTaken);
+                            } else {
+                              _selectedTypesFilter.add(DebtType.loanTaken);
+                            }
+                          });
+                        }),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            const SizedBox(height: 24),
+
+            // Empty States & Sections
+            if (state.debts.isEmpty) ...[
+              const SizedBox(height: 40),
+              Center(
+                child: Column(
+                  children: [
+                    const Icon(Icons.handshake_outlined, size: 64, color: WalletMeltColors.textMuted),
+                    const SizedBox(height: 16),
+                    Text(
+                      'No loans tracked yet',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Record money lent, borrowed, or dinner splits here.',
+                      style: TextStyle(color: WalletMeltColors.textMuted, fontSize: 13),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton.icon(
+                      onPressed: () => _showAddDebtSheet(context),
+                      icon: const Icon(Icons.add),
+                      label: const Text('Record Debt or Loan'),
+                    ),
+                  ],
+                ),
+              ),
+            ] else if (filteredDebts.isEmpty) ...[
+              const SizedBox(height: 40),
+              Center(
+                child: Column(
+                  children: [
+                    const Icon(Icons.filter_list_off_rounded, size: 48, color: WalletMeltColors.textMuted),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'No matching obligations found',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 14),
+                    OutlinedButton(
+                      onPressed: () {
+                        setState(() {
+                          _searchQuery = '';
+                          _selectedTypesFilter.clear();
+                          _selectedStatusesFilter.clear();
+                        });
+                      },
+                      child: const Text('Clear Filters'),
+                    ),
+                  ],
+                ),
+              ),
+            ] else ...[
+              // Overdue Section
+              if (overdueDebts.isNotEmpty) ...[
+                _buildSectionHeader(context, 'Overdue Obligations', WalletMeltColors.danger),
+                const SizedBox(height: 10),
+                for (final debt in overdueDebts) _buildDebtTile(context, debt),
+                const SizedBox(height: 18),
+              ],
+
+              // Active Section
+              if (activeDebts.isNotEmpty) ...[
+                _buildSectionHeader(
+                  context,
+                  'Active Transactions',
+                  Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(height: 10),
+                for (final debt in activeDebts) _buildDebtTile(context, debt),
+                const SizedBox(height: 18),
+              ],
+
+              // Settled Section
+              if (settledDebts.isNotEmpty) ...[
+                _buildSectionHeader(context, 'Settled History', WalletMeltColors.textMuted),
+                const SizedBox(height: 10),
+                for (final debt in settledDebts) _buildDebtTile(context, debt),
+              ],
             ],
           ],
         ),
@@ -213,21 +442,7 @@ class _DebtScreenState extends State<DebtScreen> {
     );
   }
 
-  Widget _buildEmptyState(String message) {
-    return WMGlassSurface.tier1(
-      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-      child: Center(
-        child: Text(
-          message,
-          style: const TextStyle(
-            color: WalletMeltColors.textMuted,
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-    );
-  }
+
 
   Widget _buildDebtTile(BuildContext context, DebtRecord debt) {
     // Determine type indicators
@@ -661,48 +876,87 @@ class _DebtScreenState extends State<DebtScreen> {
                         ),
                         const SizedBox(height: 8),
 
-                        if (repayments.isEmpty)
-                          const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 12),
-                            child: Text(
-                              'No payments recorded yet.',
-                              style: TextStyle(fontSize: 12, color: WalletMeltColors.textMuted),
+                        () {
+                          final List<Widget> items = [];
+                          final isReceiv = debt.type == DebtType.owedToMe || debt.type == DebtType.loanGiven;
+                          
+                          // 1. Created milestone
+                          items.add(
+                            _buildTimelineItem(
+                              context,
+                              title: 'Created Obligation',
+                              date: debt.createdAt.length >= 10 ? debt.createdAt.substring(0, 10) : debt.createdAt,
+                              amount: '${isReceiv ? "+" : "-"}${debt.principalAmount.toStringAsFixed(debt.principalAmount % 1 == 0 ? 0 : 2)} ${debt.currency}',
+                              icon: Icons.add_circle_outline_rounded,
+                              iconColor: isReceiv ? WalletMeltColors.positive : WalletMeltColors.danger,
+                              isLast: false,
                             ),
-                          )
-                        else
-                          ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: repayments.length,
-                            itemBuilder: (ctx, index) {
-                              final pay = repayments[index];
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 4),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        const Icon(Icons.check_circle_rounded, size: 14, color: WalletMeltColors.positive),
-                                        const SizedBox(width: 6),
-                                        Text(
-                                          pay.createdAt.substring(0, 10),
-                                          style: const TextStyle(fontSize: 12),
-                                        ),
-                                        if (pay.notes != null) ...[
-                                          Text(' (${pay.notes})', style: const TextStyle(fontSize: 11, color: WalletMeltColors.textMuted)),
-                                        ],
-                                      ],
-                                    ),
-                                    Text(
-                                      '-${pay.amount.toStringAsFixed(pay.amount % 1 == 0 ? 0 : 2)} ${debt.currency}',
-                                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                                    ),
-                                  ],
-                                ),
+                          );
+
+                          // 2. Repayments
+                          for (int i = 0; i < repayments.length; i++) {
+                            final pay = repayments[i];
+                            items.add(
+                              _buildTimelineItem(
+                                context,
+                                title: pay.notes ?? 'Repayment',
+                                date: pay.createdAt.length >= 10 ? pay.createdAt.substring(0, 10) : pay.createdAt,
+                                amount: '${isReceiv ? "-" : "+"}${pay.amount.toStringAsFixed(pay.amount % 1 == 0 ? 0 : 2)} ${debt.currency}',
+                                icon: Icons.payment_rounded,
+                                iconColor: WalletMeltColors.positive,
+                                isLast: false,
+                              ),
+                            );
+                          }
+
+                          // 3. Settled milestone
+                          if (debt.isSettled) {
+                            final settledDate = debt.settledAt ?? (repayments.isNotEmpty ? repayments.last.createdAt : debt.createdAt);
+                            items.add(
+                              _buildTimelineItem(
+                                context,
+                                title: 'Fully Settled / Paid Off',
+                                date: settledDate.length >= 10 ? settledDate.substring(0, 10) : settledDate,
+                                amount: '0 ${debt.currency}',
+                                icon: Icons.check_circle_rounded,
+                                iconColor: WalletMeltColors.positive,
+                                isLast: true,
+                              ),
+                            );
+                          }
+
+                          // Fix the last item's isLast flag if not settled
+                          if (!debt.isSettled && items.isNotEmpty) {
+                            final lastIdx = items.length - 1;
+                            if (lastIdx == 0) {
+                              items[0] = _buildTimelineItem(
+                                context,
+                                title: 'Created Obligation',
+                                date: debt.createdAt.length >= 10 ? debt.createdAt.substring(0, 10) : debt.createdAt,
+                                amount: '${isReceiv ? "+" : "-"}${debt.principalAmount.toStringAsFixed(debt.principalAmount % 1 == 0 ? 0 : 2)} ${debt.currency}',
+                                icon: Icons.add_circle_outline_rounded,
+                                iconColor: isReceiv ? WalletMeltColors.positive : WalletMeltColors.danger,
+                                isLast: true,
                               );
-                            },
-                          ),
+                            } else {
+                              final lastPay = repayments.last;
+                              items[lastIdx] = _buildTimelineItem(
+                                context,
+                                title: lastPay.notes ?? 'Repayment',
+                                date: lastPay.createdAt.length >= 10 ? lastPay.createdAt.substring(0, 10) : lastPay.createdAt,
+                                amount: '${isReceiv ? "-" : "+"}${lastPay.amount.toStringAsFixed(lastPay.amount % 1 == 0 ? 0 : 2)} ${debt.currency}',
+                                icon: Icons.payment_rounded,
+                                iconColor: WalletMeltColors.positive,
+                                isLast: true,
+                              );
+                            }
+                          }
+
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: items,
+                          );
+                        }(),
 
                         const SizedBox(height: 18),
 
@@ -821,5 +1075,92 @@ class _DebtScreenState extends State<DebtScreen> {
     );
 
     payController.dispose();
+  }
+
+  Widget _buildFilterChip(String label, bool selected, VoidCallback onTap) {
+    return FilterChip(
+      label: Text(
+        label,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          color: selected ? Colors.white : WalletMeltColors.textSecondary,
+        ),
+      ),
+      selected: selected,
+      onSelected: (_) => onTap(),
+      backgroundColor: Colors.transparent,
+      selectedColor: WalletMeltColors.brand,
+      checkmarkColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: selected ? WalletMeltColors.brand : const Color(0x1Fffffff),
+          width: 1,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTimelineItem(
+    BuildContext context, {
+    required String title,
+    required String date,
+    required String amount,
+    required IconData icon,
+    required Color iconColor,
+    bool isLast = false,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Column(
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: iconColor.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: iconColor, size: 16),
+            ),
+            if (!isLast)
+              Container(
+                width: 2,
+                height: 36,
+                color: const Color(0x1Fffffff),
+              ),
+          ],
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                  ),
+                  Text(
+                    amount,
+                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 2),
+              Text(
+                date,
+                style: const TextStyle(fontSize: 11, color: WalletMeltColors.textMuted),
+              ),
+              const SizedBox(height: 12),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 }

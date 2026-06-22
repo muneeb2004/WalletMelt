@@ -481,6 +481,14 @@ class AppState extends ChangeNotifier {
     }
   }
 
+  Future<void> updateGroceryTemplate(wm_template.GroceryTemplate template) async {
+    final repo = _driftGroceryTemplateRepository;
+    if (repo != null) {
+      await repo.update(template);
+      await refresh();
+    }
+  }
+
   Future<void> deleteGroceryTemplate(String id) async {
     final repo = _driftGroceryTemplateRepository;
     if (repo != null) {

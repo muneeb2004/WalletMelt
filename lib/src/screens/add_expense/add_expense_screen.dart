@@ -35,6 +35,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   ExpenseValidationResult? _validation;
   bool _saving = false;
   bool _hydrated = false;
+  bool _showAdditionalDetails = false;
 
   @override
   void didChangeDependencies() {
@@ -75,6 +76,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     final isEditing = widget.expenseId != null;
     final selectedCategory =
         _categoryId == null ? null : state.categoryById(_categoryId!);
+    final isGroceryMode = selectedCategory?.id == 'grocery';
+
     return Scaffold(
       body: AppBackground(
         padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
@@ -87,33 +90,17 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                     onPressed: () => context.pop(),
                     icon: const Icon(Icons.close_rounded)),
                 const SizedBox(width: 8),
-                Text(isEditing ? 'Edit expense' : 'Add expense',
-                    style: Theme.of(context).textTheme.headlineMedium),
+                Text(
+                  isGroceryMode
+                      ? 'Bulk Grocery Entry'
+                      : (isEditing ? 'Edit expense' : 'Add expense'),
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
               ],
             ),
             const SizedBox(height: 18),
-            TextField(
-              controller: _amountController,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
-              style: Theme.of(context).textTheme.displaySmall,
-              decoration: InputDecoration(
-                labelText: 'Amount',
-                prefixText: '$currency ',
-                errorText: _validation?.amountError,
-              ),
-            ),
-            const SizedBox(height: 14),
-            TextField(
-              controller: _titleController,
-              decoration:
-                  const InputDecoration(labelText: 'Title or bill name')),
-            const SizedBox(height: 14),
-            TextField(
-              controller: _vendorController,
-              decoration:
-                  const InputDecoration(labelText: 'Vendor or provider')),
-            const SizedBox(height: 18),
+
+            // Category Selector chips at the top
             _SectionTitle(
                 title: 'Category',
                 actionLabel: 'New',
@@ -127,7 +114,11 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                   WalletCategoryChip(
                     category: category,
                     selected: category.id == _categoryId,
-                    onTap: () => setState(() => _categoryId = category.id),
+                    onTap: () {
+                      setState(() {
+                        _categoryId = category.id;
+                      });
+                    },
                   ),
               ],
             ),
@@ -137,52 +128,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                   child: Text(_validation!.categoryError!,
                       style: TextStyle(
                           color: Theme.of(context).colorScheme.error))),
-            const SizedBox(height: 18),
-            WMGlassSurface.tier2(
-              onTap: _pickDate,
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-              child: Row(
-                children: [
-                  const Icon(Icons.calendar_month_rounded, color: WalletMeltColors.brandDeep),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Date', style: Theme.of(context).textTheme.labelMedium?.copyWith(fontSize: 11)),
-                        const SizedBox(height: 2),
-                        Text(
-                          '${_date.day}/${_date.month}/${_date.year}',
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                      ],
-                    ),
-                  ),
-                  Icon(
-                    Icons.chevron_right_rounded,
-                    color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.54),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 18),
-            TextField(
-              controller: _notesController,
-              minLines: 2,
-              maxLines: 4,
-              decoration: const InputDecoration(labelText: 'Notes')),
-            const SizedBox(height: 18),
-            const _SectionTitle(
-                title: 'Receipt or bill', actionLabel: null, onAction: null),
-            const SizedBox(height: 10),
-            _ReceiptCard(
-              receiptUri: _receiptUri,
-              onCamera: () => _pickReceipt(fromCamera: true),
-              onGallery: () => _pickReceipt(fromCamera: false),
-              onRemove: () => setState(() => _receiptUri = null),
-            ),
-            if (selectedCategory?.id == 'grocery') ...[
-              const SizedBox(height: 18),
+            const SizedBox(height: 20),
+
+            if (isGroceryMode) ...[
+              // Dedicated Bulk Grocery Mode
               BulkGroceryEditor(
                 items: _groceryItems,
                 currency: currency,
@@ -191,15 +140,160 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                     _groceryItems.clear();
                     _groceryItems.addAll(newItems);
                   });
-                  // Auto-update amount field based on grocery sum
                   double sum = 0.0;
                   for (final item in newItems) {
                     sum += item.amount;
                   }
-                  if (sum > 0) {
-                    _amountController.text = sum.toStringAsFixed(sum % 1 == 0 ? 0 : 2);
-                  }
+                  _amountController.text = sum.toStringAsFixed(sum % 1 == 0 ? 0 : 2);
                 },
+              ),
+              const SizedBox(height: 18),
+
+              // Collapsible Details Card
+              WMGlassSurface.tier2(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  children: [
+                    InkWell(
+                      onTap: () => setState(() => _showAdditionalDetails = !_showAdditionalDetails),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(Icons.tune_rounded, size: 20, color: WalletMeltColors.brandDeep),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Additional Details',
+                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                            ],
+                          ),
+                          Icon(
+                            _showAdditionalDetails
+                                ? Icons.expand_less_rounded
+                                : Icons.expand_more_rounded,
+                            color: WalletMeltColors.textMuted,
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (_showAdditionalDetails) ...[
+                      const SizedBox(height: 14),
+                      TextField(
+                        controller: _vendorController,
+                        decoration: const InputDecoration(
+                          labelText: 'Vendor or store',
+                          hintText: 'e.g., Imtiaz, Metro',
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      WMGlassSurface.tier1(
+                        onTap: _pickDate,
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.calendar_month_rounded, color: WalletMeltColors.brandDeep, size: 18),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                'Date: ${_date.day}/${_date.month}/${_date.year}',
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                              ),
+                            ),
+                            const Icon(Icons.chevron_right_rounded, size: 18, color: WalletMeltColors.textMuted),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: _notesController,
+                        minLines: 2,
+                        maxLines: 4,
+                        decoration: const InputDecoration(labelText: 'Notes'),
+                      ),
+                      const SizedBox(height: 14),
+                      const _SectionTitle(title: 'Receipt or bill', actionLabel: null, onAction: null),
+                      const SizedBox(height: 8),
+                      _ReceiptCard(
+                        receiptUri: _receiptUri,
+                        onCamera: () => _pickReceipt(fromCamera: true),
+                        onGallery: () => _pickReceipt(fromCamera: false),
+                        onRemove: () => setState(() => _receiptUri = null),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ] else ...[
+              // Traditional Form
+              TextField(
+                controller: _amountController,
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                style: Theme.of(context).textTheme.displaySmall,
+                decoration: InputDecoration(
+                  labelText: 'Amount',
+                  prefixText: '$currency ',
+                  errorText: _validation?.amountError,
+                ),
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: _titleController,
+                decoration:
+                    const InputDecoration(labelText: 'Title or bill name')),
+              const SizedBox(height: 14),
+              TextField(
+                controller: _vendorController,
+                decoration:
+                    const InputDecoration(labelText: 'Vendor or provider')),
+              const SizedBox(height: 18),
+              WMGlassSurface.tier2(
+                onTap: _pickDate,
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+                child: Row(
+                  children: [
+                    const Icon(Icons.calendar_month_rounded, color: WalletMeltColors.brandDeep),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Date', style: Theme.of(context).textTheme.labelMedium?.copyWith(fontSize: 11)),
+                          const SizedBox(height: 2),
+                          Text(
+                            '${_date.day}/${_date.month}/${_date.year}',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.54),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 18),
+              TextField(
+                controller: _notesController,
+                minLines: 2,
+                maxLines: 4,
+                decoration: const InputDecoration(labelText: 'Notes')),
+              const SizedBox(height: 18),
+              const _SectionTitle(
+                  title: 'Receipt or bill', actionLabel: null, onAction: null),
+              const SizedBox(height: 10),
+              _ReceiptCard(
+                receiptUri: _receiptUri,
+                onCamera: () => _pickReceipt(fromCamera: true),
+                onGallery: () => _pickReceipt(fromCamera: false),
+                onRemove: () => setState(() => _receiptUri = null),
               ),
             ],
             const SizedBox(height: 24),
@@ -255,8 +349,13 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     setState(() => _saving = true);
     final router = GoRouter.of(context);
     final amount = double.parse(_amountController.text.trim());
+    final isGroceryMode = _categoryId == 'grocery';
     final title = _titleController.text.trim().isEmpty
-        ? state.categoryById(_categoryId!)?.name ?? 'Household expense'
+        ? (isGroceryMode
+            ? (_vendorController.text.trim().isNotEmpty
+                ? 'Groceries at ${_vendorController.text.trim()}'
+                : 'Grocery Shopping')
+            : state.categoryById(_categoryId!)?.name ?? 'Household expense')
         : _titleController.text.trim();
     final existing = widget.expenseId == null
         ? null
@@ -703,7 +802,7 @@ class _BulkGroceryEditorState extends State<BulkGroceryEditor> {
       builder: (ctx) => AlertDialog(
         title: const Text('Load Grocery Template'),
         content: SizedBox(
-          width: 400,
+          width: 450,
           child: ListView.builder(
             shrinkWrap: true,
             itemCount: state.groceryTemplates.length,
@@ -712,15 +811,86 @@ class _BulkGroceryEditorState extends State<BulkGroceryEditor> {
               return ListTile(
                 title: Text(t.name),
                 subtitle: Text('${t.items.length} items'),
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete_outline_rounded),
-                  onPressed: () async {
-                    await state.deleteGroceryTemplate(t.id);
-                    if (ctx.mounted) {
-                      Navigator.pop(ctx);
-                      _loadTemplate(); // Reload
-                    }
-                  },
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Update/Save Button
+                    IconButton(
+                      icon: const Icon(Icons.save_rounded, size: 20, color: WalletMeltColors.positive),
+                      tooltip: 'Overwrite template',
+                      onPressed: () async {
+                        final names = _rows
+                            .map((r) => r.nameController.text.trim())
+                            .where((name) => name.isNotEmpty)
+                            .toList();
+                        if (names.isEmpty) {
+                          if (ctx.mounted) {
+                            ScaffoldMessenger.of(ctx).showSnackBar(
+                              const SnackBar(content: Text('Cannot update with an empty list')),
+                            );
+                          }
+                          return;
+                        }
+                        final updated = t.copyWith(items: names);
+                        await state.updateGroceryTemplate(updated);
+                        if (ctx.mounted) {
+                          ScaffoldMessenger.of(ctx).showSnackBar(
+                            SnackBar(content: Text('Template "${t.name}" updated successfully')),
+                          );
+                        }
+                      },
+                    ),
+                    // Rename Button
+                    IconButton(
+                      icon: const Icon(Icons.edit_rounded, size: 20, color: WalletMeltColors.brandDeep),
+                      tooltip: 'Rename template',
+                      onPressed: () async {
+                        final renameController = TextEditingController(text: t.name);
+                        final newName = await showDialog<String>(
+                          context: context,
+                          builder: (renameCtx) => AlertDialog(
+                            title: const Text('Rename Template'),
+                            content: TextField(
+                              controller: renameController,
+                              autofocus: true,
+                              decoration: const InputDecoration(labelText: 'New Name'),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(renameCtx),
+                                child: const Text('Cancel'),
+                              ),
+                              FilledButton(
+                                onPressed: () => Navigator.pop(renameCtx, renameController.text.trim()),
+                                child: const Text('Rename'),
+                              ),
+                            ],
+                          ),
+                        );
+                        renameController.dispose();
+                        if (newName != null && newName.isNotEmpty) {
+                          final updated = t.copyWith(name: newName);
+                          await state.updateGroceryTemplate(updated);
+                          if (ctx.mounted) {
+                            Navigator.pop(ctx); // Close list
+                            _loadTemplate(); // Re-open list to show changes
+                          }
+                        }
+                      },
+                    ),
+                    // Delete Button
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline_rounded, size: 20, color: WalletMeltColors.danger),
+                      tooltip: 'Delete template',
+                      onPressed: () async {
+                        await state.deleteGroceryTemplate(t.id);
+                        if (ctx.mounted) {
+                          Navigator.pop(ctx); // Close list
+                          _loadTemplate(); // Re-open list to show changes
+                        }
+                      },
+                    ),
+                  ],
                 ),
                 onTap: () => Navigator.pop(ctx, t),
               );
@@ -776,6 +946,22 @@ class _BulkGroceryEditorState extends State<BulkGroceryEditor> {
           color: WalletMeltColors.textSecondary,
         );
 
+    // Calculate smart totals in real-time
+    double subtotal = 0.0;
+    int itemCount = 0;
+    double totalQty = 0.0;
+
+    for (final row in _rows) {
+      final name = row.nameController.text.trim();
+      final qty = double.tryParse(row.qtyController.text.trim()) ?? 0.0;
+      final price = double.tryParse(row.priceController.text.trim()) ?? 0.0;
+      if (name.isNotEmpty) {
+        itemCount++;
+        totalQty += qty;
+        subtotal += qty * price;
+      }
+    }
+
     return WMGlassSurface.tier2(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       child: Column(
@@ -800,14 +986,79 @@ class _BulkGroceryEditorState extends State<BulkGroceryEditor> {
                   ),
                   IconButton(
                     icon: const Icon(Icons.folder_open_rounded, size: 20),
-                    tooltip: 'Load Template',
+                    tooltip: 'Load/Manage Templates',
                     onPressed: _loadTemplate,
                   ),
                 ],
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          
+          // Smart Totals display
+          if (itemCount > 0) ...[
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: WMGlassSurface.tier1(
+                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                    child: Column(
+                      children: [
+                        const Text(
+                          'ITEMS',
+                          style: TextStyle(fontSize: 9, color: WalletMeltColors.textMuted, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '$itemCount',
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: WMGlassSurface.tier1(
+                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                    child: Column(
+                      children: [
+                        const Text(
+                          'TOTAL QTY',
+                          style: TextStyle(fontSize: 9, color: WalletMeltColors.textMuted, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          totalQty % 1 == 0 ? totalQty.toStringAsFixed(0) : totalQty.toStringAsFixed(2),
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: WMGlassSurface.tier1(
+                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                    child: Column(
+                      children: [
+                        const Text(
+                          'TOTAL AMOUNT',
+                          style: TextStyle(fontSize: 9, color: WalletMeltColors.textMuted, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${subtotal.toStringAsFixed(subtotal % 1 == 0 ? 0 : 2)} ${widget.currency}',
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: WalletMeltColors.brandDeep),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+          const SizedBox(height: 14),
 
           // Spreadsheet Header
           Padding(

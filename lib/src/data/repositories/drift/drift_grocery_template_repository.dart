@@ -33,6 +33,15 @@ class DriftGroceryTemplateRepository {
     await (_db.delete(_db.groceryTemplates)..where((t) => t.id.equals(id))).go();
   }
 
+  Future<void> update(domain.GroceryTemplate template) async {
+    final row = local.GroceryTemplatesCompanion(
+      id: Value(template.id),
+      name: Value(template.name),
+      items: Value(jsonEncode(template.items)),
+    );
+    await (_db.update(_db.groceryTemplates)..where((t) => t.id.equals(template.id))).write(row);
+  }
+
   domain.GroceryTemplate _toDomain(local.GroceryTemplate row) {
     final List<dynamic> decoded = jsonDecode(row.items) as List<dynamic>;
     final items = decoded.map((e) => e.toString()).toList();

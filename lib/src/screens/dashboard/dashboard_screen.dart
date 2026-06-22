@@ -11,6 +11,7 @@ import '../../utils/currency_format.dart';
 import '../../utils/date_utils.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/progress_bar.dart';
+import '../../types/debt.dart';
 import '../../widgets/section_header.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -27,6 +28,7 @@ class DashboardScreen extends StatelessWidget {
     final hasBudget = context.select<AppState, bool>((s) => s.getMonthlyBudgetAmount() != null);
     final hasExpenses = context.select<AppState, bool>((s) => s.expenses.isNotEmpty);
     final currency = context.select<AppState, String>((s) => s.settings.currency);
+    final state = context.watch<AppState>();
 
     return Scaffold(
       body: AppBackground(
@@ -117,6 +119,10 @@ class DashboardScreen extends StatelessWidget {
                 const _DashboardBudgetCard(),
                 const SizedBox(height: AppSpacing.md),
               ],
+
+              // ── Financial Obligations Card ──────────────────────────────
+              _DashboardObligationsCard(state: state, currency: currency),
+              const SizedBox(height: AppSpacing.md),
 
               // ── Content: empty or charts + recent ──────────────────────
               if (!hasExpenses)
@@ -370,6 +376,146 @@ class _DashboardBudgetCard extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                       color: isOverBudget ? WalletMeltColors.danger : null,
                     ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DashboardObligationsCard extends StatelessWidget {
+  const _DashboardObligationsCard({
+    required this.state,
+    required this.currency,
+  });
+
+  final AppState state;
+  final String currency;
+
+  @override
+  Widget build(BuildContext context) {
+    double owedToMe = 0.0;
+    double iOwe = 0.0;
+
+    for (final debt in state.debts) {
+      if (debt.isSettled) continue;
+      if (debt.type == DebtType.owedToMe || debt.type == DebtType.loanGiven) {
+        owedToMe += debt.remainingAmount;
+      } else {
+        iOwe += debt.remainingAmount;
+      }
+    }
+
+    final netPosition = owedToMe - iOwe;
+    final isNegative = netPosition < 0;
+
+    // Show obligations only if there are active outstanding debts/loans.
+    if (owedToMe == 0 && iOwe == 0) {
+      return const SizedBox.shrink();
+    }
+
+    return WMGlassSurface.tier2(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      onTap: () => context.go('/debt'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const SectionHeader(
+                title: 'Financial obligations',
+                icon: Icons.handshake_rounded,
+                padding: EdgeInsets.zero,
+              ),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.54),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm + 2),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'OWED TO ME',
+                      style: TextStyle(
+                        fontSize: 9,
+                        color: WalletMeltColors.textMuted,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${owedToMe.toStringAsFixed(owedToMe % 1 == 0 ? 0 : 2)} $currency',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: WalletMeltColors.positive,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(width: 1, height: 24, color: const Color(0x1Fffffff)),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'I OWE',
+                      style: TextStyle(
+                        fontSize: 9,
+                        color: WalletMeltColors.textMuted,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${iOwe.toStringAsFixed(iOwe % 1 == 0 ? 0 : 2)} $currency',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: WalletMeltColors.danger,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(width: 1, height: 24, color: const Color(0x1Fffffff)),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'NET POSITION',
+                      style: TextStyle(
+                        fontSize: 9,
+                        color: WalletMeltColors.textMuted,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${netPosition >= 0 ? "+" : ""}${netPosition.toStringAsFixed(netPosition % 1 == 0 ? 0 : 2)} $currency',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: isNegative ? WalletMeltColors.danger : WalletMeltColors.positive,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
