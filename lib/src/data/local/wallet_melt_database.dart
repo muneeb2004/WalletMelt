@@ -254,6 +254,56 @@ class MigrationAudit extends Table {
   Set<Column<Object>> get primaryKey => {id};
 }
 
+class DebtRecords extends Table {
+  @override
+  String get tableName => 'debt_records';
+
+  TextColumn get id => text()();
+  TextColumn get personName => text().named('personName')();
+  TextColumn get type => text()(); // 'owedToMe', 'iOwe', 'loanGiven', 'loanTaken'
+  RealColumn get principalAmount => real().named('principalAmount')();
+  RealColumn get remainingAmount => real().named('remainingAmount')();
+  TextColumn get currency => text()();
+  TextColumn get description => text().nullable()();
+  TextColumn get createdAt => text().named('createdAt')();
+  TextColumn get dueDate => text().named('dueDate').nullable()();
+  TextColumn get settledAt => text().named('settledAt').nullable()();
+  TextColumn get status => text()(); // 'active', 'partiallyPaid', 'settled', 'overdue'
+  TextColumn get notes => text().nullable()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+class DebtRepayments extends Table {
+  @override
+  String get tableName => 'debt_repayments';
+
+  TextColumn get id => text()();
+  TextColumn get debtId => text()
+      .named('debtId')
+      .references(DebtRecords, #id, onDelete: KeyAction.cascade)();
+  RealColumn get amount => real()();
+  TextColumn get createdAt => text().named('createdAt')();
+  TextColumn get notes => text().nullable()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+class GroceryTemplates extends Table {
+  @override
+  String get tableName => 'grocery_templates';
+
+  TextColumn get id => text()();
+  TextColumn get name => text()();
+  TextColumn get items => text()(); // comma-separated or JSON list of item names
+  TextColumn get createdAt => text().named('createdAt')();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
 class V1MigrationMetrics {
   const V1MigrationMetrics({
     required this.expenseCount,
@@ -288,12 +338,15 @@ class V1MigrationMetrics {
     ExpenseItems,
     Receipts,
     MigrationAudit,
+    DebtRecords,
+    DebtRepayments,
+    GroceryTemplates,
   ],
 )
 class WalletMeltDatabase extends _$WalletMeltDatabase {
   WalletMeltDatabase(super.executor, {this.preMigrationBackupPath});
 
-  static const currentSchemaVersion = 2;
+  static const currentSchemaVersion = 3;
 
   final String? preMigrationBackupPath;
 
@@ -383,6 +436,9 @@ class WalletMeltDatabase extends _$WalletMeltDatabase {
           if (from < 2) {
             await _upgradeFromV1ToV2(m, from, to);
           }
+          if (from < 3 && to >= 3) {
+            await _upgradeFromV2ToV3(m, from, to);
+          }
         },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON;');
@@ -392,6 +448,12 @@ class WalletMeltDatabase extends _$WalletMeltDatabase {
           await customStatement('CREATE INDEX IF NOT EXISTS grocery_items_expenseId_idx ON grocery_items (expenseId);');
         },
       );
+
+  Future<void> _upgradeFromV2ToV3(Migrator m, int from, int to) async {
+    if (!await _tableExists('debt_records')) await m.createTable(debtRecords);
+    if (!await _tableExists('debt_repayments')) await m.createTable(debtRepayments);
+    if (!await _tableExists('grocery_templates')) await m.createTable(groceryTemplates);
+  }
 
   Future<void> _upgradeFromV1ToV2(Migrator m, int from, int to) async {
     final before = await readV1MigrationMetrics();

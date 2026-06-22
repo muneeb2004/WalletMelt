@@ -24,6 +24,12 @@ import '../types/settings.dart';
 import '../utils/date_utils.dart';
 import '../utils/insights.dart';
 
+import 'package:uuid/uuid.dart';
+import '../types/debt.dart' as wm_debt;
+import '../types/grocery_template.dart' as wm_template;
+import '../data/repositories/drift/drift_debt_repository.dart';
+import '../data/repositories/drift/drift_grocery_template_repository.dart';
+
 class AppState extends ChangeNotifier {
   AppState({
     SettingsService? settingsService,
@@ -66,6 +72,11 @@ class AppState extends ChangeNotifier {
   DriftCategoryRepository? _driftCategoryRepository;
   DriftBudgetRepository? _driftBudgetRepository;
   DriftExpenseRepository? _driftExpenseRepository;
+  DriftDebtRepository? _driftDebtRepository;
+  DriftGroceryTemplateRepository? _driftGroceryTemplateRepository;
+
+  List<wm_debt.DebtRecord> debts = const [];
+  List<wm_template.GroceryTemplate> groceryTemplates = const [];
 
   WalletMeltSettings settings = WalletMeltSettings.defaults;
   List<wm.Category> categories = const [];
@@ -173,6 +184,16 @@ class AppState extends ChangeNotifier {
     expenses = await _listActiveExpenses();
     currentBudgets = await _listBudgetsForMonth(currentMonthKey);
     _updateCurrentMonthExpenses();
+
+    final debtRepo = _driftDebtRepository;
+    if (debtRepo != null) {
+      debts = await debtRepo.listAll();
+    }
+    final templateRepo = _driftGroceryTemplateRepository;
+    if (templateRepo != null) {
+      groceryTemplates = await templateRepo.listAll();
+    }
+
     notifyListeners();
   }
 
@@ -395,6 +416,79 @@ class AppState extends ChangeNotifier {
     return _budgetRepository.listAll();
   }
 
+  Future<void> addDebt(wm_debt.DebtRecord debt) async {
+    final repo = _driftDebtRepository;
+    if (repo != null) {
+      await repo.createDebt(debt);
+      await refresh();
+    }
+  }
+
+  Future<void> deleteDebt(String id) async {
+    final repo = _driftDebtRepository;
+    if (repo != null) {
+      await repo.deleteDebt(id);
+      await refresh();
+    }
+  }
+
+  Future<void> addRepayment({
+    required String debtId,
+    required double amount,
+    String? notes,
+  }) async {
+    final repo = _driftDebtRepository;
+    if (repo != null) {
+      final repayment = wm_debt.DebtRepayment(
+        id: const Uuid().v4(),
+        debtId: debtId,
+        amount: amount,
+        createdAt: DateTime.now().toIso8601String(),
+        notes: notes,
+      );
+      await repo.addRepayment(repayment);
+      await refresh();
+    }
+  }
+
+  Future<List<wm_debt.DebtRepayment>> repaymentsForDebt(String debtId) async {
+    final repo = _driftDebtRepository;
+    if (repo != null) {
+      return repo.getRepayments(debtId);
+    }
+    return const [];
+  }
+
+  Future<wm_debt.DebtRecord?> getDebtById(String id) async {
+    final repo = _driftDebtRepository;
+    if (repo != null) {
+      return repo.getById(id);
+    }
+    return null;
+  }
+
+  Future<void> saveGroceryTemplate(String name, List<String> items) async {
+    final repo = _driftGroceryTemplateRepository;
+    if (repo != null) {
+      final template = wm_template.GroceryTemplate(
+        id: const Uuid().v4(),
+        name: name,
+        items: items,
+        createdAt: DateTime.now().toIso8601String(),
+      );
+      await repo.create(template);
+      await refresh();
+    }
+  }
+
+  Future<void> deleteGroceryTemplate(String id) async {
+    final repo = _driftGroceryTemplateRepository;
+    if (repo != null) {
+      await repo.delete(id);
+      await refresh();
+    }
+  }
+
   Future<void> softDeleteExpense(String id) async {
     await _softDeleteExpense(id);
     await refresh();
@@ -458,11 +552,15 @@ class AppState extends ChangeNotifier {
       _driftCategoryRepository = DriftCategoryRepository(database);
       _driftBudgetRepository = DriftBudgetRepository(database);
       _driftExpenseRepository = DriftExpenseRepository(database);
+      _driftDebtRepository = DriftDebtRepository(database);
+      _driftGroceryTemplateRepository = DriftGroceryTemplateRepository(database);
     } catch (_) {
       _driftDatabase = null;
       _driftCategoryRepository = null;
       _driftBudgetRepository = null;
       _driftExpenseRepository = null;
+      _driftDebtRepository = null;
+      _driftGroceryTemplateRepository = null;
     }
   }
 

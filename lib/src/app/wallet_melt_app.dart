@@ -12,6 +12,7 @@ import '../screens/insights/insights_screen.dart';
 import '../screens/onboarding/onboarding_screen.dart';
 import '../screens/settings/settings_screen.dart';
 import '../screens/budget/budget_screen.dart';
+import '../screens/debt/debt_screen.dart';
 import '../components/navigation/app_shell.dart';
 import '../state/app_state.dart';
 import '../theme/wallet_melt_theme.dart';
@@ -78,6 +79,11 @@ class _WalletMeltAppState extends State<WalletMeltApp> {
               GoRoute(
                   path: '/budget',
                   builder: (context, state) => const BudgetScreen())
+            ]),
+            StatefulShellBranch(routes: [
+              GoRoute(
+                  path: '/debt',
+                  builder: (context, state) => const DebtScreen())
             ]),
             StatefulShellBranch(routes: [
               GoRoute(

@@ -11,6 +11,7 @@ import '../../state/app_state.dart';
 import '../../theme/wallet_melt_theme.dart';
 import '../../utils/expense_validation.dart';
 import '../../widgets/primary_button.dart';
+import '../../types/grocery_template.dart';
 
 class AddExpenseScreen extends StatefulWidget {
   const AddExpenseScreen({super.key, this.expenseId});
@@ -26,8 +27,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   final _titleController = TextEditingController();
   final _vendorController = TextEditingController();
   final _notesController = TextEditingController();
-  final _groceryNameController = TextEditingController();
-  final _groceryAmountController = TextEditingController();
   final List<GroceryItemDraft> _groceryItems = [];
 
   String? _categoryId;
@@ -65,8 +64,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     _titleController.dispose();
     _vendorController.dispose();
     _notesController.dispose();
-    _groceryNameController.dispose();
-    _groceryAmountController.dispose();
     super.dispose();
   }
 
@@ -186,13 +183,23 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
             ),
             if (selectedCategory?.id == 'grocery') ...[
               const SizedBox(height: 18),
-              _GroceryItemsEditor(
+              BulkGroceryEditor(
                 items: _groceryItems,
-                nameController: _groceryNameController,
-                amountController: _groceryAmountController,
-                onAdd: _addGroceryItem,
-                onRemove: (index) =>
-                    setState(() => _groceryItems.removeAt(index)),
+                currency: currency,
+                onChanged: (newItems) {
+                  setState(() {
+                    _groceryItems.clear();
+                    _groceryItems.addAll(newItems);
+                  });
+                  // Auto-update amount field based on grocery sum
+                  double sum = 0.0;
+                  for (final item in newItems) {
+                    sum += item.amount;
+                  }
+                  if (sum > 0) {
+                    _amountController.text = sum.toStringAsFixed(sum % 1 == 0 ? 0 : 2);
+                  }
+                },
               ),
             ],
             const SizedBox(height: 24),
@@ -237,17 +244,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
         : await service.pickFromGallery();
     if (!mounted || uri == null) return;
     setState(() => _receiptUri = uri);
-  }
-
-  void _addGroceryItem() {
-    final amount = double.tryParse(_groceryAmountController.text.trim());
-    final name = _groceryNameController.text.trim();
-    if (name.isEmpty || amount == null || amount <= 0) return;
-    setState(() {
-      _groceryItems.add(GroceryItemDraft(name: name, amount: amount));
-      _groceryNameController.clear();
-      _groceryAmountController.clear();
-    });
   }
 
   Future<void> _save(AppState state) async {
@@ -504,60 +500,450 @@ class _ReceiptCard extends StatelessWidget {
   }
 }
 
-class _GroceryItemsEditor extends StatelessWidget {
-  const _GroceryItemsEditor({
+class BulkGroceryEditor extends StatefulWidget {
+  const BulkGroceryEditor({
+    super.key,
     required this.items,
-    required this.nameController,
-    required this.amountController,
-    required this.onAdd,
-    required this.onRemove,
+    required this.currency,
+    required this.onChanged,
   });
 
   final List<GroceryItemDraft> items;
+  final String currency;
+  final ValueChanged<List<GroceryItemDraft>> onChanged;
+
+  @override
+  State<BulkGroceryEditor> createState() => _BulkGroceryEditorState();
+}
+
+class _BulkGroceryRowData {
+  _BulkGroceryRowData({
+    required this.nameController,
+    required this.qtyController,
+    required this.priceController,
+    required this.nameFocusNode,
+    required this.qtyFocusNode,
+    required this.priceFocusNode,
+  });
+
   final TextEditingController nameController;
-  final TextEditingController amountController;
-  final VoidCallback onAdd;
-  final ValueChanged<int> onRemove;
+  final TextEditingController qtyController;
+  final TextEditingController priceController;
+  final FocusNode nameFocusNode;
+  final FocusNode qtyFocusNode;
+  final FocusNode priceFocusNode;
+}
+
+class _BulkGroceryEditorState extends State<BulkGroceryEditor> {
+  final List<_BulkGroceryRowData> _rows = [];
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.items.isEmpty) {
+      _addRow();
+    } else {
+      for (final item in widget.items) {
+        _addRowFromItem(item);
+      }
+    }
+  }
+
+  void _addRow() {
+    _rows.add(
+      _BulkGroceryRowData(
+        nameController: TextEditingController(),
+        qtyController: TextEditingController(text: '1'),
+        priceController: TextEditingController(),
+        nameFocusNode: FocusNode(),
+        qtyFocusNode: FocusNode(),
+        priceFocusNode: FocusNode(),
+      ),
+    );
+  }
+
+  void _addRowFromItem(GroceryItemDraft item) {
+    final qtyStr = item.quantity?.toStringAsFixed(item.quantity! % 1 == 0 ? 0 : 2) ?? '1';
+    final priceStr = item.unitPrice != null
+        ? item.unitPrice!.toStringAsFixed(item.unitPrice! % 1 == 0 ? 0 : 2)
+        : '';
+    _rows.add(
+      _BulkGroceryRowData(
+        nameController: TextEditingController(text: item.name),
+        qtyController: TextEditingController(text: qtyStr),
+        priceController: TextEditingController(text: priceStr),
+        nameFocusNode: FocusNode(),
+        qtyFocusNode: FocusNode(),
+        priceFocusNode: FocusNode(),
+      ),
+    );
+  }
+
+  void _removeRow(int index) {
+    setState(() {
+      final row = _rows.removeAt(index);
+      row.nameController.dispose();
+      row.qtyController.dispose();
+      row.priceController.dispose();
+      row.nameFocusNode.dispose();
+      row.qtyFocusNode.dispose();
+      row.priceFocusNode.dispose();
+      if (_rows.isEmpty) {
+        _addRow();
+      }
+    });
+    _notifyChanges();
+  }
+
+  void _notifyChanges() {
+    final drafts = <GroceryItemDraft>[];
+    for (final row in _rows) {
+      final name = row.nameController.text.trim();
+      final qty = double.tryParse(row.qtyController.text.trim()) ?? 1.0;
+      final price = double.tryParse(row.priceController.text.trim()) ?? 0.0;
+      final total = qty * price;
+      if (name.isNotEmpty) {
+        drafts.add(
+          GroceryItemDraft(
+            name: name,
+            amount: total,
+            quantity: qty,
+            unitPrice: price,
+          ),
+        );
+      }
+    }
+    widget.onChanged(drafts);
+  }
+
+  @override
+  void dispose() {
+    for (final row in _rows) {
+      row.nameController.dispose();
+      row.qtyController.dispose();
+      row.priceController.dispose();
+      row.nameFocusNode.dispose();
+      row.qtyFocusNode.dispose();
+      row.priceFocusNode.dispose();
+    }
+    super.dispose();
+  }
+
+  Future<void> _saveAsTemplate() async {
+    final names = _rows
+        .map((r) => r.nameController.text.trim())
+        .where((name) => name.isNotEmpty)
+        .toList();
+    if (names.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Cannot save empty list as template')),
+      );
+      return;
+    }
+
+    final nameController = TextEditingController();
+    final state = context.read<AppState>();
+    final result = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Save Shopping Template'),
+        content: TextField(
+          controller: nameController,
+          autofocus: true,
+          decoration: const InputDecoration(
+            labelText: 'Template Name',
+            hintText: 'e.g., Weekly Essentials',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, nameController.text.trim()),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+
+    if (result != null && result.isNotEmpty) {
+      await state.saveGroceryTemplate(result, names);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Template "$result" saved successfully')),
+        );
+      }
+    }
+    nameController.dispose();
+  }
+
+  Future<void> _loadTemplate() async {
+    final state = context.read<AppState>();
+    if (state.groceryTemplates.isEmpty) {
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('No Templates'),
+          content: const Text('You haven\'t saved any shopping list templates yet. Add items and tap "Save as Template" to create one.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    final selected = await showDialog<GroceryTemplate>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Load Grocery Template'),
+        content: SizedBox(
+          width: 400,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: state.groceryTemplates.length,
+            itemBuilder: (context, idx) {
+              final t = state.groceryTemplates[idx];
+              return ListTile(
+                title: Text(t.name),
+                subtitle: Text('${t.items.length} items'),
+                trailing: IconButton(
+                  icon: const Icon(Icons.delete_outline_rounded),
+                  onPressed: () async {
+                    await state.deleteGroceryTemplate(t.id);
+                    if (ctx.mounted) {
+                      Navigator.pop(ctx);
+                      _loadTemplate(); // Reload
+                    }
+                  },
+                ),
+                onTap: () => Navigator.pop(ctx, t),
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+        ],
+      ),
+    );
+
+    if (selected != null) {
+      setState(() {
+        // Clean old rows
+        for (final row in _rows) {
+          row.nameController.dispose();
+          row.qtyController.dispose();
+          row.priceController.dispose();
+          row.nameFocusNode.dispose();
+          row.qtyFocusNode.dispose();
+          row.priceFocusNode.dispose();
+        }
+        _rows.clear();
+
+        for (final itemName in selected.items) {
+          _rows.add(
+            _BulkGroceryRowData(
+              nameController: TextEditingController(text: itemName),
+              qtyController: TextEditingController(text: '1'),
+              priceController: TextEditingController(),
+              nameFocusNode: FocusNode(),
+              qtyFocusNode: FocusNode(),
+              priceFocusNode: FocusNode(),
+            ),
+          );
+        }
+        if (_rows.isEmpty) {
+          _addRow();
+        }
+      });
+      _notifyChanges();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final headerStyle = Theme.of(context).textTheme.labelMedium?.copyWith(
+          fontWeight: FontWeight.bold,
+          color: WalletMeltColors.textSecondary,
+        );
+
     return WMGlassSurface.tier2(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Grocery items', style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: 10),
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                  flex: 2,
-                  child: TextField(
-                      controller: nameController,
-                      decoration: const InputDecoration(labelText: 'Item'))),
-              const SizedBox(width: 8),
-              Expanded(
-                  child: TextField(
-                      controller: amountController,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      decoration: const InputDecoration(labelText: 'Amount'))),
-              IconButton(
-                  onPressed: onAdd,
-                  icon: const Icon(Icons.add_circle_rounded),
-                  tooltip: 'Add grocery item'),
+              Text(
+                'Quick Grocery Entry',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.save_as_rounded, size: 20),
+                    tooltip: 'Save as Template',
+                    onPressed: _saveAsTemplate,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.folder_open_rounded, size: 20),
+                    tooltip: 'Load Template',
+                    onPressed: _loadTemplate,
+                  ),
+                ],
+              ),
             ],
           ),
-          for (var i = 0; i < items.length; i++)
-            Material(
-              type: MaterialType.transparency,
-              child: ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(items[i].name),
-                trailing: IconButton(
-                    onPressed: () => onRemove(i),
-                    icon: const Icon(Icons.close_rounded),
-                    tooltip: 'Remove item'),
-              ),
+          const SizedBox(height: 10),
+
+          // Spreadsheet Header
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            child: Row(
+              children: [
+                Expanded(flex: 3, child: Text('Item Name', style: headerStyle)),
+                const SizedBox(width: 6),
+                Expanded(flex: 1, child: Text('Qty', style: headerStyle)),
+                const SizedBox(width: 6),
+                Expanded(flex: 1, child: Text('Price', style: headerStyle)),
+                const SizedBox(width: 6),
+                Expanded(flex: 1, child: Text('Total', style: headerStyle)),
+                const SizedBox(width: 40), // Spacing matching delete button
+              ],
             ),
+          ),
+          const Divider(height: 1),
+          const SizedBox(height: 8),
+
+          // List of spreadsheet-style rows
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: _rows.length,
+            itemBuilder: (context, idx) {
+              final row = _rows[idx];
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  children: [
+                    // Item Name
+                    Expanded(
+                      flex: 3,
+                      child: TextField(
+                        controller: row.nameController,
+                        focusNode: row.nameFocusNode,
+                        decoration: const InputDecoration(
+                          hintText: 'e.g., Rice',
+                          contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                        ),
+                        onSubmitted: (_) {
+                          row.qtyFocusNode.requestFocus();
+                        },
+                        onChanged: (_) => _notifyChanges(),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+
+                    // Quantity
+                    Expanded(
+                      flex: 1,
+                      child: TextField(
+                        controller: row.qtyController,
+                        focusNode: row.qtyFocusNode,
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        decoration: const InputDecoration(
+                          hintText: '1',
+                          contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                        ),
+                        onSubmitted: (_) {
+                          row.priceFocusNode.requestFocus();
+                        },
+                        onChanged: (_) {
+                          setState(() {});
+                          _notifyChanges();
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+
+                    // Unit Price
+                    Expanded(
+                      flex: 1,
+                      child: TextField(
+                        controller: row.priceController,
+                        focusNode: row.priceFocusNode,
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        decoration: InputDecoration(
+                          hintText: '${widget.currency} 0',
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                        ),
+                        onSubmitted: (_) {
+                          final isLast = idx == _rows.length - 1;
+                          if (isLast) {
+                            setState(() {
+                              _addRow();
+                            });
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              _rows.last.nameFocusNode.requestFocus();
+                            });
+                          } else {
+                            _rows[idx + 1].nameFocusNode.requestFocus();
+                          }
+                          _notifyChanges();
+                        },
+                        onChanged: (_) {
+                          setState(() {});
+                          _notifyChanges();
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+
+                    // Calculated Total
+                    Expanded(
+                      flex: 1,
+                      child: Builder(
+                        builder: (context) {
+                          final qty = double.tryParse(row.qtyController.text.trim()) ?? 1.0;
+                          final price = double.tryParse(row.priceController.text.trim()) ?? 0.0;
+                          final total = qty * price;
+                          return Padding(
+                            padding: const EdgeInsets.only(left: 4),
+                            child: Text(
+                              total > 0 ? total.toStringAsFixed(total % 1 == 0 ? 0 : 2) : '0',
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+
+                    // Delete Row Button
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                      tooltip: 'Delete row',
+                      onPressed: () => _removeRow(idx),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         ],
       ),
     );

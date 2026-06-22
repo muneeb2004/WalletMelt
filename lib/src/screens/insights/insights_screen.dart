@@ -10,6 +10,7 @@ import '../../utils/currency_format.dart';
 import '../../utils/date_utils.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/section_header.dart';
+import '../../types/debt.dart';
 
 class InsightsScreen extends StatelessWidget {
   const InsightsScreen({super.key});
@@ -19,6 +20,21 @@ class InsightsScreen extends StatelessWidget {
     final selectedMonth = context.select((AppState s) => s.selectedMonth);
     final insights = context.select((AppState s) => s.monthlyInsights);
     final currency = context.select((AppState s) => s.settings.currency);
+
+    // Calculate Lending and Debt metrics
+    final state = context.watch<AppState>();
+    double receivables = 0.0;
+    double liabilities = 0.0;
+    for (final debt in state.debts) {
+      if (debt.isSettled) continue;
+      if (debt.type == DebtType.owedToMe || debt.type == DebtType.loanGiven) {
+        receivables += debt.remainingAmount;
+      } else {
+        liabilities += debt.remainingAmount;
+      }
+    }
+    final netDebtPosition = receivables - liabilities;
+
     return Scaffold(
       body: AppBackground(
         child: ListView(
@@ -158,6 +174,81 @@ class InsightsScreen extends StatelessWidget {
                 ),
               ),
             ],
+            const SizedBox(height: AppSpacing.md),
+            WMGlassSurface.tier2(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SectionHeader(
+                    title: 'Lending & Debt Position',
+                    icon: Icons.handshake_rounded,
+                    padding: EdgeInsets.only(bottom: AppSpacing.xs),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Net Position:',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        '${netDebtPosition >= 0 ? "+" : ""}${netDebtPosition.toStringAsFixed(netDebtPosition % 1 == 0 ? 0 : 2)} $currency',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                          color: netDebtPosition >= 0
+                              ? WalletMeltColors.positive
+                              : WalletMeltColors.danger,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  const Divider(height: 1, color: Color(0x1Fffffff)),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'RECEIVABLES',
+                              style: TextStyle(fontSize: 9, color: WalletMeltColors.textMuted, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              '${receivables.toStringAsFixed(receivables % 1 == 0 ? 0 : 2)} $currency',
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: WalletMeltColors.positive),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Container(width: 1, height: 28, color: const Color(0x1Fffffff)),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'LIABILITIES',
+                              style: TextStyle(fontSize: 9, color: WalletMeltColors.textMuted, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              '${liabilities.toStringAsFixed(liabilities % 1 == 0 ? 0 : 2)} $currency',
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: WalletMeltColors.danger),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),

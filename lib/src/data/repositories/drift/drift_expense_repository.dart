@@ -216,6 +216,8 @@ class DriftExpenseRepository {
               expenseId: expenseId,
               itemId: Value(canonicalItem.id),
               nameSnapshot: name,
+              quantity: Value(item.quantity),
+              unitPrice: Value(item.unitPrice),
               totalPrice: item.amount,
               currency: currency,
               categoryId: Value(categoryId),

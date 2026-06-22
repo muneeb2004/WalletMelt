@@ -26,7 +26,7 @@ class AppShell extends StatelessWidget {
                   child: LayoutBuilder(
                     builder: (context, constraints) {
                       final totalWidth = constraints.maxWidth;
-                      final tabWidth = totalWidth / 5;
+                      final tabWidth = totalWidth / 6;
                       final activeIndex = navigationShell.currentIndex;
 
                       return Stack(
@@ -79,14 +79,19 @@ class AppShell extends StatelessWidget {
                                   index: 2,
                                   shell: navigationShell),
                               _NavItem(
+                                  icon: Icons.handshake_rounded,
+                                  label: 'Debts',
+                                  index: 3,
+                                  shell: navigationShell),
+                              _NavItem(
                                   icon: Icons.insights_rounded,
                                   label: 'Insights',
-                                  index: 3,
+                                  index: 4,
                                   shell: navigationShell),
                               _NavItem(
                                   icon: Icons.tune_rounded,
                                   label: 'Settings',
-                                  index: 4,
+                                  index: 5,
                                   shell: navigationShell),
                             ],
                           ),
