@@ -18,6 +18,105 @@ import '../../widgets/stat_tile.dart';
 class BudgetScreen extends StatefulWidget {
   const BudgetScreen({super.key});
 
+  static Future<void> showSetBudgetSheet(
+      BuildContext context, AppState state, double? currentAmount) async {
+    final controller = TextEditingController(
+      text: currentAmount != null ? currentAmount.toStringAsFixed(0) : '',
+    );
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useRootNavigator: true,
+      constraints: const BoxConstraints(maxWidth: 600),
+      builder: (sheetContext) {
+        return SafeArea(
+          child: AnimatedPadding(
+            duration: const Duration(milliseconds: 150),
+            curve: Curves.easeOut,
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(sheetContext).viewInsets.bottom,
+            ),
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.lg,
+                    AppSpacing.sm,
+                    AppSpacing.lg,
+                    AppSpacing.lg),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SheetHandle(),
+                    Text(
+                      currentAmount != null
+                          ? 'Edit Monthly Budget'
+                          : 'Set Monthly Budget',
+                      style: Theme.of(sheetContext).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    TextField(
+                      controller: controller,
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
+                      autofocus: true,
+                      decoration: InputDecoration(
+                        labelText: 'Budget Amount (${state.settings.currency})',
+                        hintText: 'e.g. 50000',
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.md + 4),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              minimumSize: const Size.fromHeight(50),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                      AppSpacing.buttonRadius)),
+                            ),
+                            onPressed: () => Navigator.pop(sheetContext),
+                            child: const Text('Cancel'),
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.sm),
+                        Expanded(
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              minimumSize: const Size.fromHeight(50),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                      AppSpacing.buttonRadius)),
+                            ),
+                            onPressed: () async {
+                              final parsed =
+                                  double.tryParse(controller.text.trim());
+                              if (parsed == null || parsed <= 0) {
+                                showErrorSnackbar(sheetContext,
+                                    'Please enter a valid amount greater than 0.');
+                                return;
+                              }
+                              await state.setMonthlyBudgetAmount(parsed);
+                              if (sheetContext.mounted) Navigator.pop(sheetContext);
+                            },
+                            child: const Text('Save'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+    controller.dispose();
+  }
+
   @override
   State<BudgetScreen> createState() => _BudgetScreenState();
 }
@@ -123,7 +222,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
       title: 'No monthly budget set',
       subtitle: 'Set a monthly limit to track your total spending.',
       actionLabel: 'Set Budget',
-      onActionPressed: () => _showSetBudgetSheet(context, state, null),
+      onActionPressed: () => BudgetScreen.showSetBudgetSheet(context, state, null),
     );
   }
 
@@ -158,7 +257,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                 icon: const Icon(Icons.more_vert_rounded),
                 onSelected: (value) {
                   if (value == 'edit') {
-                    _showSetBudgetSheet(context, state, monthlyBudget);
+                    BudgetScreen.showSetBudgetSheet(context, state, monthlyBudget);
                   } else if (value == 'clear') {
                     _confirmClearBudget(context, state);
                   }
@@ -412,96 +511,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
     return lastDay;
   }
 
-  // Set/Edit total budget bottom sheet
-  Future<void> _showSetBudgetSheet(
-      BuildContext context, AppState state, double? currentAmount) async {
-    final controller = TextEditingController(
-      text: currentAmount != null ? currentAmount.toStringAsFixed(0) : '',
-    );
 
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      useRootNavigator: true,
-      constraints: const BoxConstraints(maxWidth: 600),
-      builder: (context) {
-        return SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(
-                AppSpacing.lg,
-                AppSpacing.sm,
-                AppSpacing.lg,
-                AppSpacing.lg + MediaQuery.of(context).viewInsets.bottom),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SheetHandle(),
-                Text(
-                  currentAmount != null
-                      ? 'Edit Monthly Budget'
-                      : 'Set Monthly Budget',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                TextField(
-                  controller: controller,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
-                  autofocus: true,
-                  decoration: InputDecoration(
-                    labelText: 'Budget Amount (${state.settings.currency})',
-                    hintText: 'e.g. 50000',
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.md + 4),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          minimumSize: const Size.fromHeight(50),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                  AppSpacing.buttonRadius)),
-                        ),
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('Cancel'),
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    Expanded(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: const Size.fromHeight(50),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                  AppSpacing.buttonRadius)),
-                        ),
-                        onPressed: () async {
-                          final parsed =
-                              double.tryParse(controller.text.trim());
-                          if (parsed == null || parsed <= 0) {
-                            showErrorSnackbar(context,
-                                'Please enter a valid amount greater than 0.');
-                            return;
-                          }
-                          await state.setMonthlyBudgetAmount(parsed);
-                          if (context.mounted) Navigator.pop(context);
-                        },
-                        child: const Text('Save'),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-    controller.dispose();
-  }
 
   // Clear total budget confirmation
   Future<void> _confirmClearBudget(BuildContext context, AppState state) async {
@@ -534,18 +544,25 @@ class _BudgetScreenState extends State<BudgetScreen> {
       isScrollControlled: true,
       useRootNavigator: true,
       constraints: const BoxConstraints(maxWidth: 600),
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setSheetState) {
-            final isEdit = existingBudget != null;
-            return SingleChildScrollView(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(
-                    AppSpacing.lg,
-                    AppSpacing.sm,
-                    AppSpacing.lg,
-                    AppSpacing.lg + MediaQuery.of(context).viewInsets.bottom),
-                child: Column(
+      builder: (sheetContext) {
+        return SafeArea(
+          child: AnimatedPadding(
+            duration: const Duration(milliseconds: 150),
+            curve: Curves.easeOut,
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(sheetContext).viewInsets.bottom,
+            ),
+            child: StatefulBuilder(
+              builder: (context, setSheetState) {
+                final isEdit = existingBudget != null;
+                return SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.lg,
+                        AppSpacing.sm,
+                        AppSpacing.lg,
+                        AppSpacing.lg),
+                    child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -663,7 +680,9 @@ class _BudgetScreenState extends State<BudgetScreen> {
               ),
             );
           },
-        );
+        ),
+      ),
+    );
       },
     );
     amountController.dispose();

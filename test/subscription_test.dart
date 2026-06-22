@@ -173,7 +173,7 @@ class FakeExpenseRepository extends Fake implements ExpenseRepository {
   @override
   Future<List<GroceryItem>> groceryItemsForExpense(String expenseId) async => [];
   @override
-  Future<List<GroceryItem>> listAllGroceryItemsForExport() async => [];
+  Future<List<GroceryItem>> listAllGroceryItems() async => [];
   @override
   Future<void> permanentlyDelete(String id) async {}
   @override

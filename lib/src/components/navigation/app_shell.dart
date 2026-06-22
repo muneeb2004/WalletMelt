@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import '../../theme/wallet_melt_theme.dart';
+import '../../state/app_state.dart';
+import '../../types/debt.dart';
+import '../../screens/budget/budget_screen.dart';
+import '../../screens/debt/debt_screen.dart';
 
 class AppShell extends StatelessWidget {
   const AppShell({required this.navigationShell, super.key});
@@ -10,6 +15,9 @@ class AppShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final activeIndex = navigationShell.currentIndex;
+    final action = ScreenActionResolver.resolve(context, activeIndex);
+
     return Scaffold(
       extendBody: true,
       body: Stack(
@@ -104,13 +112,189 @@ class AppShell extends StatelessWidget {
             ),
           ],
         ),
-      floatingActionButton: const _AppFloatingActionButton(),
+      floatingActionButton: _AppFloatingActionButton(action: action),
+    );
+  }
+}
+
+class ScreenAction {
+  final IconData icon;
+  final String label;
+  final VoidCallback action;
+
+  const ScreenAction({
+    required this.icon,
+    required this.label,
+    required this.action,
+  });
+}
+
+class ScreenActionResolver {
+  static ScreenAction? resolve(BuildContext context, int currentIndex) {
+    switch (currentIndex) {
+      case 0:
+      case 1:
+        return ScreenAction(
+          icon: Icons.add_rounded,
+          label: 'Add Expense',
+          action: () => context.push('/expense/new'),
+        );
+      case 2:
+        final state = context.watch<AppState>();
+        final monthlyBudget = state.getMonthlyBudgetAmount();
+        final hasBudget = monthlyBudget != null;
+        return ScreenAction(
+          icon: hasBudget ? Icons.edit_rounded : Icons.add_rounded,
+          label: hasBudget ? 'Edit Budget' : 'Set Budget',
+          action: () {
+            BudgetScreen.showSetBudgetSheet(context, state, monthlyBudget);
+          },
+        );
+      case 3:
+        return ScreenAction(
+          icon: Icons.add_rounded,
+          label: 'Add Obligation',
+          action: () => _showDebtActionsSheet(context),
+        );
+      case 4:
+      case 5:
+      default:
+        return null;
+    }
+  }
+
+  static void _showDebtActionsSheet(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      useRootNavigator: true,
+      isScrollControlled: true,
+      constraints: const BoxConstraints(maxWidth: 600),
+      builder: (sheetContext) {
+        return SafeArea(
+          child: AnimatedPadding(
+            duration: const Duration(milliseconds: 150),
+            curve: Curves.easeOut,
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(sheetContext).viewInsets.bottom,
+            ),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Add Obligation',
+                    style: Theme.of(sheetContext).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildDebtActionTile(
+                    sheetContext,
+                    icon: Icons.arrow_outward_rounded,
+                    color: WalletMeltColors.positive,
+                    title: 'Money Owed To Me',
+                    subtitle: 'A person owes you money',
+                    onTap: () {
+                      Navigator.pop(sheetContext);
+                      DebtScreen.showAddDebtSheet(context, initialType: DebtType.owedToMe);
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  _buildDebtActionTile(
+                    sheetContext,
+                    icon: Icons.call_received_rounded,
+                    color: WalletMeltColors.danger,
+                    title: 'Money I Owe',
+                    subtitle: 'You owe someone money',
+                    onTap: () {
+                      Navigator.pop(sheetContext);
+                      DebtScreen.showAddDebtSheet(context, initialType: DebtType.iOwe);
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  _buildDebtActionTile(
+                    sheetContext,
+                    icon: Icons.arrow_outward_rounded,
+                    color: WalletMeltColors.positive,
+                    title: 'Loan Given',
+                    subtitle: 'You lent money to someone',
+                    onTap: () {
+                      Navigator.pop(sheetContext);
+                      DebtScreen.showAddDebtSheet(context, initialType: DebtType.loanGiven);
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  _buildDebtActionTile(
+                    sheetContext,
+                    icon: Icons.call_received_rounded,
+                    color: WalletMeltColors.danger,
+                    title: 'Loan Taken',
+                    subtitle: 'You borrowed money from someone',
+                    onTap: () {
+                      Navigator.pop(sheetContext);
+                      DebtScreen.showAddDebtSheet(context, initialType: DebtType.loanTaken);
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  static Widget _buildDebtActionTile(
+    BuildContext context, {
+    required IconData icon,
+    required Color color,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return WMGlassSurface.tier2(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      onTap: onTap,
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: color, size: 18),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+                ),
+                Text(
+                  subtitle,
+                  style: const TextStyle(color: WalletMeltColors.textMuted, fontSize: 11),
+                ),
+              ],
+            ),
+          ),
+          const Icon(Icons.chevron_right_rounded, color: WalletMeltColors.textMuted),
+        ],
+      ),
     );
   }
 }
 
 class _AppFloatingActionButton extends StatefulWidget {
-  const _AppFloatingActionButton();
+  const _AppFloatingActionButton({required this.action});
+
+  final ScreenAction? action;
 
   @override
   State<_AppFloatingActionButton> createState() => _AppFloatingActionButtonState();
@@ -121,51 +305,60 @@ class _AppFloatingActionButtonState extends State<_AppFloatingActionButton> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 84),
-      child: GestureDetector(
-        onTapDown: (_) => setState(() => _scale = 0.90),
-        onTapUp: (_) => setState(() => _scale = 1.0),
-        onTapCancel: () => setState(() => _scale = 1.0),
-        child: AnimatedScale(
-          scale: _scale,
-          duration: const Duration(milliseconds: 100),
-          curve: Curves.easeInOut,
-          child: Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFFFCD34D), // Soft golden brand highlight
-                  Color(0xFFF59E0B), // Premium amber brand shade
-                ],
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFFF59E0B).withValues(alpha: 0.36),
-                  blurRadius: 18,
-                  offset: const Offset(0, 8),
+    final hasAction = widget.action != null;
+
+    return AnimatedOpacity(
+      opacity: hasAction ? 1.0 : 0.0,
+      duration: const Duration(milliseconds: 220),
+      child: AnimatedScale(
+        scale: hasAction ? _scale : 0.0,
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOutBack,
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: 84),
+          child: IgnorePointer(
+            ignoring: !hasAction,
+            child: GestureDetector(
+              onTapDown: (_) => setState(() => _scale = 0.90),
+              onTapUp: (_) => setState(() => _scale = 1.0),
+              onTapCancel: () => setState(() => _scale = 1.0),
+              child: Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Color(0xFFFCD34D), // Soft golden brand highlight
+                      Color(0xFFF59E0B), // Premium amber brand shade
+                    ],
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFF59E0B).withValues(alpha: 0.36),
+                      blurRadius: 18,
+                      offset: const Offset(0, 8),
+                    ),
+                    BoxShadow(
+                      color: const Color(0xFFB87912).withValues(alpha: 0.20),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-                BoxShadow(
-                  color: const Color(0xFFB87912).withValues(alpha: 0.20),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
+                child: RawMaterialButton(
+                  shape: const CircleBorder(),
+                  elevation: 0,
+                  fillColor: Colors.transparent,
+                  onPressed: widget.action?.action,
+                  child: Icon(
+                    widget.action?.icon ?? Icons.add_rounded,
+                    size: 28,
+                    color: WalletMeltColors.textPrimary,
+                  ),
                 ),
-              ],
-            ),
-            child: RawMaterialButton(
-              shape: const CircleBorder(),
-              elevation: 0,
-              fillColor: Colors.transparent,
-              onPressed: () => context.push('/expense/new'),
-              child: const Icon(
-                Icons.add_rounded,
-                size: 28,
-                color: WalletMeltColors.textPrimary,
               ),
             ),
           ),

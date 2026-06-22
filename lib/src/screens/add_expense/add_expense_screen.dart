@@ -88,6 +88,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       body: AppBackground(
         padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
         child: ListView(
+          padding: EdgeInsets.fromLTRB(20, 18, 20, isGroceryMode ? 140 : 24),
           children: [
             Row(
               children: [
@@ -307,15 +308,89 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                 onRemove: () => setState(() => _receiptUri = null),
               ),
             ],
-            const SizedBox(height: 24),
-            PrimaryButton(
-              onPressed: () => _save(state),
-              label: isEditing ? 'Save changes' : 'Save expense',
-              isLoading: _saving,
-            ),
+            if (!isGroceryMode) ...[
+              const SizedBox(height: 24),
+              PrimaryButton(
+                onPressed: () => _save(state),
+                label: isEditing ? 'Save changes' : 'Save expense',
+                isLoading: _saving,
+              ),
+            ],
           ],
         ),
       ),
+      bottomNavigationBar: isGroceryMode
+          ? SafeArea(
+              child: WMGlassSurface.tier3(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                radius: 24,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _buildSummaryItem(context, 'Items', '$_totalGroceryItemsCount'),
+                        _buildSummaryItem(context, 'Qty', _totalGroceryQty.toStringAsFixed(_totalGroceryQty % 1 == 0 ? 0 : 1)),
+                        _buildSummaryItem(context, 'Subtotal', '${_getGrocerySubtotal().toStringAsFixed(_getGrocerySubtotal() % 1 == 0 ? 0 : 2)} $currency'),
+                        _buildSummaryItem(context, 'Tax', '${_getTaxAmount().toStringAsFixed(_getTaxAmount() % 1 == 0 ? 0 : 2)} $currency'),
+                        _buildSummaryItem(context, 'Total', '${_getGroceryGrandTotal().toStringAsFixed(_getGroceryGrandTotal() % 1 == 0 ? 0 : 2)} $currency', isHighlight: true),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    PrimaryButton(
+                      onPressed: () => _save(state),
+                      label: isEditing ? 'Save changes' : 'Save expense',
+                      isLoading: _saving,
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : null,
+    );
+  }
+
+  int get _totalGroceryItemsCount {
+    return _groceryItems.where((item) => item.name.trim().isNotEmpty).length;
+  }
+
+  double get _totalGroceryQty {
+    return _groceryItems
+        .where((item) => item.name.trim().isNotEmpty)
+        .fold(0.0, (sum, item) => sum + (item.quantity ?? 1.0));
+  }
+
+  double _getTaxAmount() {
+    return double.tryParse(_taxController.text.trim()) ?? 0.0;
+  }
+
+  double _getGroceryGrandTotal() {
+    return _getGrocerySubtotal() + _getTaxAmount();
+  }
+
+  Widget _buildSummaryItem(BuildContext context, String label, String value, {bool isHighlight = false}) {
+    return Column(
+      children: [
+        Text(
+          label.toUpperCase(),
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                fontSize: 8,
+                letterSpacing: 0.8,
+                fontWeight: FontWeight.w700,
+                color: WalletMeltColors.textMuted,
+              ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w800,
+                fontSize: isHighlight ? 13 : 11,
+                color: isHighlight ? WalletMeltColors.brandDeep : null,
+              ),
+        ),
+      ],
     );
   }
 
@@ -1077,115 +1152,226 @@ class _BulkGroceryEditorState extends State<BulkGroceryEditor> {
 
   @override
   Widget build(BuildContext context) {
-    final headerStyle = Theme.of(context).textTheme.labelMedium?.copyWith(
-          fontWeight: FontWeight.bold,
-          color: WalletMeltColors.textSecondary,
-        );
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isTablet = constraints.maxWidth > 700;
 
-    // Calculate smart totals in real-time
-    double subtotal = 0.0;
-    int itemCount = 0;
-    double totalQty = 0.0;
-
-    for (final row in _rows) {
-      final name = row.nameController.text.trim();
-      final qty = double.tryParse(row.qtyController.text.trim()) ?? 0.0;
-      final price = double.tryParse(row.priceController.text.trim()) ?? 0.0;
-      if (name.isNotEmpty) {
-        itemCount++;
-        totalQty += qty;
-        subtotal += qty * price;
-      }
-    }
-
-    return WMGlassSurface.tier2(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Quick Grocery Entry',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Quick Grocery Entry',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.save_as_rounded, size: 20),
+                      tooltip: 'Save as Template',
+                      onPressed: _saveAsTemplate,
                     ),
-              ),
-              Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.save_as_rounded, size: 20),
-                    tooltip: 'Save as Template',
-                    onPressed: _saveAsTemplate,
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.folder_open_rounded, size: 20),
-                    tooltip: 'Load/Manage Templates',
-                    onPressed: _loadTemplate,
-                  ),
-                ],
-              ),
-            ],
-          ),
-          
-          // Smart Totals display
-          if (itemCount > 0) ...[
+                    IconButton(
+                      icon: const Icon(Icons.folder_open_rounded, size: 20),
+                      tooltip: 'Load/Manage Templates',
+                      onPressed: _loadTemplate,
+                    ),
+                  ],
+                ),
+              ],
+            ),
             const SizedBox(height: 10),
+
+            if (isTablet)
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 0,
+                  mainAxisExtent: 175,
+                ),
+                itemCount: _rows.length,
+                itemBuilder: (context, idx) => _buildMobileCard(idx, _rows[idx]),
+              )
+            else
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: _rows.length,
+                itemBuilder: (context, idx) => _buildMobileCard(idx, _rows[idx]),
+              ),
+
+            const SizedBox(height: 12),
+            Center(
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(160, 44),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                icon: const Icon(Icons.add_rounded),
+                label: const Text('Add Item'),
+                onPressed: () {
+                  setState(() {
+                    _addRow();
+                  });
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    _rows.last.nameFocusNode.requestFocus();
+                  });
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildMobileCard(int idx, _BulkGroceryRowData row) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final qty = double.tryParse(row.qtyController.text.trim()) ?? 1.0;
+    final price = double.tryParse(row.priceController.text.trim()) ?? 0.0;
+    final total = qty * price;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: WMGlassSurface.tier1(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'ITEM #${idx + 1}',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: WalletMeltColors.brandDeep.withValues(alpha: 0.8),
+                    letterSpacing: 1.0,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete_outline_rounded, size: 18, color: WalletMeltColors.danger),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  tooltip: 'Delete item',
+                  onPressed: () => _removeRow(idx),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+
+            TextField(
+              controller: row.nameController,
+              focusNode: row.nameFocusNode,
+              decoration: const InputDecoration(
+                labelText: 'Item Name',
+                hintText: 'e.g., Milk, Eggs',
+                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              ),
+              onSubmitted: (_) {
+                row.qtyFocusNode.requestFocus();
+              },
+              onChanged: (_) => _notifyChanges(),
+            ),
+            const SizedBox(height: 8),
+
             Row(
               children: [
                 Expanded(
-                  child: WMGlassSurface.tier1(
-                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-                    child: Column(
-                      children: [
-                        const Text(
-                          'ITEMS',
-                          style: TextStyle(fontSize: 9, color: WalletMeltColors.textMuted, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '$itemCount',
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                        ),
-                      ],
+                  flex: 2,
+                  child: TextField(
+                    controller: row.qtyController,
+                    focusNode: row.qtyFocusNode,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    decoration: const InputDecoration(
+                      labelText: 'Qty',
+                      hintText: '1',
+                      contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                     ),
+                    onSubmitted: (_) {
+                      row.priceFocusNode.requestFocus();
+                    },
+                    onChanged: (_) {
+                      setState(() {});
+                      _notifyChanges();
+                    },
                   ),
                 ),
                 const SizedBox(width: 8),
+
                 Expanded(
-                  child: WMGlassSurface.tier1(
-                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-                    child: Column(
-                      children: [
-                        const Text(
-                          'TOTAL QTY',
-                          style: TextStyle(fontSize: 9, color: WalletMeltColors.textMuted, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          totalQty % 1 == 0 ? totalQty.toStringAsFixed(0) : totalQty.toStringAsFixed(2),
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                        ),
-                      ],
+                  flex: 3,
+                  child: TextField(
+                    controller: row.priceController,
+                    focusNode: row.priceFocusNode,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    decoration: InputDecoration(
+                      labelText: 'Price',
+                      hintText: '0',
+                      prefixText: '${widget.currency} ',
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                     ),
+                    onSubmitted: (_) {
+                      final isLast = idx == _rows.length - 1;
+                      if (isLast) {
+                        setState(() {
+                          _addRow();
+                        });
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          _rows.last.nameFocusNode.requestFocus();
+                        });
+                      } else {
+                        _rows[idx + 1].nameFocusNode.requestFocus();
+                      }
+                      _notifyChanges();
+                    },
+                    onChanged: (_) {
+                      setState(() {});
+                      _notifyChanges();
+                    },
                   ),
                 ),
                 const SizedBox(width: 8),
+
                 Expanded(
-                  child: WMGlassSurface.tier1(
-                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                  flex: 3,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0x0Affffff) : const Color(0x0A000000),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isDark ? const Color(0x1Fffffff) : const Color(0x1F000000),
+                        width: 1,
+                      ),
+                    ),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Text(
-                          'TOTAL AMOUNT',
-                          style: TextStyle(fontSize: 9, color: WalletMeltColors.textMuted, fontWeight: FontWeight.bold),
+                          'TOTAL',
+                          style: TextStyle(fontSize: 8, color: WalletMeltColors.textMuted, fontWeight: FontWeight.bold),
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '${subtotal.toStringAsFixed(subtotal % 1 == 0 ? 0 : 2)} ${widget.currency}',
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: WalletMeltColors.brandDeep),
+                        const SizedBox(height: 1),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            total > 0 ? '${total.toStringAsFixed(total % 1 == 0 ? 0 : 2)} ${widget.currency}' : '0',
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: WalletMeltColors.brandDeep),
+                          ),
                         ),
                       ],
                     ),
@@ -1194,144 +1380,7 @@ class _BulkGroceryEditorState extends State<BulkGroceryEditor> {
               ],
             ),
           ],
-          const SizedBox(height: 14),
-
-          // Spreadsheet Header
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            child: Row(
-              children: [
-                Expanded(flex: 3, child: Text('Item Name', style: headerStyle)),
-                const SizedBox(width: 6),
-                Expanded(flex: 1, child: Text('Qty', style: headerStyle)),
-                const SizedBox(width: 6),
-                Expanded(flex: 1, child: Text('Price', style: headerStyle)),
-                const SizedBox(width: 6),
-                Expanded(flex: 1, child: Text('Total', style: headerStyle)),
-                const SizedBox(width: 40), // Spacing matching delete button
-              ],
-            ),
-          ),
-          const Divider(height: 1),
-          const SizedBox(height: 8),
-
-          // List of spreadsheet-style rows
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: _rows.length,
-            itemBuilder: (context, idx) {
-              final row = _rows[idx];
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Row(
-                  children: [
-                    // Item Name
-                    Expanded(
-                      flex: 3,
-                      child: TextField(
-                        controller: row.nameController,
-                        focusNode: row.nameFocusNode,
-                        decoration: const InputDecoration(
-                          hintText: 'e.g., Rice',
-                          contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                        ),
-                        onSubmitted: (_) {
-                          row.qtyFocusNode.requestFocus();
-                        },
-                        onChanged: (_) => _notifyChanges(),
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-
-                    // Quantity
-                    Expanded(
-                      flex: 1,
-                      child: TextField(
-                        controller: row.qtyController,
-                        focusNode: row.qtyFocusNode,
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        decoration: const InputDecoration(
-                          hintText: '1',
-                          contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                        ),
-                        onSubmitted: (_) {
-                          row.priceFocusNode.requestFocus();
-                        },
-                        onChanged: (_) {
-                          setState(() {});
-                          _notifyChanges();
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-
-                    // Unit Price
-                    Expanded(
-                      flex: 1,
-                      child: TextField(
-                        controller: row.priceController,
-                        focusNode: row.priceFocusNode,
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        decoration: InputDecoration(
-                          hintText: '${widget.currency} 0',
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                        ),
-                        onSubmitted: (_) {
-                          final isLast = idx == _rows.length - 1;
-                          if (isLast) {
-                            setState(() {
-                              _addRow();
-                            });
-                            WidgetsBinding.instance.addPostFrameCallback((_) {
-                              _rows.last.nameFocusNode.requestFocus();
-                            });
-                          } else {
-                            _rows[idx + 1].nameFocusNode.requestFocus();
-                          }
-                          _notifyChanges();
-                        },
-                        onChanged: (_) {
-                          setState(() {});
-                          _notifyChanges();
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-
-                    // Calculated Total
-                    Expanded(
-                      flex: 1,
-                      child: Builder(
-                        builder: (context) {
-                          final qty = double.tryParse(row.qtyController.text.trim()) ?? 1.0;
-                          final price = double.tryParse(row.priceController.text.trim()) ?? 0.0;
-                          final total = qty * price;
-                          return Padding(
-                            padding: const EdgeInsets.only(left: 4),
-                            child: Text(
-                              total > 0 ? total.toStringAsFixed(total % 1 == 0 ? 0 : 2) : '0',
-                              style: const TextStyle(fontWeight: FontWeight.bold),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-
-                    // Delete Row Button
-                    IconButton(
-                      icon: const Icon(Icons.delete_outline_rounded, size: 18),
-                      tooltip: 'Delete row',
-                      onPressed: () => _removeRow(idx),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ],
+        ),
       ),
     );
   }
