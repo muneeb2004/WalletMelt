@@ -18,15 +18,20 @@ class DashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final state = context.watch<AppState>();
-    if (state.isLoading) {
+    final isLoading = context.select<AppState, bool>((s) => s.isLoading);
+    if (isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
-    final insights = state.monthlyInsights;
+    final insights = context.select((AppState s) => s.monthlyInsights);
+    final selectedMonth = context.select<AppState, DateTime>((s) => s.selectedMonth);
+    final hasBudget = context.select<AppState, bool>((s) => s.getMonthlyBudgetAmount() != null);
+    final hasExpenses = context.select<AppState, bool>((s) => s.expenses.isNotEmpty);
+    final currency = context.select<AppState, String>((s) => s.settings.currency);
+
     return Scaffold(
       body: AppBackground(
         child: RefreshIndicator(
-          onRefresh: state.refresh,
+          onRefresh: context.read<AppState>().refresh,
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 18, 20, 120),
             children: [
@@ -47,12 +52,12 @@ class DashboardScreen extends StatelessWidget {
                   ),
                   IconButton(
                     tooltip: 'Previous month',
-                    onPressed: state.previousMonth,
+                    onPressed: context.read<AppState>().previousMonth,
                     icon: const Icon(Icons.chevron_left_rounded),
                   ),
                   IconButton(
                     tooltip: 'Next month',
-                    onPressed: state.nextMonth,
+                    onPressed: context.read<AppState>().nextMonth,
                     icon: const Icon(Icons.chevron_right_rounded),
                   ),
                 ],
@@ -86,12 +91,12 @@ class DashboardScreen extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(readableMonth(state.selectedMonth),
+                        Text(readableMonth(selectedMonth),
                             style: Theme.of(context).textTheme.labelLarge),
                         const SizedBox(height: AppSpacing.sm),
                         Text(
                             formatMoney(
-                                insights.total, state.settings.currency),
+                                insights.total, currency),
                             style: Theme.of(context).textTheme.displaySmall),
                         const SizedBox(height: AppSpacing.sm),
                         Text(
@@ -108,13 +113,13 @@ class DashboardScreen extends StatelessWidget {
               const SizedBox(height: AppSpacing.md),
 
               // ── Budget summary card ─────────────────────────────────────
-              if (state.getMonthlyBudgetAmount() != null) ...[
-                _DashboardBudgetCard(state: state),
+              if (hasBudget) ...[
+                const _DashboardBudgetCard(),
                 const SizedBox(height: AppSpacing.md),
               ],
 
               // ── Content: empty or charts + recent ──────────────────────
-              if (state.expenses.isEmpty)
+              if (!hasExpenses)
                 EmptyState(
                   icon: Icons.receipt_long_outlined,
                   title: 'No expenses yet',
@@ -154,7 +159,7 @@ class DashboardScreen extends StatelessWidget {
                         leftValue: insights.groceryTotal,
                         rightLabel: 'Utilities',
                         rightValue: insights.utilitiesTotal,
-                        currency: state.settings.currency,
+                        currency: currency,
                       ),
                     ],
                   ),
@@ -173,7 +178,7 @@ class DashboardScreen extends StatelessWidget {
                       for (final expense in insights.recentExpenses)
                         ExpenseListTile(
                           expense: expense,
-                          category: state.categoryById(expense.categoryId),
+                          category: context.read<AppState>().categoryById(expense.categoryId),
                           onTap: () => context.push('/expense/${expense.id}'),
                         ),
                     ],
@@ -309,14 +314,13 @@ class _ComparisonBar extends StatelessWidget {
 }
 
 class _DashboardBudgetCard extends StatelessWidget {
-  const _DashboardBudgetCard({required this.state});
-
-  final AppState state;
+  const _DashboardBudgetCard();
 
   @override
   Widget build(BuildContext context) {
-    final monthlyBudget = state.getMonthlyBudgetAmount() ?? 0.0;
-    final totalSpent = state.getCurrentMonthTotalSpent();
+    final monthlyBudget = context.select<AppState, double>((s) => s.getMonthlyBudgetAmount() ?? 0.0);
+    final totalSpent = context.select<AppState, double>((s) => s.getCurrentMonthTotalSpent());
+    final currency = context.select<AppState, String>((s) => s.settings.currency);
     final remaining = monthlyBudget - totalSpent;
     final isOverBudget = remaining < 0;
     final ratio = monthlyBudget > 0 ? totalSpent / monthlyBudget : 0.0;
@@ -353,15 +357,15 @@ class _DashboardBudgetCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Spent: ${formatMoney(totalSpent, state.settings.currency)}',
+                'Spent: ${formatMoney(totalSpent, currency)}',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
               ),
               Text(
                 isOverBudget
-                    ? 'Over by ${formatMoney(-remaining, state.settings.currency)}'
-                    : 'Remaining: ${formatMoney(remaining, state.settings.currency)}',
+                    ? 'Over by ${formatMoney(-remaining, currency)}'
+                    : 'Remaining: ${formatMoney(remaining, currency)}',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: isOverBudget ? WalletMeltColors.danger : null,

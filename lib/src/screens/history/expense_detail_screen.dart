@@ -8,6 +8,7 @@ import '../../components/glass/app_background.dart';
 import '../../state/app_state.dart';
 import '../../theme/wallet_melt_theme.dart';
 import '../../types/expense.dart';
+import '../../types/grocery_item.dart';
 import '../../utils/currency_format.dart';
 import '../../utils/date_utils.dart';
 import '../../widgets/confirm_dialog.dart';
@@ -20,14 +21,15 @@ class ExpenseDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final state = context.watch<AppState>();
-    final expense = [...state.expenses, ...state.deletedExpenses]
-        .where((item) => item.id == expenseId)
-        .firstOrNull;
+    final state = context.read<AppState>();
+    final expense = context.select((AppState s) {
+      return s.expenses.where((item) => item.id == expenseId).firstOrNull ??
+          s.deletedExpenses.where((item) => item.id == expenseId).firstOrNull;
+    });
     if (expense == null) {
       return const Scaffold(body: Center(child: Text('Expense not found')));
     }
-    final category = state.categoryById(expense.categoryId);
+    final category = context.select((AppState s) => s.categoryById(expense.categoryId));
     return Scaffold(
       body: AppBackground(
         padding: const EdgeInsets.fromLTRB(
@@ -57,7 +59,7 @@ class ExpenseDetailScreen extends StatelessWidget {
             const SizedBox(height: AppSpacing.md + 2),
 
             // ── Amount + meta card ─────────────────────────────────────
-            LiquidGlass(
+            WMGlassSurface.tier2(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -80,9 +82,8 @@ class ExpenseDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.md),
 
-            // ── Receipt image ─────────────────────────────────────────
-            if (expense.receiptImageUri != null)
-              LiquidGlass(
+            if (expense.receiptImageUri != null) ...[
+              WMGlassSurface.tier2(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -91,22 +92,30 @@ class ExpenseDetailScreen extends StatelessWidget {
                         icon: Icons.receipt_rounded,
                         padding: EdgeInsets.only(bottom: AppSpacing.xs)),
                     const SizedBox(height: AppSpacing.sm),
-                    Hero(
-                      tag: expense.receiptImageUri!,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(22),
-                        child: Image.file(
-                          File(
-                              Uri.parse(expense.receiptImageUri!).toFilePath()),
-                          height: 320,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
-                            height: 180,
-                            alignment: Alignment.center,
-                            color: Colors.black.withValues(alpha: 0.08),
-                            child: const Text(
-                                'Receipt file is missing or unreadable.'),
+                    Semantics(
+                      button: true,
+                      label: 'View full receipt image',
+                      child: GestureDetector(
+                        onTap: () => context.push('/receipt/${expense.id}'),
+                        child: Hero(
+                          tag: expense.receiptImageUri!,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(22),
+                            child: Image.file(
+                              File(
+                                  Uri.parse(expense.receiptImageUri!).toFilePath()),
+                              height: 320,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                              cacheHeight: (320 * MediaQuery.devicePixelRatioOf(context)).round(),
+                              errorBuilder: (_, __, ___) => Container(
+                                height: 180,
+                                alignment: Alignment.center,
+                                color: Colors.black.withValues(alpha: 0.08),
+                                child: const Text(
+                                    'Receipt file is missing or unreadable.'),
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -114,6 +123,8 @@ class ExpenseDetailScreen extends StatelessWidget {
                   ],
                 ),
               ),
+              const SizedBox(height: AppSpacing.md),
+            ],
 
             // ── Grocery items ─────────────────────────────────────────
             if (category?.id == 'grocery') ...[
@@ -200,20 +211,34 @@ class ExpenseDetailScreen extends StatelessWidget {
   }
 }
 
-class _GroceryItemsCard extends StatelessWidget {
+class _GroceryItemsCard extends StatefulWidget {
   const _GroceryItemsCard({required this.expenseId, required this.currency});
 
   final String expenseId;
   final String currency;
 
   @override
+  State<_GroceryItemsCard> createState() => _GroceryItemsCardState();
+}
+
+class _GroceryItemsCardState extends State<_GroceryItemsCard> {
+  late final Future<List<GroceryItem>> _itemsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _itemsFuture =
+        context.read<AppState>().groceryItemsForExpense(widget.expenseId);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: context.read<AppState>().groceryItemsForExpense(expenseId),
+    return FutureBuilder<List<GroceryItem>>(
+      future: _itemsFuture,
       builder: (context, snapshot) {
         final items = snapshot.data ?? [];
         if (items.isEmpty) return const SizedBox.shrink();
-        return LiquidGlass(
+        return WMGlassSurface.tier2(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -231,7 +256,7 @@ class _GroceryItemsCard extends StatelessWidget {
                       Expanded(
                           child: Text(item.name,
                               style: Theme.of(context).textTheme.bodyLarge)),
-                      Text(formatMoney(item.amount, currency),
+                      Text(formatMoney(item.amount, widget.currency),
                           style: Theme.of(context).textTheme.bodyLarge),
                     ],
                   ),

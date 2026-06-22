@@ -183,6 +183,270 @@ Color budgetProgressColor(double ratio) {
   return WalletMeltColors.danger;
 }
 
+enum WMRenderTier { tier1, tier2, tier3 }
+
+class WMGlassSurface extends StatelessWidget {
+  const WMGlassSurface({
+    required this.child,
+    super.key,
+    this.padding = const EdgeInsets.all(18),
+    this.radius = 28,
+    this.tier = WMRenderTier.tier2,
+    this.onTap,
+  });
+
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+  final double radius;
+  final WMRenderTier tier;
+  final VoidCallback? onTap;
+
+  factory WMGlassSurface.tier1({
+    required Widget child,
+    Key? key,
+    EdgeInsetsGeometry padding = const EdgeInsets.all(18),
+    double radius = 28,
+    VoidCallback? onTap,
+  }) => WMGlassSurface(
+    key: key,
+    padding: padding,
+    radius: radius,
+    tier: WMRenderTier.tier1,
+    onTap: onTap,
+    child: child,
+  );
+
+  factory WMGlassSurface.tier2({
+    required Widget child,
+    Key? key,
+    EdgeInsetsGeometry padding = const EdgeInsets.all(18),
+    double radius = 28,
+    VoidCallback? onTap,
+  }) => WMGlassSurface(
+    key: key,
+    padding: padding,
+    radius: radius,
+    tier: WMRenderTier.tier2,
+    onTap: onTap,
+    child: child,
+  );
+
+  factory WMGlassSurface.tier3({
+    required Widget child,
+    Key? key,
+    EdgeInsetsGeometry padding = const EdgeInsets.all(18),
+    double radius = 28,
+    VoidCallback? onTap,
+  }) => WMGlassSurface(
+    key: key,
+    padding: padding,
+    radius: radius,
+    tier: WMRenderTier.tier3,
+    onTap: onTap,
+    child: child,
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    // Auto-downgrade to Tier 1 when inside a Scrollable container to maintain smooth scrolling
+    final isScrollable = Scrollable.maybeOf(context) != null;
+    final activeTier = isScrollable ? WMRenderTier.tier1 : tier;
+
+    if (activeTier == WMRenderTier.tier1) {
+      // Tier 1: Flat, no shadows, no blur, solid border. GPU-friendly.
+      return Container(
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF16161C) : const Color(0xFFF4F4F0),
+          borderRadius: BorderRadius.circular(radius),
+          border: Border.all(
+            color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
+            width: 1.0,
+          ),
+        ),
+        child: onTap == null
+            ? Padding(padding: padding, child: child)
+            : Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(radius - 1.0),
+                  onTap: onTap,
+                  child: Padding(padding: padding, child: child),
+                ),
+              ),
+      );
+    }
+
+    if (activeTier == WMRenderTier.tier2) {
+      // Tier 2: Solid background, single subtle shadow, solid border. GPU-efficient.
+      return Container(
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1E1E24) : Colors.white,
+          borderRadius: BorderRadius.circular(radius),
+          border: Border.all(
+            color: isDark ? const Color(0x28FFFFFF) : const Color(0x28000000),
+            width: 1.0,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.08 : 0.02),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: onTap == null
+            ? Padding(padding: padding, child: child)
+            : Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(radius - 1.0),
+                  onTap: onTap,
+                  child: Padding(padding: padding, child: child),
+                ),
+              ),
+      );
+    }
+
+    // Tier 3: Translucent surface, optional BackdropFilter blur, dual shadows. Used sparingly.
+    final fillGradient = isDark
+        ? LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              const Color(0xFF1E1E24).withValues(alpha: 0.72),
+              const Color(0xFF121216).withValues(alpha: 0.48),
+            ],
+          )
+        : LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.white.withValues(alpha: 0.72),
+              Colors.white.withValues(alpha: 0.36),
+            ],
+          );
+
+    final innerContainer = Container(
+      decoration: BoxDecoration(
+        gradient: fillGradient,
+        borderRadius: BorderRadius.circular(radius - 1.0),
+        border: Border.all(
+          color: isDark ? const Color(0x33FFFFFF) : const Color(0x33000000),
+          width: 1.0,
+        ),
+      ),
+      child: onTap == null
+          ? Padding(padding: padding, child: child)
+          : Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(radius - 1.0),
+                onTap: onTap,
+                child: Padding(padding: padding, child: child),
+              ),
+            ),
+    );
+
+    // Apply BackdropFilter with moderate blur (sigma = 16)
+    final Widget glassContent = ClipRRect(
+      borderRadius: BorderRadius.circular(radius),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(
+          sigmaX: 16.0,
+          sigmaY: 16.0,
+          tileMode: TileMode.decal,
+        ),
+        child: innerContainer,
+      ),
+    );
+
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(radius),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.16 : 0.03),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.12 : 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: glassContent,
+    );
+  }
+}
+
+class FlatCard extends StatelessWidget {
+  const FlatCard({
+    required this.child,
+    super.key,
+    this.padding = const EdgeInsets.all(18),
+    this.radius = 28,
+    this.onTap,
+  });
+
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+  final double radius;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return WMGlassSurface.tier1(
+      padding: padding,
+      radius: radius,
+      onTap: onTap,
+      child: child,
+    );
+  }
+}
+
+class FlatNavBar extends StatelessWidget {
+  const FlatNavBar({
+    required this.child,
+    super.key,
+    this.padding = const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+    this.radius = 999,
+  });
+
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+  final double radius;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E1E24) : Colors.white,
+        borderRadius: BorderRadius.circular(radius),
+        border: Border.all(
+          color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
+          width: 1.0,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.06),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: padding,
+        child: child,
+      ),
+    );
+  }
+}
+
 class LiquidGlass extends StatelessWidget {
   const LiquidGlass({
     required this.child,
@@ -201,107 +465,12 @@ class LiquidGlass extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    
-    // Premium translucent glass gradient fill simulating light refractions
-    final fillGradient = isDark
-        ? LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              const Color(0xFF1E1E24).withValues(alpha: 0.72),
-              const Color(0xFF121216).withValues(alpha: 0.48),
-            ],
-            stops: const [0.0, 1.0],
-          )
-        : LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Colors.white.withValues(alpha: 0.72),
-              Colors.white.withValues(alpha: 0.36),
-            ],
-            stops: const [0.0, 1.0],
-          );
-
-    // Light-reflecting thin highlight edge gradient
-    final borderGradient = isDark
-        ? LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              const Color(0xFFFFFFFF).withValues(alpha: 0.24),
-              const Color(0xFFFFFFFF).withValues(alpha: 0.04),
-            ],
-          )
-        : LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              const Color(0xFFFFFFFF).withValues(alpha: 0.72),
-              const Color(0xFFFFFFFF).withValues(alpha: 0.12),
-            ],
-          );
-
-    final innerContainer = Container(
-      decoration: BoxDecoration(
-        gradient: fillGradient,
-        borderRadius: BorderRadius.circular(radius - 1.2),
-      ),
-      child: onTap == null
-          ? Padding(padding: padding, child: child)
-          : Material(
-              color: Colors.transparent,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(radius - 1.2),
-                onTap: onTap,
-                child: Padding(padding: padding, child: child),
-              ),
-            ),
-    );
-
-    final borderContainer = Container(
-      padding: const EdgeInsets.all(1.2), // simulating a 1.2px thick border
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(radius),
-        gradient: borderGradient,
-      ),
-      child: innerContainer,
-    );
-
-    final Widget glassContent = blur > 0.0
-        ? ClipRRect(
-            borderRadius: BorderRadius.circular(radius),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(
-                sigmaX: blur,
-                sigmaY: blur,
-                tileMode: TileMode.decal,
-              ),
-              child: borderContainer,
-            ),
-          )
-        : borderContainer;
-
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(radius),
-        boxShadow: [
-          // Broad soft ambient occlusion shadow
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.16 : 0.03),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-          // Crisp contact shadow for depth separation
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.12 : 0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: glassContent,
+    return WMGlassSurface(
+      padding: padding,
+      radius: radius,
+      tier: blur > 0.0 ? WMRenderTier.tier3 : WMRenderTier.tier2,
+      onTap: onTap,
+      child: child,
     );
   }
 }

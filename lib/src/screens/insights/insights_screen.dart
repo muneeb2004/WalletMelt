@@ -16,8 +16,9 @@ class InsightsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final state = context.watch<AppState>();
-    final insights = state.monthlyInsights;
+    final selectedMonth = context.select((AppState s) => s.selectedMonth);
+    final insights = context.select((AppState s) => s.monthlyInsights);
+    final currency = context.select((AppState s) => s.settings.currency);
     return Scaffold(
       body: AppBackground(
         child: ListView(
@@ -30,7 +31,7 @@ class InsightsScreen extends StatelessWidget {
                 const Icon(Icons.calendar_today_rounded,
                     size: 14, color: WalletMeltColors.textMuted),
                 const SizedBox(width: AppSpacing.xs + 2),
-                Text(readableMonth(state.selectedMonth),
+                Text(readableMonth(selectedMonth),
                     style: Theme.of(context).textTheme.bodyMedium),
               ],
             ),
@@ -43,7 +44,7 @@ class InsightsScreen extends StatelessWidget {
                     'Add expenses to see your monthly trend, category breakdown, and spending insights.',
               ),
             ] else ...[
-              LiquidGlass(
+              WMGlassSurface.tier2(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -53,7 +54,7 @@ class InsightsScreen extends StatelessWidget {
                       padding: EdgeInsets.only(bottom: AppSpacing.xs),
                     ),
                     const SizedBox(height: AppSpacing.sm),
-                    Text(formatMoney(insights.total, state.settings.currency),
+                    Text(formatMoney(insights.total, currency),
                         style: Theme.of(context).textTheme.displaySmall),
                     if (insights.monthOverMonthDelta != null) ...[
                       const SizedBox(height: AppSpacing.sm + 2),
@@ -115,7 +116,7 @@ class InsightsScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: AppSpacing.md),
-              LiquidGlass(
+              WMGlassSurface.tier2(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -133,7 +134,7 @@ class InsightsScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: AppSpacing.md),
-              LiquidGlass(
+              WMGlassSurface.tier2(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

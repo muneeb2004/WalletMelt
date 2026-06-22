@@ -4,6 +4,13 @@ enum RestoreMode {
   fullReplace,
 }
 
+enum ConflictResolution {
+  keepExisting,
+  useBackup,
+  mergeFields,
+}
+
+
 enum RestorePlanIssueSeverity {
   warning,
   blocker,
@@ -131,9 +138,10 @@ class RestorePlan {
     );
   }
 
-  factory RestorePlan.fullReplaceUnsupported({
+  factory RestorePlan.fullReplace({
     RestoreEntitySelection entitySelection = RestoreEntitySelection.backupData,
     Set<RestoreSafetyCheck> completedSafetyChecks = const {},
+    List<RestorePlanIssue> issues = const [],
   }) {
     return RestorePlan(
       mode: RestoreMode.fullReplace,
@@ -141,6 +149,17 @@ class RestorePlan {
       requiredSafetyChecks: mutationSafetyChecks,
       completedSafetyChecks: completedSafetyChecks,
       executionSteps: mutationPlanningSteps,
+      issues: issues,
+    );
+  }
+
+  factory RestorePlan.fullReplaceUnsupported({
+    RestoreEntitySelection entitySelection = RestoreEntitySelection.backupData,
+    Set<RestoreSafetyCheck> completedSafetyChecks = const {},
+  }) {
+    return RestorePlan.fullReplace(
+      entitySelection: entitySelection,
+      completedSafetyChecks: completedSafetyChecks,
       issues: const [
         RestorePlanIssue(
           severity: RestorePlanIssueSeverity.blocker,
@@ -151,6 +170,8 @@ class RestorePlan {
       ],
     );
   }
+
+
 
   final RestoreMode mode;
   final RestoreEntitySelection entitySelection;

@@ -1,4 +1,68 @@
 import 'dart:convert';
+import 'dart:io';
+
+import 'package:archive/archive.dart';
+
+/// Represents a parsed backup from either a legacy JSON file or a modern ZIP package.
+class WalletMeltBackupFile {
+  final String jsonText;
+  final List<int>? zipBytes;
+  final bool isZip;
+  final Map<String, dynamic>? metadataJson;
+
+  const WalletMeltBackupFile({
+    required this.jsonText,
+    this.zipBytes,
+    this.isZip = false,
+    this.metadataJson,
+  });
+
+  /// Loads and detects the backup type from a file path.
+  static Future<WalletMeltBackupFile> fromPath(String filePath) async {
+    final file = File(filePath);
+    if (!await file.exists()) {
+      throw FileSystemException('Backup file not found', filePath);
+    }
+    final bytes = await file.readAsBytes();
+
+    // Check ZIP file signature: PK\x03\x04
+    if (bytes.length > 4 &&
+        bytes[0] == 0x50 &&
+        bytes[1] == 0x4B &&
+        bytes[2] == 0x03 &&
+        bytes[3] == 0x04) {
+      final archive = ZipDecoder().decodeBytes(bytes);
+      final backupEntry = archive.findFile('backup.json');
+      if (backupEntry == null) {
+        throw const FormatException('ZIP backup is missing backup.json');
+      }
+      final jsonText = utf8.decode(backupEntry.content as List<int>);
+
+      Map<String, dynamic>? metadataJson;
+      final metadataEntry = archive.findFile('metadata.json');
+      if (metadataEntry != null) {
+        try {
+          metadataJson = jsonDecode(utf8.decode(metadataEntry.content as List<int>))
+              as Map<String, dynamic>;
+        } catch (_) {}
+      }
+
+      return WalletMeltBackupFile(
+        jsonText: jsonText,
+        zipBytes: bytes,
+        isZip: true,
+        metadataJson: metadataJson,
+      );
+    } else {
+      // Treat as raw JSON text
+      final jsonText = utf8.decode(bytes);
+      return WalletMeltBackupFile(
+        jsonText: jsonText,
+        isZip: false,
+      );
+    }
+  }
+}
 
 /// Result of backup JSON validation.
 class WalletMeltJsonBackupValidationResult {
@@ -59,7 +123,7 @@ class WalletMeltJsonBackupValidator {
             'Unsupported format: $format');
       }
 
-      // Validate format_version
+      // Validate format_version and backupVersion (Phase 8 version checking)
       final formatVersion = metadataMap['format_version'];
       if (formatVersion is! int) {
         return const WalletMeltJsonBackupValidationResult.invalid(
@@ -68,6 +132,14 @@ class WalletMeltJsonBackupValidator {
       if (formatVersion != 1) {
         return WalletMeltJsonBackupValidationResult.invalid(
             'Unsupported format version: $formatVersion');
+      }
+
+      final backupVersion = metadataMap['backupVersion'] ?? metadataMap['backup_version'] ?? 1;
+      if (backupVersion is num) {
+        if (backupVersion.toInt() > 1) {
+          return WalletMeltJsonBackupValidationResult.invalid(
+              'Backup version $backupVersion is from a newer, unsupported version of WalletMelt.');
+        }
       }
 
       // Validate that arrays are indeed arrays
@@ -105,3 +177,4 @@ class WalletMeltJsonBackupValidator {
     }
   }
 }
+

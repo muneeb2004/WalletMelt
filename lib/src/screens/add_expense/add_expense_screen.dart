@@ -72,7 +72,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final state = context.watch<AppState>();
+    final state = context.read<AppState>();
+    final currency = context.select((AppState s) => s.settings.currency);
+    final categories = context.select((AppState s) => s.categories);
     final isEditing = widget.expenseId != null;
     final selectedCategory =
         _categoryId == null ? null : state.categoryById(_categoryId!);
@@ -100,20 +102,20 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               style: Theme.of(context).textTheme.displaySmall,
               decoration: InputDecoration(
                 labelText: 'Amount',
-                prefixText: '${state.settings.currency} ',
+                prefixText: '$currency ',
                 errorText: _validation?.amountError,
               ),
             ),
             const SizedBox(height: 14),
             TextField(
-                controller: _titleController,
-                decoration:
-                    const InputDecoration(labelText: 'Title or bill name')),
+              controller: _titleController,
+              decoration:
+                  const InputDecoration(labelText: 'Title or bill name')),
             const SizedBox(height: 14),
             TextField(
-                controller: _vendorController,
-                decoration:
-                    const InputDecoration(labelText: 'Vendor or provider')),
+              controller: _vendorController,
+              decoration:
+                  const InputDecoration(labelText: 'Vendor or provider')),
             const SizedBox(height: 18),
             _SectionTitle(
                 title: 'Category',
@@ -124,7 +126,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               spacing: 8,
               runSpacing: 8,
               children: [
-                for (final category in state.categories)
+                for (final category in categories)
                   WalletCategoryChip(
                     category: category,
                     selected: category.id == _categoryId,
@@ -139,7 +141,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                       style: TextStyle(
                           color: Theme.of(context).colorScheme.error))),
             const SizedBox(height: 18),
-            LiquidGlass(
+            WMGlassSurface.tier2(
               onTap: _pickDate,
               padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
               child: Row(
@@ -168,10 +170,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
             ),
             const SizedBox(height: 18),
             TextField(
-                controller: _notesController,
-                minLines: 2,
-                maxLines: 4,
-                decoration: const InputDecoration(labelText: 'Notes')),
+              controller: _notesController,
+              minLines: 2,
+              maxLines: 4,
+              decoration: const InputDecoration(labelText: 'Notes')),
             const SizedBox(height: 18),
             const _SectionTitle(
                 title: 'Receipt or bill', actionLabel: null, onAction: null),
@@ -314,6 +316,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       context: context,
       showDragHandle: true,
       isScrollControlled: true,
+      constraints: const BoxConstraints(maxWidth: 600),
       builder: (sheetContext) {
         return StatefulBuilder(
           builder: (context, setSheetState) {
@@ -447,7 +450,7 @@ class _ReceiptCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final uri = receiptUri;
-    return LiquidGlass(
+    return WMGlassSurface.tier2(
       child: uri == null
           ? Row(
               children: [
@@ -518,7 +521,7 @@ class _GroceryItemsEditor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LiquidGlass(
+    return WMGlassSurface.tier2(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -535,7 +538,7 @@ class _GroceryItemsEditor extends StatelessWidget {
               Expanded(
                   child: TextField(
                       controller: amountController,
-                      keyboardType: const TextInputType.numberWithOptions(),
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       decoration: const InputDecoration(labelText: 'Amount'))),
               IconButton(
                   onPressed: onAdd,

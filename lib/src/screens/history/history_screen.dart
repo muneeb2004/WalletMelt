@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -7,6 +9,7 @@ import '../../components/expense/expense_list_tile.dart';
 import '../../components/glass/app_background.dart';
 import '../../state/app_state.dart';
 import '../../theme/wallet_melt_theme.dart';
+import '../../types/category.dart' as wm;
 import '../../types/expense.dart';
 import '../../utils/insights.dart';
 import '../../widgets/empty_state.dart';
@@ -43,13 +46,73 @@ class _HistoryScreenState extends State<HistoryScreen> {
   ExpenseSort _sort = ExpenseSort.newest;
   bool _showRecycleBin = false;
 
+  Timer? _debounceTimer;
+  String _searchQuery = '';
+
+  // Memoization cache to avoid recalculating sorting/filtering on rebuilds
+  List<Expense>? _cachedRawExpenses;
+  String? _cachedSearchQuery;
+  String? _cachedCategoryId;
+  ExpenseSort? _cachedSort;
+  List<_ListItem>? _cachedItems;
+  List<Expense>? _cachedFilteredList;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  void _onSearchChanged() {
+    if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 200), () {
+      if (mounted) {
+        setState(() {
+          _searchQuery = _searchController.text.trim().toLowerCase();
+        });
+      }
+    });
+  }
+
   @override
   void dispose() {
+    _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
+    _debounceTimer?.cancel();
     super.dispose();
   }
 
-  List<_ListItem> _buildItems(Map<String, List<Expense>> grouped) {
+  List<_ListItem> _getOrCreateItems(List<Expense> rawExpenses) {
+    if (_cachedRawExpenses == rawExpenses &&
+        _cachedSearchQuery == _searchQuery &&
+        _cachedCategoryId == _categoryId &&
+        _cachedSort == _sort &&
+        _cachedItems != null) {
+      return _cachedItems!;
+    }
+
+    final filtered = rawExpenses.where((expense) {
+      final matchesCategory =
+          _categoryId == null || expense.categoryId == _categoryId;
+      final haystack =
+          '${expense.title} ${expense.vendor ?? ''} ${expense.notes ?? ''}'
+              .toLowerCase();
+      final matchesQuery = _searchQuery.isEmpty || haystack.contains(_searchQuery);
+      return matchesCategory && matchesQuery;
+    }).toList();
+
+    filtered.sort((a, b) {
+      return switch (_sort) {
+        ExpenseSort.newest => b.date.compareTo(a.date),
+        ExpenseSort.oldest => a.date.compareTo(b.date),
+        ExpenseSort.amountHigh => b.amount.compareTo(a.amount),
+        ExpenseSort.amountLow => a.amount.compareTo(b.amount),
+      };
+    });
+
+    _cachedFilteredList = filtered;
+
+    final grouped = groupExpensesByMonth(filtered);
     final items = <_ListItem>[];
     for (final entry in grouped.entries) {
       items.add(_HeaderItem(entry.key));
@@ -57,16 +120,24 @@ class _HistoryScreenState extends State<HistoryScreen> {
         items.add(_ExpenseItem(expense));
       }
     }
+
+    _cachedRawExpenses = rawExpenses;
+    _cachedSearchQuery = _searchQuery;
+    _cachedCategoryId = _categoryId;
+    _cachedSort = _sort;
+    _cachedItems = items;
+
     return items;
   }
 
   @override
   Widget build(BuildContext context) {
-    final state = context.watch<AppState>();
-    final base = _showRecycleBin ? state.deletedExpenses : state.expenses;
-    final filtered = _filtered(base);
-    final grouped = groupExpensesByMonth(filtered);
-    final items = _buildItems(grouped);
+    final expenses = context.select<AppState, List<Expense>>((s) => s.expenses);
+    final deletedExpenses = context.select<AppState, List<Expense>>((s) => s.deletedExpenses);
+    final categories = context.select<AppState, List<wm.Category>>((s) => s.categories);
+    final base = _showRecycleBin ? deletedExpenses : expenses;
+    final items = _getOrCreateItems(base);
+    final filteredEmpty = _cachedFilteredList?.isEmpty ?? true;
 
     return Scaffold(
       body: AppBackground(
@@ -90,8 +161,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           tooltip: _showRecycleBin
                               ? 'Show active expenses'
                               : 'Show recycle bin',
-                          onPressed: () =>
-                              setState(() => _showRecycleBin = !_showRecycleBin),
+                          onPressed: () {
+                            setState(() => _showRecycleBin = !_showRecycleBin);
+                            if (_showRecycleBin) {
+                              context.read<AppState>().loadDeletedExpenses();
+                            }
+                          },
                           icon: Icon(_showRecycleBin
                               ? Icons.receipt_long_rounded
                               : Icons.delete_outline_rounded),
@@ -106,29 +181,32 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       decoration: const InputDecoration(
                           prefixIcon: Icon(Icons.search_rounded),
                           labelText: 'Search vendor, title, notes'),
-                      onChanged: (_) => setState(() {}),
                     ),
                     const SizedBox(height: AppSpacing.sm),
 
                     // ── Category filter chips ─────────────────────────────
                     SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          _CategoryAllChip(
-                              selected: _categoryId == null,
-                              onTap: () =>
-                                  setState(() => _categoryId = null)),
-                          const SizedBox(width: AppSpacing.sm),
-                          for (final category in state.categories) ...[
-                            WalletCategoryChip(
-                                category: category,
-                                selected: _categoryId == category.id,
+                      clipBehavior: Clip.none,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Row(
+                          children: [
+                            _CategoryAllChip(
+                                selected: _categoryId == null,
                                 onTap: () =>
-                                    setState(() => _categoryId = category.id)),
+                                    setState(() => _categoryId = null)),
                             const SizedBox(width: AppSpacing.sm),
+                            for (final category in categories) ...[
+                              WalletCategoryChip(
+                                  category: category,
+                                  selected: _categoryId == category.id,
+                                  onTap: () =>
+                                      setState(() => _categoryId = category.id)),
+                              const SizedBox(width: AppSpacing.sm),
+                            ],
                           ],
-                        ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: AppSpacing.sm),
@@ -163,7 +241,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             ),
 
             // ── Empty state ──────────────────────────────────────────────
-            if (filtered.isEmpty)
+            if (filteredEmpty)
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
                 sliver: SliverToBoxAdapter(
@@ -198,7 +276,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     final expItem = item as _ExpenseItem;
                     return ExpenseListTile(
                       expense: expItem.expense,
-                      category: state.categoryById(expItem.expense.categoryId),
+                      category: context.read<AppState>().categoryById(expItem.expense.categoryId),
                       onTap: () => context.push('/expense/${expItem.expense.id}'),
                     );
                   },
@@ -208,28 +286,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
         ),
       ),
     );
-  }
-
-  List<Expense> _filtered(List<Expense> expenses) {
-    final query = _searchController.text.trim().toLowerCase();
-    final result = expenses.where((expense) {
-      final matchesCategory =
-          _categoryId == null || expense.categoryId == _categoryId;
-      final haystack =
-          '${expense.title} ${expense.vendor ?? ''} ${expense.notes ?? ''}'
-              .toLowerCase();
-      final matchesQuery = query.isEmpty || haystack.contains(query);
-      return matchesCategory && matchesQuery;
-    }).toList();
-    result.sort((a, b) {
-      return switch (_sort) {
-        ExpenseSort.newest => b.date.compareTo(a.date),
-        ExpenseSort.oldest => a.date.compareTo(b.date),
-        ExpenseSort.amountHigh => b.amount.compareTo(a.amount),
-        ExpenseSort.amountLow => a.amount.compareTo(b.amount),
-      };
-    });
-    return result;
   }
 }
 

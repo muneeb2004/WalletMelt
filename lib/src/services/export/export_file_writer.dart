@@ -89,6 +89,38 @@ class ExportFileWriter {
     );
   }
 
+  static const String zipMimeType = 'application/zip';
+
+  Future<ExportFileResult> writeZip({
+    required List<int> zipBytes,
+    required String exportKind,
+    DateTime? createdAt,
+    Directory? directory,
+  }) async {
+    final timestamp = createdAt ?? DateTime.now();
+    final targetDirectory = directory ?? await getTemporaryDirectory();
+    if (!await targetDirectory.exists()) {
+      await targetDirectory.create(recursive: true);
+    }
+
+    final baseFileName = buildWalletMeltExportFileName(
+      exportKind: exportKind,
+      createdAt: timestamp,
+      extension: 'zip',
+    );
+    final file = await _unusedFile(targetDirectory, baseFileName);
+
+    await file.writeAsBytes(zipBytes, flush: true);
+
+    return ExportFileResult(
+      path: file.path,
+      fileName: p.basename(file.path),
+      mimeType: zipMimeType,
+      byteCount: zipBytes.length,
+      createdAt: timestamp,
+    );
+  }
+
   Future<File> _unusedFile(Directory directory, String fileName) async {
     final firstFile = File(p.join(directory.path, fileName));
     if (!await firstFile.exists()) return firstFile;
@@ -104,3 +136,4 @@ class ExportFileWriter {
     }
   }
 }
+

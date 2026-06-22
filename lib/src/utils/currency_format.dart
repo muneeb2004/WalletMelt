@@ -1,11 +1,19 @@
 import 'package:intl/intl.dart';
 
+final Map<String, NumberFormat> _formatCache = {};
+
 String formatMoney(num value, String currency) {
-  return NumberFormat.currency(
-    name: currency,
-    symbol: _symbolFor(currency),
-    decimalDigits: value % 1 == 0 ? 0 : 2,
-  ).format(value);
+  final decimals = value % 1 == 0 ? 0 : 2;
+  final key = '${currency}_$decimals';
+  final formatter = _formatCache.putIfAbsent(
+    key,
+    () => NumberFormat.currency(
+      name: currency,
+      symbol: _symbolFor(currency),
+      decimalDigits: decimals,
+    ),
+  );
+  return formatter.format(value);
 }
 
 String _symbolFor(String currency) {

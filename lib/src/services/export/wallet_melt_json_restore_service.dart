@@ -3,6 +3,9 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../data/local/wallet_melt_database.dart' as local;
 import '../../services/settings/settings_service.dart';
@@ -19,6 +22,9 @@ class WalletMeltJsonRestoreOptions {
     this.skipBudgetConflicts = false,
     this.skipOrphanGroceryItems = false,
     this.confirmed = false,
+    this.expenseResolutions = const {},
+    this.categoryResolutions = const {},
+    this.budgetResolutions = const {},
   });
 
   final RestoreMode mode;
@@ -26,7 +32,11 @@ class WalletMeltJsonRestoreOptions {
   final bool skipBudgetConflicts;
   final bool skipOrphanGroceryItems;
   final bool confirmed;
+  final Map<String, ConflictResolution> expenseResolutions;
+  final Map<String, ConflictResolution> categoryResolutions;
+  final Map<String, ConflictResolution> budgetResolutions;
 }
+
 
 class WalletMeltJsonRestoreResult {
   const WalletMeltJsonRestoreResult({
@@ -91,6 +101,7 @@ class WalletMeltJsonRestoreService {
     required WalletMeltJsonRestoreOptions options,
     required ExportFileResult safetyBackup,
     local.WalletMeltDatabase? database,
+    Directory? zipExtractDir,
   }) async {
     final preflightFailure = await _preflightFailure(
       jsonText: jsonText,
@@ -146,6 +157,8 @@ class WalletMeltJsonRestoreService {
           categoryMaps,
           expenseMaps,
           state,
+          zipExtractDir: zipExtractDir,
+          options: options,
         );
 
         await _onStep(RestoreExecutionStep.importOrRemapGroceryItems);
@@ -200,15 +213,171 @@ class WalletMeltJsonRestoreService {
     }
   }
 
+  Future<WalletMeltJsonRestoreResult> restoreFullReplace({
+    required String jsonText,
+    required RestoreDryRunPlan dryRunPlan,
+    required WalletMeltJsonRestoreOptions options,
+    required ExportFileResult safetyBackup,
+    local.WalletMeltDatabase? database,
+    Directory? zipExtractDir,
+  }) async {
+    final preflightFailure = await _preflightFailure(
+      jsonText: jsonText,
+      dryRunPlan: dryRunPlan,
+      options: options,
+      safetyBackup: safetyBackup,
+    );
+    if (preflightFailure != null) return preflightFailure;
+
+    final db = database ?? _database ?? await local.WalletMeltDatabase.open();
+    final decoded = jsonDecode(jsonText);
+    if (decoded is! Map) {
+      return WalletMeltJsonRestoreResult.failure(
+        'Backup root is not a JSON object.',
+        safetyBackupPath: safetyBackup.path,
+      );
+    }
+    final backup = decoded.cast<String, Object?>();
+
+    try {
+      final state = _RestoreMutationState(safetyBackupPath: safetyBackup.path);
+
+      await _onStep(RestoreExecutionStep.startTransaction);
+      await db.transaction(() async {
+        await db.customStatement('PRAGMA foreign_keys = OFF;');
+
+        try {
+          // 1. Delete all existing records
+          await db.delete(db.groceryItems).go();
+          await db.delete(db.expenseItems).go();
+          await db.delete(db.receipts).go();
+          await db.delete(db.expenses).go();
+          await db.delete(db.categoryBudgets).go();
+          await db.delete(db.syncMetadata).go();
+          await db.delete(db.categories).go();
+
+          await db.delete(db.itemAliases).go();
+          await db.delete(db.items).go();
+          await db.delete(db.stores).go();
+          await db.delete(db.units).go();
+
+          // 2. Setup ID mappings (in full replace, maps are 1-to-1 matching backup IDs)
+          final categoryMaps = <String, String>{};
+          for (final cat in _asMaps(backup['categories'])) {
+            final sourceId = _requiredString(cat, 'id');
+            categoryMaps[sourceId] = sourceId;
+          }
+          final expenseMaps = <String, String>{};
+          for (final exp in _asMaps(backup['expenses'])) {
+            final sourceId = _requiredString(exp, 'id');
+            expenseMaps[sourceId] = sourceId;
+          }
+          final groceryItemMaps = <String, String>{};
+          for (final item in _asMaps(backup['grocery_items'])) {
+            final sourceId = _requiredString(item, 'id');
+            groceryItemMaps[sourceId] = sourceId;
+          }
+          final budgetMaps = <String, String>{};
+          for (final budget in _asMaps(backup['budgets'])) {
+            final sourceId = _requiredString(budget, 'id');
+            budgetMaps[sourceId] = sourceId;
+          }
+
+          // 3. Import categories
+          state.insertedCategories = await _mergeCategories(
+            db,
+            _asMaps(backup['categories']),
+            categoryMaps,
+          );
+
+          // 4. Import expenses
+          state.insertedExpenses = await _mergeExpenses(
+            db,
+            _asMaps(backup['expenses']),
+            categoryMaps,
+            expenseMaps,
+            state,
+            zipExtractDir: zipExtractDir,
+            options: options,
+          );
+
+          // 5. Import grocery items
+          state.insertedGroceryItems = await _mergeGroceryItems(
+            db,
+            _asMaps(backup['grocery_items']),
+            expenseMaps,
+            groceryItemMaps,
+            state,
+          );
+
+          // 6. Import budgets
+          final budgetResult = await _mergeBudgets(
+            db,
+            _asMaps(backup['budgets']),
+            categoryMaps,
+            budgetMaps,
+            state: state,
+            skipConflicts: false,
+          );
+          state.insertedBudgets = budgetResult.inserted;
+          state.skippedItems += budgetResult.skipped;
+          state.warnings.addAll(budgetResult.warnings);
+
+          if (options.importSettings) {
+            state.settingsImported = await _importSettings(backup['settings']);
+          }
+
+          // 7. Rebuild indexes
+          await db.customStatement('REINDEX;');
+          await db.customStatement('ANALYZE;');
+
+          await _onStep(RestoreExecutionStep.verifyCounts);
+          _verifyCounts(dryRunPlan, state);
+          await _verifyInsertedRelationships(db, state);
+        } finally {
+          await db.customStatement('PRAGMA foreign_keys = ON;');
+        }
+      });
+      await _onStep(RestoreExecutionStep.commitOrRollback);
+
+      return WalletMeltJsonRestoreResult(
+        success: true,
+        safetyBackupPath: safetyBackup.path,
+        insertedCategories: state.insertedCategories,
+        insertedExpenses: state.insertedExpenses,
+        insertedGroceryItems: state.insertedGroceryItems,
+        insertedBudgets: state.insertedBudgets,
+        settingsImported: state.settingsImported,
+        skippedItems: state.skippedItems,
+        warnings: List.unmodifiable(state.warnings),
+      );
+    } catch (error) {
+      // Rollback database from safety backup file to satisfy Phase 2 recovery safety
+      try {
+        final safetyJson = await File(safetyBackup.path).readAsString();
+        await _executeRawReplaceRestore(db, safetyJson);
+      } catch (recoveryError) {
+        return WalletMeltJsonRestoreResult.failure(
+          'Replace restore failed and recovery from safety snapshot also failed: $recoveryError. Original error: $error',
+          safetyBackupPath: safetyBackup.path,
+        );
+      }
+      return WalletMeltJsonRestoreResult.failure(
+        'Replace restore failed and database was successfully rolled back: $error',
+        safetyBackupPath: safetyBackup.path,
+      );
+    }
+  }
+
   Future<WalletMeltJsonRestoreResult?> _preflightFailure({
     required String jsonText,
     required RestoreDryRunPlan dryRunPlan,
     required WalletMeltJsonRestoreOptions options,
     required ExportFileResult safetyBackup,
   }) async {
-    if (options.mode != RestoreMode.safeMerge) {
+    if (options.mode != RestoreMode.safeMerge && options.mode != RestoreMode.fullReplace) {
       return WalletMeltJsonRestoreResult.failure(
-        'Only safe merge restore is supported.',
+        'Unsupported restore mode.',
       );
     }
     if (!options.confirmed) {
@@ -238,7 +407,7 @@ class WalletMeltJsonRestoreService {
         dryRunPlan.error ?? 'Dry-run plan is invalid.',
       );
     }
-    if (dryRunPlan.hasBlockers) {
+    if (options.mode == RestoreMode.safeMerge && dryRunPlan.hasBlockers) {
       return WalletMeltJsonRestoreResult.failure(
         'Restore blocked by dry-run issues: '
         '${dryRunPlan.issues.where((issue) => issue.isBlocker).map((issue) => issue.message).join('; ')}',
@@ -268,7 +437,7 @@ class WalletMeltJsonRestoreService {
         'Backup preview must be generated before restore.',
       );
     }
-    if (!_dryRunGateSatisfied(
+    if (options.mode == RestoreMode.safeMerge && !_dryRunGateSatisfied(
       dryRunPlan,
       RestoreDryRunSafetyGate.conflictSummaryReviewed,
     )) {
@@ -291,6 +460,7 @@ class WalletMeltJsonRestoreService {
     }
     return null;
   }
+
 
   Future<int> _mergeCategories(
     local.WalletMeltDatabase db,
@@ -328,8 +498,10 @@ class WalletMeltJsonRestoreService {
     List<Map<String, Object?>> expenses,
     Map<String, String> categoryMaps,
     Map<String, String> expenseMaps,
-    _RestoreMutationState state,
-  ) async {
+    _RestoreMutationState state, {
+    Directory? zipExtractDir,
+    required WalletMeltJsonRestoreOptions options,
+  }) async {
     var inserted = 0;
     for (final expense in expenses) {
       final sourceId = _requiredString(expense, 'id');
@@ -337,8 +509,23 @@ class WalletMeltJsonRestoreService {
       if (targetId == null) {
         throw StateError('No expense mapping for "$sourceId".');
       }
-      if (await _expenseExists(db, targetId)) {
-        throw StateError('Target expense "$targetId" already exists.');
+
+      final choice = options.expenseResolutions[sourceId];
+      final exists = await _expenseExists(db, targetId);
+
+      if (exists) {
+        if (choice == ConflictResolution.keepExisting) {
+          state.skippedItems++;
+          continue;
+        } else if (choice == ConflictResolution.useBackup) {
+          await _updateExpenseInDb(db, targetId, expense, categoryMaps, state, zipExtractDir);
+          continue;
+        } else if (choice == ConflictResolution.mergeFields) {
+          await _mergeExpenseInDb(db, targetId, expense, categoryMaps, state, zipExtractDir);
+          continue;
+        } else {
+          throw StateError('Target expense "$targetId" already exists but no conflict resolution was provided.');
+        }
       }
 
       final sourceCategoryId = _requiredString(expense, 'category_id');
@@ -353,8 +540,28 @@ class WalletMeltJsonRestoreService {
         );
       }
 
-      final receiptUri = _nullableString(expense['receipt_image_uri']);
-      if (receiptUri != null) {
+      var receiptUri = _nullableString(expense['receipt_image_uri']);
+      if (receiptUri != null && zipExtractDir != null) {
+        final fileName = p.basename(Uri.parse(receiptUri).path);
+        final srcFile = File(p.join(zipExtractDir.path, 'receipts', fileName));
+        if (srcFile.existsSync()) {
+          try {
+            final docDir = await getApplicationDocumentsDirectory();
+            final localReceiptsDir = Directory(p.join(docDir.path, 'receipts'));
+            if (!localReceiptsDir.existsSync()) {
+              localReceiptsDir.createSync(recursive: true);
+            }
+            final newFileName = '${const Uuid().v4()}${p.extension(fileName)}';
+            final destFile = File(p.join(localReceiptsDir.path, newFileName));
+            srcFile.copySync(destFile.path);
+            receiptUri = destFile.uri.toString();
+          } catch (e) {
+            state.warnings.add('Failed to copy physical receipt file: $e');
+          }
+        } else {
+          state.warnings.add('Physical receipt file not found in backup: $fileName');
+        }
+      } else if (receiptUri != null) {
         state.warnings.add(
           'Receipt path for expense "$sourceId" was restored as text only.',
         );
@@ -395,6 +602,271 @@ class WalletMeltJsonRestoreService {
       inserted++;
     }
     return inserted;
+  }
+
+  Future<void> _updateExpenseInDb(
+    local.WalletMeltDatabase db,
+    String targetId,
+    Map<String, Object?> expense,
+    Map<String, String> categoryMaps,
+    _RestoreMutationState state,
+    Directory? zipExtractDir,
+  ) async {
+    final sourceCategoryId = _requiredString(expense, 'category_id');
+    final targetCategoryId = categoryMaps[sourceCategoryId] ?? sourceCategoryId;
+
+    var receiptUri = _nullableString(expense['receipt_image_uri']);
+    if (receiptUri != null && zipExtractDir != null) {
+      final fileName = p.basename(Uri.parse(receiptUri).path);
+      final srcFile = File(p.join(zipExtractDir.path, 'receipts', fileName));
+      if (srcFile.existsSync()) {
+        try {
+          final docDir = await getApplicationDocumentsDirectory();
+          final localReceiptsDir = Directory(p.join(docDir.path, 'receipts'));
+          if (!localReceiptsDir.existsSync()) {
+            localReceiptsDir.createSync(recursive: true);
+          }
+          final newFileName = '${const Uuid().v4()}${p.extension(fileName)}';
+          final destFile = File(p.join(localReceiptsDir.path, newFileName));
+          srcFile.copySync(destFile.path);
+          receiptUri = destFile.uri.toString();
+        } catch (_) {}
+      }
+    }
+
+    await (db.update(db.expenses)..where((row) => row.id.equals(targetId)))
+        .write(
+      local.ExpensesCompanion(
+        amount: Value(_requiredDouble(expense, 'amount')),
+        currency: Value(_requiredString(expense, 'currency')),
+        categoryId: Value(targetCategoryId),
+        title: Value(_requiredString(expense, 'title')),
+        vendor: Value(_nullableString(expense['vendor'])),
+        date: Value(_requiredString(expense, 'date')),
+        notes: Value(_nullableString(expense['notes'])),
+        receiptImageUri: Value(receiptUri),
+        isRecurring: Value(_boolValue(expense['is_recurring'])),
+        recurrenceFrequency: Value(_nullableString(expense['recurrence_frequency'])),
+        updatedAt: Value(DateTime.now().toIso8601String()),
+        deletedAt: Value(_nullableString(expense['deleted_at'])),
+      ),
+    );
+
+    if (receiptUri != null) {
+      await db.into(db.receipts).insertOnConflictUpdate(
+            local.ReceiptsCompanion.insert(
+              id: 'legacy_receipt_$targetId',
+              expenseId: targetId,
+              uri: receiptUri,
+              mimeType: const Value('image/jpeg'),
+              createdAt: _requiredString(expense, 'created_at'),
+              deletedAt: Value(_nullableString(expense['deleted_at'])),
+            ),
+          );
+    }
+  }
+
+  Future<void> _mergeExpenseInDb(
+    local.WalletMeltDatabase db,
+    String targetId,
+    Map<String, Object?> expense,
+    Map<String, String> categoryMaps,
+    _RestoreMutationState state,
+    Directory? zipExtractDir,
+  ) async {
+    final existing = await (db.select(db.expenses)
+          ..where((row) => row.id.equals(targetId)))
+        .getSingleOrNull();
+    if (existing == null) return;
+
+    final sourceCategoryId = _requiredString(expense, 'category_id');
+    final targetCategoryId = categoryMaps[sourceCategoryId] ?? sourceCategoryId;
+
+    var receiptUri = _nullableString(expense['receipt_image_uri']) ?? existing.receiptImageUri;
+    if (receiptUri != existing.receiptImageUri && zipExtractDir != null && receiptUri != null) {
+      final fileName = p.basename(Uri.parse(receiptUri).path);
+      final srcFile = File(p.join(zipExtractDir.path, 'receipts', fileName));
+      if (srcFile.existsSync()) {
+        try {
+          final docDir = await getApplicationDocumentsDirectory();
+          final localReceiptsDir = Directory(p.join(docDir.path, 'receipts'));
+          if (!localReceiptsDir.existsSync()) {
+            localReceiptsDir.createSync(recursive: true);
+          }
+          final newFileName = '${const Uuid().v4()}${p.extension(fileName)}';
+          final destFile = File(p.join(localReceiptsDir.path, newFileName));
+          srcFile.copySync(destFile.path);
+          receiptUri = destFile.uri.toString();
+        } catch (_) {}
+      }
+    }
+
+    await (db.update(db.expenses)..where((row) => row.id.equals(targetId)))
+        .write(
+      local.ExpensesCompanion(
+        amount: Value(_requiredDouble(expense, 'amount')),
+        currency: Value(_requiredString(expense, 'currency')),
+        categoryId: Value(targetCategoryId),
+        title: Value(_requiredString(expense, 'title')),
+        vendor: Value(_nullableString(expense['vendor']) ?? existing.vendor),
+        date: Value(_requiredString(expense, 'date')),
+        notes: Value(_nullableString(expense['notes']) ?? existing.notes),
+        receiptImageUri: Value(receiptUri),
+        isRecurring: Value(_boolValue(expense['is_recurring'])),
+        recurrenceFrequency: Value(_nullableString(expense['recurrence_frequency']) ?? existing.recurrenceFrequency),
+        updatedAt: Value(DateTime.now().toIso8601String()),
+        deletedAt: Value(_nullableString(expense['deleted_at']) ?? existing.deletedAt),
+      ),
+    );
+
+    if (receiptUri != null) {
+      await db.into(db.receipts).insertOnConflictUpdate(
+            local.ReceiptsCompanion.insert(
+              id: 'legacy_receipt_$targetId',
+              expenseId: targetId,
+              uri: receiptUri,
+              mimeType: const Value('image/jpeg'),
+              createdAt: _requiredString(expense, 'created_at'),
+              deletedAt: Value(_nullableString(expense['deleted_at'])),
+            ),
+          );
+    }
+  }
+
+  Future<void> _executeRawReplaceRestore(
+    local.WalletMeltDatabase db,
+    String safetyJsonText,
+  ) async {
+    final decoded = jsonDecode(safetyJsonText);
+    if (decoded is! Map) {
+      throw const FormatException('Invalid safety snapshot format.');
+    }
+    final backup = decoded.cast<String, Object?>();
+
+    await db.transaction(() async {
+      await db.customStatement('PRAGMA foreign_keys = OFF;');
+      try {
+        await db.delete(db.groceryItems).go();
+        await db.delete(db.expenseItems).go();
+        await db.delete(db.receipts).go();
+        await db.delete(db.expenses).go();
+        await db.delete(db.categoryBudgets).go();
+        await db.delete(db.syncMetadata).go();
+        await db.delete(db.categories).go();
+
+        await db.delete(db.itemAliases).go();
+        await db.delete(db.items).go();
+        await db.delete(db.stores).go();
+        await db.delete(db.units).go();
+
+        for (final cat in _asMaps(backup['categories'])) {
+          await db.into(db.categories).insert(
+                local.CategoriesCompanion.insert(
+                  id: _requiredString(cat, 'id'),
+                  name: _requiredString(cat, 'name'),
+                  icon: _requiredString(cat, 'icon'),
+                  color: _requiredString(cat, 'color'),
+                  isDefault: _boolValue(cat['is_default']),
+                  createdAt: _requiredString(cat, 'created_at'),
+                  updatedAt: _requiredString(cat, 'updated_at'),
+                ),
+              );
+        }
+
+        for (final expense in _asMaps(backup['expenses'])) {
+          final targetId = _requiredString(expense, 'id');
+          final receiptUri = _nullableString(expense['receipt_image_uri']);
+
+          await db.into(db.expenses).insert(
+                local.ExpensesCompanion.insert(
+                  id: targetId,
+                  amount: _requiredDouble(expense, 'amount'),
+                  currency: _requiredString(expense, 'currency'),
+                  categoryId: _requiredString(expense, 'category_id'),
+                  title: _requiredString(expense, 'title'),
+                  vendor: Value(_nullableString(expense['vendor'])),
+                  date: _requiredString(expense, 'date'),
+                  notes: Value(_nullableString(expense['notes'])),
+                  receiptImageUri: Value(receiptUri),
+                  isRecurring: Value(_boolValue(expense['is_recurring'])),
+                  recurrenceFrequency:
+                      Value(_nullableString(expense['recurrence_frequency'])),
+                  createdAt: _requiredString(expense, 'created_at'),
+                  updatedAt: _requiredString(expense, 'updated_at'),
+                  deletedAt: Value(_nullableString(expense['deleted_at'])),
+                ),
+              );
+
+          if (receiptUri != null) {
+            await db.into(db.receipts).insert(
+                  local.ReceiptsCompanion.insert(
+                    id: 'legacy_receipt_$targetId',
+                    expenseId: targetId,
+                    uri: receiptUri,
+                    mimeType: const Value('image/jpeg'),
+                    createdAt: _requiredString(expense, 'created_at'),
+                    deletedAt: Value(_nullableString(expense['deleted_at'])),
+                  ),
+                );
+          }
+        }
+
+        for (final item in _asMaps(backup['grocery_items'])) {
+          final targetId = _requiredString(item, 'id');
+          final expenseId = _requiredString(item, 'expense_id');
+          final name = _requiredString(item, 'name');
+          final amount = _requiredDouble(item, 'amount');
+          final createdAt = _requiredString(item, 'created_at');
+
+          await db.into(db.groceryItems).insert(
+                local.GroceryItemsCompanion.insert(
+                  id: targetId,
+                  expenseId: expenseId,
+                  name: name,
+                  amount: amount,
+                  createdAt: createdAt,
+                ),
+              );
+
+          await db.into(db.expenseItems).insert(
+                local.ExpenseItemsCompanion.insert(
+                  id: targetId,
+                  expenseId: expenseId,
+                  itemId: const Value(null),
+                  nameSnapshot: name,
+                  totalPrice: amount,
+                  currency: 'PKR',
+                  createdAt: createdAt,
+                  updatedAt: createdAt,
+                ),
+              );
+        }
+
+        for (final budget in _asMaps(backup['budgets'])) {
+          await db.into(db.categoryBudgets).insert(
+                local.CategoryBudgetsCompanion.insert(
+                  id: _requiredString(budget, 'id'),
+                  categoryId: _requiredString(budget, 'category_id'),
+                  amount: _requiredDouble(budget, 'amount'),
+                  currency: _requiredString(budget, 'currency'),
+                  month: _requiredString(budget, 'month'),
+                  createdAt: _requiredString(budget, 'created_at'),
+                  updatedAt: _requiredString(budget, 'updated_at'),
+                ),
+              );
+        }
+
+        final settingsJson = backup['settings'];
+        if (settingsJson is Map) {
+          await _importSettings(settingsJson);
+        }
+
+        await db.customStatement('REINDEX;');
+        await db.customStatement('ANALYZE;');
+      } finally {
+        await db.customStatement('PRAGMA foreign_keys = ON;');
+      }
+    });
   }
 
   Future<int> _mergeGroceryItems(

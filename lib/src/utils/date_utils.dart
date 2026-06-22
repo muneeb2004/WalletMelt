@@ -1,10 +1,16 @@
 import 'package:intl/intl.dart';
 
-String monthKey(DateTime date) => DateFormat('yyyy-MM').format(date);
+final _monthKeyFormat = DateFormat('yyyy-MM');
+final _readableMonthFormat = DateFormat('MMMM yyyy');
+final Map<String, DateTime> _isoDateCache = {};
 
-String readableMonth(DateTime date) => DateFormat('MMMM yyyy').format(date);
+String monthKey(DateTime date) => _monthKeyFormat.format(date);
 
-DateTime parseIsoDate(String value) => DateTime.parse(value).toLocal();
+String readableMonth(DateTime date) => _readableMonthFormat.format(date);
+
+DateTime parseIsoDate(String value) {
+  return _isoDateCache.putIfAbsent(value, () => DateTime.parse(value).toLocal());
+}
 
 bool isSameMonth(DateTime a, DateTime b) =>
     a.year == b.year && a.month == b.month;

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
+import 'wallet_melt_json_backup_validator.dart';
 
 /// Service abstraction for picking files from the system.
 class FilePickerService {
@@ -27,6 +28,28 @@ class FilePickerService {
 
       final chunks = await file.readAsByteStream().toList();
       return utf8.decode(chunks.expand((chunk) => chunk).toList());
+    } catch (_) {
+      // Return null on failure or user cancellation.
+    }
+    return null;
+  }
+
+  /// Prompts the user to pick a backup file (either JSON or ZIP) and returns a WalletMeltBackupFile.
+  Future<WalletMeltBackupFile?> pickBackupFile() async {
+    try {
+      final result = await FilePicker.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['json', 'zip'],
+      );
+      if (result == null || result.files.isEmpty) {
+        return null;
+      }
+      final file = result.files.first;
+      final path = file.path;
+      if (path == null) {
+        return null;
+      }
+      return await WalletMeltBackupFile.fromPath(path);
     } catch (_) {
       // Return null on failure or user cancellation.
     }

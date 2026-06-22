@@ -386,6 +386,10 @@ class WalletMeltDatabase extends _$WalletMeltDatabase {
         },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON;');
+          await customStatement('CREATE INDEX IF NOT EXISTS expenses_categoryId_idx ON expenses (categoryId);');
+          await customStatement('CREATE INDEX IF NOT EXISTS expenses_date_idx ON expenses (date);');
+          await customStatement('CREATE INDEX IF NOT EXISTS expenses_deletedAt_idx ON expenses (deletedAt);');
+          await customStatement('CREATE INDEX IF NOT EXISTS grocery_items_expenseId_idx ON grocery_items (expenseId);');
         },
       );
 

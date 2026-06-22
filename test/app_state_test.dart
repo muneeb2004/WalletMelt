@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wallet_melt/src/data/local/wallet_melt_database.dart' as local;
 import 'package:wallet_melt/src/data/repositories/budget_repository.dart';
@@ -358,6 +359,7 @@ class FakeWalletMeltJsonRestoreService extends WalletMeltJsonRestoreService {
     required WalletMeltJsonRestoreOptions options,
     required ExportFileResult safetyBackup,
     local.WalletMeltDatabase? database,
+    Directory? zipExtractDir,
   }) async {
     restoreCalled = true;
     return result;
@@ -533,6 +535,7 @@ void main() {
       );
 
       await appState.refresh();
+      await appState.loadDeletedExpenses();
 
       expect(appState.expenses, [mockExpense]);
       expect(appState.deletedExpenses, [mockDeletedExpense]);
@@ -556,6 +559,7 @@ void main() {
       );
 
       await appState.refresh();
+      await appState.loadDeletedExpenses();
 
       expect(appState.expenses, [mockExpense]);
       expect(appState.deletedExpenses, [mockDeletedExpense]);
@@ -1097,6 +1101,7 @@ void main() {
       driftExpenseRepo.deleted = [mockDeletedExpense];
 
       await appState.softDeleteExpense('1');
+      await appState.loadDeletedExpenses();
 
       expect(appState.expenses, isEmpty);
       expect(appState.deletedExpenses, [mockDeletedExpense]);
@@ -1116,12 +1121,14 @@ void main() {
       );
 
       await appState.refresh();
+      await appState.loadDeletedExpenses();
       expect(appState.deletedExpenses, [mockDeletedExpense]);
 
       driftExpenseRepo.active = [mockExpense];
       driftExpenseRepo.deleted = [];
 
       await appState.restoreExpense('2');
+      await appState.loadDeletedExpenses();
 
       expect(appState.expenses, [mockExpense]);
       expect(appState.deletedExpenses, isEmpty);

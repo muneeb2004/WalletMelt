@@ -1,5 +1,5 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:path/path.dart' as p;
 import 'package:provider/provider.dart';
 
 import '../../components/glass/app_background.dart';
@@ -11,13 +11,18 @@ import '../../services/export/wallet_melt_json_backup_conflict_service.dart';
 import '../../services/export/wallet_melt_json_backup_import_validation_service.dart';
 import '../../services/export/wallet_melt_json_backup_preview_service.dart';
 import '../../services/export/wallet_melt_json_backup_service.dart';
+import '../../services/export/wallet_melt_json_backup_validator.dart';
 import '../../services/export/wallet_melt_json_restore_dry_run_planner.dart';
 import '../../services/export/wallet_melt_json_restore_service.dart';
+import '../../services/export/wallet_melt_json_restore_plan.dart';
+import 'backup_restore_dialog.dart';
+import 'restore_summary_dialog.dart';
 import '../../state/app_state.dart';
 import '../../theme/wallet_melt_theme.dart';
 import '../../types/settings.dart';
 import '../../widgets/app_snackbar.dart';
-import '../../widgets/confirm_dialog.dart';
+
+
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({
@@ -31,6 +36,7 @@ class SettingsScreen extends StatefulWidget {
     this.conflictService = const WalletMeltJsonBackupConflictService(),
     this.restoreDryRunPlanner = const WalletMeltJsonRestoreDryRunPlanner(),
     this.restoreService = const WalletMeltJsonRestoreService(),
+    this.safetyBackupDirectory,
     super.key,
   });
 
@@ -43,6 +49,7 @@ class SettingsScreen extends StatefulWidget {
   final WalletMeltJsonBackupConflictService conflictService;
   final WalletMeltJsonRestoreDryRunPlanner restoreDryRunPlanner;
   final WalletMeltJsonRestoreService restoreService;
+  final Directory? safetyBackupDirectory;
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -53,11 +60,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _isCreatingJsonBackup = false;
   bool _includeDeletedExpenses = false;
   bool _isValidatingBackup = false;
-  bool _isRestoringBackup = false;
+  bool _isRestoreInProgress = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<AppState>().loadDeletedExpenses();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    final state = context.watch<AppState>();
+    final state = context.read<AppState>();
+    final currency = context.select((AppState s) => s.settings.currency);
+    final themePreference = context.select((AppState s) => s.settings.themePreference);
+    final lastExportedAt = context.select((AppState s) => s.settings.lastExportedAt);
+    final expensesLength = context.select((AppState s) => s.expenses.length);
+    final deletedExpensesLength = context.select((AppState s) => s.deletedExpenses.length);
+
     return Scaffold(
       body: AppBackground(
         child: ListView(
@@ -67,7 +90,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const SizedBox(height: 18),
             
             // CARD 1: PREFERENCES
-            LiquidGlass(
+            WMGlassSurface.tier2(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -75,7 +98,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       style: Theme.of(context).textTheme.titleLarge),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
-                    initialValue: state.settings.currency,
+                    initialValue: currency,
                     decoration: const InputDecoration(labelText: 'Currency'),
                     dropdownColor: Theme.of(context).brightness == Brightness.dark
                         ? const Color(0xFF1E1E24)
@@ -92,7 +115,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<ThemePreference>(
-                    initialValue: state.settings.themePreference,
+                    initialValue: themePreference,
                     decoration: const InputDecoration(labelText: 'Theme'),
                     dropdownColor: Theme.of(context).brightness == Brightness.dark
                         ? const Color(0xFF1E1E24)
@@ -116,7 +139,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const SizedBox(height: 16),
             
             // CARD 2: BACKUP & DATA MANAGEMENT
-            LiquidGlass(
+            WMGlassSurface.tier2(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -199,7 +222,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
-                      onPressed: _isValidatingBackup || _isRestoringBackup
+                      onPressed: _isValidatingBackup || _isRestoreInProgress
                           ? null
                           : _validateBackupFile,
                       icon: _isValidatingBackup
@@ -221,7 +244,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   
                   const SizedBox(height: AppSpacing.md),
                   Text(
-                    _exportStatusText(state),
+                    _exportStatusText(currency, expensesLength, deletedExpensesLength, lastExportedAt),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           fontStyle: FontStyle.italic,
                         ),
@@ -232,7 +255,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const SizedBox(height: 16),
             
             // CARD 3: ABOUT & PRIVACY
-            LiquidGlass(
+            WMGlassSurface.tier2(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -290,6 +313,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() => _isExportingExpenses = true);
 
     try {
+      if (_includeDeletedExpenses) {
+        await state.loadDeletedExpenses();
+      }
       final expenses = _includeDeletedExpenses
           ? [...state.expenses, ...state.deletedExpenses]
           : state.expenses;
@@ -324,6 +350,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() => _isCreatingJsonBackup = true);
 
     try {
+      await state.loadDeletedExpenses();
       final file = await widget.jsonBackupService.createBackup(
         expenses: [...state.expenses, ...state.deletedExpenses],
         groceryItems: await state.listAllGroceryItemsForExport(),
@@ -358,70 +385,71 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _validateBackupFile() async {
+    debugPrint('_validateBackupFile CALLED');
     setState(() => _isValidatingBackup = true);
 
     try {
-      final content = await widget.filePickerService.pickJsonFileContent();
+      final backupFile = await widget.filePickerService.pickBackupFile();
       if (!mounted) return;
 
-      if (content == null) {
+      if (backupFile == null) {
         return;
       }
 
-      final result = widget.importValidationService.validateBackup(content);
+      final result = widget.importValidationService.validateBackup(backupFile.jsonText);
       if (!mounted) return;
 
       if (result.isValid) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Backup file is valid.\n'
-              'Preview found ${result.expensesCount} expenses, '
-              '${result.groceryItemsCount} items, '
-              '${result.categoriesCount} categories, and '
-              '${result.budgetsCount} budgets. No data has been imported.',
-            ),
-            backgroundColor: WalletMeltColors.positive,
-          ),
-        );
-
-        final preview = widget.previewService.generatePreview(content);
+        final preview = widget.previewService.generatePreview(backupFile.jsonText);
         if (preview.isValid) {
-          // Run read-only conflict detection against current app data.
           final state = context.read<AppState>();
+          await state.loadDeletedExpenses();
+          final groceryItems = await state.listAllGroceryItemsForExport();
+          final budgets = await state.listAllBudgetsForExport();
+          if (!mounted) return;
+
+          final snapshot = LocalAppSnapshot(
+            expenses: state.expenses,
+            deletedExpenses: state.deletedExpenses,
+            categories: state.categories,
+            budgets: budgets,
+            groceryItems: groceryItems,
+            settings: state.settings,
+          );
+
           BackupConflictSummary? conflictSummary;
           RestoreDryRunPlan? dryRunPlan;
           try {
-            final groceryItems = await state.listAllGroceryItemsForExport();
-            final budgets = await state.listAllBudgetsForExport();
-            if (!mounted) return;
-            final snapshot = LocalAppSnapshot(
-              expenses: state.expenses,
-              deletedExpenses: state.deletedExpenses,
-              categories: state.categories,
-              budgets: budgets,
-              groceryItems: groceryItems,
-              settings: state.settings,
-            );
             conflictSummary = widget.conflictService.detect(
-              jsonText: content,
+              jsonText: backupFile.jsonText,
               localSnapshot: snapshot,
             );
             dryRunPlan = widget.restoreDryRunPlanner.plan(
-              jsonText: content,
+              jsonText: backupFile.jsonText,
               localSnapshot: snapshot,
               conflictSummary: conflictSummary,
+              mode: RestoreMode.safeMerge,
             );
-          } catch (_) {
-            // Conflict detection failure is non-blocking; preview still shows.
+          } catch (e) {
+            debugPrint('Conflict/dry-run detection threw: $e');
           }
+
           if (!mounted) return;
 
-          _showBackupPreviewDialog(
-            content,
-            preview,
+          _showBackupRestoreDialog(
+            backupFile: backupFile,
+            preview: preview,
+            localSnapshot: snapshot,
             conflictSummary: conflictSummary,
             dryRunPlan: dryRunPlan,
+          );
+        } else {
+          // Fallback snackbar when preview is invalid but validation result is valid (e.g. legacy tests)
+          showSuccessSnackbar(
+            context,
+            'Backup file is valid. Preview found ${result.expensesCount} expenses, '
+            '${result.groceryItemsCount} items, ${result.categoriesCount} categories, '
+            'and ${result.budgetsCount} budgets. No data has been imported or changed.',
           );
         }
       } else {
@@ -430,8 +458,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           'Invalid backup file: '
           '${_safeRestoreErrorMessage(result.error ?? "Unknown error")}',
         );
+        debugPrint('VALIDATION RESULT INVALID: ${result.error}');
       }
-    } catch (e) {
+    } catch (e, stack) {
+      debugPrint('VALIDATION EXCEPTION: $e\n$stack');
       if (!mounted) return;
       showErrorSnackbar(
         context,
@@ -445,386 +475,60 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  void _showBackupPreviewDialog(
-    String jsonText,
-    WalletMeltBackupPreview preview, {
+  void _showBackupRestoreDialog({
+    required WalletMeltBackupFile backupFile,
+    required WalletMeltBackupPreview preview,
+    required LocalAppSnapshot localSnapshot,
     BackupConflictSummary? conflictSummary,
     RestoreDryRunPlan? dryRunPlan,
   }) {
+    debugPrint('SHOW DIALOG CALLED');
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) {
-        final isDark = Theme.of(context).brightness == Brightness.dark;
-        final sectionTitleStyle = Theme.of(context).textTheme.titleMedium;
-        final bodyStyle = Theme.of(context).textTheme.bodyMedium;
-        final canRestore = dryRunPlan != null && _canRestoreSafely(dryRunPlan);
-
-        return Dialog(
-          backgroundColor:
-              isDark ? const Color(0xFF161616) : const Color(0xFFFAFAF6),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(28),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.preview_rounded,
-                          color: WalletMeltColors.brand, size: 28),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          'Backup Preview',
-                          style: Theme.of(context).textTheme.titleLarge,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  const Divider(height: 1),
-                  const SizedBox(height: 16),
-                  Text('Metadata', style: sectionTitleStyle),
-                  const SizedBox(height: 8),
-                  _buildMetadataRow('Format', preview.format ?? 'Unknown'),
-                  _buildMetadataRow('Format Version',
-                      '${preview.formatVersion ?? "Unknown"}'),
-                  _buildMetadataRow(
-                      'App Version', preview.appVersion ?? 'Unknown'),
-                  _buildMetadataRow('Exported At',
-                      _formatExportedAt(preview.exportedAt) ?? 'Unknown'),
-                  const SizedBox(height: 16),
-                  Text('Contents', style: sectionTitleStyle),
-                  const SizedBox(height: 8),
-                  _buildContentCountRow(
-                      Icons.monetization_on_outlined,
-                      'Expenses',
-                      '${preview.expensesCount} (${preview.deletedExpensesCount} deleted)'),
-                  _buildContentCountRow(Icons.shopping_basket_outlined,
-                      'Grocery Items', '${preview.groceryItemsCount} items'),
-                  _buildContentCountRow(Icons.category_outlined, 'Categories',
-                      '${preview.categoriesCount} categories'),
-                  _buildContentCountRow(Icons.calendar_month_outlined,
-                      'Budgets', '${preview.budgetsCount} budgets'),
-                  _buildContentCountRow(
-                      Icons.settings_suggest_outlined,
-                      'Settings Configuration',
-                      preview.hasSettings ? 'Included' : 'Missing'),
-                  // Conflict check section.
-                  if (conflictSummary != null) ...[
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Icon(
-                          conflictSummary.hasAnyConflict
-                              ? Icons.rule_rounded
-                              : Icons.check_circle_outline_rounded,
-                          color: conflictSummary.hasAnyConflict
-                              ? WalletMeltColors.warning
-                              : Colors.green,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Conflict check',
-                            style: sectionTitleStyle?.copyWith(
-                              color: conflictSummary.hasAnyConflict
-                                  ? WalletMeltColors.warning
-                                  : Colors.green,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    if (!conflictSummary.hasAnyConflict)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 4),
-                        child: Text(
-                          'No conflicts detected with current local data.',
-                          style: bodyStyle?.copyWith(
-                            color: Colors.green,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ),
-                    for (final line in conflictSummary.summaryLines)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 6),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Icon(
-                              Icons.warning_amber_rounded,
-                              color: WalletMeltColors.warning,
-                              size: 16,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                line,
-                                style: bodyStyle?.copyWith(
-                                  color: WalletMeltColors.warning,
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    const SizedBox(height: 4),
-                    Text(
-                      canRestore
-                          ? 'Safe merge is available after confirmation. '
-                              'Local data will be preserved and no receipt '
-                              'files will be recovered.'
-                          : _disabledRestoreReason(dryRunPlan),
-                      style: bodyStyle?.copyWith(
-                        fontSize: 12,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withValues(alpha: 0.6),
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                  ],
-                  if (dryRunPlan != null) ...[
-                    const SizedBox(height: 16),
-                    _buildDryRunPlanSection(dryRunPlan),
-                  ],
-                  if (preview.warnings.isNotEmpty) ...[
-                    const SizedBox(height: 16),
-                    Text('Warnings',
-                        style: sectionTitleStyle?.copyWith(
-                            color: WalletMeltColors.warning)),
-                    const SizedBox(height: 8),
-                    for (final warning in preview.warnings)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 6),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Icon(Icons.warning_amber_rounded,
-                                color: WalletMeltColors.warning, size: 18),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                warning,
-                                style: bodyStyle?.copyWith(
-                                    color: WalletMeltColors.warning,
-                                    fontSize: 13),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                  ],
-                  const SizedBox(height: 20),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: WalletMeltColors.brand.withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: WalletMeltColors.brand.withValues(alpha: 0.2),
-                      ),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Icon(Icons.info_outline_rounded,
-                            color: WalletMeltColors.brandDeep, size: 20),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            'No data has been imported yet. You are looking at a read-only preview of the backup file.',
-                            style: bodyStyle?.copyWith(
-                              color: isDark
-                                  ? WalletMeltColors.brandSoft
-                                  : WalletMeltColors.brandDeep,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () => Navigator.pop(context),
-                          style: OutlinedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                          ),
-                          child: const Text('Close'),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: canRestore && !_isRestoringBackup
-                              ? () {
-                                  Navigator.pop(context);
-                                  _confirmAndRestoreBackup(
-                                    jsonText,
-                                    dryRunPlan,
-                                  );
-                                }
-                              : null,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                WalletMeltColors.brand.withValues(alpha: 0.5),
-                            disabledBackgroundColor:
-                                isDark ? Colors.white12 : Colors.black12,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                          ),
-                          child: Text(
-                            _isRestoringBackup
-                                ? 'Restoring...'
-                                : canRestore
-                                    ? 'Safe merge'
-                                    : 'Restore (N/A)',
-                            style: TextStyle(
-                              color: canRestore ? Colors.white : Colors.white24,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
+        return BackupRestoreDialog(
+          backupFile: backupFile,
+          preview: preview,
+          localSnapshot: localSnapshot,
+          initialConflictSummary: conflictSummary,
+          initialDryRunPlan: dryRunPlan,
+          jsonBackupService: widget.jsonBackupService,
+          restoreService: widget.restoreService,
+          onSuccess: (result, durationSeconds, mode, backupVersion) {
+            _showRestoreSummaryDialog(result, durationSeconds, mode, backupVersion);
+          },
+          onRestoreStarted: () {
+            setState(() => _isRestoreInProgress = true);
+          },
+          onRestoreFinished: () {
+            setState(() => _isRestoreInProgress = false);
+          },
+          safetyBackupDirectory: widget.safetyBackupDirectory,
         );
       },
     );
   }
 
-  Future<void> _confirmAndRestoreBackup(
-    String jsonText,
-    RestoreDryRunPlan dryRunPlan,
-  ) async {
-    if (_isRestoringBackup) return;
-
-    final confirmed = await showConfirmDialog(
-      context,
-      title: 'Safe merge backup?',
-      confirmLabel: 'Create safety backup and merge',
-      body:
-          'Safe merge adds only restorable backup records. Existing local data is preserved.\n\n'
-          'Duplicate IDs may be remapped, but local records and budgets will not be overwritten.\n\n'
-          'Receipt paths stay as text references only. Receipt image files are not recovered or copied.\n\n'
-          'A safety backup of current local data is created before restore. If that backup cannot be created, restore stops before any import.',
-    );
-
-    if (confirmed != true || !mounted) return;
-    if (_isRestoringBackup) return;
-
-    setState(() => _isRestoringBackup = true);
-    try {
-      final state = context.read<AppState>();
-      final safetyBackup = await widget.jsonBackupService.createBackup(
-        expenses: [...state.expenses, ...state.deletedExpenses],
-        groceryItems: await state.listAllGroceryItemsForExport(),
-        categories: state.categories,
-        budgets: await state.listAllBudgetsForExport(),
-        settings: state.settings,
-      );
-      if (!mounted) return;
-
-      final result = await state.restoreJsonBackupSafeMerge(
-        jsonText: jsonText,
-        dryRunPlan: dryRunPlan,
-        safetyBackup: safetyBackup,
-        restoreService: widget.restoreService,
-        options: const WalletMeltJsonRestoreOptions(confirmed: true),
-      );
-      if (!mounted) return;
-
-      if (result.success) {
-        _showRestoreSuccessSnackbar(context, result);
-      } else {
-        _showRestoreFailureSnackbar(context, result);
-      }
-    } catch (error) {
-      if (!mounted) return;
-      showErrorSnackbar(
-        context,
-        'Restore did not start. No data was changed. '
-        'Check that a safety backup can be created, then try again. '
-        '${_safeRestoreErrorMessage(error.toString())}',
-      );
-    } finally {
-      if (mounted) {
-        setState(() => _isRestoringBackup = false);
-      }
-    }
-  }
-
-  bool _canRestoreSafely(RestoreDryRunPlan plan) {
-    if (!plan.isValid || plan.hasBlockers) return false;
-    final requiredGates = {
-      RestoreDryRunSafetyGate.backupFormatSupported,
-      RestoreDryRunSafetyGate.formatVersionSupported,
-      RestoreDryRunSafetyGate.previewGenerated,
-      RestoreDryRunSafetyGate.conflictSummaryReviewed,
-      RestoreDryRunSafetyGate.noUnresolvedBlockers,
-    };
-    for (final gate in requiredGates) {
-      final status = plan.safetyGates.where((entry) => entry.gate == gate);
-      if (status.isEmpty || !status.first.satisfied) return false;
-    }
-    return true;
-  }
-
-  void _showRestoreSuccessSnackbar(
-      BuildContext context, WalletMeltJsonRestoreResult result) {
-    final safetyBackupName = _safetyBackupName(result.safetyBackupPath);
-    final backupText = safetyBackupName == null
-        ? 'A pre-restore safety backup was created.'
-        : 'Safety backup created: $safetyBackupName.';
-    showSuccessSnackbar(
-      context,
-      'Safe merge complete: ${result.insertedExpenses} expenses, '
-      '${result.insertedGroceryItems} items, '
-      '${result.insertedCategories} categories, and '
-      '${result.insertedBudgets} budgets imported. '
-      'Local data was preserved. $backupText '
-      'Receipt paths remain text references only.',
+  void _showRestoreSummaryDialog(
+    WalletMeltJsonRestoreResult result,
+    double durationSeconds,
+    RestoreMode mode,
+    int backupVersion,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return RestoreSummaryDialog(
+          result: result,
+          durationSeconds: durationSeconds,
+          mode: mode,
+          backupVersion: backupVersion,
+        );
+      },
     );
   }
 
-  void _showRestoreFailureSnackbar(
-      BuildContext context, WalletMeltJsonRestoreResult result) {
-    final safetyBackupName = _safetyBackupName(result.safetyBackupPath);
-    final backupText = safetyBackupName == null
-        ? 'No verified safety backup was reported.'
-        : 'Safety backup created before the failed restore: $safetyBackupName.';
-    showErrorSnackbar(
-      context,
-      'Restore failed safely. No partial import should remain because '
-      'WalletMelt rolls back the transaction. $backupText '
-      'Reason: ${_safeRestoreErrorMessage(result.errorMessage ?? "Unknown restore error.")}',
-    );
-  }
-
-  String? _safetyBackupName(String? path) {
-    if (path == null || path.trim().isEmpty) return null;
-    return p.basename(path);
-  }
 
   String _safeRestoreErrorMessage(String message) {
     final firstLine = message
@@ -845,155 +549,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return sanitized.isEmpty ? 'Unknown restore error.' : sanitized;
   }
 
-  String _disabledRestoreReason(RestoreDryRunPlan? plan) {
-    if (_isRestoringBackup) {
-      return 'Restore is already running. Wait for it to finish before selecting another backup.';
-    }
-    if (plan == null || !plan.isValid) {
-      return 'Restore is unavailable because the backup could not be fully planned. No data has been changed.';
-    }
-    if (plan.hasBlockers) {
-      return 'Restore is unavailable because blockers must be resolved first. WalletMelt will not resolve conflicts automatically.';
-    }
-    return 'Restore is unavailable until validation, preview, conflict review, confirmation, safety backup, and transaction checks are complete.';
-  }
-
-  Widget _buildDryRunPlanSection(RestoreDryRunPlan plan) {
-    final theme = Theme.of(context);
-    final sectionTitleStyle = theme.textTheme.titleMedium;
-    final bodyStyle = theme.textTheme.bodyMedium;
-    final pendingSafetyGates = plan.unsatisfiedSafetyGates
-        .map((gate) => gate.label)
-        .take(3)
-        .join(', ');
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(
-              plan.hasBlockers
-                  ? Icons.report_problem_outlined
-                  : Icons.fact_check_outlined,
-              color: plan.hasBlockers
-                  ? WalletMeltColors.warning
-                  : WalletMeltColors.positive,
-              size: 20,
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                'Dry-run restore plan',
-                style: sectionTitleStyle?.copyWith(
-                  color: plan.hasBlockers
-                      ? WalletMeltColors.warning
-                      : Colors.green,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        _buildContentCountRow(
-          Icons.category_outlined,
-          'Planned categories',
-          '${plan.plannedCounts.categories}',
-        ),
-        _buildContentCountRow(
-          Icons.monetization_on_outlined,
-          'Planned expenses',
-          '${plan.plannedCounts.expenses}',
-        ),
-        _buildContentCountRow(
-          Icons.shopping_basket_outlined,
-          'Planned grocery items',
-          '${plan.plannedCounts.groceryItems}',
-        ),
-        _buildContentCountRow(
-          Icons.calendar_month_outlined,
-          'Planned budgets',
-          '${plan.plannedCounts.budgets}',
-        ),
-        _buildContentCountRow(
-          Icons.warning_amber_outlined,
-          'Blockers / warnings',
-          '${plan.blockerCount} / ${plan.warningCount}',
-        ),
-        const SizedBox(height: 8),
-        Text(
-          pendingSafetyGates.isEmpty
-              ? _disabledRestoreReason(plan)
-              : 'Dry-run only. Pending safety checks: $pendingSafetyGates.',
-          style: bodyStyle?.copyWith(
-            fontSize: 12,
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-            fontStyle: FontStyle.italic,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMetadataRow(String label, String value) {
-    final style = Theme.of(context).textTheme.bodyMedium;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 3),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: style),
-          Text(
-            value,
-            style: style?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? WalletMeltColors.darkTextPrimary
-                    : WalletMeltColors.textPrimary),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildContentCountRow(IconData icon, String label, String value) {
-    final style = Theme.of(context).textTheme.bodyMedium;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          Icon(icon, size: 20, color: WalletMeltColors.textSecondary),
-          const SizedBox(width: 10),
-          Expanded(child: Text(label, style: style)),
-          Text(
-            value,
-            style: style?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? WalletMeltColors.darkTextPrimary
-                    : WalletMeltColors.textPrimary),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String? _formatExportedAt(String? isoString) {
-    if (isoString == null) return null;
-    final parsed = DateTime.tryParse(isoString);
-    if (parsed == null) return isoString;
-    final local = parsed.toLocal();
-    return '${local.year}-${_twoDigits(local.month)}-${_twoDigits(local.day)} '
-        '${_twoDigits(local.hour)}:${_twoDigits(local.minute)}';
-  }
-
-  String _exportStatusText(AppState state) {
-    final activeCount = state.expenses.length;
-    final deletedCount = state.deletedExpenses.length;
+  String _exportStatusText(String currency, int expensesLength, int deletedExpensesLength, String? lastExportedAt) {
+    final activeCount = expensesLength;
+    final deletedCount = deletedExpensesLength;
     final countText = _includeDeletedExpenses
         ? '$activeCount active, $deletedCount deleted'
         : '$activeCount active';
-    final lastExportedAt = state.settings.lastExportedAt;
     if (lastExportedAt == null || lastExportedAt.isEmpty) {
       return 'Ready to export $countText. Last export: never.';
     }

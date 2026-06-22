@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:path/path.dart' as p;
+import 'package:archive/archive.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wallet_melt/src/services/export/export_file_writer.dart';
 import 'package:wallet_melt/src/services/export/wallet_melt_json_backup_service.dart';
@@ -36,6 +38,7 @@ void main() {
         settings: _settings(),
         exportedAt: DateTime(2026, 6, 14, 9, 8, 7),
         directory: tempDirectory,
+        packageReceipts: false,
       );
 
       final decoded = jsonDecode(await File(result.path).readAsString())
@@ -62,6 +65,7 @@ void main() {
         settings: _settings(),
         exportedAt: DateTime(2026, 6, 14, 9, 8, 7),
         directory: tempDirectory,
+        packageReceipts: false,
       );
 
       final decoded = jsonDecode(await File(result.path).readAsString())
@@ -86,6 +90,7 @@ void main() {
         settings: _settings(),
         exportedAt: DateTime(2026, 6, 14, 9, 8, 7),
         directory: tempDirectory,
+        packageReceipts: false,
       );
 
       final decoded = jsonDecode(await File(result.path).readAsString())
@@ -101,6 +106,48 @@ void main() {
         (budgets.single as Map<String, Object?>)['id'],
         'june_budget',
       );
+    });
+
+    test('creates ZIP backup package with receipts and metadata', () async {
+      // Create a dummy receipt file to package
+      final receiptFile = File(p.join(tempDirectory.path, 'receipt_abc.jpg'));
+      await receiptFile.writeAsBytes([1, 2, 3, 4]);
+
+      const service = WalletMeltJsonBackupService(appVersion: '0.1.1+2');
+
+      final result = await service.createBackup(
+        expenses: [
+          _expense(id: 'active_rec', receiptImageUri: receiptFile.path),
+        ],
+        groceryItems: [_groceryItem()],
+        categories: [_category()],
+        budgets: [_budget()],
+        settings: _settings(),
+        exportedAt: DateTime(2026, 6, 14, 9, 8, 7),
+        directory: tempDirectory,
+        packageReceipts: true,
+      );
+
+      expect(result.fileName, 'walletmelt-backup-20260614-090807.zip');
+      expect(result.mimeType, ExportFileWriter.zipMimeType);
+
+      final fileBytes = await File(result.path).readAsBytes();
+      final archive = ZipDecoder().decodeBytes(fileBytes);
+
+      expect(archive.findFile('backup.json'), isNotNull);
+      expect(archive.findFile('metadata.json'), isNotNull);
+      expect(archive.findFile('receipts/receipt_abc.jpg'), isNotNull);
+
+      // Verify backup.json content
+      final backupJsonFile = archive.findFile('backup.json')!;
+      final decodedJson = jsonDecode(utf8.decode(backupJsonFile.content as List<int>)) as Map<String, Object?>;
+      expect(decodedJson['expenses'], isNotEmpty);
+
+      // Verify metadata.json content
+      final metadataJsonFile = archive.findFile('metadata.json')!;
+      final decodedMetadata = jsonDecode(utf8.decode(metadataJsonFile.content as List<int>)) as Map<String, Object?>;
+      expect(decodedMetadata['backupVersion'], 1);
+      expect((decodedMetadata['recordCounts'] as Map)['receipts'], 1);
     });
   });
 }
@@ -120,6 +167,7 @@ Category _category() {
 Expense _expense({
   String id = 'expense_1',
   String? deletedAt,
+  String? receiptImageUri,
 }) {
   return Expense(
     id: id,
@@ -132,6 +180,7 @@ Expense _expense({
     createdAt: '2026-06-14T10:00:00.000',
     updatedAt: '2026-06-14T10:00:00.000',
     deletedAt: deletedAt,
+    receiptImageUri: receiptImageUri,
   );
 }
 

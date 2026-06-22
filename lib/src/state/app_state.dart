@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 
 import '../data/db/app_database.dart';
@@ -11,7 +12,9 @@ import '../data/repositories/expense_repository.dart';
 import '../services/receipt_storage/receipt_storage_service.dart';
 import '../services/export/export_file_writer.dart';
 import '../services/export/wallet_melt_json_restore_dry_run_planner.dart';
+import '../services/export/wallet_melt_json_restore_plan.dart';
 import '../services/export/wallet_melt_json_restore_service.dart';
+
 import '../services/settings/settings_service.dart';
 import '../types/budget.dart';
 import '../types/category.dart' as wm;
@@ -66,19 +69,63 @@ class AppState extends ChangeNotifier {
 
   WalletMeltSettings settings = WalletMeltSettings.defaults;
   List<wm.Category> categories = const [];
-  List<Expense> expenses = const [];
-  List<Expense> deletedExpenses = const [];
+  List<Expense> _expenses = const [];
+  List<Expense> get expenses => _expenses;
+  set expenses(List<Expense> value) {
+    _expenses = value;
+    _updateCurrentMonthExpenses();
+  }
+  List<Expense> _deletedExpenses = const [];
+  bool _deletedExpensesLoaded = false;
+  List<Expense> get deletedExpenses => _deletedExpenses;
+
+  set deletedExpenses(List<Expense> value) {
+    _deletedExpenses = value;
+    _deletedExpensesLoaded = true;
+  }
+
+  Future<List<Expense>> loadDeletedExpenses() async {
+    if (!_deletedExpensesLoaded) {
+      _deletedExpenses = await _listDeletedExpenses();
+      _deletedExpensesLoaded = true;
+      notifyListeners();
+    }
+    return _deletedExpenses;
+  }
   List<CategoryBudget> currentBudgets = const [];
-  DateTime selectedMonth = DateTime(DateTime.now().year, DateTime.now().month);
+  DateTime _selectedMonth = DateTime(DateTime.now().year, DateTime.now().month);
+  DateTime get selectedMonth => _selectedMonth;
+  set selectedMonth(DateTime value) {
+    _selectedMonth = value;
+    _updateCurrentMonthExpenses();
+  }
   bool isLoading = true;
   String? errorMessage;
 
   double? _cachedTotalSpent;
   MonthlyInsights? _cachedInsights;
 
+  List<Expense> _currentMonthExpenses = const [];
+  List<Expense> get currentMonthExpenses => _currentMonthExpenses;
+
+  Map<String, wm.Category>? _categoryMap;
+
   void _clearCache() {
     _cachedTotalSpent = null;
     _cachedInsights = null;
+    _categoryMap = null;
+    _currentMonthExpenses = const [];
+  }
+
+  void _updateCurrentMonthExpenses() {
+    _currentMonthExpenses = expenses.where((e) {
+      if (e.deletedAt != null) return false;
+      try {
+        return isSameMonth(parseIsoDate(e.date), selectedMonth);
+      } catch (_) {
+        return false;
+      }
+    }).toList();
   }
 
   String get currentMonthKey => monthKey(selectedMonth);
@@ -115,10 +162,17 @@ class AppState extends ChangeNotifier {
 
   Future<void> refresh() async {
     _clearCache();
+    if (_deletedExpensesLoaded) {
+      _deletedExpenses = await _listDeletedExpenses();
+      _deletedExpensesLoaded = true;
+    } else {
+      _deletedExpensesLoaded = false;
+      _deletedExpenses = const [];
+    }
     categories = await _listCategories();
     expenses = await _listActiveExpenses();
-    deletedExpenses = await _listDeletedExpenses();
     currentBudgets = await _listBudgetsForMonth(currentMonthKey);
+    _updateCurrentMonthExpenses();
     notifyListeners();
   }
 
@@ -168,19 +222,8 @@ class AppState extends ChangeNotifier {
 
   double getCurrentMonthTotalSpent() {
     if (_cachedTotalSpent != null) return _cachedTotalSpent!;
-    var total = 0.0;
-    for (final expense in expenses) {
-      if (expense.deletedAt == null) {
-        try {
-          final date = parseIsoDate(expense.date);
-          if (isSameMonth(date, selectedMonth)) {
-            total += expense.amount;
-          }
-        } catch (_) {}
-      }
-    }
-    _cachedTotalSpent = total;
-    return total;
+    _cachedTotalSpent = _currentMonthExpenses.fold<double>(0, (sum, e) => sum + e.amount);
+    return _cachedTotalSpent!;
   }
 
   double? getCurrentMonthBudgetRemaining() {
@@ -211,6 +254,45 @@ class AppState extends ChangeNotifier {
     await refresh();
   }
 
+  Future<WalletMeltJsonRestoreResult> restoreJsonBackup({
+    required String jsonText,
+    required RestoreDryRunPlan dryRunPlan,
+    required ExportFileResult safetyBackup,
+    required WalletMeltJsonRestoreService restoreService,
+    required WalletMeltJsonRestoreOptions options,
+    Directory? zipExtractDir,
+  }) async {
+    if (_driftDatabase == null && _requiresDriftRestoreRuntime) {
+      return WalletMeltJsonRestoreResult.failure(
+        'Restore requires an available Drift database runtime.',
+      );
+    }
+    final WalletMeltJsonRestoreResult result;
+    if (options.mode == RestoreMode.fullReplace) {
+      result = await restoreService.restoreFullReplace(
+        jsonText: jsonText,
+        dryRunPlan: dryRunPlan,
+        options: options,
+        safetyBackup: safetyBackup,
+        database: _driftDatabase,
+        zipExtractDir: zipExtractDir,
+      );
+    } else {
+      result = await restoreService.restoreSafeMerge(
+        jsonText: jsonText,
+        dryRunPlan: dryRunPlan,
+        options: options,
+        safetyBackup: safetyBackup,
+        database: _driftDatabase,
+        zipExtractDir: zipExtractDir,
+      );
+    }
+    if (result.success) {
+      await refresh();
+    }
+    return result;
+  }
+
   Future<WalletMeltJsonRestoreResult> restoreJsonBackupSafeMerge({
     required String jsonText,
     required RestoreDryRunPlan dryRunPlan,
@@ -219,23 +301,15 @@ class AppState extends ChangeNotifier {
     WalletMeltJsonRestoreOptions options =
         const WalletMeltJsonRestoreOptions(confirmed: true),
   }) async {
-    if (_driftDatabase == null && _requiresDriftRestoreRuntime) {
-      return WalletMeltJsonRestoreResult.failure(
-        'Safe merge restore requires an available Drift database runtime.',
-      );
-    }
-    final result = await restoreService.restoreSafeMerge(
+    return restoreJsonBackup(
       jsonText: jsonText,
       dryRunPlan: dryRunPlan,
-      options: options,
       safetyBackup: safetyBackup,
-      database: _driftDatabase,
+      restoreService: restoreService,
+      options: options,
     );
-    if (result.success) {
-      await refresh();
-    }
-    return result;
   }
+
 
   Future<wm.Category> addCategory(
       {required String name,
@@ -360,6 +434,7 @@ class AppState extends ChangeNotifier {
     _clearCache();
     selectedMonth = DateTime(selectedMonth.year, selectedMonth.month - 1);
     currentBudgets = await _listBudgetsForMonth(currentMonthKey);
+    _updateCurrentMonthExpenses();
     notifyListeners();
   }
 
@@ -367,14 +442,13 @@ class AppState extends ChangeNotifier {
     _clearCache();
     selectedMonth = DateTime(selectedMonth.year, selectedMonth.month + 1);
     currentBudgets = await _listBudgetsForMonth(currentMonthKey);
+    _updateCurrentMonthExpenses();
     notifyListeners();
   }
 
   wm.Category? categoryById(String id) {
-    for (final category in categories) {
-      if (category.id == id) return category;
-    }
-    return null;
+    _categoryMap ??= {for (final c in categories) c.id: c};
+    return _categoryMap![id];
   }
 
   Future<void> _initializeDriftReadRepositories() async {

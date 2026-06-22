@@ -198,6 +198,7 @@ class WalletMeltJsonRestoreDryRunPlanner {
     BackupConflictSummary? conflictSummary,
     bool previewGenerated = true,
     bool settingsImportSelected = false,
+    RestoreMode mode = RestoreMode.safeMerge,
   }) {
     final validation = _validator.validate(jsonText);
     if (!validation.isValid) {
@@ -222,6 +223,7 @@ class WalletMeltJsonRestoreDryRunPlanner {
     final builder = _DryRunBuilder(
       localSnapshot: localSnapshot,
       settingsImportSelected: settingsImportSelected,
+      mode: mode,
     );
 
     builder.detectBackupDuplicates(
@@ -248,21 +250,38 @@ class WalletMeltJsonRestoreDryRunPlanner {
       if (conflictSummary != null)
         RestoreSafetyCheck.conflictDetectionCompleted,
     };
-    final restorePlan = RestorePlan.safeMerge(
-      entitySelection: RestoreEntitySelection.backupData.copyWith(
-        settings: settingsImportSelected,
-      ),
-      completedSafetyChecks: completedSafetyChecks,
-      issues: [
-        for (final issue in issues)
-          RestorePlanIssue(
-            severity: issue.isBlocker
-                ? RestorePlanIssueSeverity.blocker
-                : RestorePlanIssueSeverity.warning,
-            message: issue.message,
-          ),
-      ],
-    );
+    
+    final restorePlan = mode == RestoreMode.fullReplace
+        ? RestorePlan.fullReplace(
+            entitySelection: RestoreEntitySelection.backupData.copyWith(
+              settings: settingsImportSelected,
+            ),
+            completedSafetyChecks: completedSafetyChecks,
+            issues: [
+              for (final issue in issues)
+                RestorePlanIssue(
+                  severity: issue.isBlocker
+                      ? RestorePlanIssueSeverity.blocker
+                      : RestorePlanIssueSeverity.warning,
+                  message: issue.message,
+                ),
+            ],
+          )
+        : RestorePlan.safeMerge(
+            entitySelection: RestoreEntitySelection.backupData.copyWith(
+              settings: settingsImportSelected,
+            ),
+            completedSafetyChecks: completedSafetyChecks,
+            issues: [
+              for (final issue in issues)
+                RestorePlanIssue(
+                  severity: issue.isBlocker
+                      ? RestorePlanIssueSeverity.blocker
+                      : RestorePlanIssueSeverity.warning,
+                  message: issue.message,
+                ),
+            ],
+          );
 
     return RestoreDryRunPlan(
       isValid: true,
@@ -302,7 +321,7 @@ class WalletMeltJsonRestoreDryRunPlanner {
         RestoreDryRunSafetyGateStatus(
           gate: RestoreDryRunSafetyGate.conflictSummaryReviewed,
           label: 'Conflict summary reviewed',
-          satisfied: conflictSummary != null,
+          satisfied: conflictSummary != null || mode == RestoreMode.fullReplace,
         ),
         const RestoreDryRunSafetyGateStatus(
           gate: RestoreDryRunSafetyGate.explicitConfirmationRequiredLater,
@@ -343,10 +362,13 @@ class _DryRunBuilder {
   _DryRunBuilder({
     required this.localSnapshot,
     required this.settingsImportSelected,
+    required this.mode,
   });
 
   final LocalAppSnapshot localSnapshot;
   final bool settingsImportSelected;
+  final RestoreMode mode;
+
 
   final List<RestoreDryRunAction> actions = [];
   final List<RestoreDryRunIdMapping> idMappings = [];
@@ -394,6 +416,25 @@ class _DryRunBuilder {
           id,
           'Category is missing required id or name.',
         );
+        continue;
+      }
+
+      if (mode == RestoreMode.fullReplace) {
+        _mapId(
+          RestoreDryRunEntity.category,
+          id,
+          id,
+          'Category ID is available in replace mode.',
+          true,
+        );
+        actions.add(RestoreDryRunAction(
+          entity: RestoreDryRunEntity.category,
+          type: RestoreDryRunActionType.insert,
+          sourceId: id,
+          plannedId: id,
+          description: 'Insert category "$name".',
+        ));
+        plannedCategoryCount++;
         continue;
       }
 
@@ -500,6 +541,7 @@ class _DryRunBuilder {
     }
   }
 
+
   void planExpenses(List<Map<String, Object?>> expenses) {
     final localExpenseIds =
         localSnapshot.allExpenses.map((expense) => expense.id).toSet();
@@ -523,12 +565,32 @@ class _DryRunBuilder {
           ? null
           : _categoryIdMap[categoryId] ??
               (localCategoryIds.contains(categoryId) ? categoryId : null);
-      if (resolvedCategoryId == null) {
+      if (resolvedCategoryId == null && mode != RestoreMode.fullReplace) {
         _addBlocker(
           RestoreDryRunEntity.expense,
           id,
           'Expense "$id" references category "$categoryId" that cannot be resolved.',
         );
+        continue;
+      }
+
+      if (mode == RestoreMode.fullReplace) {
+        _expenseIdMap[id] = id;
+        _mapId(
+          RestoreDryRunEntity.expense,
+          id,
+          id,
+          'Expense ID is available in replace mode.',
+          true,
+        );
+        actions.add(RestoreDryRunAction(
+          entity: RestoreDryRunEntity.expense,
+          type: RestoreDryRunActionType.insert,
+          sourceId: id,
+          plannedId: id,
+          description: 'Insert expense "$id" with category "$resolvedCategoryId".',
+        ));
+        plannedExpenseCount++;
         continue;
       }
 
@@ -600,6 +662,25 @@ class _DryRunBuilder {
         continue;
       }
 
+      if (mode == RestoreMode.fullReplace) {
+        _mapId(
+          RestoreDryRunEntity.groceryItem,
+          id,
+          id,
+          'Grocery item ID is available in replace mode.',
+          true,
+        );
+        actions.add(RestoreDryRunAction(
+          entity: RestoreDryRunEntity.groceryItem,
+          type: RestoreDryRunActionType.insert,
+          sourceId: id,
+          plannedId: id,
+          description: 'Insert grocery item "$id" for expense "$expenseId".',
+        ));
+        plannedGroceryItemCount++;
+        continue;
+      }
+
       final resolvedExpenseId = _expenseIdMap[expenseId] ??
           (localExpenseIds.contains(expenseId) ? expenseId : null);
       if (resolvedExpenseId == null) {
@@ -661,6 +742,25 @@ class _DryRunBuilder {
         continue;
       }
 
+      if (mode == RestoreMode.fullReplace) {
+        _mapId(
+          RestoreDryRunEntity.budget,
+          id,
+          id,
+          'Budget ID is available in replace mode.',
+          true,
+        );
+        actions.add(RestoreDryRunAction(
+          entity: RestoreDryRunEntity.budget,
+          type: RestoreDryRunActionType.insert,
+          sourceId: id,
+          plannedId: id,
+          description: 'Insert budget "$id" for "$month" and category "$categoryId".',
+        ));
+        plannedBudgetCount++;
+        continue;
+      }
+
       final resolvedCategoryId = _categoryIdMap[categoryId] ??
           (localCategoryIds.contains(categoryId) ? categoryId : null);
       if (resolvedCategoryId == null) {
@@ -711,6 +811,7 @@ class _DryRunBuilder {
       plannedBudgetCount++;
     }
   }
+
 
   void planSettings(Object? settings) {
     if (settings is! Map) {

@@ -53,57 +53,62 @@ MonthlyInsights buildMonthlyInsights({
   required List<CategoryBudget> budgets,
   required DateTime month,
 }) {
-  final current = expenses
-      .where((expense) => isSameMonth(parseIsoDate(expense.date), month))
-      .toList();
   final previousMonth = DateTime(month.year, month.month - 1);
-  final previous = expenses
-      .where(
-          (expense) => isSameMonth(parseIsoDate(expense.date), previousMonth))
-      .toList();
-  final total = current.fold<double>(0, (sum, expense) => sum + expense.amount);
+  final categoryTotals = <String, double>{};
+  double currentTotal = 0;
+  double previousTotal = 0;
+  double groceryTotal = 0;
+  const utilitiesIds = {'electricity', 'gas', 'internet', 'water', 'maintenance'};
+  double utilitiesTotal = 0;
+  final currentExpenses = <Expense>[];
+  bool hasPreviousMonth = false;
+
+  for (final expense in expenses) {
+    DateTime date;
+    try {
+      date = parseIsoDate(expense.date);
+    } catch (_) {
+      continue;
+    }
+    if (isSameMonth(date, month)) {
+      currentExpenses.add(expense);
+      currentTotal += expense.amount;
+      categoryTotals[expense.categoryId] =
+          (categoryTotals[expense.categoryId] ?? 0) + expense.amount;
+      if (expense.categoryId == 'grocery') groceryTotal += expense.amount;
+      if (utilitiesIds.contains(expense.categoryId)) {
+        utilitiesTotal += expense.amount;
+      }
+    } else if (isSameMonth(date, previousMonth)) {
+      previousTotal += expense.amount;
+      hasPreviousMonth = true;
+    }
+  }
+
   final budgetByCategory = {
     for (final budget in budgets) budget.categoryId: budget
   };
 
   final categorySpend = categories
       .map((category) {
-        final categoryTotal = current
-            .where((expense) => expense.categoryId == category.id)
-            .fold<double>(0, (sum, expense) => sum + expense.amount);
+        final total = categoryTotals[category.id] ?? 0;
         return CategorySpend(
           category: category,
-          total: categoryTotal,
-          percentOfTotal: total == 0 ? 0 : categoryTotal / total,
+          total: total,
+          percentOfTotal: currentTotal == 0 ? 0 : total / currentTotal,
           budget: budgetByCategory[category.id],
         );
       })
       .where((spend) => spend.total > 0 || spend.budget != null)
       .sorted((a, b) => b.total.compareTo(a.total));
 
-  final groceryTotal = current
-      .where((expense) => expense.categoryId == 'grocery')
-      .fold<double>(0, (sum, expense) => sum + expense.amount);
-  final utilitiesIds = {
-    'electricity',
-    'gas',
-    'internet',
-    'water',
-    'maintenance'
-  };
-  final utilitiesTotal = current
-      .where((expense) => utilitiesIds.contains(expense.categoryId))
-      .fold<double>(0, (sum, expense) => sum + expense.amount);
-
   return MonthlyInsights(
-    total: total,
+    total: currentTotal,
     categorySpend: categorySpend,
-    recentExpenses: current.take(5).toList(),
+    recentExpenses: currentExpenses.take(5).toList(),
     groceryTotal: groceryTotal,
     utilitiesTotal: utilitiesTotal,
-    previousMonthTotal: previous.isEmpty
-        ? null
-        : previous.fold<double>(0, (sum, expense) => sum + expense.amount),
+    previousMonthTotal: hasPreviousMonth ? previousTotal : null,
   );
 }
 

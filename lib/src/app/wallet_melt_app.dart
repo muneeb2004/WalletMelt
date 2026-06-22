@@ -7,6 +7,7 @@ import '../screens/add_expense/add_expense_screen.dart';
 import '../screens/dashboard/dashboard_screen.dart';
 import '../screens/history/expense_detail_screen.dart';
 import '../screens/history/history_screen.dart';
+import '../screens/history/receipt_viewer_screen.dart';
 import '../screens/insights/insights_screen.dart';
 import '../screens/onboarding/onboarding_screen.dart';
 import '../screens/settings/settings_screen.dart';
@@ -97,6 +98,11 @@ class _WalletMeltAppState extends State<WalletMeltApp> {
           path: '/expense/:id',
           builder: (context, state) =>
               ExpenseDetailScreen(expenseId: state.pathParameters['id']!),
+        ),
+        GoRoute(
+          path: '/receipt/:id',
+          builder: (context, state) =>
+              ReceiptViewerScreen(expenseId: state.pathParameters['id']!),
         ),
         GoRoute(
           path: '/expense/:id/edit',

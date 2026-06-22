@@ -25,18 +25,22 @@ class BudgetScreen extends StatefulWidget {
 class _BudgetScreenState extends State<BudgetScreen> {
   @override
   Widget build(BuildContext context) {
-    final state = context.watch<AppState>();
+    final state = context.read<AppState>();
+    final selectedMonth = context.select((AppState s) => s.selectedMonth);
+    final monthlyBudget = context.select((AppState s) => s.getMonthlyBudgetAmount());
+    final totalSpent = context.select((AppState s) => s.getCurrentMonthTotalSpent());
+    final currency = context.select((AppState s) => s.settings.currency);
+    final currentBudgets = context.select((AppState s) => s.currentBudgets);
+
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final now = DateTime.now();
 
     // Check if the navigated month is the current calendar month
-    final isCurrentMonth = state.selectedMonth.year == now.year &&
-        state.selectedMonth.month == now.month;
+    final isCurrentMonth = selectedMonth.year == now.year &&
+        selectedMonth.month == now.month;
 
-    final monthlyBudget = state.getMonthlyBudgetAmount();
-    final totalSpent = state.getCurrentMonthTotalSpent();
     final remaining = monthlyBudget != null ? monthlyBudget - totalSpent : null;
-    final daysLeft = _getDaysLeftInMonth(state.selectedMonth);
+    final daysLeft = _getDaysLeftInMonth(selectedMonth);
 
     // Calculate ratio
     final ratio = monthlyBudget != null && monthlyBudget > 0
@@ -72,7 +76,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                   icon: const Icon(Icons.chevron_left_rounded),
                 ),
                 Text(
-                  readableMonth(state.selectedMonth),
+                  readableMonth(selectedMonth),
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 IconButton(
@@ -91,6 +95,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
               _buildActiveHeroCard(
                 context,
                 state,
+                selectedMonth,
                 monthlyBudget,
                 totalSpent,
                 remaining!,
@@ -98,12 +103,13 @@ class _BudgetScreenState extends State<BudgetScreen> {
                 ratio,
                 budgetColor,
                 isDark,
+                currency,
               ),
 
             const SizedBox(height: AppSpacing.lg),
 
             // SECTION 2: CATEGORY BUDGETS (SECONDARY)
-            _buildCategoryBudgetsSection(context, state),
+            _buildCategoryBudgetsSection(context, state, selectedMonth, currentBudgets, currency),
             const SizedBox(height: 84), // Bottom padding for navigation shell
           ],
         ),
@@ -124,6 +130,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
   Widget _buildActiveHeroCard(
     BuildContext context,
     AppState state,
+    DateTime selectedMonth,
     double monthlyBudget,
     double totalSpent,
     double remaining,
@@ -131,10 +138,11 @@ class _BudgetScreenState extends State<BudgetScreen> {
     double ratio,
     Color budgetColor,
     bool isDark,
+    String currency,
   ) {
     final isOverBudget = remaining < 0;
 
-    return LiquidGlass(
+    return WMGlassSurface.tier2(
       padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -143,7 +151,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                readableMonth(state.selectedMonth),
+                readableMonth(selectedMonth),
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               PopupMenuButton<String>(
@@ -200,7 +208,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                     ),
               ),
               Text(
-                '${formatMoney(totalSpent, state.settings.currency)} of ${formatMoney(monthlyBudget, state.settings.currency)}',
+                '${formatMoney(totalSpent, currency)} of ${formatMoney(monthlyBudget, currency)}',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ],
@@ -224,7 +232,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
               Expanded(
                 child: StatTile(
                   label: 'Spent',
-                  value: formatMoney(totalSpent, state.settings.currency),
+                  value: formatMoney(totalSpent, currency),
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
@@ -232,8 +240,8 @@ class _BudgetScreenState extends State<BudgetScreen> {
                 child: StatTile(
                   label: isOverBudget ? 'Over by' : 'Remaining',
                   value: isOverBudget
-                      ? formatMoney(-remaining, state.settings.currency)
-                      : formatMoney(remaining, state.settings.currency),
+                      ? formatMoney(-remaining, currency)
+                      : formatMoney(remaining, currency),
                   valueColor: isOverBudget ? WalletMeltColors.danger : null,
                 ),
               ),
@@ -251,9 +259,13 @@ class _BudgetScreenState extends State<BudgetScreen> {
     );
   }
 
-  // _buildStatTile replaced by shared StatTile widget from lib/src/widgets/stat_tile.dart
-
-  Widget _buildCategoryBudgetsSection(BuildContext context, AppState state) {
+  Widget _buildCategoryBudgetsSection(
+    BuildContext context,
+    AppState state,
+    DateTime selectedMonth,
+    List<CategoryBudget> currentBudgets,
+    String currency,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -267,32 +279,59 @@ class _BudgetScreenState extends State<BudgetScreen> {
           ),
         ),
         const SizedBox(height: AppSpacing.sm + 2),
-        if (state.currentBudgets.isEmpty)
+        if (currentBudgets.isEmpty)
           const EmptyState(
             icon: Icons.pie_chart_outline_rounded,
             title: 'No category budgets set',
             subtitle: 'Add a budget for a specific spending category.',
           )
-        else
-          Column(
-            children: [
-              for (final budget in state.currentBudgets)
-                _buildCategoryBudgetRow(context, state, budget),
-            ],
-          ),
+        else ...[
+          // Pre-aggregate spent amounts in O(E) to avoid nested O(B * E) lookup loops
+          () {
+            final expenses = context.select((AppState s) => s.expenses);
+            final categorySpentMap = <String, double>{};
+            for (final exp in expenses) {
+              if (exp.deletedAt == null) {
+                try {
+                  final date = parseIsoDate(exp.date);
+                  if (isSameMonth(date, selectedMonth)) {
+                    categorySpentMap[exp.categoryId] =
+                        (categorySpentMap[exp.categoryId] ?? 0) + exp.amount;
+                  }
+                } catch (_) {}
+              }
+            }
+            return Column(
+              children: [
+                for (final budget in currentBudgets)
+                  _buildCategoryBudgetRow(
+                    context: context,
+                    state: state,
+                    budget: budget,
+                    spent: categorySpentMap[budget.categoryId] ?? 0.0,
+                    currency: currency,
+                  ),
+              ],
+            );
+          }(),
+        ],
       ],
     );
   }
 
-  Widget _buildCategoryBudgetRow(
-      BuildContext context, AppState state, CategoryBudget budget) {
+  Widget _buildCategoryBudgetRow({
+    required BuildContext context,
+    required AppState state,
+    required CategoryBudget budget,
+    required double spent,
+    required String currency,
+  }) {
     final category = state.categoryById(budget.categoryId);
     final categoryName = category?.name ?? 'Unknown';
     final categoryColor = category != null
         ? colorFromHex(category.color)
         : WalletMeltColors.brand;
 
-    final spent = _getCategorySpent(budget.categoryId, state);
     final remaining = budget.amount - spent;
     final isOverBudget = remaining < 0;
 
@@ -301,7 +340,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      child: LiquidGlass(
+      child: WMGlassSurface.tier1(
         onTap: () => _showCategoryBudgetSheet(context, state, budget),
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -327,12 +366,12 @@ class _BudgetScreenState extends State<BudgetScreen> {
                 ),
                 Text(
                   isOverBudget
-                      ? 'Over by ${formatMoney(-remaining, state.settings.currency)}'
-                      : '${formatMoney(remaining, state.settings.currency)} left',
+                      ? 'Over by ${formatMoney(-remaining, currency)}'
+                      : '${formatMoney(remaining, currency)} left',
                   style: Theme.of(context).textTheme.labelLarge?.copyWith(
                         color: isOverBudget ? WalletMeltColors.danger : null,
                         fontSize: 12,
-                      ),
+                       ),
                 ),
               ],
             ),
@@ -341,11 +380,11 @@ class _BudgetScreenState extends State<BudgetScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Spent: ${formatMoney(spent, state.settings.currency)}',
+                  'Spent: ${formatMoney(spent, currency)}',
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 Text(
-                  'Limit: ${formatMoney(budget.amount, state.settings.currency)}',
+                  'Limit: ${formatMoney(budget.amount, currency)}',
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
               ],
@@ -356,21 +395,6 @@ class _BudgetScreenState extends State<BudgetScreen> {
         ),
       ),
     );
-  }
-
-  double _getCategorySpent(String categoryId, AppState state) {
-    var spent = 0.0;
-    for (final exp in state.expenses) {
-      if (exp.deletedAt == null && exp.categoryId == categoryId) {
-        try {
-          final date = parseIsoDate(exp.date);
-          if (isSameMonth(date, state.selectedMonth)) {
-            spent += exp.amount;
-          }
-        } catch (_) {}
-      }
-    }
-    return spent;
   }
 
   // _getBudgetColor removed — use top-level budgetProgressColor() from wallet_melt_theme.dart
@@ -399,6 +423,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
       context: context,
       isScrollControlled: true,
       useRootNavigator: true,
+      constraints: const BoxConstraints(maxWidth: 600),
       builder: (context) {
         return SingleChildScrollView(
           child: Padding(
@@ -508,6 +533,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
       context: context,
       isScrollControlled: true,
       useRootNavigator: true,
+      constraints: const BoxConstraints(maxWidth: 600),
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setSheetState) {

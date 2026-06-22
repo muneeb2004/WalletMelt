@@ -13,6 +13,7 @@ import 'package:wallet_melt/src/services/export/expense_csv_export_service.dart'
 import 'package:wallet_melt/src/services/export/export_file_writer.dart';
 import 'package:wallet_melt/src/services/export/export_share_service.dart';
 import 'package:wallet_melt/src/services/export/file_picker_service.dart';
+import 'package:wallet_melt/src/services/export/wallet_melt_json_backup_validator.dart';
 import 'package:wallet_melt/src/services/export/wallet_melt_json_backup_conflict_service.dart';
 import 'package:wallet_melt/src/services/export/wallet_melt_json_backup_import_validation_service.dart';
 import 'package:wallet_melt/src/services/export/wallet_melt_json_backup_preview_service.dart';
@@ -312,7 +313,8 @@ void main() {
       );
       await tester.pumpAndSettle();
       await tester.tap(find.text('Validate backup file'));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
 
       expect(find.text('Backup Preview'), findsOneWidget);
       expect(find.text('Format Version'), findsOneWidget);
@@ -1031,7 +1033,9 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Create safety backup and merge'));
       await tester.pump();
-      await tester.pump(const Duration(seconds: 1));
+      for (int i = 0; i < 20; i++) {
+        await tester.pump(const Duration(milliseconds: 50));
+      }
 
       expect(restoreService.restoreCalled, isTrue);
       expect(restoreService.lastOptions?.confirmed, isTrue);
@@ -1099,7 +1103,9 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Create safety backup and merge'));
       await tester.pump();
-      await tester.pump(const Duration(seconds: 1));
+      for (int i = 0; i < 20; i++) {
+        await tester.pump(const Duration(milliseconds: 50));
+      }
 
       expect(restoreService.restoreCalled, isTrue);
       expect(find.textContaining('Restore failed safely'), findsOneWidget);
@@ -1157,7 +1163,9 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Create safety backup and merge'));
       await tester.pump();
-      await tester.pump(const Duration(seconds: 1));
+      for (int i = 0; i < 20; i++) {
+        await tester.pump(const Duration(milliseconds: 50));
+      }
 
       expect(restoreService.restoreCalled, isTrue);
       expect(find.textContaining('Restore failed safely'), findsOneWidget);
@@ -1208,7 +1216,9 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Create safety backup and merge'));
       await tester.pump();
-      await tester.pump(const Duration(seconds: 1));
+      for (int i = 0; i < 20; i++) {
+        await tester.pump(const Duration(milliseconds: 50));
+      }
 
       expect(find.textContaining('Restore did not start'), findsOneWidget);
       expect(find.textContaining('No data was changed'), findsOneWidget);
@@ -1266,6 +1276,9 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Create safety backup and merge'));
       await tester.pump();
+      for (int i = 0; i < 20; i++) {
+        await tester.pump(const Duration(milliseconds: 50));
+      }
 
       final validateButton =
           find.widgetWithText(OutlinedButton, 'Validate backup file');
@@ -1310,6 +1323,7 @@ Widget _settingsHarness({
         conflictService: conflictService,
         restoreDryRunPlanner: dryRunPlanner,
         restoreService: restoreService,
+        safetyBackupDirectory: Directory.systemTemp,
       ),
     ),
   );
@@ -1476,6 +1490,7 @@ class FakeWalletMeltJsonBackupService extends WalletMeltJsonBackupService {
     required WalletMeltSettings settings,
     DateTime? exportedAt,
     Directory? directory,
+    bool packageReceipts = true,
   }) async {
     backupCalled = true;
     lastExpenses = expenses.toList();
@@ -1504,6 +1519,7 @@ class FailingWalletMeltJsonBackupService
     required WalletMeltSettings settings,
     DateTime? exportedAt,
     Directory? directory,
+    bool packageReceipts = true,
   }) async {
     throw Exception('disk full\n#0 FakeStack');
   }
@@ -1536,11 +1552,24 @@ class FakeExportShareService implements ExportShareService {
 class FakeFilePickerService extends Fake implements FilePickerService {
   String? resultText;
   bool pickCalled = false;
+  bool isZip = false;
+  List<int>? zipBytes;
 
   @override
   Future<String?> pickJsonFileContent() async {
     pickCalled = true;
     return resultText;
+  }
+
+  @override
+  Future<WalletMeltBackupFile?> pickBackupFile() async {
+    pickCalled = true;
+    if (resultText == null) return null;
+    return WalletMeltBackupFile(
+      jsonText: resultText!,
+      zipBytes: zipBytes,
+      isZip: isZip,
+    );
   }
 }
 
@@ -1618,6 +1647,7 @@ class FakeWalletMeltJsonRestoreDryRunPlanner extends Fake
     BackupConflictSummary? conflictSummary,
     bool previewGenerated = true,
     bool settingsImportSelected = false,
+    RestoreMode mode = RestoreMode.safeMerge,
   }) {
     if (onPlan != null) {
       return onPlan!(jsonText, localSnapshot);
@@ -1641,6 +1671,24 @@ class FakeWalletMeltJsonRestoreService extends WalletMeltJsonRestoreService {
     required WalletMeltJsonRestoreOptions options,
     required ExportFileResult safetyBackup,
     local.WalletMeltDatabase? database,
+    Directory? zipExtractDir,
+  }) async {
+    restoreCalled = true;
+    lastOptions = options;
+    lastSafetyBackup = safetyBackup;
+    final pending = pendingResult;
+    if (pending != null) return pending;
+    return result;
+  }
+
+  @override
+  Future<WalletMeltJsonRestoreResult> restoreFullReplace({
+    required String jsonText,
+    required RestoreDryRunPlan dryRunPlan,
+    required WalletMeltJsonRestoreOptions options,
+    required ExportFileResult safetyBackup,
+    local.WalletMeltDatabase? database,
+    Directory? zipExtractDir,
   }) async {
     restoreCalled = true;
     lastOptions = options;
@@ -1650,6 +1698,7 @@ class FakeWalletMeltJsonRestoreService extends WalletMeltJsonRestoreService {
     return result;
   }
 }
+
 
 RestoreDryRunPlan _dryRunPlan({
   int blockers = 0,

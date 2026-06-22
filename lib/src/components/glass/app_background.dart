@@ -50,9 +50,14 @@ class AppBackground extends StatelessWidget {
           Positioned.fill(
             child: SafeArea(
               bottom: false,
-              child: Padding(
-                padding: padding,
-                child: child,
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 600),
+                  child: Padding(
+                    padding: padding,
+                    child: child,
+                  ),
+                ),
               ),
             ),
           ),
@@ -74,71 +79,27 @@ class BackgroundOrbsPainter extends CustomPainter {
     final paint = Paint()..style = PaintingStyle.fill;
 
     if (isDark) {
-      // 1. Top-Right: Deep Indigo/Violet Glow
-      final center1 = Offset(size.width * 0.85, size.height * 0.2);
-      final radius1 = size.width * 0.6;
+      // Single top-right soft indigo glow
+      final center = Offset(size.width * 0.8, size.height * 0.25);
+      final radius = size.width * 0.8;
       paint.shader = RadialGradient(
         colors: [
-          const Color(0xFF6366F1).withValues(alpha: 0.16),
+          const Color(0xFF6366F1).withValues(alpha: 0.12),
           const Color(0xFF6366F1).withValues(alpha: 0.0),
         ],
-      ).createShader(Rect.fromCircle(center: center1, radius: radius1));
-      canvas.drawCircle(center1, radius1, paint);
-
-      // 2. Bottom-Left: Amber Glow
-      final center2 = Offset(size.width * 0.1, size.height * 0.75);
-      final radius2 = size.width * 0.65;
-      paint.shader = RadialGradient(
-        colors: [
-          const Color(0xFFF59E0B).withValues(alpha: 0.10),
-          const Color(0xFFF59E0B).withValues(alpha: 0.0),
-        ],
-      ).createShader(Rect.fromCircle(center: center2, radius: radius2));
-      canvas.drawCircle(center2, radius2, paint);
-
-      // 3. Center-Right: Emerald Glow
-      final center3 = Offset(size.width * 0.9, size.height * 0.55);
-      final radius3 = size.width * 0.45;
-      paint.shader = RadialGradient(
-        colors: [
-          const Color(0xFF10B981).withValues(alpha: 0.08),
-          const Color(0xFF10B981).withValues(alpha: 0.0),
-        ],
-      ).createShader(Rect.fromCircle(center: center3, radius: radius3));
-      canvas.drawCircle(center3, radius3, paint);
+      ).createShader(Rect.fromCircle(center: center, radius: radius));
+      canvas.drawCircle(center, radius, paint);
     } else {
-      // 1. Top-Right: Pastel Gold Glow
-      final center1 = Offset(size.width * 0.8, size.height * 0.15);
-      final radius1 = size.width * 0.65;
+      // Single top-right soft gold glow
+      final center = Offset(size.width * 0.8, size.height * 0.2);
+      final radius = size.width * 0.8;
       paint.shader = RadialGradient(
         colors: [
-          const Color(0xFFFCD34D).withValues(alpha: 0.26),
+          const Color(0xFFFCD34D).withValues(alpha: 0.18),
           const Color(0xFFFCD34D).withValues(alpha: 0.0),
         ],
-      ).createShader(Rect.fromCircle(center: center1, radius: radius1));
-      canvas.drawCircle(center1, radius1, paint);
-
-      // 2. Bottom-Left: Soft Mint/Emerald Glow
-      final center2 = Offset(size.width * 0.15, size.height * 0.75);
-      final radius2 = size.width * 0.7;
-      paint.shader = RadialGradient(
-        colors: [
-          const Color(0xFFA7F3D0).withValues(alpha: 0.22),
-          const Color(0xFFA7F3D0).withValues(alpha: 0.0),
-        ],
-      ).createShader(Rect.fromCircle(center: center2, radius: radius2));
-      canvas.drawCircle(center2, radius2, paint);
-
-      // 3. Center-Right: Light Sky Blue Glow
-      final center3 = Offset(size.width * 0.85, size.height * 0.5);
-      final radius3 = size.width * 0.5;
-      paint.shader = RadialGradient(
-        colors: [
-          const Color(0xFFBAE6FD).withValues(alpha: 0.16),
-          const Color(0xFFBAE6FD).withValues(alpha: 0.0),
-        ],
-      ).createShader(Rect.fromCircle(center: center3, radius: radius3));
-      canvas.drawCircle(center3, radius3, paint);
+      ).createShader(Rect.fromCircle(center: center, radius: radius));
+      canvas.drawCircle(center, radius, paint);
     }
   }
 
