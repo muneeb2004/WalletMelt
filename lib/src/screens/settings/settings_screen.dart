@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../components/glass/app_background.dart';
@@ -133,6 +134,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       if (value != null) state.updateTheme(value);
                     },
                   ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // CARD: SUBSCRIPTIONS
+            WMGlassSurface.tier2(
+              onTap: () => context.push('/subscriptions'),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Subscriptions',
+                            style: Theme.of(context).textTheme.titleLarge),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Manage recurring services, utilities, gym memberships, and rent templates.',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 13),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.chevron_right_rounded, color: WalletMeltColors.brand),
                 ],
               ),
             ),

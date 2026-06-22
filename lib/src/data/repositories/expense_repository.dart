@@ -15,6 +15,8 @@ class ExpenseDraft {
     this.notes,
     this.receiptImageUri,
     this.groceryItems = const [],
+    this.subtotalAmount,
+    this.taxAmount,
   });
 
   final double amount;
@@ -26,6 +28,8 @@ class ExpenseDraft {
   final String? notes;
   final String? receiptImageUri;
   final List<GroceryItemDraft> groceryItems;
+  final double? subtotalAmount;
+  final double? taxAmount;
 }
 
 class GroceryItemDraft {
@@ -95,6 +99,8 @@ class ExpenseRepository {
       isRecurring: false,
       createdAt: now,
       updatedAt: now,
+      subtotalAmount: draft.subtotalAmount,
+      taxAmount: draft.taxAmount,
     );
 
     await _db.transaction((txn) async {

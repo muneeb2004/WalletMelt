@@ -63,8 +63,28 @@ class ExpenseDetailScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(formatMoney(expense.amount, expense.currency),
-                      style: Theme.of(context).textTheme.displaySmall),
+                  if (expense.taxAmount != null && expense.taxAmount! > 0) ...[
+                    Text(formatMoney(expense.amount, expense.currency),
+                        style: Theme.of(context).textTheme.displaySmall),
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      'Subtotal: ${formatMoney(expense.subtotalAmount ?? (expense.amount - expense.taxAmount!), expense.currency)}',
+                      style: const TextStyle(fontSize: 13, color: WalletMeltColors.textSecondary),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Tax: ${formatMoney(expense.taxAmount!, expense.currency)}',
+                      style: const TextStyle(fontSize: 13, color: WalletMeltColors.danger),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Grand Total: ${formatMoney(expense.amount, expense.currency)}',
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: WalletMeltColors.brandDeep),
+                    ),
+                  ] else ...[
+                    Text(formatMoney(expense.amount, expense.currency),
+                        style: Theme.of(context).textTheme.displaySmall),
+                  ],
                   const SizedBox(height: AppSpacing.sm),
                   Text(
                       '${category?.name ?? 'Unknown category'} • ${readableMonth(parseIsoDate(expense.date))}',

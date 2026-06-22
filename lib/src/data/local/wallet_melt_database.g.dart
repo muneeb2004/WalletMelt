@@ -895,6 +895,18 @@ class $ExpensesTable extends Expenses with TableInfo<$ExpensesTable, Expense> {
   late final GeneratedColumn<String> deletedAt = GeneratedColumn<String>(
       'deletedAt', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _subtotalAmountMeta =
+      const VerificationMeta('subtotalAmount');
+  @override
+  late final GeneratedColumn<double> subtotalAmount = GeneratedColumn<double>(
+      'subtotalAmount', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _taxAmountMeta =
+      const VerificationMeta('taxAmount');
+  @override
+  late final GeneratedColumn<double> taxAmount = GeneratedColumn<double>(
+      'taxAmount', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -913,7 +925,9 @@ class $ExpensesTable extends Expenses with TableInfo<$ExpensesTable, Expense> {
         itemTotalMismatchApproved,
         createdAt,
         updatedAt,
-        deletedAt
+        deletedAt,
+        subtotalAmount,
+        taxAmount
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1021,6 +1035,16 @@ class $ExpensesTable extends Expenses with TableInfo<$ExpensesTable, Expense> {
       context.handle(_deletedAtMeta,
           deletedAt.isAcceptableOrUnknown(data['deletedAt']!, _deletedAtMeta));
     }
+    if (data.containsKey('subtotalAmount')) {
+      context.handle(
+          _subtotalAmountMeta,
+          subtotalAmount.isAcceptableOrUnknown(
+              data['subtotalAmount']!, _subtotalAmountMeta));
+    }
+    if (data.containsKey('taxAmount')) {
+      context.handle(_taxAmountMeta,
+          taxAmount.isAcceptableOrUnknown(data['taxAmount']!, _taxAmountMeta));
+    }
     return context;
   }
 
@@ -1065,6 +1089,10 @@ class $ExpensesTable extends Expenses with TableInfo<$ExpensesTable, Expense> {
           .read(DriftSqlType.string, data['${effectivePrefix}updatedAt'])!,
       deletedAt: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}deletedAt']),
+      subtotalAmount: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}subtotalAmount']),
+      taxAmount: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}taxAmount']),
     );
   }
 
@@ -1092,6 +1120,8 @@ class Expense extends DataClass implements Insertable<Expense> {
   final String createdAt;
   final String updatedAt;
   final String? deletedAt;
+  final double? subtotalAmount;
+  final double? taxAmount;
   const Expense(
       {required this.id,
       required this.amount,
@@ -1109,7 +1139,9 @@ class Expense extends DataClass implements Insertable<Expense> {
       required this.itemTotalMismatchApproved,
       required this.createdAt,
       required this.updatedAt,
-      this.deletedAt});
+      this.deletedAt,
+      this.subtotalAmount,
+      this.taxAmount});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1145,6 +1177,12 @@ class Expense extends DataClass implements Insertable<Expense> {
     if (!nullToAbsent || deletedAt != null) {
       map['deletedAt'] = Variable<String>(deletedAt);
     }
+    if (!nullToAbsent || subtotalAmount != null) {
+      map['subtotalAmount'] = Variable<double>(subtotalAmount);
+    }
+    if (!nullToAbsent || taxAmount != null) {
+      map['taxAmount'] = Variable<double>(taxAmount);
+    }
     return map;
   }
 
@@ -1179,6 +1217,12 @@ class Expense extends DataClass implements Insertable<Expense> {
       deletedAt: deletedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(deletedAt),
+      subtotalAmount: subtotalAmount == null && nullToAbsent
+          ? const Value.absent()
+          : Value(subtotalAmount),
+      taxAmount: taxAmount == null && nullToAbsent
+          ? const Value.absent()
+          : Value(taxAmount),
     );
   }
 
@@ -1206,6 +1250,8 @@ class Expense extends DataClass implements Insertable<Expense> {
       createdAt: serializer.fromJson<String>(json['createdAt']),
       updatedAt: serializer.fromJson<String>(json['updatedAt']),
       deletedAt: serializer.fromJson<String?>(json['deletedAt']),
+      subtotalAmount: serializer.fromJson<double?>(json['subtotalAmount']),
+      taxAmount: serializer.fromJson<double?>(json['taxAmount']),
     );
   }
   @override
@@ -1230,6 +1276,8 @@ class Expense extends DataClass implements Insertable<Expense> {
       'createdAt': serializer.toJson<String>(createdAt),
       'updatedAt': serializer.toJson<String>(updatedAt),
       'deletedAt': serializer.toJson<String?>(deletedAt),
+      'subtotalAmount': serializer.toJson<double?>(subtotalAmount),
+      'taxAmount': serializer.toJson<double?>(taxAmount),
     };
   }
 
@@ -1250,7 +1298,9 @@ class Expense extends DataClass implements Insertable<Expense> {
           bool? itemTotalMismatchApproved,
           String? createdAt,
           String? updatedAt,
-          Value<String?> deletedAt = const Value.absent()}) =>
+          Value<String?> deletedAt = const Value.absent(),
+          Value<double?> subtotalAmount = const Value.absent(),
+          Value<double?> taxAmount = const Value.absent()}) =>
       Expense(
         id: id ?? this.id,
         amount: amount ?? this.amount,
@@ -1276,6 +1326,9 @@ class Expense extends DataClass implements Insertable<Expense> {
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
         deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+        subtotalAmount:
+            subtotalAmount.present ? subtotalAmount.value : this.subtotalAmount,
+        taxAmount: taxAmount.present ? taxAmount.value : this.taxAmount,
       );
   Expense copyWithCompanion(ExpensesCompanion data) {
     return Expense(
@@ -1306,6 +1359,10 @@ class Expense extends DataClass implements Insertable<Expense> {
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      subtotalAmount: data.subtotalAmount.present
+          ? data.subtotalAmount.value
+          : this.subtotalAmount,
+      taxAmount: data.taxAmount.present ? data.taxAmount.value : this.taxAmount,
     );
   }
 
@@ -1328,7 +1385,9 @@ class Expense extends DataClass implements Insertable<Expense> {
           ..write('itemTotalMismatchApproved: $itemTotalMismatchApproved, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
-          ..write('deletedAt: $deletedAt')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('subtotalAmount: $subtotalAmount, ')
+          ..write('taxAmount: $taxAmount')
           ..write(')'))
         .toString();
   }
@@ -1351,7 +1410,9 @@ class Expense extends DataClass implements Insertable<Expense> {
       itemTotalMismatchApproved,
       createdAt,
       updatedAt,
-      deletedAt);
+      deletedAt,
+      subtotalAmount,
+      taxAmount);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1372,7 +1433,9 @@ class Expense extends DataClass implements Insertable<Expense> {
           other.itemTotalMismatchApproved == this.itemTotalMismatchApproved &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
-          other.deletedAt == this.deletedAt);
+          other.deletedAt == this.deletedAt &&
+          other.subtotalAmount == this.subtotalAmount &&
+          other.taxAmount == this.taxAmount);
 }
 
 class ExpensesCompanion extends UpdateCompanion<Expense> {
@@ -1393,6 +1456,8 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
   final Value<String> createdAt;
   final Value<String> updatedAt;
   final Value<String?> deletedAt;
+  final Value<double?> subtotalAmount;
+  final Value<double?> taxAmount;
   final Value<int> rowid;
   const ExpensesCompanion({
     this.id = const Value.absent(),
@@ -1412,6 +1477,8 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
+    this.subtotalAmount = const Value.absent(),
+    this.taxAmount = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ExpensesCompanion.insert({
@@ -1432,6 +1499,8 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
     required String createdAt,
     required String updatedAt,
     this.deletedAt = const Value.absent(),
+    this.subtotalAmount = const Value.absent(),
+    this.taxAmount = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         amount = Value(amount),
@@ -1459,6 +1528,8 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
     Expression<String>? createdAt,
     Expression<String>? updatedAt,
     Expression<String>? deletedAt,
+    Expression<double>? subtotalAmount,
+    Expression<double>? taxAmount,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1481,6 +1552,8 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
       if (createdAt != null) 'createdAt': createdAt,
       if (updatedAt != null) 'updatedAt': updatedAt,
       if (deletedAt != null) 'deletedAt': deletedAt,
+      if (subtotalAmount != null) 'subtotalAmount': subtotalAmount,
+      if (taxAmount != null) 'taxAmount': taxAmount,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1503,6 +1576,8 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
       Value<String>? createdAt,
       Value<String>? updatedAt,
       Value<String?>? deletedAt,
+      Value<double?>? subtotalAmount,
+      Value<double?>? taxAmount,
       Value<int>? rowid}) {
     return ExpensesCompanion(
       id: id ?? this.id,
@@ -1523,6 +1598,8 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
+      subtotalAmount: subtotalAmount ?? this.subtotalAmount,
+      taxAmount: taxAmount ?? this.taxAmount,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1582,6 +1659,12 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
     if (deletedAt.present) {
       map['deletedAt'] = Variable<String>(deletedAt.value);
     }
+    if (subtotalAmount.present) {
+      map['subtotalAmount'] = Variable<double>(subtotalAmount.value);
+    }
+    if (taxAmount.present) {
+      map['taxAmount'] = Variable<double>(taxAmount.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1608,6 +1691,8 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
+          ..write('subtotalAmount: $subtotalAmount, ')
+          ..write('taxAmount: $taxAmount, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -6825,6 +6910,821 @@ class GroceryTemplatesCompanion extends UpdateCompanion<GroceryTemplate> {
   }
 }
 
+class $SubscriptionsTable extends Subscriptions
+    with TableInfo<$SubscriptionsTable, Subscription> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SubscriptionsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _categoryIdMeta =
+      const VerificationMeta('categoryId');
+  @override
+  late final GeneratedColumn<String> categoryId = GeneratedColumn<String>(
+      'categoryId', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('REFERENCES categories (id)'));
+  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
+  @override
+  late final GeneratedColumn<double> amount = GeneratedColumn<double>(
+      'amount', aliasedName, false,
+      type: DriftSqlType.double, requiredDuringInsert: true);
+  static const VerificationMeta _taxAmountMeta =
+      const VerificationMeta('taxAmount');
+  @override
+  late final GeneratedColumn<double> taxAmount = GeneratedColumn<double>(
+      'taxAmount', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _currencyMeta =
+      const VerificationMeta('currency');
+  @override
+  late final GeneratedColumn<String> currency = GeneratedColumn<String>(
+      'currency', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _descriptionMeta =
+      const VerificationMeta('description');
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+      'description', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _startDateMeta =
+      const VerificationMeta('startDate');
+  @override
+  late final GeneratedColumn<String> startDate = GeneratedColumn<String>(
+      'startDate', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _nextOccurrenceDateMeta =
+      const VerificationMeta('nextOccurrenceDate');
+  @override
+  late final GeneratedColumn<String> nextOccurrenceDate =
+      GeneratedColumn<String>('nextOccurrenceDate', aliasedName, false,
+          type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _billingCycleMeta =
+      const VerificationMeta('billingCycle');
+  @override
+  late final GeneratedColumn<String> billingCycle = GeneratedColumn<String>(
+      'billingCycle', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+      'status', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+      'createdAt', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<String> updatedAt = GeneratedColumn<String>(
+      'updatedAt', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _cancelledAtMeta =
+      const VerificationMeta('cancelledAt');
+  @override
+  late final GeneratedColumn<String> cancelledAt = GeneratedColumn<String>(
+      'cancelledAt', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _notificationOffsetMeta =
+      const VerificationMeta('notificationOffset');
+  @override
+  late final GeneratedColumn<int> notificationOffset = GeneratedColumn<int>(
+      'notificationOffset', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _deletedAtMeta =
+      const VerificationMeta('deletedAt');
+  @override
+  late final GeneratedColumn<String> deletedAt = GeneratedColumn<String>(
+      'deletedAt', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _versionMeta =
+      const VerificationMeta('version');
+  @override
+  late final GeneratedColumn<int> version = GeneratedColumn<int>(
+      'version', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(1));
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        name,
+        categoryId,
+        amount,
+        taxAmount,
+        currency,
+        description,
+        startDate,
+        nextOccurrenceDate,
+        billingCycle,
+        status,
+        createdAt,
+        updatedAt,
+        cancelledAt,
+        notificationOffset,
+        deletedAt,
+        version
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'subscriptions';
+  @override
+  VerificationContext validateIntegrity(Insertable<Subscription> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('categoryId')) {
+      context.handle(
+          _categoryIdMeta,
+          categoryId.isAcceptableOrUnknown(
+              data['categoryId']!, _categoryIdMeta));
+    } else if (isInserting) {
+      context.missing(_categoryIdMeta);
+    }
+    if (data.containsKey('amount')) {
+      context.handle(_amountMeta,
+          amount.isAcceptableOrUnknown(data['amount']!, _amountMeta));
+    } else if (isInserting) {
+      context.missing(_amountMeta);
+    }
+    if (data.containsKey('taxAmount')) {
+      context.handle(_taxAmountMeta,
+          taxAmount.isAcceptableOrUnknown(data['taxAmount']!, _taxAmountMeta));
+    }
+    if (data.containsKey('currency')) {
+      context.handle(_currencyMeta,
+          currency.isAcceptableOrUnknown(data['currency']!, _currencyMeta));
+    } else if (isInserting) {
+      context.missing(_currencyMeta);
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+          _descriptionMeta,
+          description.isAcceptableOrUnknown(
+              data['description']!, _descriptionMeta));
+    }
+    if (data.containsKey('startDate')) {
+      context.handle(_startDateMeta,
+          startDate.isAcceptableOrUnknown(data['startDate']!, _startDateMeta));
+    } else if (isInserting) {
+      context.missing(_startDateMeta);
+    }
+    if (data.containsKey('nextOccurrenceDate')) {
+      context.handle(
+          _nextOccurrenceDateMeta,
+          nextOccurrenceDate.isAcceptableOrUnknown(
+              data['nextOccurrenceDate']!, _nextOccurrenceDateMeta));
+    } else if (isInserting) {
+      context.missing(_nextOccurrenceDateMeta);
+    }
+    if (data.containsKey('billingCycle')) {
+      context.handle(
+          _billingCycleMeta,
+          billingCycle.isAcceptableOrUnknown(
+              data['billingCycle']!, _billingCycleMeta));
+    } else if (isInserting) {
+      context.missing(_billingCycleMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(_statusMeta,
+          status.isAcceptableOrUnknown(data['status']!, _statusMeta));
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('createdAt')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['createdAt']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updatedAt')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updatedAt']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('cancelledAt')) {
+      context.handle(
+          _cancelledAtMeta,
+          cancelledAt.isAcceptableOrUnknown(
+              data['cancelledAt']!, _cancelledAtMeta));
+    }
+    if (data.containsKey('notificationOffset')) {
+      context.handle(
+          _notificationOffsetMeta,
+          notificationOffset.isAcceptableOrUnknown(
+              data['notificationOffset']!, _notificationOffsetMeta));
+    }
+    if (data.containsKey('deletedAt')) {
+      context.handle(_deletedAtMeta,
+          deletedAt.isAcceptableOrUnknown(data['deletedAt']!, _deletedAtMeta));
+    }
+    if (data.containsKey('version')) {
+      context.handle(_versionMeta,
+          version.isAcceptableOrUnknown(data['version']!, _versionMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Subscription map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Subscription(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      categoryId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}categoryId'])!,
+      amount: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}amount'])!,
+      taxAmount: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}taxAmount']),
+      currency: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}currency'])!,
+      description: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}description']),
+      startDate: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}startDate'])!,
+      nextOccurrenceDate: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}nextOccurrenceDate'])!,
+      billingCycle: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}billingCycle'])!,
+      status: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}status'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}createdAt'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}updatedAt'])!,
+      cancelledAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}cancelledAt']),
+      notificationOffset: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}notificationOffset']),
+      deletedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}deletedAt']),
+      version: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}version'])!,
+    );
+  }
+
+  @override
+  $SubscriptionsTable createAlias(String alias) {
+    return $SubscriptionsTable(attachedDatabase, alias);
+  }
+}
+
+class Subscription extends DataClass implements Insertable<Subscription> {
+  final String id;
+  final String name;
+  final String categoryId;
+  final double amount;
+  final double? taxAmount;
+  final String currency;
+  final String? description;
+  final String startDate;
+  final String nextOccurrenceDate;
+  final String billingCycle;
+  final String status;
+  final String createdAt;
+  final String updatedAt;
+  final String? cancelledAt;
+  final int? notificationOffset;
+  final String? deletedAt;
+  final int version;
+  const Subscription(
+      {required this.id,
+      required this.name,
+      required this.categoryId,
+      required this.amount,
+      this.taxAmount,
+      required this.currency,
+      this.description,
+      required this.startDate,
+      required this.nextOccurrenceDate,
+      required this.billingCycle,
+      required this.status,
+      required this.createdAt,
+      required this.updatedAt,
+      this.cancelledAt,
+      this.notificationOffset,
+      this.deletedAt,
+      required this.version});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    map['categoryId'] = Variable<String>(categoryId);
+    map['amount'] = Variable<double>(amount);
+    if (!nullToAbsent || taxAmount != null) {
+      map['taxAmount'] = Variable<double>(taxAmount);
+    }
+    map['currency'] = Variable<String>(currency);
+    if (!nullToAbsent || description != null) {
+      map['description'] = Variable<String>(description);
+    }
+    map['startDate'] = Variable<String>(startDate);
+    map['nextOccurrenceDate'] = Variable<String>(nextOccurrenceDate);
+    map['billingCycle'] = Variable<String>(billingCycle);
+    map['status'] = Variable<String>(status);
+    map['createdAt'] = Variable<String>(createdAt);
+    map['updatedAt'] = Variable<String>(updatedAt);
+    if (!nullToAbsent || cancelledAt != null) {
+      map['cancelledAt'] = Variable<String>(cancelledAt);
+    }
+    if (!nullToAbsent || notificationOffset != null) {
+      map['notificationOffset'] = Variable<int>(notificationOffset);
+    }
+    if (!nullToAbsent || deletedAt != null) {
+      map['deletedAt'] = Variable<String>(deletedAt);
+    }
+    map['version'] = Variable<int>(version);
+    return map;
+  }
+
+  SubscriptionsCompanion toCompanion(bool nullToAbsent) {
+    return SubscriptionsCompanion(
+      id: Value(id),
+      name: Value(name),
+      categoryId: Value(categoryId),
+      amount: Value(amount),
+      taxAmount: taxAmount == null && nullToAbsent
+          ? const Value.absent()
+          : Value(taxAmount),
+      currency: Value(currency),
+      description: description == null && nullToAbsent
+          ? const Value.absent()
+          : Value(description),
+      startDate: Value(startDate),
+      nextOccurrenceDate: Value(nextOccurrenceDate),
+      billingCycle: Value(billingCycle),
+      status: Value(status),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      cancelledAt: cancelledAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(cancelledAt),
+      notificationOffset: notificationOffset == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notificationOffset),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      version: Value(version),
+    );
+  }
+
+  factory Subscription.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Subscription(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      categoryId: serializer.fromJson<String>(json['categoryId']),
+      amount: serializer.fromJson<double>(json['amount']),
+      taxAmount: serializer.fromJson<double?>(json['taxAmount']),
+      currency: serializer.fromJson<String>(json['currency']),
+      description: serializer.fromJson<String?>(json['description']),
+      startDate: serializer.fromJson<String>(json['startDate']),
+      nextOccurrenceDate:
+          serializer.fromJson<String>(json['nextOccurrenceDate']),
+      billingCycle: serializer.fromJson<String>(json['billingCycle']),
+      status: serializer.fromJson<String>(json['status']),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+      updatedAt: serializer.fromJson<String>(json['updatedAt']),
+      cancelledAt: serializer.fromJson<String?>(json['cancelledAt']),
+      notificationOffset: serializer.fromJson<int?>(json['notificationOffset']),
+      deletedAt: serializer.fromJson<String?>(json['deletedAt']),
+      version: serializer.fromJson<int>(json['version']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'categoryId': serializer.toJson<String>(categoryId),
+      'amount': serializer.toJson<double>(amount),
+      'taxAmount': serializer.toJson<double?>(taxAmount),
+      'currency': serializer.toJson<String>(currency),
+      'description': serializer.toJson<String?>(description),
+      'startDate': serializer.toJson<String>(startDate),
+      'nextOccurrenceDate': serializer.toJson<String>(nextOccurrenceDate),
+      'billingCycle': serializer.toJson<String>(billingCycle),
+      'status': serializer.toJson<String>(status),
+      'createdAt': serializer.toJson<String>(createdAt),
+      'updatedAt': serializer.toJson<String>(updatedAt),
+      'cancelledAt': serializer.toJson<String?>(cancelledAt),
+      'notificationOffset': serializer.toJson<int?>(notificationOffset),
+      'deletedAt': serializer.toJson<String?>(deletedAt),
+      'version': serializer.toJson<int>(version),
+    };
+  }
+
+  Subscription copyWith(
+          {String? id,
+          String? name,
+          String? categoryId,
+          double? amount,
+          Value<double?> taxAmount = const Value.absent(),
+          String? currency,
+          Value<String?> description = const Value.absent(),
+          String? startDate,
+          String? nextOccurrenceDate,
+          String? billingCycle,
+          String? status,
+          String? createdAt,
+          String? updatedAt,
+          Value<String?> cancelledAt = const Value.absent(),
+          Value<int?> notificationOffset = const Value.absent(),
+          Value<String?> deletedAt = const Value.absent(),
+          int? version}) =>
+      Subscription(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        categoryId: categoryId ?? this.categoryId,
+        amount: amount ?? this.amount,
+        taxAmount: taxAmount.present ? taxAmount.value : this.taxAmount,
+        currency: currency ?? this.currency,
+        description: description.present ? description.value : this.description,
+        startDate: startDate ?? this.startDate,
+        nextOccurrenceDate: nextOccurrenceDate ?? this.nextOccurrenceDate,
+        billingCycle: billingCycle ?? this.billingCycle,
+        status: status ?? this.status,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        cancelledAt: cancelledAt.present ? cancelledAt.value : this.cancelledAt,
+        notificationOffset: notificationOffset.present
+            ? notificationOffset.value
+            : this.notificationOffset,
+        deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+        version: version ?? this.version,
+      );
+  Subscription copyWithCompanion(SubscriptionsCompanion data) {
+    return Subscription(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      categoryId:
+          data.categoryId.present ? data.categoryId.value : this.categoryId,
+      amount: data.amount.present ? data.amount.value : this.amount,
+      taxAmount: data.taxAmount.present ? data.taxAmount.value : this.taxAmount,
+      currency: data.currency.present ? data.currency.value : this.currency,
+      description:
+          data.description.present ? data.description.value : this.description,
+      startDate: data.startDate.present ? data.startDate.value : this.startDate,
+      nextOccurrenceDate: data.nextOccurrenceDate.present
+          ? data.nextOccurrenceDate.value
+          : this.nextOccurrenceDate,
+      billingCycle: data.billingCycle.present
+          ? data.billingCycle.value
+          : this.billingCycle,
+      status: data.status.present ? data.status.value : this.status,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      cancelledAt:
+          data.cancelledAt.present ? data.cancelledAt.value : this.cancelledAt,
+      notificationOffset: data.notificationOffset.present
+          ? data.notificationOffset.value
+          : this.notificationOffset,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      version: data.version.present ? data.version.value : this.version,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Subscription(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('categoryId: $categoryId, ')
+          ..write('amount: $amount, ')
+          ..write('taxAmount: $taxAmount, ')
+          ..write('currency: $currency, ')
+          ..write('description: $description, ')
+          ..write('startDate: $startDate, ')
+          ..write('nextOccurrenceDate: $nextOccurrenceDate, ')
+          ..write('billingCycle: $billingCycle, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('cancelledAt: $cancelledAt, ')
+          ..write('notificationOffset: $notificationOffset, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('version: $version')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id,
+      name,
+      categoryId,
+      amount,
+      taxAmount,
+      currency,
+      description,
+      startDate,
+      nextOccurrenceDate,
+      billingCycle,
+      status,
+      createdAt,
+      updatedAt,
+      cancelledAt,
+      notificationOffset,
+      deletedAt,
+      version);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Subscription &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.categoryId == this.categoryId &&
+          other.amount == this.amount &&
+          other.taxAmount == this.taxAmount &&
+          other.currency == this.currency &&
+          other.description == this.description &&
+          other.startDate == this.startDate &&
+          other.nextOccurrenceDate == this.nextOccurrenceDate &&
+          other.billingCycle == this.billingCycle &&
+          other.status == this.status &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.cancelledAt == this.cancelledAt &&
+          other.notificationOffset == this.notificationOffset &&
+          other.deletedAt == this.deletedAt &&
+          other.version == this.version);
+}
+
+class SubscriptionsCompanion extends UpdateCompanion<Subscription> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<String> categoryId;
+  final Value<double> amount;
+  final Value<double?> taxAmount;
+  final Value<String> currency;
+  final Value<String?> description;
+  final Value<String> startDate;
+  final Value<String> nextOccurrenceDate;
+  final Value<String> billingCycle;
+  final Value<String> status;
+  final Value<String> createdAt;
+  final Value<String> updatedAt;
+  final Value<String?> cancelledAt;
+  final Value<int?> notificationOffset;
+  final Value<String?> deletedAt;
+  final Value<int> version;
+  final Value<int> rowid;
+  const SubscriptionsCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.categoryId = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.taxAmount = const Value.absent(),
+    this.currency = const Value.absent(),
+    this.description = const Value.absent(),
+    this.startDate = const Value.absent(),
+    this.nextOccurrenceDate = const Value.absent(),
+    this.billingCycle = const Value.absent(),
+    this.status = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.cancelledAt = const Value.absent(),
+    this.notificationOffset = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.version = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SubscriptionsCompanion.insert({
+    required String id,
+    required String name,
+    required String categoryId,
+    required double amount,
+    this.taxAmount = const Value.absent(),
+    required String currency,
+    this.description = const Value.absent(),
+    required String startDate,
+    required String nextOccurrenceDate,
+    required String billingCycle,
+    required String status,
+    required String createdAt,
+    required String updatedAt,
+    this.cancelledAt = const Value.absent(),
+    this.notificationOffset = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.version = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        name = Value(name),
+        categoryId = Value(categoryId),
+        amount = Value(amount),
+        currency = Value(currency),
+        startDate = Value(startDate),
+        nextOccurrenceDate = Value(nextOccurrenceDate),
+        billingCycle = Value(billingCycle),
+        status = Value(status),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt);
+  static Insertable<Subscription> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<String>? categoryId,
+    Expression<double>? amount,
+    Expression<double>? taxAmount,
+    Expression<String>? currency,
+    Expression<String>? description,
+    Expression<String>? startDate,
+    Expression<String>? nextOccurrenceDate,
+    Expression<String>? billingCycle,
+    Expression<String>? status,
+    Expression<String>? createdAt,
+    Expression<String>? updatedAt,
+    Expression<String>? cancelledAt,
+    Expression<int>? notificationOffset,
+    Expression<String>? deletedAt,
+    Expression<int>? version,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (categoryId != null) 'categoryId': categoryId,
+      if (amount != null) 'amount': amount,
+      if (taxAmount != null) 'taxAmount': taxAmount,
+      if (currency != null) 'currency': currency,
+      if (description != null) 'description': description,
+      if (startDate != null) 'startDate': startDate,
+      if (nextOccurrenceDate != null) 'nextOccurrenceDate': nextOccurrenceDate,
+      if (billingCycle != null) 'billingCycle': billingCycle,
+      if (status != null) 'status': status,
+      if (createdAt != null) 'createdAt': createdAt,
+      if (updatedAt != null) 'updatedAt': updatedAt,
+      if (cancelledAt != null) 'cancelledAt': cancelledAt,
+      if (notificationOffset != null) 'notificationOffset': notificationOffset,
+      if (deletedAt != null) 'deletedAt': deletedAt,
+      if (version != null) 'version': version,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SubscriptionsCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? name,
+      Value<String>? categoryId,
+      Value<double>? amount,
+      Value<double?>? taxAmount,
+      Value<String>? currency,
+      Value<String?>? description,
+      Value<String>? startDate,
+      Value<String>? nextOccurrenceDate,
+      Value<String>? billingCycle,
+      Value<String>? status,
+      Value<String>? createdAt,
+      Value<String>? updatedAt,
+      Value<String?>? cancelledAt,
+      Value<int?>? notificationOffset,
+      Value<String?>? deletedAt,
+      Value<int>? version,
+      Value<int>? rowid}) {
+    return SubscriptionsCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      categoryId: categoryId ?? this.categoryId,
+      amount: amount ?? this.amount,
+      taxAmount: taxAmount ?? this.taxAmount,
+      currency: currency ?? this.currency,
+      description: description ?? this.description,
+      startDate: startDate ?? this.startDate,
+      nextOccurrenceDate: nextOccurrenceDate ?? this.nextOccurrenceDate,
+      billingCycle: billingCycle ?? this.billingCycle,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      cancelledAt: cancelledAt ?? this.cancelledAt,
+      notificationOffset: notificationOffset ?? this.notificationOffset,
+      deletedAt: deletedAt ?? this.deletedAt,
+      version: version ?? this.version,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (categoryId.present) {
+      map['categoryId'] = Variable<String>(categoryId.value);
+    }
+    if (amount.present) {
+      map['amount'] = Variable<double>(amount.value);
+    }
+    if (taxAmount.present) {
+      map['taxAmount'] = Variable<double>(taxAmount.value);
+    }
+    if (currency.present) {
+      map['currency'] = Variable<String>(currency.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (startDate.present) {
+      map['startDate'] = Variable<String>(startDate.value);
+    }
+    if (nextOccurrenceDate.present) {
+      map['nextOccurrenceDate'] = Variable<String>(nextOccurrenceDate.value);
+    }
+    if (billingCycle.present) {
+      map['billingCycle'] = Variable<String>(billingCycle.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (createdAt.present) {
+      map['createdAt'] = Variable<String>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updatedAt'] = Variable<String>(updatedAt.value);
+    }
+    if (cancelledAt.present) {
+      map['cancelledAt'] = Variable<String>(cancelledAt.value);
+    }
+    if (notificationOffset.present) {
+      map['notificationOffset'] = Variable<int>(notificationOffset.value);
+    }
+    if (deletedAt.present) {
+      map['deletedAt'] = Variable<String>(deletedAt.value);
+    }
+    if (version.present) {
+      map['version'] = Variable<int>(version.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SubscriptionsCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('categoryId: $categoryId, ')
+          ..write('amount: $amount, ')
+          ..write('taxAmount: $taxAmount, ')
+          ..write('currency: $currency, ')
+          ..write('description: $description, ')
+          ..write('startDate: $startDate, ')
+          ..write('nextOccurrenceDate: $nextOccurrenceDate, ')
+          ..write('billingCycle: $billingCycle, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('cancelledAt: $cancelledAt, ')
+          ..write('notificationOffset: $notificationOffset, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('version: $version, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$WalletMeltDatabase extends GeneratedDatabase {
   _$WalletMeltDatabase(QueryExecutor e) : super(e);
   $WalletMeltDatabaseManager get managers => $WalletMeltDatabaseManager(this);
@@ -6845,6 +7745,7 @@ abstract class _$WalletMeltDatabase extends GeneratedDatabase {
   late final $DebtRepaymentsTable debtRepayments = $DebtRepaymentsTable(this);
   late final $GroceryTemplatesTable groceryTemplates =
       $GroceryTemplatesTable(this);
+  late final $SubscriptionsTable subscriptions = $SubscriptionsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -6864,7 +7765,8 @@ abstract class _$WalletMeltDatabase extends GeneratedDatabase {
         migrationAudit,
         debtRecords,
         debtRepayments,
-        groceryTemplates
+        groceryTemplates,
+        subscriptions
       ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
@@ -6990,6 +7892,20 @@ final class $$CategoriesTableReferences
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: cache));
   }
+
+  static MultiTypedResultKey<$SubscriptionsTable, List<Subscription>>
+      _subscriptionsRefsTable(_$WalletMeltDatabase db) =>
+          MultiTypedResultKey.fromTable(db.subscriptions,
+              aliasName: 'categories__id__subscriptions__categoryId');
+
+  $$SubscriptionsTableProcessedTableManager get subscriptionsRefs {
+    final manager = $$SubscriptionsTableTableManager($_db, $_db.subscriptions)
+        .filter((f) => f.categoryId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_subscriptionsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
 }
 
 class $$CategoriesTableFilterComposer
@@ -7098,6 +8014,27 @@ class $$CategoriesTableFilterComposer
             $$ExpenseItemsTableFilterComposer(
               $db: $db,
               $table: $db.expenseItems,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<bool> subscriptionsRefs(
+      Expression<bool> Function($$SubscriptionsTableFilterComposer f) f) {
+    final $$SubscriptionsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.subscriptions,
+        getReferencedColumn: (t) => t.categoryId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$SubscriptionsTableFilterComposer(
+              $db: $db,
+              $table: $db.subscriptions,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -7251,6 +8188,27 @@ class $$CategoriesTableAnnotationComposer
             ));
     return f(composer);
   }
+
+  Expression<T> subscriptionsRefs<T extends Object>(
+      Expression<T> Function($$SubscriptionsTableAnnotationComposer a) f) {
+    final $$SubscriptionsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.subscriptions,
+        getReferencedColumn: (t) => t.categoryId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$SubscriptionsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.subscriptions,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 }
 
 class $$CategoriesTableTableManager extends RootTableManager<
@@ -7268,7 +8226,8 @@ class $$CategoriesTableTableManager extends RootTableManager<
         {bool expensesRefs,
         bool categoryBudgetsRefs,
         bool itemsRefs,
-        bool expenseItemsRefs})> {
+        bool expenseItemsRefs,
+        bool subscriptionsRefs})> {
   $$CategoriesTableTableManager(_$WalletMeltDatabase db, $CategoriesTable table)
       : super(TableManagerState(
           db: db,
@@ -7329,14 +8288,16 @@ class $$CategoriesTableTableManager extends RootTableManager<
               {expensesRefs = false,
               categoryBudgetsRefs = false,
               itemsRefs = false,
-              expenseItemsRefs = false}) {
+              expenseItemsRefs = false,
+              subscriptionsRefs = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [
                 if (expensesRefs) db.expenses,
                 if (categoryBudgetsRefs) db.categoryBudgets,
                 if (itemsRefs) db.items,
-                if (expenseItemsRefs) db.expenseItems
+                if (expenseItemsRefs) db.expenseItems,
+                if (subscriptionsRefs) db.subscriptions
               ],
               addJoins: null,
               getPrefetchedDataCallback: (items) async {
@@ -7391,6 +8352,19 @@ class $$CategoriesTableTableManager extends RootTableManager<
                         referencedItemsForCurrentItem:
                             (item, referencedItems) => referencedItems
                                 .where((e) => e.categoryId == item.id),
+                        typedResults: items),
+                  if (subscriptionsRefs)
+                    await $_getPrefetchedData<Category, $CategoriesTable,
+                            Subscription>(
+                        currentTable: table,
+                        referencedTable: $$CategoriesTableReferences
+                            ._subscriptionsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$CategoriesTableReferences(db, table, p0)
+                                .subscriptionsRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.categoryId == item.id),
                         typedResults: items)
                 ];
               },
@@ -7414,7 +8388,8 @@ typedef $$CategoriesTableProcessedTableManager = ProcessedTableManager<
         {bool expensesRefs,
         bool categoryBudgetsRefs,
         bool itemsRefs,
-        bool expenseItemsRefs})>;
+        bool expenseItemsRefs,
+        bool subscriptionsRefs})>;
 typedef $$StoresTableCreateCompanionBuilder = StoresCompanion Function({
   required String id,
   required String name,
@@ -7785,6 +8760,8 @@ typedef $$ExpensesTableCreateCompanionBuilder = ExpensesCompanion Function({
   required String createdAt,
   required String updatedAt,
   Value<String?> deletedAt,
+  Value<double?> subtotalAmount,
+  Value<double?> taxAmount,
   Value<int> rowid,
 });
 typedef $$ExpensesTableUpdateCompanionBuilder = ExpensesCompanion Function({
@@ -7805,6 +8782,8 @@ typedef $$ExpensesTableUpdateCompanionBuilder = ExpensesCompanion Function({
   Value<String> createdAt,
   Value<String> updatedAt,
   Value<String?> deletedAt,
+  Value<double?> subtotalAmount,
+  Value<double?> taxAmount,
   Value<int> rowid,
 });
 
@@ -7940,6 +8919,13 @@ class $$ExpensesTableFilterComposer
 
   ColumnFilters<String> get deletedAt => $composableBuilder(
       column: $table.deletedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get subtotalAmount => $composableBuilder(
+      column: $table.subtotalAmount,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get taxAmount => $composableBuilder(
+      column: $table.taxAmount, builder: (column) => ColumnFilters(column));
 
   $$CategoriesTableFilterComposer get categoryId {
     final $$CategoriesTableFilterComposer composer = $composerBuilder(
@@ -8103,6 +9089,13 @@ class $$ExpensesTableOrderingComposer
   ColumnOrderings<String> get deletedAt => $composableBuilder(
       column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<double> get subtotalAmount => $composableBuilder(
+      column: $table.subtotalAmount,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get taxAmount => $composableBuilder(
+      column: $table.taxAmount, builder: (column) => ColumnOrderings(column));
+
   $$CategoriesTableOrderingComposer get categoryId {
     final $$CategoriesTableOrderingComposer composer = $composerBuilder(
         composer: this,
@@ -8197,6 +9190,12 @@ class $$ExpensesTableAnnotationComposer
 
   GeneratedColumn<String> get deletedAt =>
       $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<double> get subtotalAmount => $composableBuilder(
+      column: $table.subtotalAmount, builder: (column) => column);
+
+  GeneratedColumn<double> get taxAmount =>
+      $composableBuilder(column: $table.taxAmount, builder: (column) => column);
 
   $$CategoriesTableAnnotationComposer get categoryId {
     final $$CategoriesTableAnnotationComposer composer = $composerBuilder(
@@ -8347,6 +9346,8 @@ class $$ExpensesTableTableManager extends RootTableManager<
             Value<String> createdAt = const Value.absent(),
             Value<String> updatedAt = const Value.absent(),
             Value<String?> deletedAt = const Value.absent(),
+            Value<double?> subtotalAmount = const Value.absent(),
+            Value<double?> taxAmount = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               ExpensesCompanion(
@@ -8367,6 +9368,8 @@ class $$ExpensesTableTableManager extends RootTableManager<
             createdAt: createdAt,
             updatedAt: updatedAt,
             deletedAt: deletedAt,
+            subtotalAmount: subtotalAmount,
+            taxAmount: taxAmount,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -8387,6 +9390,8 @@ class $$ExpensesTableTableManager extends RootTableManager<
             required String createdAt,
             required String updatedAt,
             Value<String?> deletedAt = const Value.absent(),
+            Value<double?> subtotalAmount = const Value.absent(),
+            Value<double?> taxAmount = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               ExpensesCompanion.insert(
@@ -8407,6 +9412,8 @@ class $$ExpensesTableTableManager extends RootTableManager<
             createdAt: createdAt,
             updatedAt: updatedAt,
             deletedAt: deletedAt,
+            subtotalAmount: subtotalAmount,
+            taxAmount: taxAmount,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
@@ -12711,6 +13718,467 @@ typedef $$GroceryTemplatesTableProcessedTableManager = ProcessedTableManager<
     ),
     GroceryTemplate,
     PrefetchHooks Function()>;
+typedef $$SubscriptionsTableCreateCompanionBuilder = SubscriptionsCompanion
+    Function({
+  required String id,
+  required String name,
+  required String categoryId,
+  required double amount,
+  Value<double?> taxAmount,
+  required String currency,
+  Value<String?> description,
+  required String startDate,
+  required String nextOccurrenceDate,
+  required String billingCycle,
+  required String status,
+  required String createdAt,
+  required String updatedAt,
+  Value<String?> cancelledAt,
+  Value<int?> notificationOffset,
+  Value<String?> deletedAt,
+  Value<int> version,
+  Value<int> rowid,
+});
+typedef $$SubscriptionsTableUpdateCompanionBuilder = SubscriptionsCompanion
+    Function({
+  Value<String> id,
+  Value<String> name,
+  Value<String> categoryId,
+  Value<double> amount,
+  Value<double?> taxAmount,
+  Value<String> currency,
+  Value<String?> description,
+  Value<String> startDate,
+  Value<String> nextOccurrenceDate,
+  Value<String> billingCycle,
+  Value<String> status,
+  Value<String> createdAt,
+  Value<String> updatedAt,
+  Value<String?> cancelledAt,
+  Value<int?> notificationOffset,
+  Value<String?> deletedAt,
+  Value<int> version,
+  Value<int> rowid,
+});
+
+final class $$SubscriptionsTableReferences extends BaseReferences<
+    _$WalletMeltDatabase, $SubscriptionsTable, Subscription> {
+  $$SubscriptionsTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static $CategoriesTable _categoryIdTable(_$WalletMeltDatabase db) =>
+      db.categories.createAlias('subscriptions__categoryId__categories__id');
+
+  $$CategoriesTableProcessedTableManager get categoryId {
+    final $_column = $_itemColumn<String>('categoryId')!;
+
+    final manager = $$CategoriesTableTableManager($_db, $_db.categories)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_categoryIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$SubscriptionsTableFilterComposer
+    extends Composer<_$WalletMeltDatabase, $SubscriptionsTable> {
+  $$SubscriptionsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get amount => $composableBuilder(
+      column: $table.amount, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get taxAmount => $composableBuilder(
+      column: $table.taxAmount, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get currency => $composableBuilder(
+      column: $table.currency, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get description => $composableBuilder(
+      column: $table.description, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get startDate => $composableBuilder(
+      column: $table.startDate, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get nextOccurrenceDate => $composableBuilder(
+      column: $table.nextOccurrenceDate,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get billingCycle => $composableBuilder(
+      column: $table.billingCycle, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get status => $composableBuilder(
+      column: $table.status, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get cancelledAt => $composableBuilder(
+      column: $table.cancelledAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get notificationOffset => $composableBuilder(
+      column: $table.notificationOffset,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get version => $composableBuilder(
+      column: $table.version, builder: (column) => ColumnFilters(column));
+
+  $$CategoriesTableFilterComposer get categoryId {
+    final $$CategoriesTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.categoryId,
+        referencedTable: $db.categories,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$CategoriesTableFilterComposer(
+              $db: $db,
+              $table: $db.categories,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$SubscriptionsTableOrderingComposer
+    extends Composer<_$WalletMeltDatabase, $SubscriptionsTable> {
+  $$SubscriptionsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get amount => $composableBuilder(
+      column: $table.amount, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get taxAmount => $composableBuilder(
+      column: $table.taxAmount, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get currency => $composableBuilder(
+      column: $table.currency, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get description => $composableBuilder(
+      column: $table.description, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get startDate => $composableBuilder(
+      column: $table.startDate, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get nextOccurrenceDate => $composableBuilder(
+      column: $table.nextOccurrenceDate,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get billingCycle => $composableBuilder(
+      column: $table.billingCycle,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get status => $composableBuilder(
+      column: $table.status, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get cancelledAt => $composableBuilder(
+      column: $table.cancelledAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get notificationOffset => $composableBuilder(
+      column: $table.notificationOffset,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get version => $composableBuilder(
+      column: $table.version, builder: (column) => ColumnOrderings(column));
+
+  $$CategoriesTableOrderingComposer get categoryId {
+    final $$CategoriesTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.categoryId,
+        referencedTable: $db.categories,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$CategoriesTableOrderingComposer(
+              $db: $db,
+              $table: $db.categories,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$SubscriptionsTableAnnotationComposer
+    extends Composer<_$WalletMeltDatabase, $SubscriptionsTable> {
+  $$SubscriptionsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<double> get amount =>
+      $composableBuilder(column: $table.amount, builder: (column) => column);
+
+  GeneratedColumn<double> get taxAmount =>
+      $composableBuilder(column: $table.taxAmount, builder: (column) => column);
+
+  GeneratedColumn<String> get currency =>
+      $composableBuilder(column: $table.currency, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+      column: $table.description, builder: (column) => column);
+
+  GeneratedColumn<String> get startDate =>
+      $composableBuilder(column: $table.startDate, builder: (column) => column);
+
+  GeneratedColumn<String> get nextOccurrenceDate => $composableBuilder(
+      column: $table.nextOccurrenceDate, builder: (column) => column);
+
+  GeneratedColumn<String> get billingCycle => $composableBuilder(
+      column: $table.billingCycle, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get cancelledAt => $composableBuilder(
+      column: $table.cancelledAt, builder: (column) => column);
+
+  GeneratedColumn<int> get notificationOffset => $composableBuilder(
+      column: $table.notificationOffset, builder: (column) => column);
+
+  GeneratedColumn<String> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get version =>
+      $composableBuilder(column: $table.version, builder: (column) => column);
+
+  $$CategoriesTableAnnotationComposer get categoryId {
+    final $$CategoriesTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.categoryId,
+        referencedTable: $db.categories,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$CategoriesTableAnnotationComposer(
+              $db: $db,
+              $table: $db.categories,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$SubscriptionsTableTableManager extends RootTableManager<
+    _$WalletMeltDatabase,
+    $SubscriptionsTable,
+    Subscription,
+    $$SubscriptionsTableFilterComposer,
+    $$SubscriptionsTableOrderingComposer,
+    $$SubscriptionsTableAnnotationComposer,
+    $$SubscriptionsTableCreateCompanionBuilder,
+    $$SubscriptionsTableUpdateCompanionBuilder,
+    (Subscription, $$SubscriptionsTableReferences),
+    Subscription,
+    PrefetchHooks Function({bool categoryId})> {
+  $$SubscriptionsTableTableManager(
+      _$WalletMeltDatabase db, $SubscriptionsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SubscriptionsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SubscriptionsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SubscriptionsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<String> categoryId = const Value.absent(),
+            Value<double> amount = const Value.absent(),
+            Value<double?> taxAmount = const Value.absent(),
+            Value<String> currency = const Value.absent(),
+            Value<String?> description = const Value.absent(),
+            Value<String> startDate = const Value.absent(),
+            Value<String> nextOccurrenceDate = const Value.absent(),
+            Value<String> billingCycle = const Value.absent(),
+            Value<String> status = const Value.absent(),
+            Value<String> createdAt = const Value.absent(),
+            Value<String> updatedAt = const Value.absent(),
+            Value<String?> cancelledAt = const Value.absent(),
+            Value<int?> notificationOffset = const Value.absent(),
+            Value<String?> deletedAt = const Value.absent(),
+            Value<int> version = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              SubscriptionsCompanion(
+            id: id,
+            name: name,
+            categoryId: categoryId,
+            amount: amount,
+            taxAmount: taxAmount,
+            currency: currency,
+            description: description,
+            startDate: startDate,
+            nextOccurrenceDate: nextOccurrenceDate,
+            billingCycle: billingCycle,
+            status: status,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            cancelledAt: cancelledAt,
+            notificationOffset: notificationOffset,
+            deletedAt: deletedAt,
+            version: version,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String name,
+            required String categoryId,
+            required double amount,
+            Value<double?> taxAmount = const Value.absent(),
+            required String currency,
+            Value<String?> description = const Value.absent(),
+            required String startDate,
+            required String nextOccurrenceDate,
+            required String billingCycle,
+            required String status,
+            required String createdAt,
+            required String updatedAt,
+            Value<String?> cancelledAt = const Value.absent(),
+            Value<int?> notificationOffset = const Value.absent(),
+            Value<String?> deletedAt = const Value.absent(),
+            Value<int> version = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              SubscriptionsCompanion.insert(
+            id: id,
+            name: name,
+            categoryId: categoryId,
+            amount: amount,
+            taxAmount: taxAmount,
+            currency: currency,
+            description: description,
+            startDate: startDate,
+            nextOccurrenceDate: nextOccurrenceDate,
+            billingCycle: billingCycle,
+            status: status,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            cancelledAt: cancelledAt,
+            notificationOffset: notificationOffset,
+            deletedAt: deletedAt,
+            version: version,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$SubscriptionsTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: ({categoryId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (categoryId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.categoryId,
+                    referencedTable:
+                        $$SubscriptionsTableReferences._categoryIdTable(db),
+                    referencedColumn:
+                        $$SubscriptionsTableReferences._categoryIdTable(db).id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$SubscriptionsTableProcessedTableManager = ProcessedTableManager<
+    _$WalletMeltDatabase,
+    $SubscriptionsTable,
+    Subscription,
+    $$SubscriptionsTableFilterComposer,
+    $$SubscriptionsTableOrderingComposer,
+    $$SubscriptionsTableAnnotationComposer,
+    $$SubscriptionsTableCreateCompanionBuilder,
+    $$SubscriptionsTableUpdateCompanionBuilder,
+    (Subscription, $$SubscriptionsTableReferences),
+    Subscription,
+    PrefetchHooks Function({bool categoryId})>;
 
 class $WalletMeltDatabaseManager {
   final _$WalletMeltDatabase _db;
@@ -12745,4 +14213,6 @@ class $WalletMeltDatabaseManager {
       $$DebtRepaymentsTableTableManager(_db, _db.debtRepayments);
   $$GroceryTemplatesTableTableManager get groceryTemplates =>
       $$GroceryTemplatesTableTableManager(_db, _db.groceryTemplates);
+  $$SubscriptionsTableTableManager get subscriptions =>
+      $$SubscriptionsTableTableManager(_db, _db.subscriptions);
 }

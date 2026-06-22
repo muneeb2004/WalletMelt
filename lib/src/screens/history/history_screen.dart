@@ -45,6 +45,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   String? _categoryId;
   ExpenseSort _sort = ExpenseSort.newest;
   bool _showRecycleBin = false;
+  String _taxFilter = 'all';
 
   Timer? _debounceTimer;
   String _searchQuery = '';
@@ -54,6 +55,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   String? _cachedSearchQuery;
   String? _cachedCategoryId;
   ExpenseSort? _cachedSort;
+  String? _cachedTaxFilter;
   List<_ListItem>? _cachedItems;
   List<Expense>? _cachedFilteredList;
 
@@ -87,6 +89,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         _cachedSearchQuery == _searchQuery &&
         _cachedCategoryId == _categoryId &&
         _cachedSort == _sort &&
+        _cachedTaxFilter == _taxFilter &&
         _cachedItems != null) {
       return _cachedItems!;
     }
@@ -98,7 +101,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
           '${expense.title} ${expense.vendor ?? ''} ${expense.notes ?? ''}'
               .toLowerCase();
       final matchesQuery = _searchQuery.isEmpty || haystack.contains(_searchQuery);
-      return matchesCategory && matchesQuery;
+      
+      bool matchesTax = true;
+      if (_taxFilter == 'taxable') {
+        matchesTax = expense.taxAmount != null && expense.taxAmount! > 0;
+      } else if (_taxFilter == 'nontaxable') {
+        matchesTax = expense.taxAmount == null || expense.taxAmount! <= 0;
+      }
+
+      return matchesCategory && matchesQuery && matchesTax;
     }).toList();
 
     filtered.sort((a, b) {
@@ -125,6 +136,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     _cachedSearchQuery = _searchQuery;
     _cachedCategoryId = _categoryId;
     _cachedSort = _sort;
+    _cachedTaxFilter = _taxFilter;
     _cachedItems = items;
 
     return items;
@@ -181,6 +193,35 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       decoration: const InputDecoration(
                           prefixIcon: Icon(Icons.search_rounded),
                           labelText: 'Search vendor, title, notes'),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+
+                    Row(
+                      children: [
+                        ChoiceChip(
+                          label: const Text('All', style: TextStyle(fontSize: 11)),
+                          selected: _taxFilter == 'all',
+                          onSelected: (val) {
+                            if (val) setState(() => _taxFilter = 'all');
+                          },
+                        ),
+                        const SizedBox(width: 8),
+                        ChoiceChip(
+                          label: const Text('Taxable', style: TextStyle(fontSize: 11)),
+                          selected: _taxFilter == 'taxable',
+                          onSelected: (val) {
+                            if (val) setState(() => _taxFilter = 'taxable');
+                          },
+                        ),
+                        const SizedBox(width: 8),
+                        ChoiceChip(
+                          label: const Text('No Tax', style: TextStyle(fontSize: 11)),
+                          selected: _taxFilter == 'nontaxable',
+                          onSelected: (val) {
+                            if (val) setState(() => _taxFilter = 'nontaxable');
+                          },
+                        ),
+                      ],
                     ),
                     const SizedBox(height: AppSpacing.sm),
 

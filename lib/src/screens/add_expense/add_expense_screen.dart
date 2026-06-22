@@ -24,6 +24,8 @@ class AddExpenseScreen extends StatefulWidget {
 
 class _AddExpenseScreenState extends State<AddExpenseScreen> {
   final _amountController = TextEditingController();
+  final _taxController = TextEditingController();
+  final _taxPercentageController = TextEditingController();
   final _titleController = TextEditingController();
   final _vendorController = TextEditingController();
   final _notesController = TextEditingController();
@@ -46,8 +48,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
         .where((expense) => expense.id == widget.expenseId)
         .firstOrNull;
     if (expense != null) {
-      _amountController.text =
-          expense.amount.toStringAsFixed(expense.amount % 1 == 0 ? 0 : 2);
+      final sub = expense.subtotalAmount ?? expense.amount;
+      final tax = expense.taxAmount ?? 0.0;
+      _amountController.text = sub.toStringAsFixed(sub % 1 == 0 ? 0 : 2);
+      _taxController.text = tax > 0 ? tax.toStringAsFixed(tax % 1 == 0 ? 0 : 2) : '';
       _titleController.text = expense.title;
       _vendorController.text = expense.vendor ?? '';
       _notesController.text = expense.notes ?? '';
@@ -62,6 +66,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   @override
   void dispose() {
     _amountController.dispose();
+    _taxController.dispose();
+    _taxPercentageController.dispose();
     _titleController.dispose();
     _vendorController.dispose();
     _notesController.dispose();
@@ -147,6 +153,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                   _amountController.text = sum.toStringAsFixed(sum % 1 == 0 ? 0 : 2);
                 },
               ),
+              const SizedBox(height: 14),
+              _buildTaxSection(context, _getGrocerySubtotal()),
               const SizedBox(height: 18),
 
               // Collapsible Details Card
@@ -240,7 +248,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                   prefixText: '$currency ',
                   errorText: _validation?.amountError,
                 ),
+                onChanged: (_) => setState(() {}),
               ),
+              const SizedBox(height: 14),
+              _buildTaxSection(context, double.tryParse(_amountController.text.trim()) ?? 0.0),
               const SizedBox(height: 14),
               TextField(
                 controller: _titleController,
@@ -348,7 +359,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 
     setState(() => _saving = true);
     final router = GoRouter.of(context);
-    final amount = double.parse(_amountController.text.trim());
+    final subtotalVal = double.tryParse(_amountController.text.trim()) ?? 0.0;
+    final taxVal = _taxController.text.trim().isEmpty ? null : double.tryParse(_taxController.text.trim());
+    final totalAmount = subtotalVal + (taxVal ?? 0.0);
+
     final isGroceryMode = _categoryId == 'grocery';
     final title = _titleController.text.trim().isEmpty
         ? (isGroceryMode
@@ -365,7 +379,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     if (existing == null) {
       await state.addExpense(
         ExpenseDraft(
-          amount: amount,
+          amount: totalAmount,
           currency: state.settings.currency,
           categoryId: _categoryId!,
           title: title,
@@ -374,12 +388,14 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
           notes: _notesController.text,
           receiptImageUri: _receiptUri,
           groceryItems: _groceryItems,
+          subtotalAmount: subtotalVal,
+          taxAmount: taxVal,
         ),
       );
     } else {
       await state.updateExpense(
         existing.copyWith(
-          amount: amount,
+          amount: totalAmount,
           currency: state.settings.currency,
           categoryId: _categoryId!,
           title: title,
@@ -388,6 +404,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
           notes: _notesController.text,
           receiptImageUri: _receiptUri,
           clearReceipt: _receiptUri == null,
+          subtotalAmount: subtotalVal,
+          taxAmount: taxVal,
         ),
         groceryItems: _groceryItems,
       );
@@ -506,6 +524,124 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       },
     );
     nameController.dispose();
+  }
+
+  double _getGrocerySubtotal() {
+    double sum = 0.0;
+    for (final item in _groceryItems) {
+      sum += item.amount;
+    }
+    return sum;
+  }
+
+  Widget _buildTaxSection(BuildContext context, double subtotal) {
+    final currency = context.read<AppState>().settings.currency;
+    final tax = double.tryParse(_taxController.text.trim()) ?? 0.0;
+    final grandTotal = subtotal + tax;
+
+    return WMGlassSurface.tier1(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'TAX & TOTALS',
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.1,
+                  color: WalletMeltColors.brandDeep,
+                ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: TextField(
+                  controller: _taxController,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  decoration: InputDecoration(
+                    labelText: 'Tax Amount',
+                    prefixText: '$currency ',
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  ),
+                  onChanged: (val) {
+                    setState(() {});
+                  },
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                flex: 2,
+                child: TextField(
+                  controller: _taxPercentageController,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  decoration: const InputDecoration(
+                    labelText: 'Apply Tax %',
+                    suffixText: '%',
+                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  ),
+                  onChanged: (val) {
+                    final pct = double.tryParse(val.trim());
+                    if (pct != null && pct >= 0) {
+                      final calculatedTax = subtotal * (pct / 100.0);
+                      setState(() {
+                        _taxController.text = calculatedTax.toStringAsFixed(
+                          calculatedTax % 1 == 0 ? 0 : 2,
+                        );
+                      });
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          const Divider(height: 1, color: Color(0x1Fffffff)),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('Subtotal:', style: TextStyle(fontSize: 13, color: WalletMeltColors.textSecondary)),
+              Text(
+                '${subtotal.toStringAsFixed(subtotal % 1 == 0 ? 0 : 2)} $currency',
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('Tax:', style: TextStyle(fontSize: 13, color: WalletMeltColors.textSecondary)),
+              Text(
+                '${tax.toStringAsFixed(tax % 1 == 0 ? 0 : 2)} $currency',
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: WalletMeltColors.danger),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Grand Total:',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w900,
+                    ),
+              ),
+              Text(
+                '${grandTotal.toStringAsFixed(grandTotal % 1 == 0 ? 0 : 2)} $currency',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w900,
+                      color: WalletMeltColors.brandDeep,
+                    ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }
 

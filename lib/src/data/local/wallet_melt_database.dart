@@ -51,6 +51,8 @@ class Expenses extends Table {
   TextColumn get createdAt => text().named('createdAt')();
   TextColumn get updatedAt => text().named('updatedAt')();
   TextColumn get deletedAt => text().named('deletedAt').nullable()();
+  RealColumn get subtotalAmount => real().named('subtotalAmount').nullable()();
+  RealColumn get taxAmount => real().named('taxAmount').nullable()();
 
   @override
   Set<Column<Object>> get primaryKey => {id};
@@ -304,6 +306,33 @@ class GroceryTemplates extends Table {
   Set<Column<Object>> get primaryKey => {id};
 }
 
+class Subscriptions extends Table {
+  @override
+  String get tableName => 'subscriptions';
+
+  TextColumn get id => text()();
+  TextColumn get name => text()();
+  TextColumn get categoryId =>
+      text().named('categoryId').references(Categories, #id)();
+  RealColumn get amount => real()();
+  RealColumn get taxAmount => real().named('taxAmount').nullable()();
+  TextColumn get currency => text()();
+  TextColumn get description => text().nullable()();
+  TextColumn get startDate => text().named('startDate')();
+  TextColumn get nextOccurrenceDate => text().named('nextOccurrenceDate')();
+  TextColumn get billingCycle => text().named('billingCycle')();
+  TextColumn get status => text()();
+  TextColumn get createdAt => text().named('createdAt')();
+  TextColumn get updatedAt => text().named('updatedAt')();
+  TextColumn get cancelledAt => text().named('cancelledAt').nullable()();
+  IntColumn get notificationOffset => integer().named('notificationOffset').nullable()();
+  TextColumn get deletedAt => text().named('deletedAt').nullable()();
+  IntColumn get version => integer().named('version').withDefault(const Constant(1))();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
 class V1MigrationMetrics {
   const V1MigrationMetrics({
     required this.expenseCount,
@@ -341,12 +370,13 @@ class V1MigrationMetrics {
     DebtRecords,
     DebtRepayments,
     GroceryTemplates,
+    Subscriptions,
   ],
 )
 class WalletMeltDatabase extends _$WalletMeltDatabase {
   WalletMeltDatabase(super.executor, {this.preMigrationBackupPath});
 
-  static const currentSchemaVersion = 3;
+  static const currentSchemaVersion = 4;
 
   final String? preMigrationBackupPath;
 
@@ -439,6 +469,9 @@ class WalletMeltDatabase extends _$WalletMeltDatabase {
           if (from < 3 && to >= 3) {
             await _upgradeFromV2ToV3(m, from, to);
           }
+          if (from < 4 && to >= 4) {
+            await _upgradeFromV3ToV4(m, from, to);
+          }
         },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON;');
@@ -448,6 +481,16 @@ class WalletMeltDatabase extends _$WalletMeltDatabase {
           await customStatement('CREATE INDEX IF NOT EXISTS grocery_items_expenseId_idx ON grocery_items (expenseId);');
         },
       );
+
+  Future<void> _upgradeFromV3ToV4(Migrator m, int from, int to) async {
+    if (!await _tableExists('subscriptions')) await m.createTable(subscriptions);
+    if (!await _columnExists('expenses', 'subtotalAmount')) {
+      await m.addColumn(expenses, expenses.subtotalAmount);
+    }
+    if (!await _columnExists('expenses', 'taxAmount')) {
+      await m.addColumn(expenses, expenses.taxAmount);
+    }
+  }
 
   Future<void> _upgradeFromV2ToV3(Migrator m, int from, int to) async {
     if (!await _tableExists('debt_records')) await m.createTable(debtRecords);

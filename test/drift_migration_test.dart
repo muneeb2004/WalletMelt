@@ -172,7 +172,7 @@ void main() {
 
     final raw = sqlite3.sqlite3.open(dbFile.path);
     try {
-      expect(raw.select('PRAGMA user_version;').first['user_version'], 3);
+      expect(raw.select('PRAGMA user_version;').first['user_version'], 4);
     } finally {
       raw.close();
     }

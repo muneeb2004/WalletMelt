@@ -66,6 +66,8 @@ class DriftExpenseRepository {
       isRecurring: false,
       createdAt: now,
       updatedAt: now,
+      subtotalAmount: draft.subtotalAmount,
+      taxAmount: draft.taxAmount,
     );
 
     await _db.transaction(() async {
@@ -286,6 +288,8 @@ class DriftExpenseRepository {
       createdAt: expense.createdAt,
       updatedAt: expense.updatedAt,
       deletedAt: Value(expense.deletedAt),
+      subtotalAmount: Value(expense.subtotalAmount),
+      taxAmount: Value(expense.taxAmount),
     );
   }
 
@@ -305,6 +309,8 @@ class DriftExpenseRepository {
       createdAt: Value(expense.createdAt),
       updatedAt: Value(expense.updatedAt),
       deletedAt: Value(expense.deletedAt),
+      subtotalAmount: Value(expense.subtotalAmount),
+      taxAmount: Value(expense.taxAmount),
     );
   }
 
@@ -324,6 +330,8 @@ class DriftExpenseRepository {
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
       deletedAt: row.deletedAt,
+      subtotalAmount: row.subtotalAmount,
+      taxAmount: row.taxAmount,
     );
   }
 

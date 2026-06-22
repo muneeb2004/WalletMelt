@@ -11,6 +11,7 @@ import '../../utils/date_utils.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/section_header.dart';
 import '../../types/debt.dart';
+import '../../types/subscription.dart' as wm_sub;
 
 class InsightsScreen extends StatelessWidget {
   const InsightsScreen({super.key});
@@ -31,6 +32,96 @@ class InsightsScreen extends StatelessWidget {
 
     final debtorAmounts = <String, double>{};
     final creditorAmounts = <String, double>{};
+
+    // Calculate Tax Metrics
+    double monthlyTax = 0.0;
+    double yearlyTax = 0.0;
+    double taxableSpend = 0.0;
+    double nonTaxableSpend = 0.0;
+    final taxByCategory = <String, double>{};
+
+    final selectedYear = selectedMonth.year;
+    final selectedMonthInt = selectedMonth.month;
+
+    for (final exp in state.expenses) {
+      if (exp.deletedAt != null) continue;
+      
+      DateTime expDate;
+      try {
+        expDate = DateTime.parse(exp.date);
+      } catch (_) {
+        continue;
+      }
+
+      final isSameYear = expDate.year == selectedYear;
+      final isSameMonth = isSameYear && expDate.month == selectedMonthInt;
+
+      if (isSameMonth) {
+        if (exp.taxAmount != null && exp.taxAmount! > 0) {
+          monthlyTax += exp.taxAmount!;
+          taxableSpend += exp.subtotalAmount ?? (exp.amount - exp.taxAmount!);
+          final category = state.categoryById(exp.categoryId);
+          final catName = category?.name ?? 'Uncategorized';
+          taxByCategory[catName] = (taxByCategory[catName] ?? 0.0) + exp.taxAmount!;
+        } else {
+          nonTaxableSpend += exp.amount;
+        }
+      }
+
+      if (isSameYear) {
+        if (exp.taxAmount != null && exp.taxAmount! > 0) {
+          yearlyTax += exp.taxAmount!;
+        }
+      }
+    }
+
+    // Calculate Subscription Metrics
+    double monthlySubSpend = 0.0;
+    double annualSubSpend = 0.0;
+    wm_sub.Subscription? mostExpensiveSub;
+    double highestSubPrice = 0.0;
+
+    final activeSubs = state.subscriptions.where((s) => s.status == wm_sub.SubscriptionStatus.active).toList();
+    final subSpendByCategory = <String, double>{};
+
+    for (final sub in activeSubs) {
+      final subTotalCost = sub.amount + (sub.taxAmount ?? 0.0);
+      double monthlyEquivalent = 0.0;
+      final cycle = sub.billingCycle.toLowerCase().trim();
+
+      if (cycle == 'monthly') {
+        monthlyEquivalent = subTotalCost;
+      } else if (cycle == 'quarterly') {
+        monthlyEquivalent = subTotalCost / 3.0;
+      } else if (cycle == 'semi-annual' || cycle == 'semi_annual') {
+        monthlyEquivalent = subTotalCost / 6.0;
+      } else if (cycle == 'annual' || cycle == 'yearly') {
+        monthlyEquivalent = subTotalCost / 12.0;
+      } else if (cycle.startsWith('custom_')) {
+        final parts = cycle.split('_');
+        if (parts.length == 2) {
+          final days = int.tryParse(parts[1]) ?? 30;
+          monthlyEquivalent = subTotalCost * (30.0 / days);
+        } else {
+          monthlyEquivalent = subTotalCost;
+        }
+      } else {
+        monthlyEquivalent = subTotalCost;
+      }
+
+      monthlySubSpend += monthlyEquivalent;
+
+      final category = state.categoryById(sub.categoryId);
+      final catName = category?.name ?? 'Uncategorized';
+      subSpendByCategory[catName] = (subSpendByCategory[catName] ?? 0.0) + monthlyEquivalent;
+
+      if (subTotalCost > highestSubPrice) {
+        highestSubPrice = subTotalCost;
+        mostExpensiveSub = sub;
+      }
+    }
+
+    annualSubSpend = monthlySubSpend * 12.0;
 
     for (final debt in state.debts) {
       if (debt.isSettled) continue;
@@ -352,6 +443,184 @@ class InsightsScreen extends StatelessWidget {
                       ),
                     ],
                   ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            WMGlassSurface.tier2(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SectionHeader(
+                    title: 'Tax Insights',
+                    icon: Icons.account_balance_rounded,
+                    padding: EdgeInsets.only(bottom: AppSpacing.xs),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Tax Paid This Month:', style: TextStyle(fontSize: 13)),
+                      Text(
+                        '${monthlyTax.toStringAsFixed(monthlyTax % 1 == 0 ? 0 : 2)} $currency',
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: WalletMeltColors.danger),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Tax Paid This Year:', style: TextStyle(fontSize: 13)),
+                      Text(
+                        '${yearlyTax.toStringAsFixed(yearlyTax % 1 == 0 ? 0 : 2)} $currency',
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: WalletMeltColors.danger),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  const Divider(height: 1, color: Color(0x1Fffffff)),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'TAXABLE SPEND',
+                              style: TextStyle(fontSize: 9, color: WalletMeltColors.textMuted, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              '${taxableSpend.toStringAsFixed(taxableSpend % 1 == 0 ? 0 : 2)} $currency',
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(width: 1, height: 28, color: const Color(0x1Fffffff)),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'TAX-FREE SPEND',
+                              style: TextStyle(fontSize: 9, color: WalletMeltColors.textMuted, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              '${nonTaxableSpend.toStringAsFixed(nonTaxableSpend % 1 == 0 ? 0 : 2)} $currency',
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (taxByCategory.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    const Divider(height: 1, color: Color(0x1Fffffff)),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'TAX BY CATEGORY (THIS MONTH)',
+                      style: TextStyle(fontSize: 9, color: WalletMeltColors.textMuted, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 6),
+                    for (final entry in taxByCategory.entries) ...[
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(entry.key, style: const TextStyle(fontSize: 12)),
+                            Text(
+                              '${entry.value.toStringAsFixed(entry.value % 1 == 0 ? 0 : 2)} $currency',
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            WMGlassSurface.tier2(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SectionHeader(
+                    title: 'Subscription Insights',
+                    icon: Icons.repeat_rounded,
+                    padding: EdgeInsets.only(bottom: AppSpacing.xs),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Monthly Est. Spend:', style: TextStyle(fontSize: 13)),
+                      Text(
+                        '${monthlySubSpend.toStringAsFixed(monthlySubSpend % 1 == 0 ? 0 : 2)} $currency',
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: WalletMeltColors.brandDeep),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Annual Est. Spend:', style: TextStyle(fontSize: 13)),
+                      Text(
+                        '${annualSubSpend.toStringAsFixed(annualSubSpend % 1 == 0 ? 0 : 2)} $currency',
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: WalletMeltColors.brandDeep),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  const Divider(height: 1, color: Color(0x1Fffffff)),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'MOST EXPENSIVE',
+                    style: TextStyle(fontSize: 9, color: WalletMeltColors.textMuted, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    mostExpensiveSub != null
+                        ? '${mostExpensiveSub.name} (${(mostExpensiveSub.amount + (mostExpensiveSub.taxAmount ?? 0.0)).toStringAsFixed(0)} $currency/${mostExpensiveSub.billingCycle})'
+                        : 'None active',
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                  ),
+                  if (subSpendByCategory.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    const Divider(height: 1, color: Color(0x1Fffffff)),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'SUBSCRIPTIONS BY CATEGORY',
+                      style: TextStyle(fontSize: 9, color: WalletMeltColors.textMuted, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 6),
+                    for (final entry in subSpendByCategory.entries) ...[
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(entry.key, style: const TextStyle(fontSize: 12)),
+                            Text(
+                              '${entry.value.toStringAsFixed(entry.value % 1 == 0 ? 0 : 2)} $currency/mo',
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
                 ],
               ),
             ),

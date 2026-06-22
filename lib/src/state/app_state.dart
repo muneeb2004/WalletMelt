@@ -27,8 +27,11 @@ import '../utils/insights.dart';
 import 'package:uuid/uuid.dart';
 import '../types/debt.dart' as wm_debt;
 import '../types/grocery_template.dart' as wm_template;
+import '../types/subscription.dart' as wm_sub;
+import '../types/subscription.dart' show SubscriptionStatus;
 import '../data/repositories/drift/drift_debt_repository.dart';
 import '../data/repositories/drift/drift_grocery_template_repository.dart';
+import '../data/repositories/drift/drift_subscription_repository.dart';
 
 class AppState extends ChangeNotifier {
   AppState({
@@ -46,6 +49,9 @@ class AppState extends ChangeNotifier {
     DriftCategoryRepository? driftCategoryRepository,
     DriftBudgetRepository? driftBudgetRepository,
     DriftExpenseRepository? driftExpenseRepository,
+    DriftDebtRepository? driftDebtRepository,
+    DriftGroceryTemplateRepository? driftGroceryTemplateRepository,
+    DriftSubscriptionRepository? driftSubscriptionRepository,
     SettingsService? settingsService,
     ReceiptStorageService? receiptStorageService,
     bool requiresDriftRestoreRuntime = false,
@@ -58,6 +64,9 @@ class AppState extends ChangeNotifier {
     _driftCategoryRepository = driftCategoryRepository;
     _driftBudgetRepository = driftBudgetRepository;
     _driftExpenseRepository = driftExpenseRepository;
+    _driftDebtRepository = driftDebtRepository;
+    _driftGroceryTemplateRepository = driftGroceryTemplateRepository;
+    _driftSubscriptionRepository = driftSubscriptionRepository;
     isLoading = false;
   }
 
@@ -74,9 +83,11 @@ class AppState extends ChangeNotifier {
   DriftExpenseRepository? _driftExpenseRepository;
   DriftDebtRepository? _driftDebtRepository;
   DriftGroceryTemplateRepository? _driftGroceryTemplateRepository;
+  DriftSubscriptionRepository? _driftSubscriptionRepository;
 
   List<wm_debt.DebtRecord> debts = const [];
   List<wm_template.GroceryTemplate> groceryTemplates = const [];
+  List<wm_sub.Subscription> subscriptions = const [];
 
   WalletMeltSettings settings = WalletMeltSettings.defaults;
   List<wm.Category> categories = const [];
@@ -180,6 +191,12 @@ class AppState extends ChangeNotifier {
       _deletedExpensesLoaded = false;
       _deletedExpenses = const [];
     }
+    final subRepo = _driftSubscriptionRepository;
+    if (subRepo != null) {
+      await processSubscriptionRenewals();
+      subscriptions = await subRepo.listAll();
+    }
+
     categories = await _listCategories();
     expenses = await _listActiveExpenses();
     currentBudgets = await _listBudgetsForMonth(currentMonthKey);
@@ -459,6 +476,78 @@ class AppState extends ChangeNotifier {
     return const [];
   }
 
+  Future<void> addSubscription(wm_sub.Subscription sub) async {
+    final repo = _driftSubscriptionRepository;
+    if (repo != null) {
+      await repo.create(sub);
+      await refresh();
+    }
+  }
+
+  Future<void> updateSubscription(wm_sub.Subscription sub) async {
+    final repo = _driftSubscriptionRepository;
+    if (repo != null) {
+      await repo.update(sub);
+      await refresh();
+    }
+  }
+
+  Future<void> deleteSubscription(String id) async {
+    final repo = _driftSubscriptionRepository;
+    if (repo != null) {
+      await repo.delete(id);
+      await refresh();
+    }
+  }
+
+  Future<void> processSubscriptionRenewals() async {
+    final subRepo = _driftSubscriptionRepository;
+    final expRepo = _driftExpenseRepository;
+    if (subRepo == null || expRepo == null) return;
+
+    final subs = await subRepo.listAll();
+    final todayStr = DateTime.now().toIso8601String().substring(0, 10);
+
+    for (final sub in subs) {
+      if (sub.status != SubscriptionStatus.active) continue;
+
+      var currentNextDateStr = sub.nextOccurrenceDate;
+      var updatedSub = sub;
+      bool hasRenewals = false;
+
+      while (currentNextDateStr.compareTo(todayStr) <= 0) {
+        hasRenewals = true;
+        final parsedDate = DateTime.parse(currentNextDateStr);
+        
+        final draft = ExpenseDraft(
+          amount: sub.amount + (sub.taxAmount ?? 0.0),
+          currency: sub.currency,
+          categoryId: sub.categoryId,
+          title: '${sub.name} (Recurring Renewal)',
+          date: parsedDate,
+          vendor: sub.name,
+          notes: 'Auto-generated subscription renewal for ${sub.name}',
+          subtotalAmount: sub.amount,
+          taxAmount: sub.taxAmount,
+        );
+
+        await expRepo.create(draft);
+
+        final nextDate = sub.calculateNextRenewalDate(parsedDate);
+        currentNextDateStr = nextDate.toIso8601String().substring(0, 10);
+        
+        updatedSub = updatedSub.copyWith(
+          nextOccurrenceDate: currentNextDateStr,
+          updatedAt: DateTime.now().toIso8601String(),
+        );
+      }
+
+      if (hasRenewals) {
+        await subRepo.update(updatedSub);
+      }
+    }
+  }
+
   Future<wm_debt.DebtRecord?> getDebtById(String id) async {
     final repo = _driftDebtRepository;
     if (repo != null) {
@@ -562,6 +651,7 @@ class AppState extends ChangeNotifier {
       _driftExpenseRepository = DriftExpenseRepository(database);
       _driftDebtRepository = DriftDebtRepository(database);
       _driftGroceryTemplateRepository = DriftGroceryTemplateRepository(database);
+      _driftSubscriptionRepository = DriftSubscriptionRepository(database);
     } catch (_) {
       _driftDatabase = null;
       _driftCategoryRepository = null;
@@ -569,6 +659,7 @@ class AppState extends ChangeNotifier {
       _driftExpenseRepository = null;
       _driftDebtRepository = null;
       _driftGroceryTemplateRepository = null;
+      _driftSubscriptionRepository = null;
     }
   }
 

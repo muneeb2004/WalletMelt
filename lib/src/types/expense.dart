@@ -16,6 +16,8 @@ class Expense {
     this.receiptImageUri,
     this.recurrenceFrequency,
     this.deletedAt,
+    this.subtotalAmount,
+    this.taxAmount,
   });
 
   final String id;
@@ -32,6 +34,8 @@ class Expense {
   final String createdAt;
   final String updatedAt;
   final String? deletedAt;
+  final double? subtotalAmount;
+  final double? taxAmount;
 
   bool get isDeleted => deletedAt != null;
 
@@ -52,6 +56,10 @@ class Expense {
     String? updatedAt,
     String? deletedAt,
     bool clearDeletedAt = false,
+    double? subtotalAmount,
+    bool clearSubtotalAmount = false,
+    double? taxAmount,
+    bool clearTaxAmount = false,
   }) {
     return Expense(
       id: id ?? this.id,
@@ -69,6 +77,8 @@ class Expense {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: clearDeletedAt ? null : deletedAt ?? this.deletedAt,
+      subtotalAmount: clearSubtotalAmount ? null : subtotalAmount ?? this.subtotalAmount,
+      taxAmount: clearTaxAmount ? null : taxAmount ?? this.taxAmount,
     );
   }
 
@@ -88,6 +98,8 @@ class Expense {
       'createdAt': createdAt,
       'updatedAt': updatedAt,
       'deletedAt': deletedAt,
+      'subtotalAmount': subtotalAmount,
+      'taxAmount': taxAmount,
     };
   }
 
@@ -108,6 +120,8 @@ class Expense {
       createdAt: map['createdAt']! as String,
       updatedAt: map['updatedAt']! as String,
       deletedAt: map['deletedAt'] as String?,
+      subtotalAmount: map['subtotalAmount'] != null ? (map['subtotalAmount'] as num).toDouble() : null,
+      taxAmount: map['taxAmount'] != null ? (map['taxAmount'] as num).toDouble() : null,
     );
   }
 

@@ -13,6 +13,7 @@ import '../../widgets/empty_state.dart';
 import '../../widgets/progress_bar.dart';
 import '../../types/debt.dart';
 import '../../widgets/section_header.dart';
+import '../../types/subscription.dart' as wm_sub;
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -122,6 +123,14 @@ class DashboardScreen extends StatelessWidget {
 
               // ── Financial Obligations Card ──────────────────────────────
               _DashboardObligationsCard(state: state, currency: currency),
+              const SizedBox(height: AppSpacing.md),
+
+              // ── Tax Paid Card ──────────────────────────────────────────
+              _DashboardTaxCard(state: state, currency: currency),
+              const SizedBox(height: AppSpacing.md),
+
+              // ── Upcoming Renewals Card ──────────────────────────────────
+              _DashboardUpcomingRenewalsCard(state: state, currency: currency),
               const SizedBox(height: AppSpacing.md),
 
               // ── Content: empty or charts + recent ──────────────────────
@@ -524,3 +533,154 @@ class _DashboardObligationsCard extends StatelessWidget {
     );
   }
 }
+
+class _DashboardTaxCard extends StatelessWidget {
+  const _DashboardTaxCard({required this.state, required this.currency});
+
+  final AppState state;
+  final String currency;
+
+  @override
+  Widget build(BuildContext context) {
+    final taxThisMonth = state.currentMonthExpenses.fold<double>(0, (sum, e) => sum + (e.taxAmount ?? 0.0));
+    if (taxThisMonth == 0) return const SizedBox.shrink();
+
+    return WMGlassSurface.tier2(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      onTap: () => context.go('/insights'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const SectionHeader(
+                title: 'Tax paid this month',
+                icon: Icons.account_balance_rounded,
+                padding: EdgeInsets.zero,
+              ),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.54),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            formatMoney(taxThisMonth, currency),
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  color: WalletMeltColors.danger,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DashboardUpcomingRenewalsCard extends StatelessWidget {
+  const _DashboardUpcomingRenewalsCard({required this.state, required this.currency});
+
+  final AppState state;
+  final String currency;
+
+  @override
+  Widget build(BuildContext context) {
+    final activeSubs = state.subscriptions.where((s) => s.status == wm_sub.SubscriptionStatus.active).toList();
+    if (activeSubs.isEmpty) return const SizedBox.shrink();
+
+    final sortedSubs = List<wm_sub.Subscription>.from(activeSubs);
+    sortedSubs.sort((a, b) => a.nextOccurrenceDate.compareTo(b.nextOccurrenceDate));
+
+    final nextRenewals = sortedSubs.take(3).toList();
+
+    return WMGlassSurface.tier2(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      onTap: () => context.push('/subscriptions'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const SectionHeader(
+                title: 'Upcoming renewals',
+                icon: Icons.repeat_rounded,
+                padding: EdgeInsets.zero,
+              ),
+              Text(
+                'View all →',
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm + 2),
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: nextRenewals.length,
+            separatorBuilder: (context, index) => const Divider(height: 1, color: Color(0x1Fffffff)),
+            itemBuilder: (context, index) {
+              final sub = nextRenewals[index];
+              final totalAmount = sub.amount + (sub.taxAmount ?? 0.0);
+              
+              final nextDate = DateTime.tryParse(sub.nextOccurrenceDate);
+              String daysText = '';
+              if (nextDate != null) {
+                final now = DateTime.now();
+                final today = DateTime(now.year, now.month, now.day);
+                final renewal = DateTime(nextDate.year, nextDate.month, nextDate.day);
+                final days = renewal.difference(today).inDays;
+                if (days < 0) {
+                  daysText = 'overdue';
+                } else if (days == 0) {
+                  daysText = 'today';
+                } else if (days == 1) {
+                  daysText = 'tomorrow';
+                } else {
+                  daysText = '$days days';
+                }
+              } else {
+                daysText = 'unknown';
+              }
+
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          sub.name,
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 14),
+                        ),
+                        Text(
+                          daysText,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: daysText == 'today' || daysText == 'overdue'
+                                ? WalletMeltColors.warning
+                                : WalletMeltColors.textMuted,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Text(
+                      formatMoney(totalAmount, currency),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 14),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+

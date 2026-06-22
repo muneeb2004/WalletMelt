@@ -13,6 +13,7 @@ import '../screens/onboarding/onboarding_screen.dart';
 import '../screens/settings/settings_screen.dart';
 import '../screens/budget/budget_screen.dart';
 import '../screens/debt/debt_screen.dart';
+import '../screens/subscription/subscription_screen.dart';
 import '../components/navigation/app_shell.dart';
 import '../state/app_state.dart';
 import '../theme/wallet_melt_theme.dart';
@@ -100,6 +101,9 @@ class _WalletMeltAppState extends State<WalletMeltApp> {
         GoRoute(
             path: '/expense/new',
             builder: (context, state) => const AddExpenseScreen()),
+        GoRoute(
+            path: '/subscriptions',
+            builder: (context, state) => const SubscriptionScreen()),
         GoRoute(
           path: '/expense/:id',
           builder: (context, state) =>

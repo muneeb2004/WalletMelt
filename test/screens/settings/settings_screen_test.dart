@@ -62,6 +62,8 @@ void main() {
         ),
       );
 
+      await tester.ensureVisible(find.text('Export expenses CSV'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Export expenses CSV'));
       await tester.pumpAndSettle();
 
@@ -101,7 +103,11 @@ void main() {
         ),
       );
 
+      await tester.ensureVisible(find.text('Include deleted expenses'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Include deleted expenses'));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Export expenses CSV'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Export expenses CSV'));
       await tester.pumpAndSettle();
@@ -125,6 +131,8 @@ void main() {
         ),
       );
 
+      await tester.ensureVisible(find.text('Export expenses CSV'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Export expenses CSV'));
       await tester.pumpAndSettle();
 
