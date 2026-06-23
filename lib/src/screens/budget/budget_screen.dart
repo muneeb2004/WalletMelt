@@ -160,8 +160,13 @@ class _BudgetScreenState extends State<BudgetScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Budgeting',
-                          style: Theme.of(context).textTheme.headlineMedium),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text('Budgeting',
+                            maxLines: 1,
+                            style: Theme.of(context).textTheme.headlineMedium),
+                      ),
                       const SizedBox(height: 4),
                       Text('Keep your spending under control.',
                           style: Theme.of(context).textTheme.bodyMedium),

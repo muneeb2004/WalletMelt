@@ -48,9 +48,14 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(
-                      'Subscriptions',
-                      style: Theme.of(context).textTheme.headlineMedium,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Subscriptions',
+                        maxLines: 1,
+                        style: Theme.of(context).textTheme.headlineMedium,
+                      ),
                     ),
                   ),
                   IconButton(
@@ -461,9 +466,16 @@ class _AddSubscriptionSheetState extends State<_AddSubscriptionSheet> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'Create Subscription',
-                      style: theme.textTheme.headlineMedium?.copyWith(fontSize: 22),
+                    Expanded(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Create Subscription',
+                          maxLines: 1,
+                          style: theme.textTheme.headlineMedium?.copyWith(fontSize: 22),
+                        ),
+                      ),
                     ),
                     IconButton(
                       icon: const Icon(Icons.close_rounded),

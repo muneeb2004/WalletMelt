@@ -166,9 +166,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     Row(
                       children: [
                         Expanded(
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
                             child: Text('History',
-                                style:
-                                    Theme.of(context).textTheme.headlineMedium)),
+                                maxLines: 1,
+                                style: Theme.of(context).textTheme.headlineMedium),
+                          ),
+                        ),
                         IconButton(
                           tooltip: _showRecycleBin
                               ? 'Show active expenses'

@@ -97,11 +97,18 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                     onPressed: () => context.pop(),
                     icon: const Icon(Icons.close_rounded)),
                 const SizedBox(width: 8),
-                Text(
-                  isGroceryMode
-                      ? 'Bulk Grocery Entry'
-                      : (isEditing ? 'Edit expense' : 'Add expense'),
-                  style: Theme.of(context).textTheme.headlineMedium,
+                Expanded(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      isGroceryMode
+                          ? 'Bulk Grocery Entry'
+                          : (isEditing ? 'Edit expense' : 'Add expense'),
+                      maxLines: 1,
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -628,48 +635,46 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                 ),
           ),
           const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                flex: 3,
-                child: TextField(
-                  controller: _taxController,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  decoration: InputDecoration(
-                    labelText: 'Tax Amount',
-                    prefixText: '$currency ',
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                  ),
-                  onChanged: (val) {
-                    setState(() {});
-                  },
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                flex: 2,
-                child: TextField(
-                  controller: _taxPercentageController,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  decoration: const InputDecoration(
-                    labelText: 'Apply Tax %',
-                    suffixText: '%',
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                  ),
-                  onChanged: (val) {
-                    final pct = double.tryParse(val.trim());
-                    if (pct != null && pct >= 0) {
-                      final calculatedTax = subtotal * (pct / 100.0);
-                      setState(() {
-                        _taxController.text = calculatedTax.toStringAsFixed(
-                          calculatedTax % 1 == 0 ? 0 : 2,
-                        );
-                      });
-                    }
-                  },
-                ),
-              ),
-            ],
+          TextField(
+            controller: _taxController,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: InputDecoration(
+              labelText: 'Tax Amount (Total)',
+              prefixText: '$currency ',
+              helperText: 'Enter the total tax amount directly',
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            ),
+            onChanged: (val) {
+              setState(() {
+                _taxPercentageController.clear();
+              });
+            },
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _taxPercentageController,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: const InputDecoration(
+              labelText: 'Calculate via Tax Percentage (%)',
+              suffixText: '%',
+              helperText: 'Or enter percentage to calculate tax',
+              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            ),
+            onChanged: (val) {
+              final pct = double.tryParse(val.trim());
+              if (pct != null && pct >= 0) {
+                final calculatedTax = subtotal * (pct / 100.0);
+                setState(() {
+                  _taxController.text = calculatedTax.toStringAsFixed(
+                    calculatedTax % 1 == 0 ? 0 : 2,
+                  );
+                });
+              } else if (val.trim().isEmpty) {
+                setState(() {
+                  _taxController.clear();
+                });
+              }
+            },
           ),
           const SizedBox(height: 16),
           const Divider(height: 1, color: Color(0x1Fffffff)),

@@ -87,7 +87,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 18, 20, 120),
           children: [
-            Text('Settings', style: Theme.of(context).textTheme.headlineMedium),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text('Settings',
+                  maxLines: 1,
+                  style: Theme.of(context).textTheme.headlineMedium),
+            ),
             const SizedBox(height: 18),
             
             // CARD 1: PREFERENCES

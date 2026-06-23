@@ -165,7 +165,13 @@ class InsightsScreen extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 18, 20, 120),
           children: [
-            Text('Insights', style: Theme.of(context).textTheme.headlineMedium),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text('Insights',
+                  maxLines: 1,
+                  style: Theme.of(context).textTheme.headlineMedium),
+            ),
             const SizedBox(height: AppSpacing.xs),
             Row(
               children: [

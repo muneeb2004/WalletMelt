@@ -45,8 +45,13 @@ class DashboardScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('WalletMelt',
-                            style: Theme.of(context).textTheme.headlineMedium),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text('WalletMelt',
+                              maxLines: 1,
+                              style: Theme.of(context).textTheme.headlineMedium),
+                        ),
                         const SizedBox(height: AppSpacing.xs),
                         Text('Where did your money go this month?',
                             style: Theme.of(context).textTheme.bodyMedium),
