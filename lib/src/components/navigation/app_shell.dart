@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
 import '../../theme/wallet_melt_theme.dart';
-import '../../state/app_state.dart';
 import '../../types/debt.dart';
-import '../../screens/budget/budget_screen.dart';
 import '../../screens/debt/debt_screen.dart';
 
 class AppShell extends StatelessWidget {
@@ -28,90 +25,81 @@ class AppShell extends StatelessWidget {
             right: AppSpacing.md,
             bottom: AppSpacing.md,
             child: SafeArea(
-                child: FlatNavBar(
-                  radius: 999,
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      final totalWidth = constraints.maxWidth;
-                      final tabWidth = totalWidth / 6;
-                      final activeIndex = navigationShell.currentIndex;
+              child: FlatNavBar(
+                radius: 999,
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final totalWidth = constraints.maxWidth;
+                    final tabWidth = totalWidth / 4;
+                    final activeIndex = navigationShell.currentIndex;
 
-                      return Stack(
-                        children: [
-                          // Smoothly sliding active indicator tab background
-                          AnimatedPositioned(
-                            duration: AppMotion.medium,
-                            curve: AppMotion.entrance,
-                            left: activeIndex * tabWidth,
-                            width: tabWidth,
-                            top: 0,
-                            bottom: 0,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
-                              child: Container(
-                                decoration: BoxDecoration(
+                    return Stack(
+                      children: [
+                        // Smoothly sliding active indicator tab background
+                        AnimatedPositioned(
+                          duration: AppMotion.medium,
+                          curve: AppMotion.entrance,
+                          left: activeIndex * tabWidth,
+                          width: tabWidth,
+                          top: 0,
+                          bottom: 0,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 2, vertical: 2),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(999),
+                                border: Border.all(
                                   color: Theme.of(context)
                                       .colorScheme
                                       .primary
-                                      .withValues(alpha: 0.12),
-                                  borderRadius: BorderRadius.circular(999),
-                                  border: Border.all(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .primary
-                                        .withValues(alpha: 0.18),
-                                    width: 1.0,
-                                  ),
+                                      .withValues(alpha: 0.18),
+                                  width: 1.0,
                                 ),
                               ),
                             ),
                           ),
-                          // Tab Items Row
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              _NavItem(
-                                  icon: Icons.dashboard_rounded,
-                                  label: 'Home',
-                                  index: 0,
-                                  shell: navigationShell),
-                              _NavItem(
-                                  icon: Icons.receipt_long_rounded,
-                                  label: 'History',
-                                  index: 1,
-                                  shell: navigationShell),
-                              _NavItem(
-                                  icon: Icons.account_balance_wallet_rounded,
-                                  label: 'Budget',
-                                  index: 2,
-                                  shell: navigationShell),
-                              _NavItem(
-                                  icon: Icons.handshake_rounded,
-                                  label: 'Debts',
-                                  index: 3,
-                                  shell: navigationShell),
-                              _NavItem(
-                                  icon: Icons.insights_rounded,
-                                  label: 'Insights',
-                                  index: 4,
-                                  shell: navigationShell),
-                              _NavItem(
-                                  icon: Icons.tune_rounded,
-                                  label: 'Settings',
-                                  index: 5,
-                                  shell: navigationShell),
-                            ],
-                          ),
-                        ],
-                      );
-                    },
-                  ),
+                        ),
+                        // Tab Items Row
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            _NavItem(
+                                icon: Icons.dashboard_rounded,
+                                label: 'Home',
+                                index: 0,
+                                shell: navigationShell),
+                            _NavItem(
+                                icon: Icons.receipt_long_rounded,
+                                label: 'History',
+                                index: 1,
+                                shell: navigationShell),
+                            _NavItem(
+                                icon: Icons.calendar_today_rounded,
+                                label: 'Planning',
+                                index: 2,
+                                shell: navigationShell),
+                            _NavItem(
+                                icon: Icons.handshake_rounded,
+                                label: 'Debts',
+                                index: 3,
+                                shell: navigationShell),
+                          ],
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
+      ),
       floatingActionButton: _AppFloatingActionButton(action: action),
     );
   }
@@ -140,24 +128,13 @@ class ScreenActionResolver {
           action: () => context.push('/expense/new'),
         );
       case 2:
-        final state = context.watch<AppState>();
-        final monthlyBudget = state.getMonthlyBudgetAmount();
-        final hasBudget = monthlyBudget != null;
-        return ScreenAction(
-          icon: hasBudget ? Icons.edit_rounded : Icons.add_rounded,
-          label: hasBudget ? 'Edit Budget' : 'Set Budget',
-          action: () {
-            BudgetScreen.showSetBudgetSheet(context, state, monthlyBudget);
-          },
-        );
+        return null; // PlanningScreen renders its own contextual header add/edit button
       case 3:
         return ScreenAction(
           icon: Icons.add_rounded,
           label: 'Add Obligation',
           action: () => _showDebtActionsSheet(context),
         );
-      case 4:
-      case 5:
       default:
         return null;
     }
@@ -192,7 +169,8 @@ class ScreenActionResolver {
                 onTap: () {
                   WMHaptics.light();
                   Navigator.pop(sheetContext);
-                  DebtScreen.showAddDebtSheet(context, initialType: DebtType.owedToMe);
+                  DebtScreen.showAddDebtSheet(context,
+                      initialType: DebtType.owedToMe);
                 },
               ),
               const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
@@ -205,7 +183,8 @@ class ScreenActionResolver {
                 onTap: () {
                   WMHaptics.light();
                   Navigator.pop(sheetContext);
-                  DebtScreen.showAddDebtSheet(context, initialType: DebtType.iOwe);
+                  DebtScreen.showAddDebtSheet(context,
+                      initialType: DebtType.iOwe);
                 },
               ),
               const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
@@ -218,7 +197,8 @@ class ScreenActionResolver {
                 onTap: () {
                   WMHaptics.light();
                   Navigator.pop(sheetContext);
-                  DebtScreen.showAddDebtSheet(context, initialType: DebtType.loanGiven);
+                  DebtScreen.showAddDebtSheet(context,
+                      initialType: DebtType.loanGiven);
                 },
               ),
               const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
@@ -231,7 +211,8 @@ class ScreenActionResolver {
                 onTap: () {
                   WMHaptics.light();
                   Navigator.pop(sheetContext);
-                  DebtScreen.showAddDebtSheet(context, initialType: DebtType.loanTaken);
+                  DebtScreen.showAddDebtSheet(context,
+                      initialType: DebtType.loanTaken);
                 },
               ),
             ],
@@ -286,7 +267,8 @@ class ScreenActionResolver {
               ],
             ),
           ),
-          const Icon(Icons.chevron_right_rounded, color: WalletMeltColors.textMuted),
+          const Icon(Icons.chevron_right_rounded,
+              color: WalletMeltColors.textMuted),
         ],
       ),
     );
@@ -299,7 +281,8 @@ class _AppFloatingActionButton extends StatefulWidget {
   final ScreenAction? action;
 
   @override
-  State<_AppFloatingActionButton> createState() => _AppFloatingActionButtonState();
+  State<_AppFloatingActionButton> createState() =>
+      _AppFloatingActionButtonState();
 }
 
 class _AppFloatingActionButtonState extends State<_AppFloatingActionButton> {
@@ -339,13 +322,13 @@ class _AppFloatingActionButtonState extends State<_AppFloatingActionButton> {
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFFF59E0B).withValues(alpha: 0.36),
-                      blurRadius: 18,
-                      offset: const Offset(0, 8),
+                      color: Colors.black.withValues(alpha: 0.16),
+                      blurRadius: 12,
+                      offset: const Offset(0, 6),
                     ),
                     BoxShadow(
-                      color: const Color(0xFFB87912).withValues(alpha: 0.20),
-                      blurRadius: 6,
+                      color: Colors.black.withValues(alpha: 0.08),
+                      blurRadius: 4,
                       offset: const Offset(0, 2),
                     ),
                   ],
@@ -409,8 +392,7 @@ class _NavItem extends StatelessWidget {
           borderRadius: BorderRadius.circular(999),
           onTap: () {
             WMHaptics.selection();
-            shell.goBranch(index,
-                initialLocation: index == shell.currentIndex);
+            shell.goBranch(index, initialLocation: index == shell.currentIndex);
           },
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),

@@ -664,15 +664,25 @@ class AppState extends ChangeNotifier {
   }
 
   Future<List<wm.Category>> _listCategories() async {
+    List<wm.Category> rawList;
     final repository = _driftCategoryRepository;
     if (repository != null) {
       try {
-        return await repository.listCategories();
+        rawList = await repository.listCategories();
       } catch (_) {
-        // Fall through to the proven sqflite path if the new read path fails.
+        rawList = await _categoryRepository.listCategories();
       }
+    } else {
+      rawList = await _categoryRepository.listCategories();
     }
-    return _categoryRepository.listCategories();
+
+    final list = List<wm.Category>.from(rawList);
+    final otherIndex = list.indexWhere((c) => c.id == 'other' || c.name.toLowerCase() == 'other');
+    if (otherIndex != -1) {
+      final other = list.removeAt(otherIndex);
+      list.add(other);
+    }
+    return list;
   }
 
   Future<List<CategoryBudget>> _listBudgetsForMonth(String month) async {

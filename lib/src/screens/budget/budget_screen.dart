@@ -15,7 +15,9 @@ import '../../widgets/sheet_handle.dart';
 import '../../widgets/stat_tile.dart';
 
 class BudgetScreen extends StatefulWidget {
-  const BudgetScreen({super.key});
+  const BudgetScreen({this.isEmbedded = false, super.key});
+
+  final bool isEmbedded;
 
   static Future<void> showSetBudgetSheet(
       BuildContext context, AppState state, double? currentAmount) async {
@@ -136,74 +138,115 @@ class _BudgetScreenState extends State<BudgetScreen> {
     // Get color based on threshold ratio
     final budgetColor = budgetProgressColor(ratio);
 
+    final content = ListView(
+      padding: EdgeInsets.fromLTRB(20, widget.isEmbedded ? 0 : 18, 20, 120),
+      children: [
+        if (!widget.isEmbedded) ...[
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text('Budgeting',
+                          maxLines: 1,
+                          style: Theme.of(context).textTheme.headlineMedium),
+                    ),
+                    const SizedBox(height: 4),
+                    Text('Keep your spending under control.',
+                        style: Theme.of(context).textTheme.bodyMedium),
+                  ],
+                ),
+              ),
+              // Month Navigation
+              IconButton(
+                tooltip: 'Previous month',
+                onPressed: state.previousMonth,
+                icon: const Icon(Icons.chevron_left_rounded),
+              ),
+              Text(
+                readableMonth(selectedMonth),
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              IconButton(
+                tooltip: 'Next month',
+                onPressed: isCurrentMonth ? null : state.nextMonth,
+                icon: const Icon(Icons.chevron_right_rounded),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+        ] else ...[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Month Ceiling',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    tooltip: 'Previous month',
+                    onPressed: state.previousMonth,
+                    icon: const Icon(Icons.chevron_left_rounded),
+                  ),
+                  Text(
+                    readableMonth(selectedMonth),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 14),
+                  ),
+                  IconButton(
+                    tooltip: 'Next month',
+                    onPressed: isCurrentMonth ? null : state.nextMonth,
+                    icon: const Icon(Icons.chevron_right_rounded),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+        ],
+
+        // SECTION 1: TOTAL MONTHLY BUDGET (HERO)
+        if (monthlyBudget == null)
+          _buildEmptyHeroCard(context, state)
+        else
+          _buildActiveHeroCard(
+            context,
+            state,
+            selectedMonth,
+            monthlyBudget,
+            totalSpent,
+            remaining!,
+            daysLeft,
+            ratio,
+            budgetColor,
+            isDark,
+            currency,
+          ),
+
+        const SizedBox(height: AppSpacing.lg),
+        _buildCategoryBudgetsSection(
+          context,
+          state,
+          selectedMonth,
+          currentBudgets,
+          currency,
+        ),
+      ],
+    );
+
+    if (widget.isEmbedded) {
+      return content;
+    }
+
     return Scaffold(
       body: AppBackground(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 18, 20, 120),
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: Alignment.centerLeft,
-                        child: Text('Budgeting',
-                            maxLines: 1,
-                            style: Theme.of(context).textTheme.headlineMedium),
-                      ),
-                      const SizedBox(height: 4),
-                      Text('Keep your spending under control.',
-                          style: Theme.of(context).textTheme.bodyMedium),
-                    ],
-                  ),
-                ),
-                // Month Navigation
-                IconButton(
-                  tooltip: 'Previous month',
-                  onPressed: state.previousMonth,
-                  icon: const Icon(Icons.chevron_left_rounded),
-                ),
-                Text(
-                  readableMonth(selectedMonth),
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                IconButton(
-                  tooltip: 'Next month',
-                  onPressed: isCurrentMonth ? null : state.nextMonth,
-                  icon: const Icon(Icons.chevron_right_rounded),
-                ),
-              ],
-            ),
-            const SizedBox(height: 18),
-
-            // SECTION 1: TOTAL MONTHLY BUDGET (HERO)
-            if (monthlyBudget == null)
-              _buildEmptyHeroCard(context, state)
-            else
-              _buildActiveHeroCard(
-                context,
-                state,
-                selectedMonth,
-                monthlyBudget,
-                totalSpent,
-                remaining!,
-                daysLeft,
-                ratio,
-                budgetColor,
-                isDark,
-                currency,
-              ),
-
-            const SizedBox(height: AppSpacing.lg),
-
-            // SECTION 2: CATEGORY BUDGETS (SECONDARY)
-            _buildCategoryBudgetsSection(context, state, selectedMonth, currentBudgets, currency),
-            const SizedBox(height: 84), // Bottom padding for navigation shell
-          ],
-        ),
+        child: content,
       ),
     );
   }
@@ -468,15 +511,24 @@ class _BudgetScreenState extends State<BudgetScreen> {
             ),
             const SizedBox(height: 8),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Spent: ${formatMoney(spent, currency)}',
-                  style: Theme.of(context).textTheme.bodyMedium,
+                Expanded(
+                  child: Text(
+                    'Spent: ${formatMoney(spent, currency)}',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-                Text(
-                  'Limit: ${formatMoney(budget.amount, currency)}',
-                  style: Theme.of(context).textTheme.bodyMedium,
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    'Limit: ${formatMoney(budget.amount, currency)}',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    textAlign: TextAlign.right,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
             ),

@@ -11,9 +11,8 @@ import '../screens/history/receipt_viewer_screen.dart';
 import '../screens/insights/insights_screen.dart';
 import '../screens/onboarding/onboarding_screen.dart';
 import '../screens/settings/settings_screen.dart';
-import '../screens/budget/budget_screen.dart';
 import '../screens/debt/debt_screen.dart';
-import '../screens/subscription/subscription_screen.dart';
+import '../screens/planning/planning_screen.dart';
 import '../components/navigation/app_shell.dart';
 import '../state/app_state.dart';
 import '../theme/wallet_melt_theme.dart';
@@ -78,32 +77,32 @@ class _WalletMeltAppState extends State<WalletMeltApp> {
             ]),
             StatefulShellBranch(routes: [
               GoRoute(
-                  path: '/budget',
-                  builder: (context, state) => const BudgetScreen())
+                  path: '/planning',
+                  builder: (context, state) {
+                    final tab = state.uri.queryParameters['tab'];
+                    final initialIndex = tab == 'subscriptions' ? 1 : 0;
+                    return PlanningScreen(initialIndex: initialIndex);
+                  })
             ]),
             StatefulShellBranch(routes: [
               GoRoute(
                   path: '/debt',
                   builder: (context, state) => const DebtScreen())
             ]),
-            StatefulShellBranch(routes: [
-              GoRoute(
-                  path: '/insights',
-                  builder: (context, state) => const InsightsScreen())
-            ]),
-            StatefulShellBranch(routes: [
-              GoRoute(
-                  path: '/settings',
-                  builder: (context, state) => const SettingsScreen())
-            ]),
           ],
         ),
+        GoRoute(
+            path: '/settings',
+            builder: (context, state) => const SettingsScreen()),
+        GoRoute(
+            path: '/insights',
+            builder: (context, state) => const InsightsScreen()),
         GoRoute(
             path: '/expense/new',
             builder: (context, state) => const AddExpenseScreen()),
         GoRoute(
             path: '/subscriptions',
-            builder: (context, state) => const SubscriptionScreen()),
+            redirect: (context, state) => '/planning?tab=subscriptions'),
         GoRoute(
           path: '/expense/:id',
           builder: (context, state) =>

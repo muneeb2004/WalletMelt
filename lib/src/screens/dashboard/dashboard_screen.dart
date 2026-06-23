@@ -25,10 +25,14 @@ class DashboardScreen extends StatelessWidget {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     final insights = context.select((AppState s) => s.monthlyInsights);
-    final selectedMonth = context.select<AppState, DateTime>((s) => s.selectedMonth);
-    final hasBudget = context.select<AppState, bool>((s) => s.getMonthlyBudgetAmount() != null);
-    final hasExpenses = context.select<AppState, bool>((s) => s.expenses.isNotEmpty);
-    final currency = context.select<AppState, String>((s) => s.settings.currency);
+    final selectedMonth =
+        context.select<AppState, DateTime>((s) => s.selectedMonth);
+    final hasBudget = context
+        .select<AppState, bool>((s) => s.getMonthlyBudgetAmount() != null);
+    final hasExpenses =
+        context.select<AppState, bool>((s) => s.expenses.isNotEmpty);
+    final currency =
+        context.select<AppState, String>((s) => s.settings.currency);
     final state = context.watch<AppState>();
 
     return Scaffold(
@@ -50,7 +54,8 @@ class DashboardScreen extends StatelessWidget {
                           alignment: Alignment.centerLeft,
                           child: Text('WalletMelt',
                               maxLines: 1,
-                              style: Theme.of(context).textTheme.headlineMedium),
+                              style:
+                                  Theme.of(context).textTheme.headlineMedium),
                         ),
                         const SizedBox(height: AppSpacing.xs),
                         Text('Where did your money go this month?',
@@ -68,6 +73,16 @@ class DashboardScreen extends StatelessWidget {
                     onPressed: context.read<AppState>().nextMonth,
                     icon: const Icon(Icons.chevron_right_rounded),
                   ),
+                  IconButton(
+                    tooltip: 'Insights',
+                    onPressed: () => context.push('/insights'),
+                    icon: const Icon(Icons.insights_rounded),
+                  ),
+                  IconButton(
+                    tooltip: 'Settings',
+                    onPressed: () => context.push('/settings'),
+                    icon: const Icon(Icons.settings_rounded),
+                  ),
                 ],
               ),
               const SizedBox(height: AppSpacing.md + 2),
@@ -78,21 +93,20 @@ class DashboardScreen extends StatelessWidget {
                 child: Stack(
                   children: [
                     Positioned(
-                      right: -20,
-                      top: -20,
+                      right: -30,
+                      top: -30,
                       child: Container(
-                        width: 140,
-                        height: 140,
+                        width: 150,
+                        height: 150,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: WalletMeltColors.brandSoft
-                              .withValues(alpha: 0.32),
-                          boxShadow: [
-                            BoxShadow(
-                                color: WalletMeltColors.brand
-                                    .withValues(alpha: 0.22),
-                                blurRadius: 48)
-                          ],
+                          gradient: RadialGradient(
+                            colors: [
+                              WalletMeltColors.brandSoft
+                                  .withValues(alpha: 0.36),
+                              WalletMeltColors.brandSoft.withValues(alpha: 0.0),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -102,9 +116,7 @@ class DashboardScreen extends StatelessWidget {
                         Text(readableMonth(selectedMonth),
                             style: Theme.of(context).textTheme.labelLarge),
                         const SizedBox(height: AppSpacing.sm),
-                        Text(
-                            formatMoney(
-                                insights.total, currency),
+                        Text(formatMoney(insights.total, currency),
                             style: Theme.of(context).textTheme.displaySmall),
                         const SizedBox(height: AppSpacing.sm),
                         Text(
@@ -198,7 +210,9 @@ class DashboardScreen extends StatelessWidget {
                       for (final expense in insights.recentExpenses)
                         ExpenseListTile(
                           expense: expense,
-                          category: context.read<AppState>().categoryById(expense.categoryId),
+                          category: context
+                              .read<AppState>()
+                              .categoryById(expense.categoryId),
                           onTap: () => context.push('/expense/${expense.id}'),
                         ),
                     ],
@@ -289,7 +303,11 @@ class _ComparisonBar extends StatelessWidget {
                   Text(
                     leftLabel,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.8),
+                          color: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.color
+                              ?.withValues(alpha: 0.8),
                           fontWeight: FontWeight.w600,
                         ),
                   ),
@@ -311,7 +329,11 @@ class _ComparisonBar extends StatelessWidget {
                   Text(
                     rightLabel,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.8),
+                          color: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.color
+                              ?.withValues(alpha: 0.8),
                           fontWeight: FontWeight.w600,
                         ),
                   ),
@@ -338,16 +360,19 @@ class _DashboardBudgetCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final monthlyBudget = context.select<AppState, double>((s) => s.getMonthlyBudgetAmount() ?? 0.0);
-    final totalSpent = context.select<AppState, double>((s) => s.getCurrentMonthTotalSpent());
-    final currency = context.select<AppState, String>((s) => s.settings.currency);
+    final monthlyBudget = context
+        .select<AppState, double>((s) => s.getMonthlyBudgetAmount() ?? 0.0);
+    final totalSpent =
+        context.select<AppState, double>((s) => s.getCurrentMonthTotalSpent());
+    final currency =
+        context.select<AppState, String>((s) => s.settings.currency);
     final remaining = monthlyBudget - totalSpent;
     final isOverBudget = remaining < 0;
     final ratio = monthlyBudget > 0 ? totalSpent / monthlyBudget : 0.0;
     final Color budgetColor = budgetProgressColor(ratio);
 
     return LiquidGlass(
-      onTap: () => context.go('/budget'),
+      onTap: () => context.go('/planning'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -374,22 +399,31 @@ class _DashboardBudgetCard extends StatelessWidget {
           ProgressBar(fraction: ratio, color: budgetColor),
           const SizedBox(height: AppSpacing.sm),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Spent: ${formatMoney(totalSpent, currency)}',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+              Expanded(
+                child: Text(
+                  'Spent: ${formatMoney(totalSpent, currency)}',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-              Text(
-                isOverBudget
-                    ? 'Over by ${formatMoney(-remaining, currency)}'
-                    : 'Remaining: ${formatMoney(remaining, currency)}',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: isOverBudget ? WalletMeltColors.danger : null,
-                    ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  isOverBudget
+                      ? 'Over by ${formatMoney(-remaining, currency)}'
+                      : 'Remaining: ${formatMoney(remaining, currency)}',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: isOverBudget ? WalletMeltColors.danger : null,
+                      ),
+                  textAlign: TextAlign.right,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ],
           ),
@@ -447,7 +481,11 @@ class _DashboardObligationsCard extends StatelessWidget {
               ),
               Icon(
                 Icons.chevron_right_rounded,
-                color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.54),
+                color: Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.color
+                    ?.withValues(alpha: 0.54),
               ),
             ],
           ),
@@ -479,7 +517,12 @@ class _DashboardObligationsCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              Container(width: 1, height: 24, color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder),
+              Container(
+                  width: 1,
+                  height: 24,
+                  color: isDark
+                      ? WalletMeltColors.darkBorder
+                      : WalletMeltColors.lightBorder),
               const SizedBox(width: 8),
               Expanded(
                 child: Column(
@@ -506,7 +549,12 @@ class _DashboardObligationsCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              Container(width: 1, height: 24, color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder),
+              Container(
+                  width: 1,
+                  height: 24,
+                  color: isDark
+                      ? WalletMeltColors.darkBorder
+                      : WalletMeltColors.lightBorder),
               const SizedBox(width: 8),
               Expanded(
                 child: Column(
@@ -526,7 +574,9 @@ class _DashboardObligationsCard extends StatelessWidget {
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
-                        color: isNegative ? WalletMeltColors.danger : WalletMeltColors.positive,
+                        color: isNegative
+                            ? WalletMeltColors.danger
+                            : WalletMeltColors.positive,
                       ),
                     ),
                   ],
@@ -548,7 +598,8 @@ class _DashboardTaxCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final taxThisMonth = state.currentMonthExpenses.fold<double>(0, (sum, e) => sum + (e.taxAmount ?? 0.0));
+    final taxThisMonth = state.currentMonthExpenses
+        .fold<double>(0, (sum, e) => sum + (e.taxAmount ?? 0.0));
     if (taxThisMonth == 0) return const SizedBox.shrink();
 
     return WMGlassSurface.tier2(
@@ -567,7 +618,11 @@ class _DashboardTaxCard extends StatelessWidget {
               ),
               Icon(
                 Icons.chevron_right_rounded,
-                color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.54),
+                color: Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.color
+                    ?.withValues(alpha: 0.54),
               ),
             ],
           ),
@@ -585,24 +640,28 @@ class _DashboardTaxCard extends StatelessWidget {
 }
 
 class _DashboardUpcomingRenewalsCard extends StatelessWidget {
-  const _DashboardUpcomingRenewalsCard({required this.state, required this.currency});
+  const _DashboardUpcomingRenewalsCard(
+      {required this.state, required this.currency});
 
   final AppState state;
   final String currency;
 
   @override
   Widget build(BuildContext context) {
-    final activeSubs = state.subscriptions.where((s) => s.status == wm_sub.SubscriptionStatus.active).toList();
+    final activeSubs = state.subscriptions
+        .where((s) => s.status == wm_sub.SubscriptionStatus.active)
+        .toList();
     if (activeSubs.isEmpty) return const SizedBox.shrink();
 
     final sortedSubs = List<wm_sub.Subscription>.from(activeSubs);
-    sortedSubs.sort((a, b) => a.nextOccurrenceDate.compareTo(b.nextOccurrenceDate));
+    sortedSubs
+        .sort((a, b) => a.nextOccurrenceDate.compareTo(b.nextOccurrenceDate));
 
     final nextRenewals = sortedSubs.take(3).toList();
 
     return WMGlassSurface.tier2(
       padding: const EdgeInsets.all(AppSpacing.md),
-      onTap: () => context.push('/subscriptions'),
+      onTap: () => context.go('/planning?tab=subscriptions'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -627,17 +686,22 @@ class _DashboardUpcomingRenewalsCard extends StatelessWidget {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: nextRenewals.length,
-            separatorBuilder: (context, index) => Divider(height: 1, color: Theme.of(context).brightness == Brightness.dark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder),
+            separatorBuilder: (context, index) => Divider(
+                height: 1,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? WalletMeltColors.darkBorder
+                    : WalletMeltColors.lightBorder),
             itemBuilder: (context, index) {
               final sub = nextRenewals[index];
               final totalAmount = sub.amount + (sub.taxAmount ?? 0.0);
-              
+
               final nextDate = DateTime.tryParse(sub.nextOccurrenceDate);
               String daysText = '';
               if (nextDate != null) {
                 final now = DateTime.now();
                 final today = DateTime(now.year, now.month, now.day);
-                final renewal = DateTime(nextDate.year, nextDate.month, nextDate.day);
+                final renewal =
+                    DateTime(nextDate.year, nextDate.month, nextDate.day);
                 final days = renewal.difference(today).inDays;
                 if (days < 0) {
                   daysText = 'overdue';
@@ -662,22 +726,32 @@ class _DashboardUpcomingRenewalsCard extends StatelessWidget {
                       children: [
                         Text(
                           sub.name,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 14),
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(fontSize: 14),
                         ),
                         Text(
                           daysText,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: daysText == 'today' || daysText == 'overdue'
-                                ? WalletMeltColors.warning
-                                : WalletMeltColors.textMuted,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(
+                                color:
+                                    daysText == 'today' || daysText == 'overdue'
+                                        ? WalletMeltColors.warning
+                                        : WalletMeltColors.textMuted,
+                                fontWeight: FontWeight.bold,
+                              ),
                         ),
                       ],
                     ),
                     Text(
                       formatMoney(totalAmount, currency),
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 14),
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium
+                          ?.copyWith(fontSize: 14),
                     ),
                   ],
                 ),
@@ -689,4 +763,3 @@ class _DashboardUpcomingRenewalsCard extends StatelessWidget {
     );
   }
 }
-

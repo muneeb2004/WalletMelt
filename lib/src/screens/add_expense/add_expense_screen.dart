@@ -657,7 +657,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
             controller: _taxPercentageController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             decoration: const InputDecoration(
-              labelText: 'Calculate via Tax Percentage (%)',
+              labelText: 'Calculate via Tax Percentage',
               suffixText: '%',
               helperText: 'Or enter percentage to calculate tax',
               contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),

@@ -26,9 +26,9 @@ void main() {
             builder: (context, state) => const DashboardScreen(),
           ),
           GoRoute(
-            path: '/budget',
+            path: '/planning',
             builder: (context, state) =>
-                const Scaffold(body: Text('Budget Screen Mock')),
+                const Scaffold(body: Text('Planning Screen Mock')),
           ),
         ],
       );
@@ -169,7 +169,7 @@ void main() {
       await tester.tap(find.text("This Month's Budget"));
       await tester.pumpAndSettle();
 
-      expect(find.text('Budget Screen Mock'), findsOneWidget);
+      expect(find.text('Planning Screen Mock'), findsOneWidget);
     });
 
     testWidgets('Tapping Details navigates to the Budget route',
@@ -183,7 +183,7 @@ void main() {
       await tester.tap(find.text('Details →'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Budget Screen Mock'), findsOneWidget);
+      expect(find.text('Planning Screen Mock'), findsOneWidget);
     });
   });
 }

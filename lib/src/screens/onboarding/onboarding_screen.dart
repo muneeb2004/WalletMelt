@@ -123,13 +123,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFFF59E0B).withValues(alpha: 0.36),
-                    blurRadius: 18,
-                    offset: const Offset(0, 8),
+                    color: Colors.black.withValues(alpha: 0.16),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
                   ),
                   BoxShadow(
-                    color: const Color(0xFFB87912).withValues(alpha: 0.16),
-                    blurRadius: 6,
+                    color: Colors.black.withValues(alpha: 0.08),
+                    blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
                 ],
@@ -146,7 +146,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 ),
                 onPressed: _currentPage < 2
                     ? _nextPage
-                    : () => context.read<AppState>().completeOnboarding(_currency),
+                    : () =>
+                        context.read<AppState>().completeOnboarding(_currency),
                 child: Text(
                   _currentPage < 2 ? 'Next Feature' : 'Start Tracking',
                   style: const TextStyle(
@@ -232,10 +233,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     Expanded(
                       child: Text(
                         'Local-First Security',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w900,
-                            ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w900,
+                                ),
                       ),
                     ),
                   ],
@@ -409,7 +411,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 const SizedBox(width: 8),
                 Text(
                   category,
-                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                  style: const TextStyle(
+                      fontSize: 13, fontWeight: FontWeight.w700),
                 ),
               ],
             ),
@@ -448,8 +451,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Widget _buildPageThree(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final receiptBg = isDark ? const Color(0xFF16161C) : const Color(0xFFFAF9F6);
-    final receiptBorderColor = isDark ? const Color(0x28FFFFFF) : const Color(0x28000000);
+    final receiptBg =
+        isDark ? const Color(0xFF16161C) : const Color(0xFFFAF9F6);
+    final receiptBorderColor =
+        isDark ? const Color(0x28FFFFFF) : const Color(0x28000000);
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
@@ -522,7 +527,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       const DottedLine(color: WalletMeltColors.textMuted),
                       const SizedBox(height: 8),
                       _buildReceiptItem('Whole Wheat Bread', 'x1', '\$3.50'),
-                      _buildReceiptItem('Organic Whole Milk', 'x2 gal', '\$7.00'),
+                      _buildReceiptItem(
+                          'Organic Whole Milk', 'x2 gal', '\$7.00'),
                       _buildReceiptItem('Fresh Bananas', 'x2.4 lbs', '\$2.28'),
                       const SizedBox(height: 8),
                       const DottedLine(color: WalletMeltColors.textMuted),
@@ -566,9 +572,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   initialValue: _currency,
                   decoration: const InputDecoration(
                     labelText: 'Currency Code',
-                    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    contentPadding:
+                        EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                   ),
-                  dropdownColor: isDark ? WalletMeltColors.darkSurface : Colors.white,
+                  dropdownColor:
+                      isDark ? WalletMeltColors.darkSurface : Colors.white,
                   borderRadius: BorderRadius.circular(20),
                   items: [
                     for (final currency in defaultCurrencyCodes)
@@ -580,7 +588,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         ),
                       ),
                   ],
-                  onChanged: (value) => setState(() => _currency = value ?? _currency),
+                  onChanged: (value) =>
+                      setState(() => _currency = value ?? _currency),
                 ),
               ],
             ),

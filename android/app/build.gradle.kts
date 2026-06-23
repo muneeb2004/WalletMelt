@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -9,6 +11,12 @@ android {
     namespace = "app.walletmelt.wallet_melt"
     compileSdk = 36
     ndkVersion = flutter.ndkVersion
+
+    val keystoreProperties = Properties()
+    val keystorePropertiesFile = rootProject.file("local.properties")
+    if (keystorePropertiesFile.exists()) {
+        keystoreProperties.load(keystorePropertiesFile.inputStream())
+    }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -26,13 +34,24 @@ android {
         versionName = flutter.versionName
     }
 
-
+    signingConfigs {
+        create("release") {
+            keyAlias = keystoreProperties.getProperty("keyAlias") ?: ""
+            keyPassword = keystoreProperties.getProperty("keyPassword") ?: ""
+            val storeFilePath = keystoreProperties.getProperty("storeFile")
+            storeFile = if (storeFilePath != null) file(storeFilePath) else null
+            storePassword = keystoreProperties.getProperty("storePassword") ?: ""
+        }
+    }
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            val isSigningConfigured = keystoreProperties.getProperty("storeFile") != null
+            signingConfig = if (isSigningConfigured) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")

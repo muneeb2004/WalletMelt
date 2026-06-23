@@ -16,7 +16,17 @@ import '../../widgets/primary_button.dart';
 import '../../widgets/app_snackbar.dart';
 
 class SubscriptionScreen extends StatefulWidget {
-  const SubscriptionScreen({super.key});
+  const SubscriptionScreen({this.isEmbedded = false, super.key});
+
+  final bool isEmbedded;
+
+  static void showAddSubscriptionSheet(BuildContext context) {
+    showAppBottomSheet(
+      context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => const _AddSubscriptionSheet(),
+    );
+  }
 
   @override
   State<SubscriptionScreen> createState() => _SubscriptionScreenState();
@@ -33,110 +43,116 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
 
     final filteredSubs = allSubs.where((s) => s.status == _selectedFilter).toList();
 
+    final content = Column(
+      children: [
+        if (!widget.isEmbedded)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 18, 20, 10),
+            child: Row(
+              children: [
+                IconButton(
+                  tooltip: 'Back',
+                  onPressed: () => context.pop(),
+                  icon: const Icon(Icons.arrow_back_rounded),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Subscriptions',
+                      maxLines: 1,
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  tooltip: 'Add Subscription',
+                  onPressed: () => _showAddSubscriptionSheet(context),
+                  icon: const Icon(Icons.add_rounded, size: 28),
+                ),
+              ],
+            ),
+          ),
+
+        // Tabs / Filters
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
+          child: Row(
+            children: [
+              _FilterChip(
+                label: 'Active',
+                selected: _selectedFilter == SubscriptionStatus.active,
+                color: WalletMeltColors.positive,
+                onTap: () => setState(() => _selectedFilter = SubscriptionStatus.active),
+              ),
+              const SizedBox(width: 8),
+              _FilterChip(
+                label: 'Paused',
+                selected: _selectedFilter == SubscriptionStatus.paused,
+                color: WalletMeltColors.brand,
+                onTap: () => setState(() => _selectedFilter = SubscriptionStatus.paused),
+              ),
+              const SizedBox(width: 8),
+              _FilterChip(
+                label: 'Cancelled',
+                selected: _selectedFilter == SubscriptionStatus.cancelled,
+                color: WalletMeltColors.danger,
+                onTap: () => setState(() => _selectedFilter = SubscriptionStatus.cancelled),
+              ),
+            ],
+          ),
+        ),
+
+        // Subscription List Content
+        Expanded(
+          child: filteredSubs.isEmpty
+              ? Center(
+                  child: EmptyState(
+                    icon: Icons.repeat_rounded,
+                    title: _selectedFilter == SubscriptionStatus.active
+                        ? 'No active subscriptions'
+                        : _selectedFilter == SubscriptionStatus.paused
+                            ? 'No paused subscriptions'
+                            : 'No cancelled subscriptions',
+                    subtitle: _selectedFilter == SubscriptionStatus.active
+                        ? 'Create templates for Netflix, gym, rent, etc. to auto-generate expenses.'
+                        : 'Subscriptions you pause will appear here.',
+                    actionLabel: _selectedFilter == SubscriptionStatus.active ? 'Add Subscription' : null,
+                    onActionPressed: _selectedFilter == SubscriptionStatus.active
+                        ? () => _showAddSubscriptionSheet(context)
+                        : null,
+                  ),
+                )
+              : ListView.builder(
+                  padding: EdgeInsets.fromLTRB(20, 10, 20, widget.isEmbedded ? 120 : 100),
+                  itemCount: filteredSubs.length,
+                  itemBuilder: (context, index) {
+                    final sub = filteredSubs[index];
+                    final category = state.categoryById(sub.categoryId);
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12.0),
+                      child: _SubscriptionCard(
+                        subscription: sub,
+                        category: category,
+                        currency: currency,
+                        onTap: () => _showSubscriptionActions(context, sub),
+                      ),
+                    );
+                  },
+                ),
+        ),
+      ],
+    );
+
+    if (widget.isEmbedded) {
+      return content;
+    }
+
     return Scaffold(
       body: AppBackground(
-        child: Column(
-          children: [
-            // Header Row
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 18, 20, 10),
-              child: Row(
-                children: [
-                  IconButton(
-                    tooltip: 'Back',
-                    onPressed: () => context.pop(),
-                    icon: const Icon(Icons.arrow_back_rounded),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        'Subscriptions',
-                        maxLines: 1,
-                        style: Theme.of(context).textTheme.headlineMedium,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    tooltip: 'Add Subscription',
-                    onPressed: () => _showAddSubscriptionSheet(context),
-                    icon: const Icon(Icons.add_rounded, size: 28),
-                  ),
-                ],
-              ),
-            ),
-
-            // Tabs / Filters
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
-              child: Row(
-                children: [
-                  _FilterChip(
-                    label: 'Active',
-                    selected: _selectedFilter == SubscriptionStatus.active,
-                    color: WalletMeltColors.positive,
-                    onTap: () => setState(() => _selectedFilter = SubscriptionStatus.active),
-                  ),
-                  const SizedBox(width: 8),
-                  _FilterChip(
-                    label: 'Paused',
-                    selected: _selectedFilter == SubscriptionStatus.paused,
-                    color: WalletMeltColors.brand,
-                    onTap: () => setState(() => _selectedFilter = SubscriptionStatus.paused),
-                  ),
-                  const SizedBox(width: 8),
-                  _FilterChip(
-                    label: 'Cancelled',
-                    selected: _selectedFilter == SubscriptionStatus.cancelled,
-                    color: WalletMeltColors.danger,
-                    onTap: () => setState(() => _selectedFilter = SubscriptionStatus.cancelled),
-                  ),
-                ],
-              ),
-            ),
-
-            // Subscription List Content
-            Expanded(
-              child: filteredSubs.isEmpty
-                  ? Center(
-                      child: EmptyState(
-                        icon: Icons.repeat_rounded,
-                        title: _selectedFilter == SubscriptionStatus.active
-                            ? 'No active subscriptions'
-                            : _selectedFilter == SubscriptionStatus.paused
-                                ? 'No paused subscriptions'
-                                : 'No cancelled subscriptions',
-                        subtitle: _selectedFilter == SubscriptionStatus.active
-                            ? 'Create templates for Netflix, gym, rent, etc. to auto-generate expenses.'
-                            : 'Subscriptions you pause will appear here.',
-                        actionLabel: _selectedFilter == SubscriptionStatus.active ? 'Add Subscription' : null,
-                        onActionPressed: _selectedFilter == SubscriptionStatus.active
-                            ? () => _showAddSubscriptionSheet(context)
-                            : null,
-                      ),
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(20, 10, 20, 100),
-                      itemCount: filteredSubs.length,
-                      itemBuilder: (context, index) {
-                        final sub = filteredSubs[index];
-                        final category = state.categoryById(sub.categoryId);
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 12.0),
-                          child: _SubscriptionCard(
-                            subscription: sub,
-                            category: category,
-                            currency: currency,
-                            onTap: () => _showSubscriptionActions(context, sub),
-                          ),
-                        );
-                      },
-                    ),
-            ),
-          ],
-        ),
+        child: content,
       ),
     );
   }
@@ -507,9 +523,10 @@ class _AddSubscriptionSheetState extends State<_AddSubscriptionSheet> {
                 ),
                 const SizedBox(height: 8),
                 SizedBox(
-                  height: 42,
+                  height: 48,
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
+                    clipBehavior: Clip.none,
                     itemCount: categories.length,
                     separatorBuilder: (context, i) => const SizedBox(width: 8),
                     itemBuilder: (context, index) {

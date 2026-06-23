@@ -26,7 +26,8 @@ class EmptyState extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
     return AppCard(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.xl),
+      padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg, vertical: AppSpacing.xl),
       child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -82,9 +83,9 @@ class EmptyState extends StatelessWidget {
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFFF59E0B).withValues(alpha: 0.28),
-                      blurRadius: 12,
-                      offset: const Offset(0, 6),
+                      color: Colors.black.withValues(alpha: 0.16),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
@@ -101,7 +102,8 @@ class EmptyState extends StatelessWidget {
                   onPressed: onActionPressed,
                   child: Text(
                     actionLabel!,
-                    style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w900, fontSize: 14),
                   ),
                 ),
               ),

@@ -23,8 +23,6 @@ import '../../theme/wallet_melt_theme.dart';
 import '../../types/settings.dart';
 import '../../widgets/app_snackbar.dart';
 
-
-
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({
     this.expenseCsvExportService = const ExpenseCsvExportService(),
@@ -77,25 +75,40 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     final state = context.read<AppState>();
     final currency = context.select((AppState s) => s.settings.currency);
-    final themePreference = context.select((AppState s) => s.settings.themePreference);
-    final lastExportedAt = context.select((AppState s) => s.settings.lastExportedAt);
+    final themePreference =
+        context.select((AppState s) => s.settings.themePreference);
+    final lastExportedAt =
+        context.select((AppState s) => s.settings.lastExportedAt);
     final expensesLength = context.select((AppState s) => s.expenses.length);
-    final deletedExpensesLength = context.select((AppState s) => s.deletedExpenses.length);
+    final deletedExpensesLength =
+        context.select((AppState s) => s.deletedExpenses.length);
 
     return Scaffold(
       body: AppBackground(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 18, 20, 120),
           children: [
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerLeft,
-              child: Text('Settings',
-                  maxLines: 1,
-                  style: Theme.of(context).textTheme.headlineMedium),
+            Row(
+              children: [
+                IconButton(
+                  tooltip: 'Back',
+                  onPressed: () => context.pop(),
+                  icon: const Icon(Icons.arrow_back_rounded),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text('Settings',
+                        maxLines: 1,
+                        style: Theme.of(context).textTheme.headlineMedium),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 18),
-            
+
             // CARD 1: PREFERENCES
             WMGlassSurface.tier2(
               child: Column(
@@ -107,9 +120,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   DropdownButtonFormField<String>(
                     initialValue: currency,
                     decoration: const InputDecoration(labelText: 'Currency'),
-                    dropdownColor: Theme.of(context).brightness == Brightness.dark
-                        ? WalletMeltColors.darkSurface
-                        : Colors.white,
+                    dropdownColor:
+                        Theme.of(context).brightness == Brightness.dark
+                            ? WalletMeltColors.darkSurface
+                            : Colors.white,
                     borderRadius: BorderRadius.circular(20),
                     items: [
                       for (final currency in defaultCurrencyCodes)
@@ -124,9 +138,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   DropdownButtonFormField<ThemePreference>(
                     initialValue: themePreference,
                     decoration: const InputDecoration(labelText: 'Theme'),
-                    dropdownColor: Theme.of(context).brightness == Brightness.dark
-                        ? WalletMeltColors.darkSurface
-                        : Colors.white,
+                    dropdownColor:
+                        Theme.of(context).brightness == Brightness.dark
+                            ? WalletMeltColors.darkSurface
+                            : Colors.white,
                     borderRadius: BorderRadius.circular(20),
                     items: const [
                       DropdownMenuItem(
@@ -145,31 +160,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             const SizedBox(height: 16),
 
-            // CARD: SUBSCRIPTIONS
-            WMGlassSurface.tier2(
-              onTap: () => context.push('/subscriptions'),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Subscriptions',
-                            style: Theme.of(context).textTheme.titleLarge),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Manage recurring services, utilities, gym memberships, and rent templates.',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 13),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Icon(Icons.chevron_right_rounded, color: WalletMeltColors.brand),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-            
             // CARD 2: BACKUP & DATA MANAGEMENT
             WMGlassSurface.tier2(
               child: Column(
@@ -178,7 +168,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   Text('Backup & Data Management',
                       style: Theme.of(context).textTheme.titleLarge),
                   const SizedBox(height: 12),
-                  
+
                   // Data export subsection
                   Text('Data export',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -238,12 +228,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           : 'Back up JSON'),
                     ),
                   ),
-                  
+
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 12),
-                    child: Divider(height: 1, color: Colors.grey, thickness: 0.12),
+                    child:
+                        Divider(height: 1, color: Colors.grey, thickness: 0.12),
                   ),
-                  
+
                   // Data import subsection
                   Text('Data import',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -273,10 +264,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     'Select a backup JSON file to verify its structure and compatibility before importing. No changes will be made to your data.',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
-                  
+
                   const SizedBox(height: AppSpacing.md),
                   Text(
-                    _exportStatusText(currency, expensesLength, deletedExpensesLength, lastExportedAt),
+                    _exportStatusText(currency, expensesLength,
+                        deletedExpensesLength, lastExportedAt),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           fontStyle: FontStyle.italic,
                         ),
@@ -285,7 +277,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            
+
             // CARD 3: ABOUT & PRIVACY
             WMGlassSurface.tier2(
               child: Column(
@@ -302,11 +294,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   const SizedBox(height: 4),
                   Text(
                     'All expenses, settings, categories, budgets, and receipt images stay stored locally on this device. There is no remote login, backend databases, or cloud tracking.',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 13),
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyMedium
+                        ?.copyWith(fontSize: 13),
                   ),
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 12),
-                    child: Divider(height: 1, color: Colors.grey, thickness: 0.12),
+                    child:
+                        Divider(height: 1, color: Colors.grey, thickness: 0.12),
                   ),
                   Text('Future Scope',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -316,17 +312,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   const SizedBox(height: 4),
                   Text(
                     'Automatic cloud synchronization, shared household ledger profiles, OCR-based receipt scanning, and recurring expense reminders are planned for future versions.',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 13),
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyMedium
+                        ?.copyWith(fontSize: 13),
                   ),
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 12),
-                    child: Divider(height: 1, color: Colors.grey, thickness: 0.12),
+                    child:
+                        Divider(height: 1, color: Colors.grey, thickness: 0.12),
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text('Version',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(fontWeight: FontWeight.bold)),
                       Text('v0.1.1',
                           style: Theme.of(context).textTheme.bodyMedium),
                     ],
@@ -428,11 +431,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
         return;
       }
 
-      final result = widget.importValidationService.validateBackup(backupFile.jsonText);
+      final result =
+          widget.importValidationService.validateBackup(backupFile.jsonText);
       if (!mounted) return;
 
       if (result.isValid) {
-        final preview = widget.previewService.generatePreview(backupFile.jsonText);
+        final preview =
+            widget.previewService.generatePreview(backupFile.jsonText);
         if (preview.isValid) {
           final state = context.read<AppState>();
           await state.loadDeletedExpenses();
@@ -528,7 +533,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           jsonBackupService: widget.jsonBackupService,
           restoreService: widget.restoreService,
           onSuccess: (result, durationSeconds, mode, backupVersion) {
-            _showRestoreSummaryDialog(result, durationSeconds, mode, backupVersion);
+            _showRestoreSummaryDialog(
+                result, durationSeconds, mode, backupVersion);
           },
           onRestoreStarted: () {
             setState(() => _isRestoreInProgress = true);
@@ -561,7 +567,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-
   String _safeRestoreErrorMessage(String message) {
     final firstLine = message
         .replaceAll(RegExp(r'\s+'), ' ')
@@ -581,7 +586,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return sanitized.isEmpty ? 'Unknown restore error.' : sanitized;
   }
 
-  String _exportStatusText(String currency, int expensesLength, int deletedExpensesLength, String? lastExportedAt) {
+  String _exportStatusText(String currency, int expensesLength,
+      int deletedExpensesLength, String? lastExportedAt) {
     final activeCount = expensesLength;
     final deletedCount = deletedExpensesLength;
     final countText = _includeDeletedExpenses

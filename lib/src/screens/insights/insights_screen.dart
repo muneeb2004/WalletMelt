@@ -45,7 +45,7 @@ class InsightsScreen extends StatelessWidget {
 
     for (final exp in state.expenses) {
       if (exp.deletedAt != null) continue;
-      
+
       DateTime expDate;
       try {
         expDate = DateTime.parse(exp.date);
@@ -62,7 +62,8 @@ class InsightsScreen extends StatelessWidget {
           taxableSpend += exp.subtotalAmount ?? (exp.amount - exp.taxAmount!);
           final category = state.categoryById(exp.categoryId);
           final catName = category?.name ?? 'Uncategorized';
-          taxByCategory[catName] = (taxByCategory[catName] ?? 0.0) + exp.taxAmount!;
+          taxByCategory[catName] =
+              (taxByCategory[catName] ?? 0.0) + exp.taxAmount!;
         } else {
           nonTaxableSpend += exp.amount;
         }
@@ -81,7 +82,9 @@ class InsightsScreen extends StatelessWidget {
     wm_sub.Subscription? mostExpensiveSub;
     double highestSubPrice = 0.0;
 
-    final activeSubs = state.subscriptions.where((s) => s.status == wm_sub.SubscriptionStatus.active).toList();
+    final activeSubs = state.subscriptions
+        .where((s) => s.status == wm_sub.SubscriptionStatus.active)
+        .toList();
     final subSpendByCategory = <String, double>{};
 
     for (final sub in activeSubs) {
@@ -113,7 +116,8 @@ class InsightsScreen extends StatelessWidget {
 
       final category = state.categoryById(sub.categoryId);
       final catName = category?.name ?? 'Uncategorized';
-      subSpendByCategory[catName] = (subSpendByCategory[catName] ?? 0.0) + monthlyEquivalent;
+      subSpendByCategory[catName] =
+          (subSpendByCategory[catName] ?? 0.0) + monthlyEquivalent;
 
       if (subTotalCost > highestSubPrice) {
         highestSubPrice = subTotalCost;
@@ -126,13 +130,16 @@ class InsightsScreen extends StatelessWidget {
     for (final debt in state.debts) {
       if (debt.isSettled) continue;
 
-      final isReceivable = debt.type == DebtType.owedToMe || debt.type == DebtType.loanGiven;
+      final isReceivable =
+          debt.type == DebtType.owedToMe || debt.type == DebtType.loanGiven;
       if (isReceivable) {
         receivables += debt.remainingAmount;
-        debtorAmounts[debt.personName] = (debtorAmounts[debt.personName] ?? 0.0) + debt.remainingAmount;
+        debtorAmounts[debt.personName] =
+            (debtorAmounts[debt.personName] ?? 0.0) + debt.remainingAmount;
       } else {
         liabilities += debt.remainingAmount;
-        creditorAmounts[debt.personName] = (creditorAmounts[debt.personName] ?? 0.0) + debt.remainingAmount;
+        creditorAmounts[debt.personName] =
+            (creditorAmounts[debt.personName] ?? 0.0) + debt.remainingAmount;
       }
 
       if (debt.dueDate != null && debt.dueDate!.compareTo(nowStr) < 0) {
@@ -166,21 +173,46 @@ class InsightsScreen extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 18, 20, 120),
           children: [
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerLeft,
-              child: Text('Insights',
-                  maxLines: 1,
-                  style: Theme.of(context).textTheme.headlineMedium),
-            ),
-            const SizedBox(height: AppSpacing.xs),
             Row(
               children: [
-                const Icon(Icons.calendar_today_rounded,
-                    size: 14, color: WalletMeltColors.textMuted),
-                const SizedBox(width: AppSpacing.xs + 2),
-                Text(readableMonth(selectedMonth),
-                    style: Theme.of(context).textTheme.bodyMedium),
+                IconButton(
+                  tooltip: 'Back',
+                  onPressed: () => context.pop(),
+                  icon: const Icon(Icons.arrow_back_rounded),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text('Insights',
+                            maxLines: 1,
+                            style: Theme.of(context).textTheme.headlineMedium),
+                      ),
+                      const SizedBox(height: 2),
+                      Row(
+                        children: [
+                          const Icon(Icons.calendar_today_rounded,
+                              size: 13, color: WalletMeltColors.textMuted),
+                          const SizedBox(width: 6),
+                          Text(
+                            readableMonth(selectedMonth),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: WalletMeltColors.textMuted,
+                                  fontSize: 12,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: AppSpacing.md + 2),
@@ -207,16 +239,20 @@ class InsightsScreen extends StatelessWidget {
                     if (insights.monthOverMonthDelta != null) ...[
                       const SizedBox(height: AppSpacing.sm + 2),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
                           color: insights.monthOverMonthDelta! <= 0
-                              ? WalletMeltColors.positive.withValues(alpha: 0.16)
+                              ? WalletMeltColors.positive
+                                  .withValues(alpha: 0.16)
                               : WalletMeltColors.danger.withValues(alpha: 0.16),
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
                             color: insights.monthOverMonthDelta! <= 0
-                                ? WalletMeltColors.positive.withValues(alpha: 0.28)
-                                : WalletMeltColors.danger.withValues(alpha: 0.28),
+                                ? WalletMeltColors.positive
+                                    .withValues(alpha: 0.28)
+                                : WalletMeltColors.danger
+                                    .withValues(alpha: 0.28),
                             width: 1.0,
                           ),
                         ),
@@ -228,10 +264,12 @@ class InsightsScreen extends StatelessWidget {
                                   ? Icons.trending_down_rounded
                                   : Icons.trending_up_rounded,
                               color: insights.monthOverMonthDelta! <= 0
-                                  ? (Theme.of(context).brightness == Brightness.dark
+                                  ? (Theme.of(context).brightness ==
+                                          Brightness.dark
                                       ? WalletMeltColors.positive
                                       : const Color(0xFF1E7E52))
-                                  : (Theme.of(context).brightness == Brightness.dark
+                                  : (Theme.of(context).brightness ==
+                                          Brightness.dark
                                       ? WalletMeltColors.danger
                                       : const Color(0xFFC0392B)),
                               size: 16,
@@ -239,13 +277,18 @@ class InsightsScreen extends StatelessWidget {
                             const SizedBox(width: 6),
                             Text(
                               '${insights.monthOverMonthDelta! >= 0 ? '+' : ''}${insights.monthOverMonthDelta!.toStringAsFixed(1)}% vs previous month',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
                                     fontWeight: FontWeight.w800,
                                     color: insights.monthOverMonthDelta! <= 0
-                                        ? (Theme.of(context).brightness == Brightness.dark
+                                        ? (Theme.of(context).brightness ==
+                                                Brightness.dark
                                             ? Colors.white
                                             : const Color(0xFF1E7E52))
-                                        : (Theme.of(context).brightness == Brightness.dark
+                                        : (Theme.of(context).brightness ==
+                                                Brightness.dark
                                             ? Colors.white
                                             : const Color(0xFFC0392B)),
                                   ),
@@ -298,7 +341,7 @@ class InsightsScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: AppSpacing.md),
                     OutlinedButton.icon(
-                      onPressed: () => context.go('/budget'),
+                      onPressed: () => context.go('/planning'),
                       icon: const Icon(Icons.account_balance_wallet_rounded),
                       label: const Text('Manage Budgets'),
                     ),
@@ -323,7 +366,10 @@ class InsightsScreen extends StatelessWidget {
                     children: [
                       Text(
                         'Net Position:',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       Text(
                         '${netDebtPosition >= 0 ? "+" : ""}${netDebtPosition.toStringAsFixed(netDebtPosition % 1 == 0 ? 0 : 2)} $currency',
@@ -338,7 +384,11 @@ class InsightsScreen extends StatelessWidget {
                     ],
                   ),
                   AppSpacing.gapSm,
-                  Divider(height: 1, color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder),
+                  Divider(
+                      height: 1,
+                      color: isDark
+                          ? WalletMeltColors.darkBorder
+                          : WalletMeltColors.lightBorder),
                   AppSpacing.gapSm,
                   Row(
                     children: [
@@ -348,18 +398,29 @@ class InsightsScreen extends StatelessWidget {
                           children: [
                             const Text(
                               'RECEIVABLES',
-                              style: TextStyle(fontSize: 9, color: WalletMeltColors.textMuted, fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                  fontSize: 9,
+                                  color: WalletMeltColors.textMuted,
+                                  fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 2),
                             Text(
                               '${receivables.toStringAsFixed(receivables % 1 == 0 ? 0 : 2)} $currency',
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: WalletMeltColors.positive),
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                  color: WalletMeltColors.positive),
                             ),
                           ],
                         ),
                       ),
                       AppSpacing.gapSm,
-                      Container(width: 1, height: 28, color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder),
+                      Container(
+                          width: 1,
+                          height: 28,
+                          color: isDark
+                              ? WalletMeltColors.darkBorder
+                              : WalletMeltColors.lightBorder),
                       AppSpacing.gapSm,
                       Expanded(
                         child: Column(
@@ -367,18 +428,29 @@ class InsightsScreen extends StatelessWidget {
                           children: [
                             const Text(
                               'LIABILITIES',
-                              style: TextStyle(fontSize: 9, color: WalletMeltColors.textMuted, fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                  fontSize: 9,
+                                  color: WalletMeltColors.textMuted,
+                                  fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 2),
                             Text(
                               '${liabilities.toStringAsFixed(liabilities % 1 == 0 ? 0 : 2)} $currency',
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: WalletMeltColors.danger),
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                  color: WalletMeltColors.danger),
                             ),
                           ],
                         ),
                       ),
                       AppSpacing.gapSm,
-                      Container(width: 1, height: 28, color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder),
+                      Container(
+                          width: 1,
+                          height: 28,
+                          color: isDark
+                              ? WalletMeltColors.darkBorder
+                              : WalletMeltColors.lightBorder),
                       AppSpacing.gapSm,
                       Expanded(
                         child: Column(
@@ -386,7 +458,10 @@ class InsightsScreen extends StatelessWidget {
                           children: [
                             const Text(
                               'OVERDUE',
-                              style: TextStyle(fontSize: 9, color: WalletMeltColors.textMuted, fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                  fontSize: 9,
+                                  color: WalletMeltColors.textMuted,
+                                  fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 2),
                             Text(
@@ -394,7 +469,9 @@ class InsightsScreen extends StatelessWidget {
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 13,
-                                color: overdueAmount > 0 ? WalletMeltColors.danger : WalletMeltColors.textMuted,
+                                color: overdueAmount > 0
+                                    ? WalletMeltColors.danger
+                                    : WalletMeltColors.textMuted,
                               ),
                             ),
                           ],
@@ -403,7 +480,11 @@ class InsightsScreen extends StatelessWidget {
                     ],
                   ),
                   AppSpacing.gapSm,
-                  Divider(height: 1, color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder),
+                  Divider(
+                      height: 1,
+                      color: isDark
+                          ? WalletMeltColors.darkBorder
+                          : WalletMeltColors.lightBorder),
                   AppSpacing.gapSm,
                   Row(
                     children: [
@@ -413,14 +494,18 @@ class InsightsScreen extends StatelessWidget {
                           children: [
                             const Text(
                               'LARGEST DEBTOR',
-                              style: TextStyle(fontSize: 9, color: WalletMeltColors.textMuted, fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                  fontSize: 9,
+                                  color: WalletMeltColors.textMuted,
+                                  fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 4),
                             Text(
                               largestDebtorName != null
                                   ? '$largestDebtorName (${largestDebtorAmount.toStringAsFixed(largestDebtorAmount % 1 == 0 ? 0 : 2)} $currency)'
                                   : 'None',
-                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                              style: const TextStyle(
+                                  fontSize: 12, fontWeight: FontWeight.w700),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -434,14 +519,18 @@ class InsightsScreen extends StatelessWidget {
                           children: [
                             const Text(
                               'LARGEST CREDITOR',
-                              style: TextStyle(fontSize: 9, color: WalletMeltColors.textMuted, fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                  fontSize: 9,
+                                  color: WalletMeltColors.textMuted,
+                                  fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 4),
                             Text(
                               largestCreditorName != null
                                   ? '$largestCreditorName (${largestCreditorAmount.toStringAsFixed(largestCreditorAmount % 1 == 0 ? 0 : 2)} $currency)'
                                   : 'None',
-                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                              style: const TextStyle(
+                                  fontSize: 12, fontWeight: FontWeight.w700),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -468,10 +557,14 @@ class InsightsScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Tax Paid This Month:', style: TextStyle(fontSize: 13)),
+                      const Text('Tax Paid This Month:',
+                          style: TextStyle(fontSize: 13)),
                       Text(
                         '${monthlyTax.toStringAsFixed(monthlyTax % 1 == 0 ? 0 : 2)} $currency',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: WalletMeltColors.danger),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: WalletMeltColors.danger),
                       ),
                     ],
                   ),
@@ -479,15 +572,23 @@ class InsightsScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Tax Paid This Year:', style: TextStyle(fontSize: 13)),
+                      const Text('Tax Paid This Year:',
+                          style: TextStyle(fontSize: 13)),
                       Text(
                         '${yearlyTax.toStringAsFixed(yearlyTax % 1 == 0 ? 0 : 2)} $currency',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: WalletMeltColors.danger),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: WalletMeltColors.danger),
                       ),
                     ],
                   ),
                   AppSpacing.gapSm,
-                  Divider(height: 1, color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder),
+                  Divider(
+                      height: 1,
+                      color: isDark
+                          ? WalletMeltColors.darkBorder
+                          : WalletMeltColors.lightBorder),
                   AppSpacing.gapSm,
                   Row(
                     children: [
@@ -497,18 +598,27 @@ class InsightsScreen extends StatelessWidget {
                           children: [
                             const Text(
                               'TAXABLE SPEND',
-                              style: TextStyle(fontSize: 9, color: WalletMeltColors.textMuted, fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                  fontSize: 9,
+                                  color: WalletMeltColors.textMuted,
+                                  fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 2),
                             Text(
                               '${taxableSpend.toStringAsFixed(taxableSpend % 1 == 0 ? 0 : 2)} $currency',
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 13),
                             ),
                           ],
                         ),
                       ),
                       AppSpacing.gapSm,
-                      Container(width: 1, height: 28, color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder),
+                      Container(
+                          width: 1,
+                          height: 28,
+                          color: isDark
+                              ? WalletMeltColors.darkBorder
+                              : WalletMeltColors.lightBorder),
                       AppSpacing.gapSm,
                       Expanded(
                         child: Column(
@@ -516,12 +626,16 @@ class InsightsScreen extends StatelessWidget {
                           children: [
                             const Text(
                               'TAX-FREE SPEND',
-                              style: TextStyle(fontSize: 9, color: WalletMeltColors.textMuted, fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                  fontSize: 9,
+                                  color: WalletMeltColors.textMuted,
+                                  fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 2),
                             Text(
                               '${nonTaxableSpend.toStringAsFixed(nonTaxableSpend % 1 == 0 ? 0 : 2)} $currency',
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 13),
                             ),
                           ],
                         ),
@@ -530,11 +644,18 @@ class InsightsScreen extends StatelessWidget {
                   ),
                   if (taxByCategory.isNotEmpty) ...[
                     AppSpacing.gapSm,
-                    Divider(height: 1, color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder),
+                    Divider(
+                        height: 1,
+                        color: isDark
+                            ? WalletMeltColors.darkBorder
+                            : WalletMeltColors.lightBorder),
                     AppSpacing.gapSm,
                     const Text(
                       'TAX BY CATEGORY (THIS MONTH)',
-                      style: TextStyle(fontSize: 9, color: WalletMeltColors.textMuted, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          fontSize: 9,
+                          color: WalletMeltColors.textMuted,
+                          fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 6),
                     for (final entry in taxByCategory.entries) ...[
@@ -543,10 +664,12 @@ class InsightsScreen extends StatelessWidget {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(entry.key, style: const TextStyle(fontSize: 12)),
+                            Text(entry.key,
+                                style: const TextStyle(fontSize: 12)),
                             Text(
                               '${entry.value.toStringAsFixed(entry.value % 1 == 0 ? 0 : 2)} $currency',
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 12),
                             ),
                           ],
                         ),
@@ -571,10 +694,14 @@ class InsightsScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Monthly Est. Spend:', style: TextStyle(fontSize: 13)),
+                      const Text('Monthly Est. Spend:',
+                          style: TextStyle(fontSize: 13)),
                       Text(
                         '${monthlySubSpend.toStringAsFixed(monthlySubSpend % 1 == 0 ? 0 : 2)} $currency',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: WalletMeltColors.brandDeep),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: WalletMeltColors.brandDeep),
                       ),
                     ],
                   ),
@@ -582,34 +709,53 @@ class InsightsScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Annual Est. Spend:', style: TextStyle(fontSize: 13)),
+                      const Text('Annual Est. Spend:',
+                          style: TextStyle(fontSize: 13)),
                       Text(
                         '${annualSubSpend.toStringAsFixed(annualSubSpend % 1 == 0 ? 0 : 2)} $currency',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: WalletMeltColors.brandDeep),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: WalletMeltColors.brandDeep),
                       ),
                     ],
                   ),
                   AppSpacing.gapSm,
-                  Divider(height: 1, color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder),
+                  Divider(
+                      height: 1,
+                      color: isDark
+                          ? WalletMeltColors.darkBorder
+                          : WalletMeltColors.lightBorder),
                   AppSpacing.gapSm,
                   const Text(
                     'MOST EXPENSIVE',
-                    style: TextStyle(fontSize: 9, color: WalletMeltColors.textMuted, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        fontSize: 9,
+                        color: WalletMeltColors.textMuted,
+                        fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     mostExpensiveSub != null
                         ? '${mostExpensiveSub.name} (${(mostExpensiveSub.amount + (mostExpensiveSub.taxAmount ?? 0.0)).toStringAsFixed(0)} $currency/${mostExpensiveSub.billingCycle})'
                         : 'None active',
-                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 13, fontWeight: FontWeight.bold),
                   ),
                   if (subSpendByCategory.isNotEmpty) ...[
                     AppSpacing.gapSm,
-                    Divider(height: 1, color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder),
+                    Divider(
+                        height: 1,
+                        color: isDark
+                            ? WalletMeltColors.darkBorder
+                            : WalletMeltColors.lightBorder),
                     AppSpacing.gapSm,
                     const Text(
                       'SUBSCRIPTIONS BY CATEGORY',
-                      style: TextStyle(fontSize: 9, color: WalletMeltColors.textMuted, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          fontSize: 9,
+                          color: WalletMeltColors.textMuted,
+                          fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 6),
                     for (final entry in subSpendByCategory.entries) ...[
@@ -618,10 +764,12 @@ class InsightsScreen extends StatelessWidget {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(entry.key, style: const TextStyle(fontSize: 12)),
+                            Text(entry.key,
+                                style: const TextStyle(fontSize: 12)),
                             Text(
                               '${entry.value.toStringAsFixed(entry.value % 1 == 0 ? 0 : 2)} $currency/mo',
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 12),
                             ),
                           ],
                         ),
