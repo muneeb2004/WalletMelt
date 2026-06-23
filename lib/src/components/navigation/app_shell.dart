@@ -25,9 +25,9 @@ class AppShell extends StatelessWidget {
         children: [
           Positioned.fill(child: navigationShell),
           Positioned(
-            left: 18,
-            right: 18,
-            bottom: 18,
+            left: AppSpacing.md,
+            right: AppSpacing.md,
+            bottom: AppSpacing.md,
             child: SafeArea(
                 child: FlatNavBar(
                   radius: 999,
@@ -179,7 +179,10 @@ class ScreenActionResolver {
               bottom: MediaQuery.of(sheetContext).viewInsets.bottom,
             ),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: AppSpacing.lg,
+              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -198,11 +201,12 @@ class ScreenActionResolver {
                     title: 'Money Owed To Me',
                     subtitle: 'A person owes you money',
                     onTap: () {
+                      HapticFeedback.lightImpact();
                       Navigator.pop(sheetContext);
                       DebtScreen.showAddDebtSheet(context, initialType: DebtType.owedToMe);
                     },
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
                   _buildDebtActionTile(
                     sheetContext,
                     icon: Icons.call_received_rounded,
@@ -210,11 +214,12 @@ class ScreenActionResolver {
                     title: 'Money I Owe',
                     subtitle: 'You owe someone money',
                     onTap: () {
+                      HapticFeedback.lightImpact();
                       Navigator.pop(sheetContext);
                       DebtScreen.showAddDebtSheet(context, initialType: DebtType.iOwe);
                     },
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
                   _buildDebtActionTile(
                     sheetContext,
                     icon: Icons.arrow_outward_rounded,
@@ -222,11 +227,12 @@ class ScreenActionResolver {
                     title: 'Loan Given',
                     subtitle: 'You lent money to someone',
                     onTap: () {
+                      HapticFeedback.lightImpact();
                       Navigator.pop(sheetContext);
                       DebtScreen.showAddDebtSheet(context, initialType: DebtType.loanGiven);
                     },
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
                   _buildDebtActionTile(
                     sheetContext,
                     icon: Icons.call_received_rounded,
@@ -234,6 +240,7 @@ class ScreenActionResolver {
                     title: 'Loan Taken',
                     subtitle: 'You borrowed money from someone',
                     onTap: () {
+                      HapticFeedback.lightImpact();
                       Navigator.pop(sheetContext);
                       DebtScreen.showAddDebtSheet(context, initialType: DebtType.loanTaken);
                     },
@@ -255,6 +262,7 @@ class ScreenActionResolver {
     required String subtitle,
     required VoidCallback onTap,
   }) {
+    final theme = Theme.of(context);
     return WMGlassSurface.tier2(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       onTap: onTap,
@@ -269,18 +277,24 @@ class ScreenActionResolver {
             ),
             child: Icon(icon, color: color, size: 18),
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: AppSpacing.md - 2.0),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
-                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14.0,
+                  ),
                 ),
                 Text(
                   subtitle,
-                  style: const TextStyle(color: WalletMeltColors.textMuted, fontSize: 11),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: WalletMeltColors.textMuted,
+                    fontSize: 11.0,
+                  ),
                 ),
               ],
             ),
@@ -314,13 +328,13 @@ class _AppFloatingActionButtonState extends State<_AppFloatingActionButton> {
       child: AnimatedScale(
         scale: hasAction ? _scale : 0.0,
         duration: const Duration(milliseconds: 220),
-        curve: Curves.easeOutBack,
+        curve: Curves.easeOutCubic,
         child: Padding(
           padding: const EdgeInsets.only(bottom: 84),
           child: IgnorePointer(
             ignoring: !hasAction,
             child: GestureDetector(
-              onTapDown: (_) => setState(() => _scale = 0.90),
+              onTapDown: (_) => setState(() => _scale = 0.94),
               onTapUp: (_) => setState(() => _scale = 1.0),
               onTapCancel: () => setState(() => _scale = 1.0),
               child: Container(
@@ -353,7 +367,14 @@ class _AppFloatingActionButtonState extends State<_AppFloatingActionButton> {
                   shape: const CircleBorder(),
                   elevation: 0,
                   fillColor: Colors.transparent,
-                  onPressed: widget.action?.action,
+                  splashColor: Colors.white.withValues(alpha: 0.15),
+                  highlightColor: Colors.white.withValues(alpha: 0.08),
+                  onPressed: widget.action == null
+                      ? null
+                      : () {
+                          HapticFeedback.lightImpact();
+                          widget.action!.action();
+                        },
                   child: Icon(
                     widget.action?.icon ?? Icons.add_rounded,
                     size: 28,
@@ -416,7 +437,7 @@ class _NavItem extends StatelessWidget {
                 AnimatedScale(
                   scale: active ? 1.12 : 1.0,
                   duration: const Duration(milliseconds: 240),
-                  curve: Curves.easeOutBack,
+                  curve: Curves.easeOutCubic,
                   child: TweenAnimationBuilder<Color?>(
                     duration: const Duration(milliseconds: 240),
                     tween: ColorTween(
