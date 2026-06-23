@@ -11,7 +11,6 @@ import '../../types/expense.dart';
 import '../../types/grocery_item.dart';
 import '../../utils/currency_format.dart';
 import '../../utils/date_utils.dart';
-import '../../widgets/confirm_dialog.dart';
 import '../../widgets/section_header.dart';
 
 class ExpenseDetailScreen extends StatelessWidget {

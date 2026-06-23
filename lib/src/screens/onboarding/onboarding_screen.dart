@@ -561,14 +561,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         fontWeight: FontWeight.w800,
                       ),
                 ),
-                const SizedBox(height: 8),
+                AppSpacing.gapSm,
                 DropdownButtonFormField<String>(
                   initialValue: _currency,
                   decoration: const InputDecoration(
                     labelText: 'Currency Code',
                     contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                   ),
-                  dropdownColor: isDark ? const Color(0xFF1E1E24) : Colors.white,
+                  dropdownColor: isDark ? WalletMeltColors.darkSurface : Colors.white,
                   borderRadius: BorderRadius.circular(20),
                   items: [
                     for (final currency in defaultCurrencyCodes)

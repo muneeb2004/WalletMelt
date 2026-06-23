@@ -14,6 +14,13 @@ Future<bool?> showConfirmDialog(
   required String confirmLabel,
   bool isDestructive = false,
 }) {
+  // Trigger tactile sensory feedback
+  if (isDestructive) {
+    WMHaptics.heavy();
+  } else {
+    WMHaptics.light();
+  }
+
   return showDialog<bool>(
     context: context,
     builder: (dialogContext) => AlertDialog(

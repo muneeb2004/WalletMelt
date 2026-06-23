@@ -7,6 +7,7 @@ import '../../state/app_state.dart';
 import '../../theme/wallet_melt_theme.dart';
 import '../../types/debt.dart';
 import '../../widgets/primary_button.dart';
+import '../../widgets/app_snackbar.dart';
 
 class DebtScreen extends StatefulWidget {
   const DebtScreen({super.key});
@@ -15,99 +16,87 @@ class DebtScreen extends StatefulWidget {
     final state = context.read<AppState>();
     final active = state.debts.where((d) => !d.isSettled).toList();
 
-    showModalBottomSheet<void>(
-      context: context,
-      useRootNavigator: true,
-      isScrollControlled: true,
-      constraints: const BoxConstraints(maxWidth: 600),
+    showAppBottomSheet<void>(
+      context,
       builder: (sheetContext) {
-        return SafeArea(
-          child: AnimatedPadding(
-            duration: const Duration(milliseconds: 150),
-            curve: Curves.easeOut,
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(sheetContext).viewInsets.bottom,
-            ),
-            child: Container(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Select Obligation for Repayment',
-                    style: Theme.of(sheetContext).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
-                  ),
-                  const SizedBox(height: 14),
-                  if (active.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 24),
-                      child: Center(
-                        child: Text(
-                          'No active debts or loans found.',
-                          style: TextStyle(color: WalletMeltColors.textMuted),
-                        ),
-                      ),
-                    )
-                  else
-                    ConstrainedBox(
-                      constraints: const BoxConstraints(maxHeight: 300),
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: active.length,
-                        itemBuilder: (ctx, idx) {
-                          final debt = active[idx];
-                          final isReceivable = debt.type == DebtType.owedToMe || debt.type == DebtType.loanGiven;
-                          final typeColor = isReceivable ? WalletMeltColors.positive : WalletMeltColors.danger;
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: WMGlassSurface.tier2(
-                              padding: const EdgeInsets.all(12),
-                              onTap: () {
-                                Navigator.pop(sheetContext);
-                                showDebtDetailSheet(context, debt);
-                              },
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    isReceivable
-                                        ? Icons.arrow_outward_rounded
-                                        : Icons.call_received_rounded,
-                                    color: typeColor,
-                                    size: 16,
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          debt.personName,
-                                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                                        ),
-                                        Text(
-                                          debt.type.name.toUpperCase(),
-                                          style: TextStyle(fontSize: 9, color: typeColor, fontWeight: FontWeight.bold),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Text(
-                                    '${debt.remainingAmount.toStringAsFixed(debt.remainingAmount % 1 == 0 ? 0 : 2)} ${debt.currency}',
-                                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
+        return Container(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Select Obligation for Repayment',
+                style: Theme.of(sheetContext).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
                     ),
-                ],
               ),
-            ),
+              const SizedBox(height: 14),
+              if (active.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 24),
+                  child: Center(
+                    child: Text(
+                      'No active debts or loans found.',
+                      style: TextStyle(color: WalletMeltColors.textMuted),
+                    ),
+                  ),
+                )
+              else
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 300),
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: active.length,
+                    itemBuilder: (ctx, idx) {
+                      final debt = active[idx];
+                      final isReceivable = debt.type == DebtType.owedToMe || debt.type == DebtType.loanGiven;
+                      final typeColor = isReceivable ? WalletMeltColors.positive : WalletMeltColors.danger;
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: WMGlassSurface.tier2(
+                          padding: const EdgeInsets.all(12),
+                          onTap: () {
+                            Navigator.pop(sheetContext);
+                            showDebtDetailSheet(context, debt);
+                          },
+                          child: Row(
+                            children: [
+                              Icon(
+                                isReceivable
+                                    ? Icons.arrow_outward_rounded
+                                    : Icons.call_received_rounded,
+                                color: typeColor,
+                                size: 16,
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      debt.personName,
+                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                    ),
+                                    Text(
+                                      debt.type.name.toUpperCase(),
+                                      style: TextStyle(fontSize: 9, color: typeColor, fontWeight: FontWeight.bold),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Text(
+                                '${debt.remainingAmount.toStringAsFixed(debt.remainingAmount % 1 == 0 ? 0 : 2)} ${debt.currency}',
+                                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+            ],
           ),
         );
       },
@@ -124,23 +113,12 @@ class DebtScreen extends StatefulWidget {
     DebtType selectedType = initialType ?? DebtType.owedToMe;
     DateTime? selectedDueDate;
 
-    await showModalBottomSheet<void>(
-      context: context,
-      useRootNavigator: true,
-      isScrollControlled: true,
-      showDragHandle: true,
-      constraints: const BoxConstraints(maxWidth: 600),
+    await showAppBottomSheet<void>(
+      context,
       builder: (sheetContext) {
-        return SafeArea(
-          child: AnimatedPadding(
-            duration: const Duration(milliseconds: 150),
-            curve: Curves.easeOut,
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(sheetContext).viewInsets.bottom,
-            ),
-            child: StatefulBuilder(
-              builder: (context, setSheetState) {
-                return SingleChildScrollView(
+        return StatefulBuilder(
+          builder: (builderContext, setSheetState) {
+            return SingleChildScrollView(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
                     child: Column(
@@ -148,8 +126,8 @@ class DebtScreen extends StatefulWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('Record Debt or Loan',
-                            style: Theme.of(context).textTheme.titleLarge),
-                        const SizedBox(height: 14),
+                            style: Theme.of(builderContext).textTheme.titleLarge),
+                        AppSpacing.gapMd,
 
                         TextField(
                           controller: nameController,
@@ -158,7 +136,7 @@ class DebtScreen extends StatefulWidget {
                             hintText: 'e.g., Ali, Ahmed',
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        AppSpacing.gapSm,
 
                         Row(
                           children: [
@@ -173,14 +151,14 @@ class DebtScreen extends StatefulWidget {
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 12),
+                            AppSpacing.gapSm,
                             Expanded(
                               flex: 5,
                               child: DropdownButtonFormField<DebtType>(
                                 initialValue: selectedType,
                                 decoration: const InputDecoration(labelText: 'Type'),
-                                dropdownColor: Theme.of(context).brightness == Brightness.dark
-                                    ? const Color(0xFF1E1E24)
+                                dropdownColor: Theme.of(builderContext).brightness == Brightness.dark
+                                    ? WalletMeltColors.darkSurface
                                     : Colors.white,
                                 borderRadius: BorderRadius.circular(20),
                                 items: const [
@@ -210,12 +188,12 @@ class DebtScreen extends StatefulWidget {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 14),
+                        AppSpacing.gapMd,
 
                         WMGlassSurface.tier1(
                           onTap: () async {
                             final picked = await showDatePicker(
-                              context: context,
+                              context: builderContext,
                               useRootNavigator: true,
                               initialDate: selectedDueDate ?? DateTime.now().add(const Duration(days: 30)),
                               firstDate: DateTime.now().subtract(const Duration(days: 365)),
@@ -229,7 +207,7 @@ class DebtScreen extends StatefulWidget {
                           child: Row(
                             children: [
                               const Icon(Icons.calendar_month_rounded, color: WalletMeltColors.brandDeep, size: 18),
-                              const SizedBox(width: 10),
+                              AppSpacing.gapSm,
                               Expanded(
                                 child: Text(
                                   selectedDueDate == null
@@ -250,7 +228,7 @@ class DebtScreen extends StatefulWidget {
                             ],
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        AppSpacing.gapSm,
 
                         TextField(
                           controller: descController,
@@ -259,7 +237,7 @@ class DebtScreen extends StatefulWidget {
                             hintText: 'e.g., Dinner split, Rent share',
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        AppSpacing.gapSm,
 
                         TextField(
                           controller: notesController,
@@ -270,14 +248,24 @@ class DebtScreen extends StatefulWidget {
                             hintText: 'Any extra details...',
                           ),
                         ),
-                        const SizedBox(height: 18),
+                        AppSpacing.gapMd,
 
                         PrimaryButton(
                           label: 'Record Transaction',
                           onPressed: () async {
                             final name = nameController.text.trim();
-                            final amount = double.tryParse(amountController.text.trim());
-                            if (name.isEmpty || amount == null || amount <= 0) return;
+                            final amountText = amountController.text.trim();
+                            
+                            if (name.isEmpty) {
+                              showErrorSnackbar(context, 'Please enter a person name');
+                              return;
+                            }
+                            
+                            final amount = double.tryParse(amountText);
+                            if (amount == null || amount <= 0) {
+                              showErrorSnackbar(context, 'Please enter a valid amount greater than 0');
+                              return;
+                            }
 
                             final navigator = Navigator.of(sheetContext);
 
@@ -301,6 +289,9 @@ class DebtScreen extends StatefulWidget {
 
                             await state.addDebt(newDebt);
                             navigator.pop();
+                            if (context.mounted) {
+                              showSuccessSnackbar(context, 'Obligation for "$name" recorded successfully.');
+                            }
                           },
                         ),
                       ],
@@ -308,11 +299,9 @@ class DebtScreen extends StatefulWidget {
                   ),
                 );
               },
-            ),
-          ),
+            );
+          },
         );
-      },
-    );
 
     nameController.dispose();
     amountController.dispose();
@@ -324,30 +313,19 @@ class DebtScreen extends StatefulWidget {
     final state = context.read<AppState>();
     final payController = TextEditingController();
 
-    await showModalBottomSheet<void>(
-      context: context,
-      useRootNavigator: true,
-      isScrollControlled: true,
-      showDragHandle: true,
-      constraints: const BoxConstraints(maxWidth: 600),
+    await showAppBottomSheet<void>(
+      context,
       builder: (sheetContext) {
         return FutureBuilder<List<DebtRepayment>>(
           future: state.repaymentsForDebt(debt.id),
-          builder: (context, snapshot) {
+          builder: (futureContext, snapshot) {
             final repayments = snapshot.data ?? const [];
 
-            return SafeArea(
-              child: AnimatedPadding(
-                duration: const Duration(milliseconds: 150),
-                curve: Curves.easeOut,
-                padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(sheetContext).viewInsets.bottom,
-                ),
-                child: StatefulBuilder(
-                  builder: (context, setSheetState) {
-                    final isReceivable = debt.type == DebtType.owedToMe || debt.type == DebtType.loanGiven;
+            return StatefulBuilder(
+              builder: (stateContext, setSheetState) {
+                final isReceivable = debt.type == DebtType.owedToMe || debt.type == DebtType.loanGiven;
 
-                    return SingleChildScrollView(
+                return SingleChildScrollView(
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
                         child: Column(
@@ -565,8 +543,20 @@ class DebtScreen extends StatefulWidget {
                                       ),
                                     ),
                                     onPressed: () async {
-                                      final amount = double.tryParse(payController.text.trim());
-                                      if (amount == null || amount <= 0) return;
+                                      final amountText = payController.text.trim();
+                                      if (amountText.isEmpty) {
+                                        showErrorSnackbar(context, 'Please enter a repayment amount');
+                                        return;
+                                      }
+                                      final amount = double.tryParse(amountText);
+                                      if (amount == null || amount <= 0) {
+                                        showErrorSnackbar(context, 'Please enter a valid repayment amount');
+                                        return;
+                                      }
+                                      if (amount > debt.remainingAmount) {
+                                        showErrorSnackbar(context, 'Repayment amount cannot exceed outstanding balance');
+                                        return;
+                                      }
 
                                       final navigator = Navigator.of(sheetContext);
                                       await state.addRepayment(
@@ -575,6 +565,9 @@ class DebtScreen extends StatefulWidget {
                                         notes: 'Partial payment',
                                       );
                                       navigator.pop();
+                                      if (context.mounted) {
+                                        showSuccessSnackbar(context, 'Repayment of $amount ${debt.currency} recorded successfully.');
+                                      }
                                     },
                                     child: const Text('Pay'),
                                   ),
@@ -596,6 +589,9 @@ class DebtScreen extends StatefulWidget {
                                     notes: 'Settle remaining',
                                   );
                                   navigator.pop();
+                                  if (context.mounted) {
+                                    showSuccessSnackbar(context, 'Obligation settled successfully.');
+                                  }
                                 },
                                 child: const Text('Settle Remaining Balance'),
                               ),
@@ -611,31 +607,20 @@ class DebtScreen extends StatefulWidget {
                               label: const Text('Delete Obligation'),
                               onPressed: () async {
                                 final navigator = Navigator.of(sheetContext);
-                                final confirm = await showDialog<bool>(
-                                  context: context,
-                                  useRootNavigator: true,
-                                  builder: (ctx) => AlertDialog(
-                                    title: const Text('Delete Obligation?'),
-                                    content: const Text('This will delete this debt record and all its repayment logs permanently.'),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () => Navigator.pop(ctx, false),
-                                        child: const Text('Cancel'),
-                                      ),
-                                      FilledButton(
-                                        style: FilledButton.styleFrom(
-                                          backgroundColor: WalletMeltColors.danger,
-                                        ),
-                                        onPressed: () => Navigator.pop(ctx, true),
-                                        child: const Text('Delete'),
-                                      ),
-                                    ],
-                                  ),
+                                final confirm = await showConfirmDialog(
+                                  context,
+                                  title: 'Delete Obligation?',
+                                  body: 'This will delete this debt record and all its repayment logs permanently.',
+                                  confirmLabel: 'Delete',
+                                  isDestructive: true,
                                 );
 
                                 if (confirm == true) {
                                   await state.deleteDebt(debt.id);
                                   navigator.pop();
+                                  if (context.mounted) {
+                                    showSuccessSnackbar(context, 'Obligation deleted successfully.');
+                                  }
                                 }
                               },
                             ),
@@ -644,13 +629,11 @@ class DebtScreen extends StatefulWidget {
                       ),
                     );
                   },
-                ),
-              ),
+                );
+              },
             );
           },
         );
-      },
-    );
 
     payController.dispose();
   }
@@ -682,7 +665,9 @@ class DebtScreen extends StatefulWidget {
               Container(
                 width: 2,
                 height: 36,
-                color: const Color(0x1Fffffff),
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? WalletMeltColors.darkBorder
+                    : WalletMeltColors.lightBorder,
               ),
           ],
         ),

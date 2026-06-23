@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -42,21 +41,21 @@ class AppShell extends StatelessWidget {
                         children: [
                           // Smoothly sliding active indicator tab background
                           AnimatedPositioned(
-                            duration: const Duration(milliseconds: 260),
-                            curve: Curves.easeOutCubic,
+                            duration: AppMotion.medium,
+                            curve: AppMotion.entrance,
                             left: activeIndex * tabWidth,
                             width: tabWidth,
                             top: 0,
                             bottom: 0,
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
                               child: Container(
                                 decoration: BoxDecoration(
                                   color: Theme.of(context)
                                       .colorScheme
                                       .primary
                                       .withValues(alpha: 0.12),
-                                  borderRadius: BorderRadius.circular(16),
+                                  borderRadius: BorderRadius.circular(999),
                                   border: Border.all(
                                     color: Theme.of(context)
                                         .colorScheme
@@ -165,89 +164,77 @@ class ScreenActionResolver {
   }
 
   static void _showDebtActionsSheet(BuildContext context) {
-    showModalBottomSheet<void>(
-      context: context,
-      useRootNavigator: true,
-      isScrollControlled: true,
-      constraints: const BoxConstraints(maxWidth: 600),
+    showAppBottomSheet<void>(
+      context,
       builder: (sheetContext) {
-        return SafeArea(
-          child: AnimatedPadding(
-            duration: const Duration(milliseconds: 150),
-            curve: Curves.easeOut,
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(sheetContext).viewInsets.bottom,
-            ),
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-                vertical: AppSpacing.lg,
+        return Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.lg,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Add Obligation',
+                style: Theme.of(sheetContext).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Add Obligation',
-                    style: Theme.of(sheetContext).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildDebtActionTile(
-                    sheetContext,
-                    icon: Icons.arrow_outward_rounded,
-                    color: WalletMeltColors.positive,
-                    title: 'Money Owed To Me',
-                    subtitle: 'A person owes you money',
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      Navigator.pop(sheetContext);
-                      DebtScreen.showAddDebtSheet(context, initialType: DebtType.owedToMe);
-                    },
-                  ),
-                  const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
-                  _buildDebtActionTile(
-                    sheetContext,
-                    icon: Icons.call_received_rounded,
-                    color: WalletMeltColors.danger,
-                    title: 'Money I Owe',
-                    subtitle: 'You owe someone money',
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      Navigator.pop(sheetContext);
-                      DebtScreen.showAddDebtSheet(context, initialType: DebtType.iOwe);
-                    },
-                  ),
-                  const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
-                  _buildDebtActionTile(
-                    sheetContext,
-                    icon: Icons.arrow_outward_rounded,
-                    color: WalletMeltColors.positive,
-                    title: 'Loan Given',
-                    subtitle: 'You lent money to someone',
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      Navigator.pop(sheetContext);
-                      DebtScreen.showAddDebtSheet(context, initialType: DebtType.loanGiven);
-                    },
-                  ),
-                  const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
-                  _buildDebtActionTile(
-                    sheetContext,
-                    icon: Icons.call_received_rounded,
-                    color: WalletMeltColors.danger,
-                    title: 'Loan Taken',
-                    subtitle: 'You borrowed money from someone',
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      Navigator.pop(sheetContext);
-                      DebtScreen.showAddDebtSheet(context, initialType: DebtType.loanTaken);
-                    },
-                  ),
-                ],
+              const SizedBox(height: 16),
+              _buildDebtActionTile(
+                sheetContext,
+                icon: Icons.arrow_outward_rounded,
+                color: WalletMeltColors.positive,
+                title: 'Money Owed To Me',
+                subtitle: 'A person owes you money',
+                onTap: () {
+                  WMHaptics.light();
+                  Navigator.pop(sheetContext);
+                  DebtScreen.showAddDebtSheet(context, initialType: DebtType.owedToMe);
+                },
               ),
-            ),
+              const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
+              _buildDebtActionTile(
+                sheetContext,
+                icon: Icons.call_received_rounded,
+                color: WalletMeltColors.danger,
+                title: 'Money I Owe',
+                subtitle: 'You owe someone money',
+                onTap: () {
+                  WMHaptics.light();
+                  Navigator.pop(sheetContext);
+                  DebtScreen.showAddDebtSheet(context, initialType: DebtType.iOwe);
+                },
+              ),
+              const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
+              _buildDebtActionTile(
+                sheetContext,
+                icon: Icons.arrow_outward_rounded,
+                color: WalletMeltColors.positive,
+                title: 'Loan Given',
+                subtitle: 'You lent money to someone',
+                onTap: () {
+                  WMHaptics.light();
+                  Navigator.pop(sheetContext);
+                  DebtScreen.showAddDebtSheet(context, initialType: DebtType.loanGiven);
+                },
+              ),
+              const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
+              _buildDebtActionTile(
+                sheetContext,
+                icon: Icons.call_received_rounded,
+                color: WalletMeltColors.danger,
+                title: 'Loan Taken',
+                subtitle: 'You borrowed money from someone',
+                onTap: () {
+                  WMHaptics.light();
+                  Navigator.pop(sheetContext);
+                  DebtScreen.showAddDebtSheet(context, initialType: DebtType.loanTaken);
+                },
+              ),
+            ],
           ),
         );
       },
@@ -324,11 +311,11 @@ class _AppFloatingActionButtonState extends State<_AppFloatingActionButton> {
 
     return AnimatedOpacity(
       opacity: hasAction ? 1.0 : 0.0,
-      duration: const Duration(milliseconds: 220),
+      duration: AppMotion.medium,
       child: AnimatedScale(
         scale: hasAction ? _scale : 0.0,
-        duration: const Duration(milliseconds: 220),
-        curve: Curves.easeOutCubic,
+        duration: AppMotion.medium,
+        curve: AppMotion.entrance,
         child: Padding(
           padding: const EdgeInsets.only(bottom: 84),
           child: IgnorePointer(
@@ -372,7 +359,7 @@ class _AppFloatingActionButtonState extends State<_AppFloatingActionButton> {
                   onPressed: widget.action == null
                       ? null
                       : () {
-                          HapticFeedback.lightImpact();
+                          WMHaptics.light();
                           widget.action!.action();
                         },
                   child: Icon(
@@ -421,12 +408,12 @@ class _NavItem extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(999),
           onTap: () {
-            HapticFeedback.lightImpact();
+            WMHaptics.selection();
             shell.goBranch(index,
                 initialLocation: index == shell.currentIndex);
           },
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
             decoration: const BoxDecoration(
               color: Colors.transparent,
             ),
@@ -436,10 +423,10 @@ class _NavItem extends StatelessWidget {
               children: [
                 AnimatedScale(
                   scale: active ? 1.12 : 1.0,
-                  duration: const Duration(milliseconds: 240),
-                  curve: Curves.easeOutCubic,
+                  duration: AppMotion.medium,
+                  curve: AppMotion.entrance,
                   child: TweenAnimationBuilder<Color?>(
-                    duration: const Duration(milliseconds: 240),
+                    duration: AppMotion.medium,
                     tween: ColorTween(
                       end: active ? activeColor : inactiveColor,
                     ),
@@ -456,8 +443,8 @@ class _NavItem extends StatelessWidget {
                 FittedBox(
                   fit: BoxFit.scaleDown,
                   child: AnimatedDefaultTextStyle(
-                    duration: const Duration(milliseconds: 240),
-                    curve: Curves.easeOutCubic,
+                    duration: AppMotion.medium,
+                    curve: AppMotion.entrance,
                     style: theme.textTheme.labelMedium!.copyWith(
                       fontSize: 9.5,
                       fontWeight: active ? FontWeight.w800 : FontWeight.w600,

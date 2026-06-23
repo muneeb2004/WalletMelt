@@ -40,6 +40,14 @@ abstract final class AppSpacing {
       EdgeInsets.symmetric(horizontal: md, vertical: md);
 
   static const EdgeInsets sheetPadding = EdgeInsets.fromLTRB(lg, sm, lg, lg);
+
+  // ── Standard Spatial Gaps ──────────────────────────────────────────────────
+  static const Widget gapXs = SizedBox(height: xs, width: xs);
+  static const Widget gapSm = SizedBox(height: sm, width: sm);
+  static const Widget gapMd = SizedBox(height: md, width: md);
+  static const Widget gapLg = SizedBox(height: lg, width: lg);
+  static const Widget gapXl = SizedBox(height: xl, width: xl);
+  static const Widget gapXxl = SizedBox(height: xxl, width: xxl);
 }
 
 /// Convenience alias so existing code that uses raw doubles can be migrated

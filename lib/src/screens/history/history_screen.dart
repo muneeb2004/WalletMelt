@@ -262,7 +262,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       initialValue: _sort,
                       decoration: const InputDecoration(labelText: 'Sort'),
                       dropdownColor: Theme.of(context).brightness == Brightness.dark
-                          ? const Color(0xFF1E1E24)
+                          ? WalletMeltColors.darkSurface
                           : Colors.white,
                       borderRadius: BorderRadius.circular(20),
                       items: const [
@@ -348,7 +348,7 @@ class _CategoryAllChip extends StatelessWidget {
     final fill = selected
         ? color.withValues(alpha: 0.28)
         : (isDark
-            ? const Color(0xFF1E1E24).withValues(alpha: 0.48)
+            ? WalletMeltColors.darkSurface.withValues(alpha: 0.48)
             : Colors.white.withValues(alpha: 0.42));
     final border = selected
         ? color

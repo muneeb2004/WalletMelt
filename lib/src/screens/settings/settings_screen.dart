@@ -108,7 +108,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     initialValue: currency,
                     decoration: const InputDecoration(labelText: 'Currency'),
                     dropdownColor: Theme.of(context).brightness == Brightness.dark
-                        ? const Color(0xFF1E1E24)
+                        ? WalletMeltColors.darkSurface
                         : Colors.white,
                     borderRadius: BorderRadius.circular(20),
                     items: [
@@ -125,7 +125,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     initialValue: themePreference,
                     decoration: const InputDecoration(labelText: 'Theme'),
                     dropdownColor: Theme.of(context).brightness == Brightness.dark
-                        ? const Color(0xFF1E1E24)
+                        ? WalletMeltColors.darkSurface
                         : Colors.white,
                     borderRadius: BorderRadius.circular(20),
                     items: const [

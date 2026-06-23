@@ -1,8 +1,13 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import '../utils/haptics.dart';
 
 export 'app_spacing.dart';
+export 'app_motion.dart';
+export '../widgets/app_bottom_sheet.dart';
+export '../widgets/confirm_dialog.dart';
+export '../utils/haptics.dart';
 
 class WalletMeltColors {
   const WalletMeltColors._();
@@ -22,6 +27,13 @@ class WalletMeltColors {
   static const darkBackground = Color(0xFF090909);
   static const darkTextPrimary = Color(0xFFFAF7EF);
   static const darkTextSecondary = Color(0xFFBEB7AA);
+
+  // Semantic surfaces, containers, and borders
+  static const darkSurface = Color(0xFF1E1E24);
+  static const darkBackgroundContainer = Color(0xFF121218);
+  static const darkBackgroundAlt = Color(0xFF0F0F0F);
+  static const darkBorder = Color(0x1FFFFFFF);
+  static const lightBorder = Color(0x1F000000);
 }
 
 // ── Budget threshold color aliases ──────────────────────────────────────────
@@ -261,7 +273,7 @@ class WMGlassSurface extends StatelessWidget {
           color: isDark ? const Color(0xFF16161C) : const Color(0xFFF4F4F0),
           borderRadius: BorderRadius.circular(radius),
           border: Border.all(
-            color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
+            color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder,
             width: 1.0,
           ),
         ),
@@ -271,7 +283,10 @@ class WMGlassSurface extends StatelessWidget {
                 color: Colors.transparent,
                 child: InkWell(
                   borderRadius: BorderRadius.circular(radius - 1.0),
-                  onTap: onTap,
+                  onTap: () {
+                    WMHaptics.light();
+                    onTap!();
+                  },
                   child: Padding(padding: padding, child: child),
                 ),
               ),
@@ -282,7 +297,7 @@ class WMGlassSurface extends StatelessWidget {
       // Tier 2: Solid background, single subtle shadow, solid border. GPU-efficient.
       return Container(
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF1E1E24) : Colors.white,
+          color: isDark ? WalletMeltColors.darkSurface : Colors.white,
           borderRadius: BorderRadius.circular(radius),
           border: Border.all(
             color: isDark ? const Color(0x28FFFFFF) : const Color(0x28000000),
@@ -302,7 +317,10 @@ class WMGlassSurface extends StatelessWidget {
                 color: Colors.transparent,
                 child: InkWell(
                   borderRadius: BorderRadius.circular(radius - 1.0),
-                  onTap: onTap,
+                  onTap: () {
+                    WMHaptics.light();
+                    onTap!();
+                  },
                   child: Padding(padding: padding, child: child),
                 ),
               ),
@@ -315,7 +333,7 @@ class WMGlassSurface extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              const Color(0xFF1E1E24).withValues(alpha: 0.72),
+              WalletMeltColors.darkSurface.withValues(alpha: 0.72),
               const Color(0xFF121216).withValues(alpha: 0.48),
             ],
           )
@@ -343,7 +361,10 @@ class WMGlassSurface extends StatelessWidget {
               color: Colors.transparent,
               child: InkWell(
                 borderRadius: BorderRadius.circular(radius - 1.0),
-                onTap: onTap,
+                onTap: () {
+                  WMHaptics.light();
+                  onTap!();
+                },
                 child: Padding(padding: padding, child: child),
               ),
             ),
@@ -425,10 +446,10 @@ class FlatNavBar extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E1E24) : Colors.white,
+        color: isDark ? WalletMeltColors.darkSurface : Colors.white,
         borderRadius: BorderRadius.circular(radius),
         border: Border.all(
-          color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
+          color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder,
           width: 1.0,
         ),
         boxShadow: [
@@ -439,9 +460,15 @@ class FlatNavBar extends StatelessWidget {
           ),
         ],
       ),
-      child: Padding(
-        padding: padding,
-        child: child,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(radius),
+        child: Material(
+          color: Colors.transparent,
+          child: Padding(
+            padding: padding,
+            child: child,
+          ),
+        ),
       ),
     );
   }

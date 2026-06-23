@@ -45,9 +45,15 @@ class PrimaryButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(AppSpacing.buttonRadius),
           ),
         ),
-        onPressed: isLoading ? null : onPressed,
+        onPressed: isLoading || onPressed == null
+            ? null
+            : () {
+                WMHaptics.light();
+                onPressed!();
+              },
         child: child,
       ),
     );
   }
 }
+

@@ -260,7 +260,7 @@ class _ComparisonBar extends StatelessWidget {
                 ),
                 Container(
                   width: 2,
-                  color: isDark ? const Color(0xFF1E1E24) : Colors.white,
+                  color: isDark ? WalletMeltColors.darkSurface : Colors.white,
                 ),
                 Expanded(
                   flex: rightFlex,
@@ -424,6 +424,7 @@ class _DashboardObligationsCard extends StatelessWidget {
 
     final netPosition = owedToMe - iOwe;
     final isNegative = netPosition < 0;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Show obligations only if there are active outstanding debts/loans.
     if (owedToMe == 0 && iOwe == 0) {
@@ -478,7 +479,7 @@ class _DashboardObligationsCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              Container(width: 1, height: 24, color: const Color(0x1Fffffff)),
+              Container(width: 1, height: 24, color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder),
               const SizedBox(width: 8),
               Expanded(
                 child: Column(
@@ -505,7 +506,7 @@ class _DashboardObligationsCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              Container(width: 1, height: 24, color: const Color(0x1Fffffff)),
+              Container(width: 1, height: 24, color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder),
               const SizedBox(width: 8),
               Expanded(
                 child: Column(
@@ -626,7 +627,7 @@ class _DashboardUpcomingRenewalsCard extends StatelessWidget {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: nextRenewals.length,
-            separatorBuilder: (context, index) => const Divider(height: 1, color: Color(0x1Fffffff)),
+            separatorBuilder: (context, index) => Divider(height: 1, color: Theme.of(context).brightness == Brightness.dark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder),
             itemBuilder: (context, index) {
               final sub = nextRenewals[index];
               final totalAmount = sub.amount + (sub.taxAmount ?? 0.0);

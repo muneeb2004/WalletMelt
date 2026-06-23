@@ -17,7 +17,6 @@ import '../../services/export/wallet_melt_json_restore_plan.dart';
 import '../../services/export/wallet_melt_json_restore_service.dart';
 import '../../state/app_state.dart';
 import '../../widgets/app_snackbar.dart';
-import '../../widgets/confirm_dialog.dart';
 import 'conflict_resolution_screen.dart';
 
 class BackupRestoreDialog extends StatefulWidget {
@@ -132,12 +131,7 @@ class _BackupRestoreDialogState extends State<BackupRestoreDialog> {
               _conflictsResolved = true;
             });
             Navigator.pop(context);
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Conflict resolutions saved. Ready to merge.'),
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
+            showSuccessSnackbar(context, 'Conflict resolutions saved. Ready to merge.');
           },
         ),
       ),

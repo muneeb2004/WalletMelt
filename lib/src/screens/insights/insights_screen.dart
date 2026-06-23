@@ -141,6 +141,7 @@ class InsightsScreen extends StatelessWidget {
     }
 
     final netDebtPosition = receivables - liabilities;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     String? largestDebtorName;
     double largestDebtorAmount = 0.0;
@@ -336,9 +337,9 @@ class InsightsScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
-                  const Divider(height: 1, color: Color(0x1Fffffff)),
-                  const SizedBox(height: 12),
+                  AppSpacing.gapSm,
+                  Divider(height: 1, color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder),
+                  AppSpacing.gapSm,
                   Row(
                     children: [
                       Expanded(
@@ -357,9 +358,9 @@ class InsightsScreen extends StatelessWidget {
                           ],
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Container(width: 1, height: 28, color: const Color(0x1Fffffff)),
-                      const SizedBox(width: 8),
+                      AppSpacing.gapSm,
+                      Container(width: 1, height: 28, color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder),
+                      AppSpacing.gapSm,
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -376,9 +377,9 @@ class InsightsScreen extends StatelessWidget {
                           ],
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Container(width: 1, height: 28, color: const Color(0x1Fffffff)),
-                      const SizedBox(width: 8),
+                      AppSpacing.gapSm,
+                      Container(width: 1, height: 28, color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder),
+                      AppSpacing.gapSm,
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -401,9 +402,9 @@ class InsightsScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 14),
-                  const Divider(height: 1, color: Color(0x1Fffffff)),
-                  const SizedBox(height: 14),
+                  AppSpacing.gapSm,
+                  Divider(height: 1, color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder),
+                  AppSpacing.gapSm,
                   Row(
                     children: [
                       Expanded(
@@ -485,9 +486,9 @@ class InsightsScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
-                  const Divider(height: 1, color: Color(0x1Fffffff)),
-                  const SizedBox(height: 12),
+                  AppSpacing.gapSm,
+                  Divider(height: 1, color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder),
+                  AppSpacing.gapSm,
                   Row(
                     children: [
                       Expanded(
@@ -506,9 +507,9 @@ class InsightsScreen extends StatelessWidget {
                           ],
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Container(width: 1, height: 28, color: const Color(0x1Fffffff)),
-                      const SizedBox(width: 8),
+                      AppSpacing.gapSm,
+                      Container(width: 1, height: 28, color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder),
+                      AppSpacing.gapSm,
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -528,9 +529,9 @@ class InsightsScreen extends StatelessWidget {
                     ],
                   ),
                   if (taxByCategory.isNotEmpty) ...[
-                    const SizedBox(height: 12),
-                    const Divider(height: 1, color: Color(0x1Fffffff)),
-                    const SizedBox(height: 12),
+                    AppSpacing.gapSm,
+                    Divider(height: 1, color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder),
+                    AppSpacing.gapSm,
                     const Text(
                       'TAX BY CATEGORY (THIS MONTH)',
                       style: TextStyle(fontSize: 9, color: WalletMeltColors.textMuted, fontWeight: FontWeight.bold),
@@ -588,9 +589,9 @@ class InsightsScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
-                  const Divider(height: 1, color: Color(0x1Fffffff)),
-                  const SizedBox(height: 12),
+                  AppSpacing.gapSm,
+                  Divider(height: 1, color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder),
+                  AppSpacing.gapSm,
                   const Text(
                     'MOST EXPENSIVE',
                     style: TextStyle(fontSize: 9, color: WalletMeltColors.textMuted, fontWeight: FontWeight.bold),
@@ -603,9 +604,9 @@ class InsightsScreen extends StatelessWidget {
                     style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
                   ),
                   if (subSpendByCategory.isNotEmpty) ...[
-                    const SizedBox(height: 12),
-                    const Divider(height: 1, color: Color(0x1Fffffff)),
-                    const SizedBox(height: 12),
+                    AppSpacing.gapSm,
+                    Divider(height: 1, color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder),
+                    AppSpacing.gapSm,
                     const Text(
                       'SUBSCRIPTIONS BY CATEGORY',
                       style: TextStyle(fontSize: 9, color: WalletMeltColors.textMuted, fontWeight: FontWeight.bold),

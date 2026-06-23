@@ -22,7 +22,7 @@ class WalletCategoryChip extends StatelessWidget {
     final fill = selected
         ? color.withValues(alpha: 0.28)
         : (isDark
-            ? const Color(0xFF1E1E24).withValues(alpha: 0.48)
+            ? WalletMeltColors.darkSurface.withValues(alpha: 0.48)
             : Colors.white.withValues(alpha: 0.42));
     final border = selected
         ? color

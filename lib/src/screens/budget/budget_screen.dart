@@ -7,7 +7,6 @@ import '../../theme/wallet_melt_theme.dart';
 import '../../utils/currency_format.dart';
 import '../../utils/date_utils.dart';
 import '../../types/budget.dart';
-import '../../widgets/confirm_dialog.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/progress_bar.dart';
@@ -24,20 +23,10 @@ class BudgetScreen extends StatefulWidget {
       text: currentAmount != null ? currentAmount.toStringAsFixed(0) : '',
     );
 
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      useRootNavigator: true,
-      constraints: const BoxConstraints(maxWidth: 600),
+    await showAppBottomSheet<void>(
+      context,
       builder: (sheetContext) {
-        return SafeArea(
-          child: AnimatedPadding(
-            duration: const Duration(milliseconds: 150),
-            curve: Curves.easeOut,
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(sheetContext).viewInsets.bottom,
-            ),
-            child: SingleChildScrollView(
+        return SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(
                     AppSpacing.lg,
@@ -55,7 +44,7 @@ class BudgetScreen extends StatefulWidget {
                           : 'Set Monthly Budget',
                       style: Theme.of(sheetContext).textTheme.titleLarge,
                     ),
-                    const SizedBox(height: AppSpacing.sm),
+                    AppSpacing.gapSm,
                     TextField(
                       controller: controller,
                       keyboardType:
@@ -81,7 +70,7 @@ class BudgetScreen extends StatefulWidget {
                             child: const Text('Cancel'),
                           ),
                         ),
-                        const SizedBox(width: AppSpacing.sm),
+                        AppSpacing.gapSm,
                         Expanded(
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
@@ -109,9 +98,7 @@ class BudgetScreen extends StatefulWidget {
                   ],
                 ),
               ),
-            ),
-          ),
-        );
+            );
       },
     );
     controller.dispose();
@@ -544,23 +531,13 @@ class _BudgetScreenState extends State<BudgetScreen> {
     var categoryId =
         existingBudget?.categoryId ?? state.categories.firstOrNull?.id;
 
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      useRootNavigator: true,
-      constraints: const BoxConstraints(maxWidth: 600),
+    await showAppBottomSheet<void>(
+      context,
       builder: (sheetContext) {
-        return SafeArea(
-          child: AnimatedPadding(
-            duration: const Duration(milliseconds: 150),
-            curve: Curves.easeOut,
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(sheetContext).viewInsets.bottom,
-            ),
-            child: StatefulBuilder(
-              builder: (context, setSheetState) {
-                final isEdit = existingBudget != null;
-                return SingleChildScrollView(
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            final isEdit = existingBudget != null;
+            return SingleChildScrollView(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(
                         AppSpacing.lg,
@@ -597,7 +574,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                       initialValue: categoryId,
                       decoration: const InputDecoration(labelText: 'Category'),
                       dropdownColor: Theme.of(context).brightness == Brightness.dark
-                          ? const Color(0xFF1E1E24)
+                          ? WalletMeltColors.darkSurface
                           : Colors.white,
                       borderRadius: BorderRadius.circular(20),
                       items: [
@@ -611,7 +588,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                           ? null // Category is read-only during edit
                           : (val) => setSheetState(() => categoryId = val),
                     ),
-                    const SizedBox(height: AppSpacing.sm),
+                    AppSpacing.gapSm,
 
                     // Amount textfield
                     TextField(
@@ -639,7 +616,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                             child: const Text('Cancel'),
                           ),
                         ),
-                        const SizedBox(width: AppSpacing.sm),
+                        AppSpacing.gapSm,
                         Expanded(
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
@@ -685,9 +662,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
               ),
             );
           },
-        ),
-      ),
-    );
+        );
       },
     );
     amountController.dispose();

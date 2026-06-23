@@ -14,6 +14,7 @@ import '../../types/category.dart';
 import '../../types/expense.dart';
 import '../../utils/currency_format.dart';
 import '../../utils/date_utils.dart';
+import '../../widgets/app_snackbar.dart';
 
 abstract class ReceiptExportService {
   Future<String?> saveReceipt(String uri, String fileName);
@@ -217,12 +218,7 @@ class _ReceiptViewerScreenState extends State<ReceiptViewerScreen>
       await widget.exportShareService.shareFile(exportFile);
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to share receipt image'),
-            backgroundColor: WalletMeltColors.danger,
-          ),
-        );
+        showErrorSnackbar(context, 'Failed to share receipt image');
       }
     }
     _resetHideTimer();
@@ -236,19 +232,9 @@ class _ReceiptViewerScreenState extends State<ReceiptViewerScreen>
 
     if (mounted) {
       if (savedPath != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Receipt saved: ${p.basename(savedPath)}'),
-            backgroundColor: WalletMeltColors.positive,
-          ),
-        );
+        showSuccessSnackbar(context, 'Receipt saved: ${p.basename(savedPath)}');
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Receipt export cancelled or failed'),
-            backgroundColor: WalletMeltColors.warning,
-          ),
-        );
+        showErrorSnackbar(context, 'Receipt export cancelled or failed');
       }
     }
     _resetHideTimer();

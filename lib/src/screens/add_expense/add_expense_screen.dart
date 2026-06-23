@@ -11,6 +11,7 @@ import '../../state/app_state.dart';
 import '../../theme/wallet_melt_theme.dart';
 import '../../utils/expense_validation.dart';
 import '../../widgets/primary_button.dart';
+import '../../widgets/app_snackbar.dart';
 import '../../types/grocery_template.dart';
 
 class AddExpenseScreen extends StatefulWidget {
@@ -617,6 +618,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   }
 
   Widget _buildTaxSection(BuildContext context, double subtotal) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final currency = context.read<AppState>().settings.currency;
     final tax = double.tryParse(_taxController.text.trim()) ?? 0.0;
     final grandTotal = subtotal + tax;
@@ -676,9 +678,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               }
             },
           ),
-          const SizedBox(height: 16),
-          const Divider(height: 1, color: Color(0x1Fffffff)),
-          const SizedBox(height: 12),
+          AppSpacing.gapMd,
+          Divider(height: 1, color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder),
+          AppSpacing.gapSm,
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -950,9 +952,7 @@ class _BulkGroceryEditorState extends State<BulkGroceryEditor> {
         .where((name) => name.isNotEmpty)
         .toList();
     if (names.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cannot save empty list as template')),
-      );
+      showErrorSnackbar(context, 'Cannot save empty list as template');
       return;
     }
 
@@ -986,9 +986,7 @@ class _BulkGroceryEditorState extends State<BulkGroceryEditor> {
     if (result != null && result.isNotEmpty) {
       await state.saveGroceryTemplate(result, names);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Template "$result" saved successfully')),
-        );
+        showSuccessSnackbar(context, 'Template "$result" saved successfully');
       }
     }
     nameController.dispose();
@@ -1041,18 +1039,14 @@ class _BulkGroceryEditorState extends State<BulkGroceryEditor> {
                             .toList();
                         if (names.isEmpty) {
                           if (ctx.mounted) {
-                            ScaffoldMessenger.of(ctx).showSnackBar(
-                              const SnackBar(content: Text('Cannot update with an empty list')),
-                            );
+                            showErrorSnackbar(ctx, 'Cannot update with an empty list');
                           }
                           return;
                         }
                         final updated = t.copyWith(items: names);
                         await state.updateGroceryTemplate(updated);
                         if (ctx.mounted) {
-                          ScaffoldMessenger.of(ctx).showSnackBar(
-                            SnackBar(content: Text('Template "${t.name}" updated successfully')),
-                          );
+                          showSuccessSnackbar(ctx, 'Template "${t.name}" updated successfully');
                         }
                       },
                     ),
@@ -1358,7 +1352,7 @@ class _BulkGroceryEditorState extends State<BulkGroceryEditor> {
                       color: isDark ? const Color(0x0Affffff) : const Color(0x0A000000),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: isDark ? const Color(0x1Fffffff) : const Color(0x1F000000),
+                        color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder,
                         width: 1,
                       ),
                     ),

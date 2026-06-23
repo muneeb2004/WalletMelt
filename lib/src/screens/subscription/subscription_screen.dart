@@ -13,6 +13,7 @@ import '../../types/category.dart' as wm_cat;
 import '../../utils/currency_format.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/primary_button.dart';
+import '../../widgets/app_snackbar.dart';
 
 class SubscriptionScreen extends StatefulWidget {
   const SubscriptionScreen({super.key});
@@ -141,18 +142,18 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   }
 
   void _showAddSubscriptionSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
+    showAppBottomSheet(
+      context,
       backgroundColor: Colors.transparent,
       builder: (context) => const _AddSubscriptionSheet(),
     );
   }
 
   void _showSubscriptionActions(BuildContext context, wm_sub.Subscription sub) {
-    showModalBottomSheet(
-      context: context,
+    showAppBottomSheet(
+      context,
       backgroundColor: Colors.transparent,
+      showDragHandle: false,
       builder: (context) => _SubscriptionActionsSheet(subscription: sub),
     );
   }
@@ -439,11 +440,9 @@ class _AddSubscriptionSheetState extends State<_AddSubscriptionSheet> {
     final parsedTax = double.tryParse(_taxController.text.trim()) ?? 0.0;
     final grandTotal = parsedAmount + parsedTax;
 
-    return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-      child: Container(
+    return Container(
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF121218).withValues(alpha: 0.98) : Colors.white,
+          color: isDark ? WalletMeltColors.darkBackgroundContainer.withValues(alpha: 0.98) : Colors.white,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
           boxShadow: [
             BoxShadow(
@@ -624,7 +623,7 @@ class _AddSubscriptionSheetState extends State<_AddSubscriptionSheet> {
                 DropdownButtonFormField<String>(
                   initialValue: _billingCycle,
                   decoration: const InputDecoration(labelText: 'Billing Cycle'),
-                  dropdownColor: isDark ? const Color(0xFF1E1E24) : Colors.white,
+                  dropdownColor: isDark ? WalletMeltColors.darkSurface : Colors.white,
                   borderRadius: BorderRadius.circular(20),
                   items: const [
                     DropdownMenuItem(value: 'Monthly', child: Text('Monthly')),
@@ -699,7 +698,7 @@ class _AddSubscriptionSheetState extends State<_AddSubscriptionSheet> {
                 DropdownButtonFormField<int>(
                   initialValue: _notificationOffset,
                   decoration: const InputDecoration(labelText: 'Notification Reminder'),
-                  dropdownColor: isDark ? const Color(0xFF1E1E24) : Colors.white,
+                  dropdownColor: isDark ? WalletMeltColors.darkSurface : Colors.white,
                   borderRadius: BorderRadius.circular(20),
                   items: const [
                     DropdownMenuItem(value: 0, child: Text('On renewal day')),
@@ -745,9 +744,7 @@ class _AddSubscriptionSheetState extends State<_AddSubscriptionSheet> {
                         onPressed: () async {
                           if (_formKey.currentState?.validate() ?? false) {
                             if (_categoryId == null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Please select a category')),
-                              );
+                              showErrorSnackbar(context, 'Please select a category');
                               return;
                             }
 
@@ -788,9 +785,7 @@ class _AddSubscriptionSheetState extends State<_AddSubscriptionSheet> {
 
                             if (!context.mounted) return;
                             Navigator.pop(context);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Subscription "$name" created successfully.')),
-                            );
+                            showSuccessSnackbar(context, 'Subscription "$name" created successfully.');
                           }
                         },
                       ),
@@ -801,8 +796,7 @@ class _AddSubscriptionSheetState extends State<_AddSubscriptionSheet> {
             ),
           ),
         ),
-      ),
-    );
+      );
   }
 }
 
@@ -819,7 +813,7 @@ class _SubscriptionActionsSheet extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF121218).withValues(alpha: 0.98) : Colors.white,
+        color: isDark ? WalletMeltColors.darkBackgroundContainer.withValues(alpha: 0.98) : Colors.white,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
       ),
       padding: const EdgeInsets.fromLTRB(24, 24, 24, 40),
@@ -912,7 +906,10 @@ class _SubscriptionActionsSheet extends StatelessWidget {
             },
           ),
 
-          const Divider(height: 24, color: Color(0x1Fffffff)),
+          Divider(
+            height: 24,
+            color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder,
+          ),
 
           _ActionButton(
             icon: Icons.delete_forever_rounded,
@@ -920,23 +917,12 @@ class _SubscriptionActionsSheet extends StatelessWidget {
             color: WalletMeltColors.danger,
             isDestructive: true,
             onTap: () async {
-              final confirm = await showDialog<bool>(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Delete Subscription Template?'),
-                  content: const Text(
-                      'This will delete the subscription template completely. Historical expenses generated from this template will not be affected.'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      child: const Text('Cancel'),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, true),
-                      child: const Text('Delete', style: TextStyle(color: WalletMeltColors.danger)),
-                    ),
-                  ],
-                ),
+              final confirm = await showConfirmDialog(
+                context,
+                title: 'Delete Subscription Template?',
+                body: 'This will delete the subscription template completely. Historical expenses generated from this template will not be affected.',
+                confirmLabel: 'Delete',
+                isDestructive: true,
               );
 
               if (confirm == true) {

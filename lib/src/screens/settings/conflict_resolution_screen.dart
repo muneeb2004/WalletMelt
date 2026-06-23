@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../widgets/app_snackbar.dart';
 import '../../types/category.dart';
 import '../../types/expense.dart';
 import '../../theme/wallet_melt_theme.dart';
@@ -46,12 +47,7 @@ class _ConflictResolutionScreenState extends State<ConflictResolutionScreen> {
         _resolutions[id] = resolution;
       }
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Applied bulk resolution to ${widget.conflicts.length} conflicts.'),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+    showSuccessSnackbar(context, 'Applied bulk resolution to ${widget.conflicts.length} conflicts.');
   }
 
   void _applyAutoResolve() {
@@ -76,12 +72,7 @@ class _ConflictResolutionScreenState extends State<ConflictResolutionScreen> {
         _resolutions[id] = ConflictResolution.keepExisting;
       }
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Auto-resolved conflicts by choosing the newest records.'),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+    showSuccessSnackbar(context, 'Auto-resolved conflicts by choosing the newest records.');
   }
 
   String _getCategoryName(String categoryId, bool isBackup) {
@@ -106,7 +97,7 @@ class _ConflictResolutionScreenState extends State<ConflictResolutionScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF0F0F0F) : const Color(0xFFF7F7F4),
+      backgroundColor: isDark ? WalletMeltColors.darkBackgroundAlt : const Color(0xFFF7F7F4),
       appBar: AppBar(
         title: const Text('Resolve Conflicts', style: TextStyle(fontWeight: FontWeight.bold)),
         elevation: 0,
@@ -120,7 +111,7 @@ class _ConflictResolutionScreenState extends State<ConflictResolutionScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               margin: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+                color: isDark ? WalletMeltColors.darkSurface : Colors.white,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
