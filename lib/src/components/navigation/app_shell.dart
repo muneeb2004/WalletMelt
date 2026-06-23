@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -41,21 +42,21 @@ class AppShell extends StatelessWidget {
                         children: [
                           // Smoothly sliding active indicator tab background
                           AnimatedPositioned(
-                            duration: const Duration(milliseconds: 320),
-                            curve: Curves.easeOutBack,
+                            duration: const Duration(milliseconds: 260),
+                            curve: Curves.easeOutCubic,
                             left: activeIndex * tabWidth,
                             width: tabWidth,
                             top: 0,
                             bottom: 0,
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
                               child: Container(
                                 decoration: BoxDecoration(
                                   color: Theme.of(context)
                                       .colorScheme
                                       .primary
                                       .withValues(alpha: 0.12),
-                                  borderRadius: BorderRadius.circular(999),
+                                  borderRadius: BorderRadius.circular(16),
                                   border: Border.all(
                                     color: Theme.of(context)
                                         .colorScheme
@@ -387,7 +388,9 @@ class _NavItem extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
     final activeColor = colorScheme.primary;
-    final inactiveColor = theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.54) ?? Colors.grey;
+    final inactiveColor =
+        theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.54) ??
+            Colors.grey;
 
     return Expanded(
       child: Semantics(
@@ -396,10 +399,13 @@ class _NavItem extends StatelessWidget {
         label: label,
         child: InkWell(
           borderRadius: BorderRadius.circular(999),
-          onTap: () => shell.goBranch(index,
-              initialLocation: index == shell.currentIndex),
+          onTap: () {
+            HapticFeedback.lightImpact();
+            shell.goBranch(index,
+                initialLocation: index == shell.currentIndex);
+          },
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 10),
             decoration: const BoxDecoration(
               color: Colors.transparent,
             ),
@@ -407,24 +413,39 @@ class _NavItem extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  icon,
-                  color: active ? activeColor : inactiveColor,
-                  size: 20,
+                AnimatedScale(
+                  scale: active ? 1.12 : 1.0,
+                  duration: const Duration(milliseconds: 240),
+                  curve: Curves.easeOutBack,
+                  child: TweenAnimationBuilder<Color?>(
+                    duration: const Duration(milliseconds: 240),
+                    tween: ColorTween(
+                      end: active ? activeColor : inactiveColor,
+                    ),
+                    builder: (context, color, child) {
+                      return Icon(
+                        icon,
+                        color: color ?? (active ? activeColor : inactiveColor),
+                        size: 20,
+                      );
+                    },
+                  ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 3),
                 FittedBox(
                   fit: BoxFit.scaleDown,
-                  child: Text(
-                    label,
-                    maxLines: 1,
-                    softWrap: false,
-                    overflow: TextOverflow.clip,
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      fontSize: 10,
+                  child: AnimatedDefaultTextStyle(
+                    duration: const Duration(milliseconds: 240),
+                    curve: Curves.easeOutCubic,
+                    style: theme.textTheme.labelMedium!.copyWith(
+                      fontSize: 9.5,
                       fontWeight: active ? FontWeight.w800 : FontWeight.w600,
                       color: active ? activeColor : inactiveColor,
                     ),
+                    maxLines: 1,
+                    softWrap: false,
+                    overflow: TextOverflow.clip,
+                    child: Text(label),
                   ),
                 ),
               ],
