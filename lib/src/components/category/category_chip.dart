@@ -38,20 +38,31 @@ class WalletCategoryChip extends StatelessWidget {
         scale: selected ? 1.03 : 1.0,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
+          constraints: const BoxConstraints(minHeight: 44.0),
           decoration: BoxDecoration(
             color: fill,
-            borderRadius: BorderRadius.circular(999),
+            borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
             border: Border.all(color: border, width: 1.2),
           ),
           child: Material(
             color: Colors.transparent,
             child: InkWell(
-              borderRadius: BorderRadius.circular(999),
+              borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
               onTap: onTap,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                child: Text(category.name,
-                    style: Theme.of(context).textTheme.labelLarge),
+              child: Center(
+                widthFactor: 1.0,
+                heightFactor: 1.0,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  child: Text(
+                    category.name,
+                    style: Theme.of(context).textTheme.labelLarge,
+                    textHeightBehavior: const TextHeightBehavior(
+                      applyHeightToFirstAscent: false,
+                      applyHeightToLastDescent: false,
+                    ),
+                  ),
+                ),
               ),
             ),
           ),

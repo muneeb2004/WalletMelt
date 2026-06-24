@@ -147,7 +147,6 @@ class ExpenseDetailScreen extends StatelessWidget {
 
             // ── Grocery items ─────────────────────────────────────────
             if (category?.id == 'grocery') ...[
-              const SizedBox(height: AppSpacing.md),
               _GroceryItemsCard(
                   expenseId: expense.id, currency: expense.currency),
             ],
@@ -257,30 +256,33 @@ class _GroceryItemsCardState extends State<_GroceryItemsCard> {
       builder: (context, snapshot) {
         final items = snapshot.data ?? [];
         if (items.isEmpty) return const SizedBox.shrink();
-        return WMGlassSurface.tier2(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SectionHeader(
-                  title: 'Grocery items',
-                  icon: Icons.shopping_cart_outlined,
-                  padding: EdgeInsets.only(bottom: AppSpacing.xs)),
-              const SizedBox(height: AppSpacing.sm),
-              for (final item in items)
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: AppSpacing.xs + 2),
-                  child: Row(
-                    children: [
-                      Expanded(
-                          child: Text(item.name,
-                              style: Theme.of(context).textTheme.bodyLarge)),
-                      Text(formatMoney(item.amount, widget.currency),
-                          style: Theme.of(context).textTheme.bodyLarge),
-                    ],
+        return Padding(
+          padding: const EdgeInsets.only(top: 16.0 /* AppSpacing.md */),
+          child: WMGlassSurface.tier2(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SectionHeader(
+                    title: 'Grocery items',
+                    icon: Icons.shopping_cart_outlined,
+                    padding: EdgeInsets.only(bottom: AppSpacing.xs)),
+                const SizedBox(height: AppSpacing.sm),
+                for (final item in items)
+                  Padding(
+                    padding:
+                        const EdgeInsets.symmetric(vertical: AppSpacing.xs + 2),
+                    child: Row(
+                      children: [
+                        Expanded(
+                            child: Text(item.name,
+                                style: Theme.of(context).textTheme.bodyLarge)),
+                        Text(formatMoney(item.amount, widget.currency),
+                            style: Theme.of(context).textTheme.bodyLarge),
+                      ],
+                    ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         );
       },

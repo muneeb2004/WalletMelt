@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'app_spacing.dart';
 import '../utils/haptics.dart';
 
 export 'app_spacing.dart';
@@ -53,6 +54,7 @@ class WalletMeltTheme {
       brightness: Brightness.light,
       primary: WalletMeltColors.brandDeep,
       surface: WalletMeltColors.background,
+      error: WalletMeltColors.danger,
     );
     return _base(scheme).copyWith(
       scaffoldBackgroundColor: WalletMeltColors.background,
@@ -66,6 +68,7 @@ class WalletMeltTheme {
       brightness: Brightness.dark,
       primary: WalletMeltColors.brand,
       surface: WalletMeltColors.darkBackground,
+      error: WalletMeltColors.danger,
     );
     return _base(scheme).copyWith(
       scaffoldBackgroundColor: WalletMeltColors.darkBackground,
@@ -114,7 +117,7 @@ class WalletMeltTheme {
           foregroundColor: WalletMeltColors.textPrimary,
           minimumSize: const Size.fromHeight(52),
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.buttonRadius)),
           textStyle: const TextStyle(fontWeight: FontWeight.w800),
         ),
       ),
@@ -123,7 +126,7 @@ class WalletMeltTheme {
           foregroundColor: scheme.primary,
           side: BorderSide(color: scheme.primary.withValues(alpha: 0.28), width: 1.4),
           minimumSize: const Size.fromHeight(52),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.buttonRadius)),
           textStyle: const TextStyle(fontWeight: FontWeight.w800),
         ),
       ),
@@ -132,7 +135,7 @@ class WalletMeltTheme {
           backgroundColor: scheme.primary,
           foregroundColor: scheme.brightness == Brightness.dark ? Colors.black : Colors.white,
           minimumSize: const Size.fromHeight(52),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.buttonRadius)),
           textStyle: const TextStyle(fontWeight: FontWeight.w800),
         ),
       ),

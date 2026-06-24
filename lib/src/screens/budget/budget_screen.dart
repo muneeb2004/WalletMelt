@@ -62,12 +62,6 @@ class BudgetScreen extends StatefulWidget {
                       children: [
                         Expanded(
                           child: OutlinedButton(
-                            style: OutlinedButton.styleFrom(
-                              minimumSize: const Size.fromHeight(50),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(
-                                      AppSpacing.buttonRadius)),
-                            ),
                             onPressed: () => Navigator.pop(sheetContext),
                             child: const Text('Cancel'),
                           ),
@@ -75,12 +69,6 @@ class BudgetScreen extends StatefulWidget {
                         AppSpacing.gapSm,
                         Expanded(
                           child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              minimumSize: const Size.fromHeight(50),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(
-                                      AppSpacing.buttonRadius)),
-                            ),
                             onPressed: () async {
                               final parsed =
                                   double.tryParse(controller.text.trim());
@@ -148,12 +136,11 @@ class _BudgetScreenState extends State<BudgetScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
-                      child: Text('Budgeting',
-                          maxLines: 1,
-                          style: Theme.of(context).textTheme.headlineMedium),
+                    Text(
+                      'Budgeting',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.headlineMedium,
                     ),
                     const SizedBox(height: 4),
                     Text('Keep your spending under control.',

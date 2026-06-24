@@ -34,10 +34,11 @@ class _RestoreSummaryDialogState extends State<RestoreSummaryDialog> {
     return Dialog(
       backgroundColor: isDark ? const Color(0xFF161616) : const Color(0xFFFAFAF6),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16.0 /* AppSpacing.md */, vertical: 24.0 /* AppSpacing.lg */),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 450),
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(16.0 /* AppSpacing.md */),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [

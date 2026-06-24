@@ -87,9 +87,14 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 
     return Scaffold(
       body: AppBackground(
-        padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
+        padding: EdgeInsets.zero,
         child: ListView(
-          padding: EdgeInsets.fromLTRB(20, 18, 20, isGroceryMode ? 140 : 24),
+          padding: EdgeInsets.fromLTRB(
+            16.0 /* AppSpacing.md */,
+            18.0,
+            16.0 /* AppSpacing.md */,
+            isGroceryMode ? 140.0 : 24.0 /* AppSpacing.lg */,
+          ),
           children: [
             Row(
               children: [
@@ -99,16 +104,13 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                     icon: const Icon(Icons.close_rounded)),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      isGroceryMode
-                          ? 'Bulk Grocery Entry'
-                          : (isEditing ? 'Edit expense' : 'Add expense'),
-                      maxLines: 1,
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
+                  child: Text(
+                    isGroceryMode
+                        ? 'Bulk Grocery Entry'
+                        : (isEditing ? 'Edit expense' : 'Add expense'),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.headlineMedium,
                   ),
                 ),
               ],
@@ -804,7 +806,7 @@ class _ReceiptCard extends StatelessWidget {
                         onPressed: onCamera,
                         icon: const Icon(Icons.sync_rounded),
                         label: const Text('Replace')),
-                    const Expanded(child: SizedBox.shrink()),
+                    const Spacer(),
                     TextButton.icon(
                         onPressed: onRemove,
                         icon: const Icon(Icons.delete_outline_rounded),

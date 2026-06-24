@@ -14,6 +14,7 @@ import '../../widgets/progress_bar.dart';
 import '../../types/debt.dart';
 import '../../widgets/section_header.dart';
 import '../../types/subscription.dart' as wm_sub;
+import '../../widgets/triple_metric_row.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -34,6 +35,8 @@ class DashboardScreen extends StatelessWidget {
     final currency =
         context.select<AppState, String>((s) => s.settings.currency);
     final state = context.watch<AppState>();
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
 
     return Scaffold(
       body: AppBackground(
@@ -49,17 +52,15 @@ class DashboardScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        FittedBox(
-                          fit: BoxFit.scaleDown,
-                          alignment: Alignment.centerLeft,
-                          child: Text('WalletMelt',
-                              maxLines: 1,
-                              style:
-                                  Theme.of(context).textTheme.headlineMedium),
+                        Text(
+                          'WalletMelt',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: textTheme.headlineMedium,
                         ),
                         const SizedBox(height: AppSpacing.xs),
                         Text('Where did your money go this month?',
-                            style: Theme.of(context).textTheme.bodyMedium),
+                            style: textTheme.bodyMedium),
                       ],
                     ),
                   ),
@@ -91,6 +92,7 @@ class DashboardScreen extends StatelessWidget {
               LiquidGlass(
                 padding: const EdgeInsets.all(AppSpacing.lg),
                 child: Stack(
+                  clipBehavior: Clip.none,
                   children: [
                     Positioned(
                       right: -30,
@@ -114,16 +116,16 @@ class DashboardScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(readableMonth(selectedMonth),
-                            style: Theme.of(context).textTheme.labelLarge),
+                            style: textTheme.labelLarge),
                         const SizedBox(height: AppSpacing.sm),
                         Text(formatMoney(insights.total, currency),
-                            style: Theme.of(context).textTheme.displaySmall),
+                            style: textTheme.displaySmall),
                         const SizedBox(height: AppSpacing.sm),
                         Text(
                           insights.highestCategory == null
                               ? 'Add your first expense to reveal where the month melted.'
                               : 'Highest melt: ${insights.highestCategory!.category.name}',
-                          style: Theme.of(context).textTheme.bodyMedium,
+                          style: textTheme.bodyMedium,
                         ),
                       ],
                     ),
@@ -139,20 +141,26 @@ class DashboardScreen extends StatelessWidget {
               ],
 
               // ── Financial Obligations Card ──────────────────────────────
-              _DashboardObligationsCard(state: state, currency: currency),
-              const SizedBox(height: AppSpacing.md),
+              if (state.debts.any((d) => !d.isSettled)) ...[
+                _DashboardObligationsCard(state: state, currency: currency),
+                const SizedBox(height: AppSpacing.md),
+              ],
 
               // ── Tax Paid Card ──────────────────────────────────────────
-              _DashboardTaxCard(state: state, currency: currency),
-              const SizedBox(height: AppSpacing.md),
+              if (state.currentMonthExpenses.any((e) => e.taxAmount != null && e.taxAmount! > 0)) ...[
+                _DashboardTaxCard(state: state, currency: currency),
+                const SizedBox(height: AppSpacing.md),
+              ],
 
               // ── Upcoming Renewals Card ──────────────────────────────────
-              _DashboardUpcomingRenewalsCard(state: state, currency: currency),
-              const SizedBox(height: AppSpacing.md),
+              if (state.subscriptions.any((s) => s.status == wm_sub.SubscriptionStatus.active)) ...[
+                _DashboardUpcomingRenewalsCard(state: state, currency: currency),
+                const SizedBox(height: AppSpacing.md),
+              ],
 
               // ── Content: empty or charts + recent ──────────────────────
               if (!hasExpenses)
-                EmptyState(
+                const EmptyState(
                   icon: Icons.receipt_long_outlined,
                   title: 'No expenses yet',
                   subtitle: 'Tap + to add your first expense.',
@@ -251,6 +259,9 @@ class _ComparisonBar extends StatelessWidget {
     final leftPercent = total == 0 ? 0.5 : leftValue / total;
     final leftFlex = (leftPercent * 100).round().clamp(1, 99).toInt();
     final rightFlex = (100 - leftFlex).clamp(1, 99).toInt();
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+
     return Column(
       children: [
         ClipRRect(
@@ -302,19 +313,15 @@ class _ComparisonBar extends StatelessWidget {
                 children: [
                   Text(
                     leftLabel,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context)
-                              .textTheme
-                              .bodySmall
-                              ?.color
-                              ?.withValues(alpha: 0.8),
+                    style: textTheme.bodySmall?.copyWith(
+                          color: textTheme.bodySmall?.color?.withValues(alpha: 0.8),
                           fontWeight: FontWeight.w600,
                         ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     formatMoney(leftValue, currency),
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    style: textTheme.titleMedium?.copyWith(
                           color: WalletMeltColors.positive,
                           fontSize: 15,
                         ),
@@ -328,19 +335,15 @@ class _ComparisonBar extends StatelessWidget {
                 children: [
                   Text(
                     rightLabel,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context)
-                              .textTheme
-                              .bodySmall
-                              ?.color
-                              ?.withValues(alpha: 0.8),
+                    style: textTheme.bodySmall?.copyWith(
+                          color: textTheme.bodySmall?.color?.withValues(alpha: 0.8),
                           fontWeight: FontWeight.w600,
                         ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     formatMoney(rightValue, currency),
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    style: textTheme.titleMedium?.copyWith(
                           color: WalletMeltColors.brand,
                           fontSize: 15,
                         ),
@@ -418,7 +421,7 @@ class _DashboardBudgetCard extends StatelessWidget {
                       : 'Remaining: ${formatMoney(remaining, currency)}',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: isOverBudget ? WalletMeltColors.danger : null,
+                        color: isOverBudget ? Theme.of(context).colorScheme.error : null,
                       ),
                   textAlign: TextAlign.right,
                   maxLines: 1,
@@ -458,7 +461,6 @@ class _DashboardObligationsCard extends StatelessWidget {
 
     final netPosition = owedToMe - iOwe;
     final isNegative = netPosition < 0;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Show obligations only if there are active outstanding debts/loans.
     if (owedToMe == 0 && iOwe == 0) {
@@ -490,99 +492,16 @@ class _DashboardObligationsCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.sm + 2),
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'OWED TO ME',
-                      style: TextStyle(
-                        fontSize: 9,
-                        color: WalletMeltColors.textMuted,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '${owedToMe.toStringAsFixed(owedToMe % 1 == 0 ? 0 : 2)} $currency',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        color: WalletMeltColors.positive,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              Container(
-                  width: 1,
-                  height: 24,
-                  color: isDark
-                      ? WalletMeltColors.darkBorder
-                      : WalletMeltColors.lightBorder),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'I OWE',
-                      style: TextStyle(
-                        fontSize: 9,
-                        color: WalletMeltColors.textMuted,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '${iOwe.toStringAsFixed(iOwe % 1 == 0 ? 0 : 2)} $currency',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        color: WalletMeltColors.danger,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              Container(
-                  width: 1,
-                  height: 24,
-                  color: isDark
-                      ? WalletMeltColors.darkBorder
-                      : WalletMeltColors.lightBorder),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'NET POSITION',
-                      style: TextStyle(
-                        fontSize: 9,
-                        color: WalletMeltColors.textMuted,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '${netPosition >= 0 ? "+" : ""}${netPosition.toStringAsFixed(netPosition % 1 == 0 ? 0 : 2)} $currency',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        color: isNegative
-                            ? WalletMeltColors.danger
-                            : WalletMeltColors.positive,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+          TripleMetricRow(
+            label1: 'OWED TO ME',
+            value1: '${owedToMe.toStringAsFixed(owedToMe % 1 == 0 ? 0 : 2)} $currency',
+            color1: WalletMeltColors.positive,
+            label2: 'I OWE',
+            value2: '${iOwe.toStringAsFixed(iOwe % 1 == 0 ? 0 : 2)} $currency',
+            color2: Theme.of(context).colorScheme.error,
+            label3: 'NET POSITION',
+            value3: '${netPosition >= 0 ? "+" : ""}${netPosition.toStringAsFixed(netPosition % 1 == 0 ? 0 : 2)} $currency',
+            color3: isNegative ? Theme.of(context).colorScheme.error : WalletMeltColors.positive,
           ),
         ],
       ),
@@ -630,7 +549,7 @@ class _DashboardTaxCard extends StatelessWidget {
           Text(
             formatMoney(taxThisMonth, currency),
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: WalletMeltColors.danger,
+                  color: Theme.of(context).colorScheme.error,
                 ),
           ),
         ],

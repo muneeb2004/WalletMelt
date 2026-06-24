@@ -57,14 +57,11 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Subscriptions',
-                      maxLines: 1,
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
+                  child: Text(
+                    'Subscriptions',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.headlineMedium,
                   ),
                 ),
                 IconButton(
@@ -198,6 +195,7 @@ class _FilterChip extends StatelessWidget {
         onTap: onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
+          constraints: const BoxConstraints(minHeight: 44.0),
           padding: const EdgeInsets.symmetric(vertical: 10),
           alignment: Alignment.center,
           decoration: BoxDecoration(
@@ -206,7 +204,7 @@ class _FilterChip extends StatelessWidget {
                 : isDark
                     ? Colors.white.withValues(alpha: 0.04)
                     : Colors.black.withValues(alpha: 0.03),
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
             border: Border.all(
               color: selected
                   ? color.withValues(alpha: 0.35)
@@ -221,6 +219,10 @@ class _FilterChip extends StatelessWidget {
             style: theme.textTheme.labelMedium?.copyWith(
               color: selected ? (isDark ? Colors.white : color) : theme.textTheme.bodyMedium?.color,
               fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+            ),
+            textHeightBehavior: const TextHeightBehavior(
+              applyHeightToFirstAscent: false,
+              applyHeightToLastDescent: false,
             ),
           ),
         ),

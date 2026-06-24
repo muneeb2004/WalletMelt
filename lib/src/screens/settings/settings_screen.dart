@@ -97,12 +97,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerLeft,
-                    child: Text('Settings',
-                        maxLines: 1,
-                        style: Theme.of(context).textTheme.headlineMedium),
+                  child: Text(
+                    'Settings',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.headlineMedium,
                   ),
                 ),
               ],

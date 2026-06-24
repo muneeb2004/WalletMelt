@@ -60,12 +60,11 @@ class _PlanningScreenState extends State<PlanningScreen>
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerLeft,
+                  Expanded(
                     child: Text(
                       'Planning',
                       maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.headlineMedium,
                     ),
                   ),

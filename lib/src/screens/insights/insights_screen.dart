@@ -12,18 +12,21 @@ import '../../widgets/empty_state.dart';
 import '../../widgets/section_header.dart';
 import '../../types/debt.dart';
 import '../../types/subscription.dart' as wm_sub;
+import '../../widgets/triple_metric_row.dart';
 
 class InsightsScreen extends StatelessWidget {
   const InsightsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final selectedMonth = context.select((AppState s) => s.selectedMonth);
-    final insights = context.select((AppState s) => s.monthlyInsights);
-    final currency = context.select((AppState s) => s.settings.currency);
+    final state = context.watch<AppState>();
+    final currency = state.settings.currency;
+    final selectedMonth = state.selectedMonth;
+    final insights = state.monthlyInsights;
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
 
     // Calculate Lending and Debt metrics
-    final state = context.watch<AppState>();
     double receivables = 0.0;
     double liabilities = 0.0;
     double overdueAmount = 0.0;
@@ -185,12 +188,11 @@ class InsightsScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: Alignment.centerLeft,
-                        child: Text('Insights',
-                            maxLines: 1,
-                            style: Theme.of(context).textTheme.headlineMedium),
+                      Text(
+                        'Insights',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: textTheme.headlineMedium,
                       ),
                       const SizedBox(height: 2),
                       Row(
@@ -217,7 +219,7 @@ class InsightsScreen extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.md + 2),
             if (insights.total == 0) ...[
-              EmptyState(
+              const EmptyState(
                 icon: Icons.insights_rounded,
                 title: 'No data yet',
                 subtitle:
@@ -366,9 +368,7 @@ class InsightsScreen extends StatelessWidget {
                     children: [
                       Text(
                         'Net Position:',
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyMedium
+                        style: textTheme.bodyMedium
                             ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       Text(
@@ -378,7 +378,7 @@ class InsightsScreen extends StatelessWidget {
                           fontWeight: FontWeight.w900,
                           color: netDebtPosition >= 0
                               ? WalletMeltColors.positive
-                              : WalletMeltColors.danger,
+                              : theme.colorScheme.error,
                         ),
                       ),
                     ],
@@ -390,94 +390,16 @@ class InsightsScreen extends StatelessWidget {
                           ? WalletMeltColors.darkBorder
                           : WalletMeltColors.lightBorder),
                   AppSpacing.gapSm,
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'RECEIVABLES',
-                              style: TextStyle(
-                                  fontSize: 9,
-                                  color: WalletMeltColors.textMuted,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              '${receivables.toStringAsFixed(receivables % 1 == 0 ? 0 : 2)} $currency',
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13,
-                                  color: WalletMeltColors.positive),
-                            ),
-                          ],
-                        ),
-                      ),
-                      AppSpacing.gapSm,
-                      Container(
-                          width: 1,
-                          height: 28,
-                          color: isDark
-                              ? WalletMeltColors.darkBorder
-                              : WalletMeltColors.lightBorder),
-                      AppSpacing.gapSm,
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'LIABILITIES',
-                              style: TextStyle(
-                                  fontSize: 9,
-                                  color: WalletMeltColors.textMuted,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              '${liabilities.toStringAsFixed(liabilities % 1 == 0 ? 0 : 2)} $currency',
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13,
-                                  color: WalletMeltColors.danger),
-                            ),
-                          ],
-                        ),
-                      ),
-                      AppSpacing.gapSm,
-                      Container(
-                          width: 1,
-                          height: 28,
-                          color: isDark
-                              ? WalletMeltColors.darkBorder
-                              : WalletMeltColors.lightBorder),
-                      AppSpacing.gapSm,
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'OVERDUE',
-                              style: TextStyle(
-                                  fontSize: 9,
-                                  color: WalletMeltColors.textMuted,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              '${overdueAmount.toStringAsFixed(overdueAmount % 1 == 0 ? 0 : 2)} $currency',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
-                                color: overdueAmount > 0
-                                    ? WalletMeltColors.danger
-                                    : WalletMeltColors.textMuted,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                  TripleMetricRow(
+                    label1: 'RECEIVABLES',
+                    value1: '${receivables.toStringAsFixed(receivables % 1 == 0 ? 0 : 2)} $currency',
+                    color1: WalletMeltColors.positive,
+                    label2: 'LIABILITIES',
+                    value2: '${liabilities.toStringAsFixed(liabilities % 1 == 0 ? 0 : 2)} $currency',
+                    color2: theme.colorScheme.error,
+                    label3: 'OVERDUE',
+                    value3: '${overdueAmount.toStringAsFixed(overdueAmount % 1 == 0 ? 0 : 2)} $currency',
+                    color3: overdueAmount > 0 ? theme.colorScheme.error : WalletMeltColors.textMuted,
                   ),
                   AppSpacing.gapSm,
                   Divider(
