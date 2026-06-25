@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -430,13 +431,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
         return;
       }
 
-      final result =
-          widget.importValidationService.validateBackup(backupFile.jsonText);
+      final result = Platform.environment.containsKey('FLUTTER_TEST')
+          ? widget.importValidationService.validateBackup(backupFile.jsonText)
+          : await compute(_validateBackupIsolate, backupFile.jsonText);
       if (!mounted) return;
 
       if (result.isValid) {
-        final preview =
-            widget.previewService.generatePreview(backupFile.jsonText);
+        final preview = Platform.environment.containsKey('FLUTTER_TEST')
+            ? widget.previewService.generatePreview(backupFile.jsonText)
+            : await compute(_generatePreviewIsolate, backupFile.jsonText);
+        if (!mounted) return;
         if (preview.isValid) {
           final state = context.read<AppState>();
           await state.loadDeletedExpenses();
@@ -456,16 +460,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
           BackupConflictSummary? conflictSummary;
           RestoreDryRunPlan? dryRunPlan;
           try {
-            conflictSummary = widget.conflictService.detect(
-              jsonText: backupFile.jsonText,
-              localSnapshot: snapshot,
-            );
-            dryRunPlan = widget.restoreDryRunPlanner.plan(
-              jsonText: backupFile.jsonText,
-              localSnapshot: snapshot,
-              conflictSummary: conflictSummary,
-              mode: RestoreMode.safeMerge,
-            );
+            if (Platform.environment.containsKey('FLUTTER_TEST')) {
+              conflictSummary = widget.conflictService.detect(
+                jsonText: backupFile.jsonText,
+                localSnapshot: snapshot,
+              );
+              dryRunPlan = widget.restoreDryRunPlanner.plan(
+                jsonText: backupFile.jsonText,
+                localSnapshot: snapshot,
+                conflictSummary: conflictSummary,
+                mode: RestoreMode.safeMerge,
+              );
+            } else {
+              conflictSummary = await compute(
+                _detectConflictsIsolate,
+                _ConflictDetectionArgs(backupFile.jsonText, snapshot),
+              );
+              if (!mounted) return;
+              dryRunPlan = await compute(
+                _planRestoreIsolate,
+                _RestorePlanArgs(
+                  jsonText: backupFile.jsonText,
+                  localSnapshot: snapshot,
+                  conflictSummary: conflictSummary,
+                  mode: RestoreMode.safeMerge,
+                ),
+              );
+            }
           } catch (e) {
             debugPrint('Conflict/dry-run detection threw: $e');
           }
@@ -609,4 +630,51 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   String _twoDigits(int value) => value.toString().padLeft(2, '0');
+}
+
+class _ConflictDetectionArgs {
+  final String jsonText;
+  final LocalAppSnapshot localSnapshot;
+  const _ConflictDetectionArgs(this.jsonText, this.localSnapshot);
+}
+
+BackupConflictSummary _detectConflictsIsolate(_ConflictDetectionArgs args) {
+  const conflictService = WalletMeltJsonBackupConflictService();
+  return conflictService.detect(
+    jsonText: args.jsonText,
+    localSnapshot: args.localSnapshot,
+  );
+}
+
+class _RestorePlanArgs {
+  final String jsonText;
+  final LocalAppSnapshot localSnapshot;
+  final BackupConflictSummary? conflictSummary;
+  final RestoreMode mode;
+  const _RestorePlanArgs({
+    required this.jsonText,
+    required this.localSnapshot,
+    this.conflictSummary,
+    required this.mode,
+  });
+}
+
+RestoreDryRunPlan _planRestoreIsolate(_RestorePlanArgs args) {
+  const planner = WalletMeltJsonRestoreDryRunPlanner();
+  return planner.plan(
+    jsonText: args.jsonText,
+    localSnapshot: args.localSnapshot,
+    conflictSummary: args.conflictSummary,
+    mode: args.mode,
+  );
+}
+
+BackupValidationResult _validateBackupIsolate(String jsonText) {
+  const service = WalletMeltJsonBackupImportValidationService();
+  return service.validateBackup(jsonText);
+}
+
+WalletMeltBackupPreview _generatePreviewIsolate(String jsonText) {
+  const service = WalletMeltJsonBackupPreviewService();
+  return service.generatePreview(jsonText);
 }

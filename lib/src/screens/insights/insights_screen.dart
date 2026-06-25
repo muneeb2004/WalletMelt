@@ -11,42 +11,87 @@ import '../../utils/date_utils.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/section_header.dart';
 import '../../types/debt.dart';
+import '../../types/expense.dart';
 import '../../types/subscription.dart' as wm_sub;
 import '../../widgets/triple_metric_row.dart';
 
-class InsightsScreen extends StatelessWidget {
+class InsightsScreen extends StatefulWidget {
   const InsightsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final state = context.watch<AppState>();
-    final currency = state.settings.currency;
-    final selectedMonth = state.selectedMonth;
-    final insights = state.monthlyInsights;
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
+  State<InsightsScreen> createState() => _InsightsScreenState();
+}
 
-    // Calculate Lending and Debt metrics
-    double receivables = 0.0;
-    double liabilities = 0.0;
-    double overdueAmount = 0.0;
+class _InsightsScreenState extends State<InsightsScreen> {
+  // Caching tracking
+  List<Expense>? _lastExpenses;
+  List<wm_sub.Subscription>? _lastSubscriptions;
+  List<DebtRecord>? _lastDebts;
+  DateTime? _lastSelectedMonth;
+
+  // Cached variables
+  late double receivables;
+  late double liabilities;
+  late double overdueAmount;
+  late double monthlyTax;
+  late double yearlyTax;
+  late double taxableSpend;
+  late double nonTaxableSpend;
+  late Map<String, double> taxByCategory;
+  late double monthlySubSpend;
+  late double annualSubSpend;
+  late wm_sub.Subscription? mostExpensiveSub;
+  late double highestSubPrice;
+  late Map<String, double> subSpendByCategory;
+  late String? largestDebtorName;
+  late double largestDebtorAmount;
+  late String? largestCreditorName;
+  late double largestCreditorAmount;
+  late double netDebtPosition;
+
+  @override
+  void initState() {
+    super.initState();
+    taxByCategory = {};
+    subSpendByCategory = {};
+  }
+
+  void _calculateMetrics(AppState state) {
+    final expenses = state.expenses;
+    final subscriptions = state.subscriptions;
+    final debts = state.debts;
+    final selectedMonth = state.selectedMonth;
+
+    if (_lastExpenses == expenses &&
+        _lastSubscriptions == subscriptions &&
+        _lastDebts == debts &&
+        _lastSelectedMonth == selectedMonth) {
+      return;
+    }
+
+    _lastExpenses = expenses;
+    _lastSubscriptions = subscriptions;
+    _lastDebts = debts;
+    _lastSelectedMonth = selectedMonth;
+
+    receivables = 0.0;
+    liabilities = 0.0;
+    overdueAmount = 0.0;
 
     final nowStr = DateTime.now().toIso8601String().substring(0, 10);
-
     final debtorAmounts = <String, double>{};
     final creditorAmounts = <String, double>{};
 
-    // Calculate Tax Metrics
-    double monthlyTax = 0.0;
-    double yearlyTax = 0.0;
-    double taxableSpend = 0.0;
-    double nonTaxableSpend = 0.0;
-    final taxByCategory = <String, double>{};
+    monthlyTax = 0.0;
+    yearlyTax = 0.0;
+    taxableSpend = 0.0;
+    nonTaxableSpend = 0.0;
+    taxByCategory.clear();
 
     final selectedYear = selectedMonth.year;
     final selectedMonthInt = selectedMonth.month;
 
-    for (final exp in state.expenses) {
+    for (final exp in expenses) {
       if (exp.deletedAt != null) continue;
 
       DateTime expDate;
@@ -79,16 +124,15 @@ class InsightsScreen extends StatelessWidget {
       }
     }
 
-    // Calculate Subscription Metrics
-    double monthlySubSpend = 0.0;
-    double annualSubSpend = 0.0;
-    wm_sub.Subscription? mostExpensiveSub;
-    double highestSubPrice = 0.0;
+    monthlySubSpend = 0.0;
+    annualSubSpend = 0.0;
+    mostExpensiveSub = null;
+    highestSubPrice = 0.0;
+    subSpendByCategory.clear();
 
-    final activeSubs = state.subscriptions
+    final activeSubs = subscriptions
         .where((s) => s.status == wm_sub.SubscriptionStatus.active)
         .toList();
-    final subSpendByCategory = <String, double>{};
 
     for (final sub in activeSubs) {
       final subTotalCost = sub.amount + (sub.taxAmount ?? 0.0);
@@ -130,7 +174,7 @@ class InsightsScreen extends StatelessWidget {
 
     annualSubSpend = monthlySubSpend * 12.0;
 
-    for (final debt in state.debts) {
+    for (final debt in debts) {
       if (debt.isSettled) continue;
 
       final isReceivable =
@@ -150,11 +194,10 @@ class InsightsScreen extends StatelessWidget {
       }
     }
 
-    final netDebtPosition = receivables - liabilities;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    netDebtPosition = receivables - liabilities;
 
-    String? largestDebtorName;
-    double largestDebtorAmount = 0.0;
+    largestDebtorName = null;
+    largestDebtorAmount = 0.0;
     debtorAmounts.forEach((name, amount) {
       if (amount > largestDebtorAmount) {
         largestDebtorAmount = amount;
@@ -162,14 +205,29 @@ class InsightsScreen extends StatelessWidget {
       }
     });
 
-    String? largestCreditorName;
-    double largestCreditorAmount = 0.0;
+    largestCreditorName = null;
+    largestCreditorAmount = 0.0;
     creditorAmounts.forEach((name, amount) {
       if (amount > largestCreditorAmount) {
         largestCreditorAmount = amount;
         largestCreditorName = name;
       }
     });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<AppState>();
+    final currency = state.settings.currency;
+    final selectedMonth = state.selectedMonth;
+    final insights = state.monthlyInsights;
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+
+    _calculateMetrics(state);
+    final expensiveSub = mostExpensiveSub;
+
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       body: AppBackground(
@@ -658,8 +716,8 @@ class InsightsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    mostExpensiveSub != null
-                        ? '${mostExpensiveSub.name} (${(mostExpensiveSub.amount + (mostExpensiveSub.taxAmount ?? 0.0)).toStringAsFixed(0)} $currency/${mostExpensiveSub.billingCycle})'
+                    expensiveSub != null
+                        ? '${expensiveSub.name} (${(expensiveSub.amount + (expensiveSub.taxAmount ?? 0.0)).toStringAsFixed(0)} $currency/${expensiveSub.billingCycle})'
                         : 'None active',
                     style: const TextStyle(
                         fontSize: 13, fontWeight: FontWeight.bold),

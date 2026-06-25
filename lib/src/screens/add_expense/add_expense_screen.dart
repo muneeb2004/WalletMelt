@@ -77,6 +77,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final state = context.read<AppState>();
     final currency = context.select((AppState s) => s.settings.currency);
     final categories = context.select((AppState s) => s.categories);
@@ -110,7 +111,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                         : (isEditing ? 'Edit expense' : 'Add expense'),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.headlineMedium,
+                    style: theme.textTheme.headlineMedium,
                   ),
                 ),
               ],
@@ -144,7 +145,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                   padding: const EdgeInsets.only(top: 8),
                   child: Text(_validation!.categoryError!,
                       style: TextStyle(
-                          color: Theme.of(context).colorScheme.error))),
+                          color: theme.colorScheme.error))),
             const SizedBox(height: 20),
 
             if (isGroceryMode) ...[
@@ -184,10 +185,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                               const SizedBox(width: 8),
                               Text(
                                 'Additional Details',
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                style: theme.textTheme.titleMedium?.copyWith(
                                       fontSize: 14,
                                       fontWeight: FontWeight.bold,
-                                    ),
+                                      ),
                               ),
                             ],
                           ),
@@ -253,7 +254,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                 controller: _amountController,
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
-                style: Theme.of(context).textTheme.displaySmall,
+                style: theme.textTheme.displaySmall,
                 decoration: InputDecoration(
                   labelText: 'Amount',
                   prefixText: '$currency ',
@@ -285,18 +286,18 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Date', style: Theme.of(context).textTheme.labelMedium?.copyWith(fontSize: 11)),
+                          Text('Date', style: theme.textTheme.labelMedium?.copyWith(fontSize: 11)),
                           const SizedBox(height: 2),
                           Text(
                             '${_date.day}/${_date.month}/${_date.year}',
-                            style: Theme.of(context).textTheme.titleMedium,
+                            style: theme.textTheme.titleMedium,
                           ),
                         ],
                       ),
                     ),
                     Icon(
                       Icons.chevron_right_rounded,
-                      color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.54),
+                      color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.54),
                     ),
                   ],
                 ),

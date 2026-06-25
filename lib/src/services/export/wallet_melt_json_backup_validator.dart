@@ -2,6 +2,48 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:archive/archive.dart';
+import 'package:flutter/foundation.dart';
+
+class _ZipDecoderArgs {
+  final List<int> bytes;
+  const _ZipDecoderArgs(this.bytes);
+}
+
+class _ZipDecoderResult {
+  final String jsonText;
+  final Map<String, dynamic>? metadataJson;
+  const _ZipDecoderResult(this.jsonText, this.metadataJson);
+}
+
+_ZipDecoderResult _decodeBackupZip(_ZipDecoderArgs args) {
+  final archive = ZipDecoder().decodeBytes(args.bytes);
+  final backupEntry = archive.findFile('backup.json');
+  if (backupEntry == null) {
+    throw const FormatException('ZIP backup is missing backup.json');
+  }
+  final jsonText = utf8.decode(backupEntry.content as List<int>);
+
+  Map<String, dynamic>? metadataJson;
+  final metadataEntry = archive.findFile('metadata.json');
+  if (metadataEntry != null) {
+    try {
+      metadataJson = jsonDecode(utf8.decode(metadataEntry.content as List<int>))
+          as Map<String, dynamic>;
+    } catch (_) {}
+  }
+  return _ZipDecoderResult(jsonText, metadataJson);
+}
+
+Future<R> _runTask<Q, R>(ComputeCallback<Q, R> callback, Q message) {
+  if (Platform.environment.containsKey('FLUTTER_TEST')) {
+    try {
+      return Future.value(callback(message));
+    } catch (e, s) {
+      return Future.error(e, s);
+    }
+  }
+  return compute(callback, message);
+}
 
 /// Represents a parsed backup from either a legacy JSON file or a modern ZIP package.
 class WalletMeltBackupFile {
@@ -31,27 +73,13 @@ class WalletMeltBackupFile {
         bytes[1] == 0x4B &&
         bytes[2] == 0x03 &&
         bytes[3] == 0x04) {
-      final archive = ZipDecoder().decodeBytes(bytes);
-      final backupEntry = archive.findFile('backup.json');
-      if (backupEntry == null) {
-        throw const FormatException('ZIP backup is missing backup.json');
-      }
-      final jsonText = utf8.decode(backupEntry.content as List<int>);
-
-      Map<String, dynamic>? metadataJson;
-      final metadataEntry = archive.findFile('metadata.json');
-      if (metadataEntry != null) {
-        try {
-          metadataJson = jsonDecode(utf8.decode(metadataEntry.content as List<int>))
-              as Map<String, dynamic>;
-        } catch (_) {}
-      }
+      final decoded = await _runTask(_decodeBackupZip, _ZipDecoderArgs(bytes));
 
       return WalletMeltBackupFile(
-        jsonText: jsonText,
+        jsonText: decoded.jsonText,
         zipBytes: bytes,
         isZip: true,
-        metadataJson: metadataJson,
+        metadataJson: decoded.metadataJson,
       );
     } else {
       // Treat as raw JSON text

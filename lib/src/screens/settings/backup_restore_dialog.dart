@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -210,16 +211,10 @@ class _BackupRestoreDialogState extends State<BackupRestoreDialog> {
         ));
         await zipExtractDir.create(recursive: true);
 
-        final archive = ZipDecoder().decodeBytes(widget.backupFile.zipBytes!);
-        for (final entry in archive) {
-          final entryPath = entry.name;
-          if (entry.isFile) {
-            final data = entry.content as List<int>;
-            File(p.join(zipExtractDir.path, entryPath))
-              ..createSync(recursive: true)
-              ..writeAsBytesSync(data);
-          }
-        }
+        await _runTask(
+          _extractZipInBackground,
+          _ZipExtractorArgs(widget.backupFile.zipBytes!, zipExtractDir.path),
+        );
       }
 
       // 3. Trigger Restore Service
@@ -777,4 +772,34 @@ class _ModeTab extends StatelessWidget {
 
 extension on BackupRestoreDialog {
   WalletMeltJsonRestoreDryRunPlanner get restoreDryRunPlanner => const WalletMeltJsonRestoreDryRunPlanner();
+}
+
+class _ZipExtractorArgs {
+  final List<int> zipBytes;
+  final String extractPath;
+  const _ZipExtractorArgs(this.zipBytes, this.extractPath);
+}
+
+void _extractZipInBackground(_ZipExtractorArgs args) {
+  final archive = ZipDecoder().decodeBytes(args.zipBytes);
+  for (final entry in archive) {
+    final entryPath = entry.name;
+    if (entry.isFile) {
+      final data = entry.content as List<int>;
+      final file = File(p.join(args.extractPath, entryPath));
+      file.createSync(recursive: true);
+      file.writeAsBytesSync(data);
+    }
+  }
+}
+
+Future<R> _runTask<Q, R>(ComputeCallback<Q, R> callback, Q message) {
+  if (Platform.environment.containsKey('FLUTTER_TEST')) {
+    try {
+      return Future.value(callback(message));
+    } catch (e, s) {
+      return Future.error(e, s);
+    }
+  }
+  return compute(callback, message);
 }

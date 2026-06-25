@@ -28,10 +28,23 @@ class ConflictResolutionScreen extends StatefulWidget {
 
 class _ConflictResolutionScreenState extends State<ConflictResolutionScreen> {
   final Map<String, ConflictResolution> _resolutions = {};
+  late final Map<String, Expense> _localExpensesMap;
+  late final Map<String, Map<String, Object?>> _backupCategoriesMap;
+  late final Map<String, Category> _localCategoriesMap;
 
   @override
   void initState() {
     super.initState();
+    _localExpensesMap = {
+      for (final e in widget.localExpenses) e.id: e
+    };
+    _backupCategoriesMap = {
+      for (final c in widget.backupCategories) c['id']?.toString() ?? '': c
+    };
+    _localCategoriesMap = {
+      for (final c in widget.localCategories) c.id: c
+    };
+
     // Default to keep local (safe default)
     for (final expense in widget.conflicts) {
       final id = expense['id']?.toString() ?? '';
@@ -56,7 +69,8 @@ class _ConflictResolutionScreenState extends State<ConflictResolutionScreen> {
         final id = expense['id']?.toString() ?? '';
         if (id.isEmpty) continue;
 
-        final local = widget.localExpenses.firstWhere((e) => e.id == id);
+        final local = _localExpensesMap[id];
+        if (local == null) continue;
         final backupUpdatedAtStr = expense['updated_at']?.toString();
         
         if (backupUpdatedAtStr != null) {
@@ -77,19 +91,14 @@ class _ConflictResolutionScreenState extends State<ConflictResolutionScreen> {
 
   String _getCategoryName(String categoryId, bool isBackup) {
     if (isBackup) {
-      final match = widget.backupCategories.firstWhere(
-        (c) => c['id']?.toString() == categoryId,
-        orElse: () => <String, Object?>{},
-      );
-      if (match.isNotEmpty) {
+      final match = _backupCategoriesMap[categoryId];
+      if (match != null) {
         return match['name']?.toString() ?? categoryId;
       }
+      return categoryId;
     }
-    final match = widget.localCategories.firstWhere(
-      (c) => c.id == categoryId,
-      orElse: () => Category(id: '', name: 'Unknown', icon: '❓', color: '#888888', isDefault: false, createdAt: '', updatedAt: ''),
-    );
-    return match.name;
+    final match = _localCategoriesMap[categoryId];
+    return match?.name ?? 'Unknown';
   }
 
   @override
@@ -171,7 +180,8 @@ class _ConflictResolutionScreenState extends State<ConflictResolutionScreen> {
                 itemBuilder: (context, index) {
                   final backupExpense = widget.conflicts[index];
                   final id = backupExpense['id']?.toString() ?? '';
-                  final localExpense = widget.localExpenses.firstWhere((e) => e.id == id);
+                  final localExpense = _localExpensesMap[id];
+                  if (localExpense == null) return const SizedBox.shrink();
                   final currentChoice = _resolutions[id] ?? ConflictResolution.keepExisting;
 
                   return _ConflictCard(

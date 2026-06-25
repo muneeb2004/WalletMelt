@@ -123,7 +123,7 @@ class _ReceiptViewerScreenState extends State<ReceiptViewerScreen>
       if (mounted) {
         setState(() {
           _hasError = true;
-          _errorMessage = e.toString();
+          _errorMessage = 'Failed to load receipt image.';
           _isLoading = false;
         });
       }

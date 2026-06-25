@@ -101,6 +101,7 @@ class BudgetScreen extends StatefulWidget {
 class _BudgetScreenState extends State<BudgetScreen> {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final state = context.read<AppState>();
     final selectedMonth = context.select((AppState s) => s.selectedMonth);
     final monthlyBudget = context.select((AppState s) => s.getMonthlyBudgetAmount());
@@ -108,7 +109,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
     final currency = context.select((AppState s) => s.settings.currency);
     final currentBudgets = context.select((AppState s) => s.currentBudgets);
 
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = theme.brightness == Brightness.dark;
     final now = DateTime.now();
 
     // Check if the navigated month is the current calendar month
@@ -140,11 +141,11 @@ class _BudgetScreenState extends State<BudgetScreen> {
                       'Budgeting',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.headlineMedium,
+                      style: theme.textTheme.headlineMedium,
                     ),
                     const SizedBox(height: 4),
                     Text('Keep your spending under control.',
-                        style: Theme.of(context).textTheme.bodyMedium),
+                        style: theme.textTheme.bodyMedium),
                   ],
                 ),
               ),
@@ -156,7 +157,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
               ),
               Text(
                 readableMonth(selectedMonth),
-                style: Theme.of(context).textTheme.titleMedium,
+                style: theme.textTheme.titleMedium,
               ),
               IconButton(
                 tooltip: 'Next month',

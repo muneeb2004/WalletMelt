@@ -25,6 +25,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    precacheImage(
+      const AssetImage('assets/brand/optimized/walletmelt_main_logo_960.webp'),
+      context,
+    );
+  }
+
+  @override
   void dispose() {
     _pageController.dispose();
     super.dispose();
