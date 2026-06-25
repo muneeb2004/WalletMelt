@@ -103,7 +103,8 @@ class _ConflictResolutionScreenState extends State<ConflictResolutionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     
     return Scaffold(
       backgroundColor: isDark ? WalletMeltColors.darkBackgroundAlt : const Color(0xFFF7F7F4),
@@ -135,7 +136,7 @@ class _ConflictResolutionScreenState extends State<ConflictResolutionScreen> {
                 children: [
                   Text(
                     'Bulk Actions (${widget.conflicts.length} duplicate IDs detected)',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                    style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 10),
                   SingleChildScrollView(

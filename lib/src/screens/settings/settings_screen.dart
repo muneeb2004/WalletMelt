@@ -75,6 +75,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final state = context.read<AppState>();
+    final theme = Theme.of(context);
     final currency = context.select((AppState s) => s.settings.currency);
     final themePreference =
         context.select((AppState s) => s.settings.themePreference);
@@ -102,7 +103,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     'Settings',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.headlineMedium,
+                    style: theme.textTheme.headlineMedium,
                   ),
                 ),
               ],
@@ -115,13 +116,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('Preferences',
-                      style: Theme.of(context).textTheme.titleLarge),
+                      style: theme.textTheme.titleLarge),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
                     initialValue: currency,
                     decoration: const InputDecoration(labelText: 'Currency'),
                     dropdownColor:
-                        Theme.of(context).brightness == Brightness.dark
+                        theme.brightness == Brightness.dark
                             ? WalletMeltColors.darkSurface
                             : Colors.white,
                     borderRadius: BorderRadius.circular(20),
@@ -139,7 +140,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     initialValue: themePreference,
                     decoration: const InputDecoration(labelText: 'Theme'),
                     dropdownColor:
-                        Theme.of(context).brightness == Brightness.dark
+                        theme.brightness == Brightness.dark
                             ? WalletMeltColors.darkSurface
                             : Colors.white,
                     borderRadius: BorderRadius.circular(20),
@@ -166,12 +167,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('Backup & Data Management',
-                      style: Theme.of(context).textTheme.titleLarge),
+                      style: theme.textTheme.titleLarge),
                   const SizedBox(height: 12),
 
                   // Data export subsection
                   Text('Data export',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      style: theme.textTheme.titleMedium?.copyWith(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
                           )),
@@ -210,7 +211,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           : 'Export expenses CSV'),
                     ),
                   ),
-                  const SizedBox(height: 8),
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
@@ -237,7 +237,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                   // Data import subsection
                   Text('Data import',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      style: theme.textTheme.titleMedium?.copyWith(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
                           )),
@@ -262,14 +262,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   const SizedBox(height: 8),
                   Text(
                     'Select a backup JSON file to verify its structure and compatibility before importing. No changes will be made to your data.',
-                    style: Theme.of(context).textTheme.bodySmall,
+                    style: theme.textTheme.bodySmall,
                   ),
 
                   const SizedBox(height: AppSpacing.md),
                   Text(
                     _exportStatusText(currency, expensesLength,
                         deletedExpensesLength, lastExportedAt),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    style: theme.textTheme.bodySmall?.copyWith(
                           fontStyle: FontStyle.italic,
                         ),
                   ),
@@ -284,19 +284,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('About WalletMelt',
-                      style: Theme.of(context).textTheme.titleLarge),
+                      style: theme.textTheme.titleLarge),
                   const SizedBox(height: 12),
                   Text('Privacy First',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      style: theme.textTheme.titleMedium?.copyWith(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
                           )),
                   const SizedBox(height: 4),
                   Text(
                     'All expenses, settings, categories, budgets, and receipt images stay stored locally on this device. There is no remote login, backend databases, or cloud tracking.',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyMedium
+                    style: theme.textTheme.bodyMedium
                         ?.copyWith(fontSize: 13),
                   ),
                   const Padding(
@@ -305,16 +303,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         Divider(height: 1, color: Colors.grey, thickness: 0.12),
                   ),
                   Text('Future Scope',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      style: theme.textTheme.titleMedium?.copyWith(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
                           )),
                   const SizedBox(height: 4),
                   Text(
                     'Automatic cloud synchronization, shared household ledger profiles, OCR-based receipt scanning, and recurring expense reminders are planned for future versions.',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyMedium
+                    style: theme.textTheme.bodyMedium
                         ?.copyWith(fontSize: 13),
                   ),
                   const Padding(
@@ -326,12 +322,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text('Version',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
+                          style: theme.textTheme.bodyMedium
                               ?.copyWith(fontWeight: FontWeight.bold)),
                       Text('v0.1.1',
-                          style: Theme.of(context).textTheme.bodyMedium),
+                          style: theme.textTheme.bodyMedium),
                     ],
                   ),
                 ],
@@ -420,7 +414,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _validateBackupFile() async {
-    debugPrint('_validateBackupFile CALLED');
+    if (kDebugMode) {
+      debugPrint('_validateBackupFile CALLED');
+    }
     setState(() => _isValidatingBackup = true);
 
     try {
@@ -488,7 +484,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               );
             }
           } catch (e) {
-            debugPrint('Conflict/dry-run detection threw: $e');
+            if (kDebugMode) {
+              debugPrint('Conflict/dry-run detection threw: $e');
+            }
           }
 
           if (!mounted) return;
@@ -515,10 +513,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
           'Invalid backup file: '
           '${_safeRestoreErrorMessage(result.error ?? "Unknown error")}',
         );
-        debugPrint('VALIDATION RESULT INVALID: ${result.error}');
+        if (kDebugMode) {
+          debugPrint('VALIDATION RESULT INVALID: ${result.error}');
+        }
       }
     } catch (e, stack) {
-      debugPrint('VALIDATION EXCEPTION: $e\n$stack');
+      if (kDebugMode) {
+        debugPrint('VALIDATION EXCEPTION: $e\n$stack');
+      }
       if (!mounted) return;
       showErrorSnackbar(
         context,
@@ -539,7 +541,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     BackupConflictSummary? conflictSummary,
     RestoreDryRunPlan? dryRunPlan,
   }) {
-    debugPrint('SHOW DIALOG CALLED');
+    if (kDebugMode) {
+      debugPrint('SHOW DIALOG CALLED');
+    }
     showDialog(
       context: context,
       barrierDismissible: false,

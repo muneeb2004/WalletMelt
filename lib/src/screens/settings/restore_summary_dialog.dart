@@ -26,8 +26,9 @@ class _RestoreSummaryDialogState extends State<RestoreSummaryDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final textTheme = theme.textTheme;
 
     final hasWarnings = widget.result.warnings.isNotEmpty;
 

@@ -260,7 +260,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
                           const SizedBox(width: 6),
                           Text(
                             readableMonth(selectedMonth),
-                            style: Theme.of(context)
+                            style: theme
                                 .textTheme
                                 .bodyMedium
                                 ?.copyWith(
@@ -295,7 +295,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     Text(formatMoney(insights.total, currency),
-                        style: Theme.of(context).textTheme.displaySmall),
+                        style: theme.textTheme.displaySmall),
                     if (insights.monthOverMonthDelta != null) ...[
                       const SizedBox(height: AppSpacing.sm + 2),
                       Container(
@@ -319,36 +319,32 @@ class _InsightsScreenState extends State<InsightsScreen> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(
+                             Icon(
                               insights.monthOverMonthDelta! <= 0
                                   ? Icons.trending_down_rounded
                                   : Icons.trending_up_rounded,
                               color: insights.monthOverMonthDelta! <= 0
-                                  ? (Theme.of(context).brightness ==
-                                          Brightness.dark
+                                  ? (isDark
                                       ? WalletMeltColors.positive
                                       : const Color(0xFF1E7E52))
-                                  : (Theme.of(context).brightness ==
-                                          Brightness.dark
+                                  : (isDark
                                       ? WalletMeltColors.danger
                                       : const Color(0xFFC0392B)),
                               size: 16,
-                            ),
+                             ),
                             const SizedBox(width: 6),
                             Text(
                               '${insights.monthOverMonthDelta! >= 0 ? '+' : ''}${insights.monthOverMonthDelta!.toStringAsFixed(1)}% vs previous month',
-                              style: Theme.of(context)
+                              style: theme
                                   .textTheme
                                   .bodySmall
                                   ?.copyWith(
                                     fontWeight: FontWeight.w800,
                                     color: insights.monthOverMonthDelta! <= 0
-                                        ? (Theme.of(context).brightness ==
-                                                Brightness.dark
+                                        ? (isDark
                                             ? Colors.white
                                             : const Color(0xFF1E7E52))
-                                        : (Theme.of(context).brightness ==
-                                                Brightness.dark
+                                        : (isDark
                                             ? Colors.white
                                             : const Color(0xFFC0392B)),
                                   ),
@@ -360,7 +356,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
                       const SizedBox(height: AppSpacing.sm),
                       Text(
                         'Add another month of expenses to compare trends.',
-                        style: Theme.of(context).textTheme.bodyMedium,
+                        style: theme.textTheme.bodyMedium,
                       ),
                     ],
                   ],
@@ -397,7 +393,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
                     const SizedBox(height: AppSpacing.sm),
                     Text(
                       'Track your monthly spend ceiling and optional category limits.',
-                      style: Theme.of(context).textTheme.bodyMedium,
+                      style: theme.textTheme.bodyMedium,
                     ),
                     const SizedBox(height: AppSpacing.md),
                     OutlinedButton.icon(

@@ -144,6 +144,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final expenses = context.select<AppState, List<Expense>>((s) => s.expenses);
     final deletedExpenses = context.select<AppState, List<Expense>>((s) => s.deletedExpenses);
     final categories = context.select<AppState, List<wm.Category>>((s) => s.categories);
@@ -170,7 +171,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             'History',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.headlineMedium,
+                            style: theme.textTheme.headlineMedium,
                           ),
                         ),
                         IconButton(
@@ -260,7 +261,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     DropdownButtonFormField<ExpenseSort>(
                       initialValue: _sort,
                       decoration: const InputDecoration(labelText: 'Sort'),
-                      dropdownColor: Theme.of(context).brightness == Brightness.dark
+                      dropdownColor: theme.brightness == Brightness.dark
                           ? WalletMeltColors.darkSurface
                           : Colors.white,
                       borderRadius: BorderRadius.circular(20),

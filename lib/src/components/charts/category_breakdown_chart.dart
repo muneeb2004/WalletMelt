@@ -11,9 +11,10 @@ class CategoryBreakdownChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     if (items.isEmpty) {
       return Text('Add expenses to see where the month melted.',
-          style: Theme.of(context).textTheme.bodyMedium);
+          style: theme.textTheme.bodyMedium);
     }
     return SizedBox(
       height: 210,
@@ -61,7 +62,7 @@ class CategoryBreakdownChart extends StatelessWidget {
                             child: Text(item.category.name,
                                 maxLines: 1, overflow: TextOverflow.ellipsis)),
                         Text('${(item.percentOfTotal * 100).round()}%',
-                            style: Theme.of(context).textTheme.labelMedium),
+                            style: theme.textTheme.labelMedium),
                       ],
                     ),
                   ),

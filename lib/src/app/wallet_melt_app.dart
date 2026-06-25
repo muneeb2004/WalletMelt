@@ -17,6 +17,7 @@ import '../components/navigation/app_shell.dart';
 import '../state/app_state.dart';
 import '../theme/wallet_melt_theme.dart';
 import '../types/settings.dart';
+import '../utils/security_utils.dart';
 
 class WalletMeltBootstrap extends StatelessWidget {
   const WalletMeltBootstrap({super.key});
@@ -42,9 +43,18 @@ class WalletMeltApp extends StatefulWidget {
 class _WalletMeltAppState extends State<WalletMeltApp> {
   late final GoRouter _router;
 
+  bool _isValidUuid(String? id) {
+    if (id == null || id.length != 36) return false;
+    final regex = RegExp(
+      r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
+    );
+    return regex.hasMatch(id);
+  }
+
   @override
   void initState() {
     super.initState();
+    SecurityUtils.enableSecureScreen();
     final appState = context.read<AppState>();
     _router = GoRouter(
       initialLocation: '/',
@@ -80,7 +90,8 @@ class _WalletMeltAppState extends State<WalletMeltApp> {
                   path: '/planning',
                   builder: (context, state) {
                     final tab = state.uri.queryParameters['tab'];
-                    final initialIndex = tab == 'subscriptions' ? 1 : 0;
+                    final allowlist = {'subscriptions', 'budgets'};
+                    final initialIndex = allowlist.contains(tab) && tab == 'subscriptions' ? 1 : 0;
                     return PlanningScreen(initialIndex: initialIndex);
                   })
             ]),
@@ -105,16 +116,31 @@ class _WalletMeltAppState extends State<WalletMeltApp> {
             redirect: (context, state) => '/planning?tab=subscriptions'),
         GoRoute(
           path: '/expense/:id',
+          redirect: (context, state) {
+            final id = state.pathParameters['id'];
+            if (!_isValidUuid(id)) return '/';
+            return null;
+          },
           builder: (context, state) =>
               ExpenseDetailScreen(expenseId: state.pathParameters['id']!),
         ),
         GoRoute(
           path: '/receipt/:id',
+          redirect: (context, state) {
+            final id = state.pathParameters['id'];
+            if (!_isValidUuid(id)) return '/';
+            return null;
+          },
           builder: (context, state) =>
               ReceiptViewerScreen(expenseId: state.pathParameters['id']!),
         ),
         GoRoute(
           path: '/expense/:id/edit',
+          redirect: (context, state) {
+            final id = state.pathParameters['id'];
+            if (!_isValidUuid(id)) return '/';
+            return null;
+          },
           builder: (context, state) =>
               AddExpenseScreen(expenseId: state.pathParameters['id']),
         ),

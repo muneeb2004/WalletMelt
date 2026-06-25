@@ -17,7 +17,8 @@ class WalletCategoryChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final color = colorFromHex(category.color);
     final fill = selected
         ? color.withValues(alpha: 0.28)
@@ -56,7 +57,7 @@ class WalletCategoryChip extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   child: Text(
                     category.name,
-                    style: Theme.of(context).textTheme.labelLarge,
+                    style: theme.textTheme.labelLarge,
                     textHeightBehavior: const TextHeightBehavior(
                       applyHeightToFirstAscent: false,
                       applyHeightToLastDescent: false,

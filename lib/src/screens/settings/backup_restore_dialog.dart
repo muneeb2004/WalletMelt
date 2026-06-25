@@ -278,7 +278,9 @@ class _BackupRestoreDialogState extends State<BackupRestoreDialog> {
         );
       }
     } catch (e) {
-      debugPrint('RESTORE EXECUTE EXCEPTION: $e');
+      if (kDebugMode) {
+        debugPrint('RESTORE EXECUTE EXCEPTION: $e');
+      }
       if (!mounted) return;
       Navigator.pop(context);
       showErrorSnackbar(

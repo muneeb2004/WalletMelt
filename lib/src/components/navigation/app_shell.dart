@@ -376,8 +376,8 @@ class _NavItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final active = shell.currentIndex == index;
-    final colorScheme = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final activeColor = colorScheme.primary;
     final inactiveColor =
         theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.54) ??

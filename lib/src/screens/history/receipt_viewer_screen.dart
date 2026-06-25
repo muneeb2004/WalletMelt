@@ -395,6 +395,7 @@ class _ReceiptViewerScreenState extends State<ReceiptViewerScreen>
 
     final category = state.categoryById(expense.categoryId);
     final isZoomed = _transformationController.value.getMaxScaleOnAxis() > 1.05;
+    final mediaQueryPadding = MediaQuery.of(context).padding;
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -443,7 +444,7 @@ class _ReceiptViewerScreenState extends State<ReceiptViewerScreen>
             right: 0.0,
             child: Container(
               padding: EdgeInsets.only(
-                top: MediaQuery.of(context).padding.top + 8,
+                top: mediaQueryPadding.top + 8,
                 bottom: 16,
                 left: 16,
                 right: 16,
@@ -513,7 +514,7 @@ class _ReceiptViewerScreenState extends State<ReceiptViewerScreen>
             child: Container(
               padding: EdgeInsets.only(
                 top: 16,
-                bottom: MediaQuery.of(context).padding.bottom + 16,
+                bottom: mediaQueryPadding.bottom + 16,
                 left: 20,
                 right: 20,
               ),
