@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:collection/collection.dart';
-import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import '../data/local/wallet_melt_database.dart' as local;
 import '../data/repositories/drift/drift_budget_repository.dart';
@@ -604,10 +603,7 @@ class AppState extends ChangeNotifier {
     await refresh();
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
+
 }
 
 class _FakeDriftCategoryRepository extends DriftCategoryRepository {

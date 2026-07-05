@@ -6,7 +6,6 @@ import 'package:wallet_melt/src/data/repositories/drift/drift_item_repository.da
 import 'package:wallet_melt/src/data/repositories/drift/drift_receipt_repository.dart';
 import 'package:wallet_melt/src/data/repositories/drift/drift_store_repository.dart';
 import 'package:wallet_melt/src/types/expense.dart';
-import 'package:wallet_melt/src/types/grocery_item.dart';
 
 void main() {
   test(

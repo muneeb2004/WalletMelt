@@ -8,10 +8,6 @@ import 'package:wallet_melt/src/data/repositories/drift/drift_category_repositor
 import 'package:wallet_melt/src/data/repositories/drift/drift_budget_repository.dart';
 import 'package:wallet_melt/src/state/app_state.dart';
 import 'package:wallet_melt/src/types/subscription.dart';
-import 'package:wallet_melt/src/types/expense.dart';
-import 'package:wallet_melt/src/types/category.dart';
-import 'package:wallet_melt/src/types/grocery_item.dart';
-import 'package:wallet_melt/src/types/budget.dart';
 
 void main() {
   group('Subscription Model Tests', () {
