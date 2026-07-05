@@ -1,19 +1,20 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_windowmanager/flutter_windowmanager.dart';
+
+import '../services/platform/window_security_channel.dart';
 
 class SecurityUtils {
   static Future<void> enableSecureScreen() async {
     if (kIsWeb || !Platform.isAndroid) return;
     try {
-      await FlutterWindowManager.addFlags(FlutterWindowManager.FLAG_SECURE);
+      await WindowSecurityChannel.setSecureScreenEnabled(true);
     } catch (_) {}
   }
 
   static Future<void> disableSecureScreen() async {
     if (kIsWeb || !Platform.isAndroid) return;
     try {
-      await FlutterWindowManager.clearFlags(FlutterWindowManager.FLAG_SECURE);
+      await WindowSecurityChannel.setSecureScreenEnabled(false);
     } catch (_) {}
   }
 }
