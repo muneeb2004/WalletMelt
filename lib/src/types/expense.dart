@@ -1,3 +1,5 @@
+import 'grocery_item.dart';
+
 enum RecurrenceFrequency { weekly, monthly, quarterly, yearly }
 
 class Expense {
@@ -132,4 +134,32 @@ class Expense {
     }
     return null;
   }
+}
+
+class ExpenseDraft {
+  ExpenseDraft({
+    required this.amount,
+    required this.currency,
+    required this.categoryId,
+    required this.title,
+    required this.date,
+    this.vendor,
+    this.notes,
+    this.receiptImageUri,
+    this.groceryItems = const [],
+    this.subtotalAmount,
+    this.taxAmount,
+  });
+
+  final double amount;
+  final String currency;
+  final String categoryId;
+  final String title;
+  final DateTime date;
+  final String? vendor;
+  final String? notes;
+  final String? receiptImageUri;
+  final List<GroceryItemDraft> groceryItems;
+  final double? subtotalAmount;
+  final double? taxAmount;
 }

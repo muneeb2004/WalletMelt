@@ -172,10 +172,46 @@ void main() {
 
     final raw = sqlite3.sqlite3.open(dbFile.path);
     try {
-      expect(raw.select('PRAGMA user_version;').first['user_version'], 4);
+      expect(raw.select('PRAGMA user_version;').first['user_version'], 5);
     } finally {
       raw.close();
     }
+  });
+
+  test('V4 to V5 migration creates payees for existing debt records and reassigns payeeId', () async {
+    final tempDir = await Directory.systemTemp.createTemp('wallet_melt_v4_to_v5_test_');
+    addTearDown(() async {
+      if (await tempDir.exists()) {
+        await tempDir.delete(recursive: true);
+      }
+    });
+
+    final dbFile = File('${tempDir.path}${Platform.pathSeparator}${DatabaseSchema.databaseName}');
+    
+    _createV1Fixture(dbFile.path);
+    final raw = sqlite3.sqlite3.open(dbFile.path);
+    try {
+      raw
+        ..execute('CREATE TABLE debt_records (id TEXT NOT NULL PRIMARY KEY, personName TEXT NOT NULL, type TEXT NOT NULL, principalAmount REAL NOT NULL, remainingAmount REAL NOT NULL, currency TEXT NOT NULL, description TEXT, createdAt TEXT NOT NULL, dueDate TEXT, settledAt TEXT, status TEXT NOT NULL, notes TEXT);')
+        ..execute("INSERT INTO debt_records (id, personName, type, principalAmount, remainingAmount, currency, createdAt, status) VALUES ('debt_1', 'Ali Ahmed', 'loanGiven', 5000, 5000, 'PKR', '2026-07-01T10:00:00.000', 'active');")
+        ..execute("INSERT INTO debt_records (id, personName, type, principalAmount, remainingAmount, currency, createdAt, status) VALUES ('debt_2', ' ali ahmed ', 'loanGiven', 2000, 2000, 'PKR', '2026-07-02T10:00:00.000', 'active');")
+        ..execute('PRAGMA user_version = 4;');
+    } finally {
+      raw.close();
+    }
+
+    final db = WalletMeltDatabase(NativeDatabase.createInBackground(dbFile));
+    addTearDown(db.close);
+
+    final payees = await db.select(db.payees).get();
+    expect(payees, hasLength(1));
+    expect(payees.first.name, 'Ali Ahmed');
+    expect(payees.first.normalizedName, 'ali ahmed');
+
+    final debtRecords = await db.select(db.debtRecords).get();
+    expect(debtRecords, hasLength(2));
+    expect(debtRecords[0].payeeId, payees.first.id);
+    expect(debtRecords[1].payeeId, payees.first.id);
   });
 }
 

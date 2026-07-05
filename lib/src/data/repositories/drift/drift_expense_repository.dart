@@ -2,7 +2,8 @@ import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../local/wallet_melt_database.dart' as local;
-import '../expense_repository.dart';
+import '../../../types/expense.dart';
+import '../../../types/grocery_item.dart';
 import '../../../types/expense.dart' as domain;
 import '../../../types/grocery_item.dart' as domain;
 

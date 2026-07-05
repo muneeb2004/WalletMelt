@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
+import 'package:provider/provider.dart' hide Consumer;
 
 import '../screens/add_expense/add_expense_screen.dart';
 import '../screens/dashboard/dashboard_screen.dart';
@@ -13,11 +13,14 @@ import '../screens/onboarding/onboarding_screen.dart';
 import '../screens/settings/settings_screen.dart';
 import '../screens/debt/debt_screen.dart';
 import '../screens/planning/planning_screen.dart';
+import '../screens/payee/payees_screen.dart';
 import '../components/navigation/app_shell.dart';
 import '../state/app_state.dart';
 import '../theme/wallet_melt_theme.dart';
 import '../types/settings.dart';
 import '../utils/security_utils.dart';
+
+import '../providers/app_state_provider.dart';
 
 class WalletMeltBootstrap extends StatelessWidget {
   const WalletMeltBootstrap({super.key});
@@ -25,9 +28,30 @@ class WalletMeltBootstrap extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ProviderScope(
-      child: ChangeNotifierProvider(
-        create: (_) => AppState()..initialize(),
-        child: const WalletMeltApp(),
+      child: Consumer(
+        builder: (context, ref, child) {
+          final appStateAsync = ref.watch(appStateProvider);
+          return appStateAsync.when(
+            loading: () => const MaterialApp(
+              home: Scaffold(
+                body: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+            ),
+            error: (err, stack) => MaterialApp(
+              home: Scaffold(
+                body: Center(
+                  child: Text('Error loading app data: $err'),
+                ),
+              ),
+            ),
+            data: (appState) => ChangeNotifierProvider<AppState>.value(
+              value: appState,
+              child: const WalletMeltApp(),
+            ),
+          );
+        },
       ),
     );
   }
@@ -83,7 +107,10 @@ class _WalletMeltAppState extends State<WalletMeltApp> {
             StatefulShellBranch(routes: [
               GoRoute(
                   path: '/history',
-                  builder: (context, state) => const HistoryScreen())
+                  builder: (context, state) {
+                    final catId = state.uri.queryParameters['categoryId'];
+                    return HistoryScreen(initialCategoryId: catId);
+                  })
             ]),
             StatefulShellBranch(routes: [
               GoRoute(
@@ -105,6 +132,9 @@ class _WalletMeltAppState extends State<WalletMeltApp> {
         GoRoute(
             path: '/settings',
             builder: (context, state) => const SettingsScreen()),
+        GoRoute(
+            path: '/payees',
+            builder: (context, state) => const PayeesScreen()),
         GoRoute(
             path: '/insights',
             builder: (context, state) => const InsightsScreen()),

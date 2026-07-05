@@ -5730,6 +5730,479 @@ class MigrationAuditCompanion extends UpdateCompanion<MigrationAuditData> {
   }
 }
 
+class $PayeesTable extends Payees with TableInfo<$PayeesTable, Payee> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PayeesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _normalizedNameMeta =
+      const VerificationMeta('normalizedName');
+  @override
+  late final GeneratedColumn<String> normalizedName = GeneratedColumn<String>(
+      'normalizedName', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _phoneMeta = const VerificationMeta('phone');
+  @override
+  late final GeneratedColumn<String> phone = GeneratedColumn<String>(
+      'phone', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+      'notes', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+      'createdAt', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<String> updatedAt = GeneratedColumn<String>(
+      'updatedAt', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _deletedAtMeta =
+      const VerificationMeta('deletedAt');
+  @override
+  late final GeneratedColumn<String> deletedAt = GeneratedColumn<String>(
+      'deletedAt', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _isActiveMeta =
+      const VerificationMeta('isActive');
+  @override
+  late final GeneratedColumn<bool> isActive = GeneratedColumn<bool>(
+      'isActive', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("isActive" IN (0, 1))'),
+      defaultValue: const Constant(true));
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        name,
+        normalizedName,
+        phone,
+        notes,
+        createdAt,
+        updatedAt,
+        deletedAt,
+        isActive
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'payees';
+  @override
+  VerificationContext validateIntegrity(Insertable<Payee> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('normalizedName')) {
+      context.handle(
+          _normalizedNameMeta,
+          normalizedName.isAcceptableOrUnknown(
+              data['normalizedName']!, _normalizedNameMeta));
+    } else if (isInserting) {
+      context.missing(_normalizedNameMeta);
+    }
+    if (data.containsKey('phone')) {
+      context.handle(
+          _phoneMeta, phone.isAcceptableOrUnknown(data['phone']!, _phoneMeta));
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+          _notesMeta, notes.isAcceptableOrUnknown(data['notes']!, _notesMeta));
+    }
+    if (data.containsKey('createdAt')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['createdAt']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updatedAt')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updatedAt']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deletedAt')) {
+      context.handle(_deletedAtMeta,
+          deletedAt.isAcceptableOrUnknown(data['deletedAt']!, _deletedAtMeta));
+    }
+    if (data.containsKey('isActive')) {
+      context.handle(_isActiveMeta,
+          isActive.isAcceptableOrUnknown(data['isActive']!, _isActiveMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+        {normalizedName},
+      ];
+  @override
+  Payee map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Payee(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      normalizedName: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}normalizedName'])!,
+      phone: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}phone']),
+      notes: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}notes']),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}createdAt'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}updatedAt'])!,
+      deletedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}deletedAt']),
+      isActive: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}isActive'])!,
+    );
+  }
+
+  @override
+  $PayeesTable createAlias(String alias) {
+    return $PayeesTable(attachedDatabase, alias);
+  }
+}
+
+class Payee extends DataClass implements Insertable<Payee> {
+  final String id;
+  final String name;
+  final String normalizedName;
+  final String? phone;
+  final String? notes;
+  final String createdAt;
+  final String updatedAt;
+  final String? deletedAt;
+  final bool isActive;
+  const Payee(
+      {required this.id,
+      required this.name,
+      required this.normalizedName,
+      this.phone,
+      this.notes,
+      required this.createdAt,
+      required this.updatedAt,
+      this.deletedAt,
+      required this.isActive});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    map['normalizedName'] = Variable<String>(normalizedName);
+    if (!nullToAbsent || phone != null) {
+      map['phone'] = Variable<String>(phone);
+    }
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
+    map['createdAt'] = Variable<String>(createdAt);
+    map['updatedAt'] = Variable<String>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deletedAt'] = Variable<String>(deletedAt);
+    }
+    map['isActive'] = Variable<bool>(isActive);
+    return map;
+  }
+
+  PayeesCompanion toCompanion(bool nullToAbsent) {
+    return PayeesCompanion(
+      id: Value(id),
+      name: Value(name),
+      normalizedName: Value(normalizedName),
+      phone:
+          phone == null && nullToAbsent ? const Value.absent() : Value(phone),
+      notes:
+          notes == null && nullToAbsent ? const Value.absent() : Value(notes),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      isActive: Value(isActive),
+    );
+  }
+
+  factory Payee.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Payee(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      normalizedName: serializer.fromJson<String>(json['normalizedName']),
+      phone: serializer.fromJson<String?>(json['phone']),
+      notes: serializer.fromJson<String?>(json['notes']),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+      updatedAt: serializer.fromJson<String>(json['updatedAt']),
+      deletedAt: serializer.fromJson<String?>(json['deletedAt']),
+      isActive: serializer.fromJson<bool>(json['isActive']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'normalizedName': serializer.toJson<String>(normalizedName),
+      'phone': serializer.toJson<String?>(phone),
+      'notes': serializer.toJson<String?>(notes),
+      'createdAt': serializer.toJson<String>(createdAt),
+      'updatedAt': serializer.toJson<String>(updatedAt),
+      'deletedAt': serializer.toJson<String?>(deletedAt),
+      'isActive': serializer.toJson<bool>(isActive),
+    };
+  }
+
+  Payee copyWith(
+          {String? id,
+          String? name,
+          String? normalizedName,
+          Value<String?> phone = const Value.absent(),
+          Value<String?> notes = const Value.absent(),
+          String? createdAt,
+          String? updatedAt,
+          Value<String?> deletedAt = const Value.absent(),
+          bool? isActive}) =>
+      Payee(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        normalizedName: normalizedName ?? this.normalizedName,
+        phone: phone.present ? phone.value : this.phone,
+        notes: notes.present ? notes.value : this.notes,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+        isActive: isActive ?? this.isActive,
+      );
+  Payee copyWithCompanion(PayeesCompanion data) {
+    return Payee(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      normalizedName: data.normalizedName.present
+          ? data.normalizedName.value
+          : this.normalizedName,
+      phone: data.phone.present ? data.phone.value : this.phone,
+      notes: data.notes.present ? data.notes.value : this.notes,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      isActive: data.isActive.present ? data.isActive.value : this.isActive,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Payee(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('normalizedName: $normalizedName, ')
+          ..write('phone: $phone, ')
+          ..write('notes: $notes, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('isActive: $isActive')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, normalizedName, phone, notes,
+      createdAt, updatedAt, deletedAt, isActive);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Payee &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.normalizedName == this.normalizedName &&
+          other.phone == this.phone &&
+          other.notes == this.notes &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.isActive == this.isActive);
+}
+
+class PayeesCompanion extends UpdateCompanion<Payee> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<String> normalizedName;
+  final Value<String?> phone;
+  final Value<String?> notes;
+  final Value<String> createdAt;
+  final Value<String> updatedAt;
+  final Value<String?> deletedAt;
+  final Value<bool> isActive;
+  final Value<int> rowid;
+  const PayeesCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.normalizedName = const Value.absent(),
+    this.phone = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.isActive = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PayeesCompanion.insert({
+    required String id,
+    required String name,
+    required String normalizedName,
+    this.phone = const Value.absent(),
+    this.notes = const Value.absent(),
+    required String createdAt,
+    required String updatedAt,
+    this.deletedAt = const Value.absent(),
+    this.isActive = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        name = Value(name),
+        normalizedName = Value(normalizedName),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt);
+  static Insertable<Payee> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<String>? normalizedName,
+    Expression<String>? phone,
+    Expression<String>? notes,
+    Expression<String>? createdAt,
+    Expression<String>? updatedAt,
+    Expression<String>? deletedAt,
+    Expression<bool>? isActive,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (normalizedName != null) 'normalizedName': normalizedName,
+      if (phone != null) 'phone': phone,
+      if (notes != null) 'notes': notes,
+      if (createdAt != null) 'createdAt': createdAt,
+      if (updatedAt != null) 'updatedAt': updatedAt,
+      if (deletedAt != null) 'deletedAt': deletedAt,
+      if (isActive != null) 'isActive': isActive,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PayeesCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? name,
+      Value<String>? normalizedName,
+      Value<String?>? phone,
+      Value<String?>? notes,
+      Value<String>? createdAt,
+      Value<String>? updatedAt,
+      Value<String?>? deletedAt,
+      Value<bool>? isActive,
+      Value<int>? rowid}) {
+    return PayeesCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      normalizedName: normalizedName ?? this.normalizedName,
+      phone: phone ?? this.phone,
+      notes: notes ?? this.notes,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      isActive: isActive ?? this.isActive,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (normalizedName.present) {
+      map['normalizedName'] = Variable<String>(normalizedName.value);
+    }
+    if (phone.present) {
+      map['phone'] = Variable<String>(phone.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (createdAt.present) {
+      map['createdAt'] = Variable<String>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updatedAt'] = Variable<String>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deletedAt'] = Variable<String>(deletedAt.value);
+    }
+    if (isActive.present) {
+      map['isActive'] = Variable<bool>(isActive.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PayeesCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('normalizedName: $normalizedName, ')
+          ..write('phone: $phone, ')
+          ..write('notes: $notes, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('isActive: $isActive, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $DebtRecordsTable extends DebtRecords
     with TableInfo<$DebtRecordsTable, DebtRecord> {
   @override
@@ -5747,6 +6220,15 @@ class $DebtRecordsTable extends DebtRecords
   late final GeneratedColumn<String> personName = GeneratedColumn<String>(
       'personName', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _payeeIdMeta =
+      const VerificationMeta('payeeId');
+  @override
+  late final GeneratedColumn<String> payeeId = GeneratedColumn<String>(
+      'payeeId', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('REFERENCES payees (id)'));
   static const VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
   late final GeneratedColumn<String> type = GeneratedColumn<String>(
@@ -5808,6 +6290,7 @@ class $DebtRecordsTable extends DebtRecords
   List<GeneratedColumn> get $columns => [
         id,
         personName,
+        payeeId,
         type,
         principalAmount,
         remainingAmount,
@@ -5841,6 +6324,10 @@ class $DebtRecordsTable extends DebtRecords
               data['personName']!, _personNameMeta));
     } else if (isInserting) {
       context.missing(_personNameMeta);
+    }
+    if (data.containsKey('payeeId')) {
+      context.handle(_payeeIdMeta,
+          payeeId.isAcceptableOrUnknown(data['payeeId']!, _payeeIdMeta));
     }
     if (data.containsKey('type')) {
       context.handle(
@@ -5913,6 +6400,8 @@ class $DebtRecordsTable extends DebtRecords
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       personName: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}personName'])!,
+      payeeId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}payeeId']),
       type: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}type'])!,
       principalAmount: attachedDatabase.typeMapping.read(
@@ -5945,6 +6434,7 @@ class $DebtRecordsTable extends DebtRecords
 class DebtRecord extends DataClass implements Insertable<DebtRecord> {
   final String id;
   final String personName;
+  final String? payeeId;
   final String type;
   final double principalAmount;
   final double remainingAmount;
@@ -5958,6 +6448,7 @@ class DebtRecord extends DataClass implements Insertable<DebtRecord> {
   const DebtRecord(
       {required this.id,
       required this.personName,
+      this.payeeId,
       required this.type,
       required this.principalAmount,
       required this.remainingAmount,
@@ -5973,6 +6464,9 @@ class DebtRecord extends DataClass implements Insertable<DebtRecord> {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['personName'] = Variable<String>(personName);
+    if (!nullToAbsent || payeeId != null) {
+      map['payeeId'] = Variable<String>(payeeId);
+    }
     map['type'] = Variable<String>(type);
     map['principalAmount'] = Variable<double>(principalAmount);
     map['remainingAmount'] = Variable<double>(remainingAmount);
@@ -5998,6 +6492,9 @@ class DebtRecord extends DataClass implements Insertable<DebtRecord> {
     return DebtRecordsCompanion(
       id: Value(id),
       personName: Value(personName),
+      payeeId: payeeId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(payeeId),
       type: Value(type),
       principalAmount: Value(principalAmount),
       remainingAmount: Value(remainingAmount),
@@ -6024,6 +6521,7 @@ class DebtRecord extends DataClass implements Insertable<DebtRecord> {
     return DebtRecord(
       id: serializer.fromJson<String>(json['id']),
       personName: serializer.fromJson<String>(json['personName']),
+      payeeId: serializer.fromJson<String?>(json['payeeId']),
       type: serializer.fromJson<String>(json['type']),
       principalAmount: serializer.fromJson<double>(json['principalAmount']),
       remainingAmount: serializer.fromJson<double>(json['remainingAmount']),
@@ -6042,6 +6540,7 @@ class DebtRecord extends DataClass implements Insertable<DebtRecord> {
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'personName': serializer.toJson<String>(personName),
+      'payeeId': serializer.toJson<String?>(payeeId),
       'type': serializer.toJson<String>(type),
       'principalAmount': serializer.toJson<double>(principalAmount),
       'remainingAmount': serializer.toJson<double>(remainingAmount),
@@ -6058,6 +6557,7 @@ class DebtRecord extends DataClass implements Insertable<DebtRecord> {
   DebtRecord copyWith(
           {String? id,
           String? personName,
+          Value<String?> payeeId = const Value.absent(),
           String? type,
           double? principalAmount,
           double? remainingAmount,
@@ -6071,6 +6571,7 @@ class DebtRecord extends DataClass implements Insertable<DebtRecord> {
       DebtRecord(
         id: id ?? this.id,
         personName: personName ?? this.personName,
+        payeeId: payeeId.present ? payeeId.value : this.payeeId,
         type: type ?? this.type,
         principalAmount: principalAmount ?? this.principalAmount,
         remainingAmount: remainingAmount ?? this.remainingAmount,
@@ -6087,6 +6588,7 @@ class DebtRecord extends DataClass implements Insertable<DebtRecord> {
       id: data.id.present ? data.id.value : this.id,
       personName:
           data.personName.present ? data.personName.value : this.personName,
+      payeeId: data.payeeId.present ? data.payeeId.value : this.payeeId,
       type: data.type.present ? data.type.value : this.type,
       principalAmount: data.principalAmount.present
           ? data.principalAmount.value
@@ -6110,6 +6612,7 @@ class DebtRecord extends DataClass implements Insertable<DebtRecord> {
     return (StringBuffer('DebtRecord(')
           ..write('id: $id, ')
           ..write('personName: $personName, ')
+          ..write('payeeId: $payeeId, ')
           ..write('type: $type, ')
           ..write('principalAmount: $principalAmount, ')
           ..write('remainingAmount: $remainingAmount, ')
@@ -6128,6 +6631,7 @@ class DebtRecord extends DataClass implements Insertable<DebtRecord> {
   int get hashCode => Object.hash(
       id,
       personName,
+      payeeId,
       type,
       principalAmount,
       remainingAmount,
@@ -6144,6 +6648,7 @@ class DebtRecord extends DataClass implements Insertable<DebtRecord> {
       (other is DebtRecord &&
           other.id == this.id &&
           other.personName == this.personName &&
+          other.payeeId == this.payeeId &&
           other.type == this.type &&
           other.principalAmount == this.principalAmount &&
           other.remainingAmount == this.remainingAmount &&
@@ -6159,6 +6664,7 @@ class DebtRecord extends DataClass implements Insertable<DebtRecord> {
 class DebtRecordsCompanion extends UpdateCompanion<DebtRecord> {
   final Value<String> id;
   final Value<String> personName;
+  final Value<String?> payeeId;
   final Value<String> type;
   final Value<double> principalAmount;
   final Value<double> remainingAmount;
@@ -6173,6 +6679,7 @@ class DebtRecordsCompanion extends UpdateCompanion<DebtRecord> {
   const DebtRecordsCompanion({
     this.id = const Value.absent(),
     this.personName = const Value.absent(),
+    this.payeeId = const Value.absent(),
     this.type = const Value.absent(),
     this.principalAmount = const Value.absent(),
     this.remainingAmount = const Value.absent(),
@@ -6188,6 +6695,7 @@ class DebtRecordsCompanion extends UpdateCompanion<DebtRecord> {
   DebtRecordsCompanion.insert({
     required String id,
     required String personName,
+    this.payeeId = const Value.absent(),
     required String type,
     required double principalAmount,
     required double remainingAmount,
@@ -6210,6 +6718,7 @@ class DebtRecordsCompanion extends UpdateCompanion<DebtRecord> {
   static Insertable<DebtRecord> custom({
     Expression<String>? id,
     Expression<String>? personName,
+    Expression<String>? payeeId,
     Expression<String>? type,
     Expression<double>? principalAmount,
     Expression<double>? remainingAmount,
@@ -6225,6 +6734,7 @@ class DebtRecordsCompanion extends UpdateCompanion<DebtRecord> {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (personName != null) 'personName': personName,
+      if (payeeId != null) 'payeeId': payeeId,
       if (type != null) 'type': type,
       if (principalAmount != null) 'principalAmount': principalAmount,
       if (remainingAmount != null) 'remainingAmount': remainingAmount,
@@ -6242,6 +6752,7 @@ class DebtRecordsCompanion extends UpdateCompanion<DebtRecord> {
   DebtRecordsCompanion copyWith(
       {Value<String>? id,
       Value<String>? personName,
+      Value<String?>? payeeId,
       Value<String>? type,
       Value<double>? principalAmount,
       Value<double>? remainingAmount,
@@ -6256,6 +6767,7 @@ class DebtRecordsCompanion extends UpdateCompanion<DebtRecord> {
     return DebtRecordsCompanion(
       id: id ?? this.id,
       personName: personName ?? this.personName,
+      payeeId: payeeId ?? this.payeeId,
       type: type ?? this.type,
       principalAmount: principalAmount ?? this.principalAmount,
       remainingAmount: remainingAmount ?? this.remainingAmount,
@@ -6278,6 +6790,9 @@ class DebtRecordsCompanion extends UpdateCompanion<DebtRecord> {
     }
     if (personName.present) {
       map['personName'] = Variable<String>(personName.value);
+    }
+    if (payeeId.present) {
+      map['payeeId'] = Variable<String>(payeeId.value);
     }
     if (type.present) {
       map['type'] = Variable<String>(type.value);
@@ -6320,6 +6835,7 @@ class DebtRecordsCompanion extends UpdateCompanion<DebtRecord> {
     return (StringBuffer('DebtRecordsCompanion(')
           ..write('id: $id, ')
           ..write('personName: $personName, ')
+          ..write('payeeId: $payeeId, ')
           ..write('type: $type, ')
           ..write('principalAmount: $principalAmount, ')
           ..write('remainingAmount: $remainingAmount, ')
@@ -7741,6 +8257,7 @@ abstract class _$WalletMeltDatabase extends GeneratedDatabase {
   late final $ExpenseItemsTable expenseItems = $ExpenseItemsTable(this);
   late final $ReceiptsTable receipts = $ReceiptsTable(this);
   late final $MigrationAuditTable migrationAudit = $MigrationAuditTable(this);
+  late final $PayeesTable payees = $PayeesTable(this);
   late final $DebtRecordsTable debtRecords = $DebtRecordsTable(this);
   late final $DebtRepaymentsTable debtRepayments = $DebtRepaymentsTable(this);
   late final $GroceryTemplatesTable groceryTemplates =
@@ -7763,6 +8280,7 @@ abstract class _$WalletMeltDatabase extends GeneratedDatabase {
         expenseItems,
         receipts,
         migrationAudit,
+        payees,
         debtRecords,
         debtRepayments,
         groceryTemplates,
@@ -12915,10 +13433,322 @@ typedef $$MigrationAuditTableProcessedTableManager = ProcessedTableManager<
     ),
     MigrationAuditData,
     PrefetchHooks Function()>;
+typedef $$PayeesTableCreateCompanionBuilder = PayeesCompanion Function({
+  required String id,
+  required String name,
+  required String normalizedName,
+  Value<String?> phone,
+  Value<String?> notes,
+  required String createdAt,
+  required String updatedAt,
+  Value<String?> deletedAt,
+  Value<bool> isActive,
+  Value<int> rowid,
+});
+typedef $$PayeesTableUpdateCompanionBuilder = PayeesCompanion Function({
+  Value<String> id,
+  Value<String> name,
+  Value<String> normalizedName,
+  Value<String?> phone,
+  Value<String?> notes,
+  Value<String> createdAt,
+  Value<String> updatedAt,
+  Value<String?> deletedAt,
+  Value<bool> isActive,
+  Value<int> rowid,
+});
+
+final class $$PayeesTableReferences
+    extends BaseReferences<_$WalletMeltDatabase, $PayeesTable, Payee> {
+  $$PayeesTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$DebtRecordsTable, List<DebtRecord>>
+      _debtRecordsRefsTable(_$WalletMeltDatabase db) =>
+          MultiTypedResultKey.fromTable(db.debtRecords,
+              aliasName: 'payees__id__debt_records__payeeId');
+
+  $$DebtRecordsTableProcessedTableManager get debtRecordsRefs {
+    final manager = $$DebtRecordsTableTableManager($_db, $_db.debtRecords)
+        .filter((f) => f.payeeId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_debtRecordsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+}
+
+class $$PayeesTableFilterComposer
+    extends Composer<_$WalletMeltDatabase, $PayeesTable> {
+  $$PayeesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get normalizedName => $composableBuilder(
+      column: $table.normalizedName,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get phone => $composableBuilder(
+      column: $table.phone, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get notes => $composableBuilder(
+      column: $table.notes, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isActive => $composableBuilder(
+      column: $table.isActive, builder: (column) => ColumnFilters(column));
+
+  Expression<bool> debtRecordsRefs(
+      Expression<bool> Function($$DebtRecordsTableFilterComposer f) f) {
+    final $$DebtRecordsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.debtRecords,
+        getReferencedColumn: (t) => t.payeeId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$DebtRecordsTableFilterComposer(
+              $db: $db,
+              $table: $db.debtRecords,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+}
+
+class $$PayeesTableOrderingComposer
+    extends Composer<_$WalletMeltDatabase, $PayeesTable> {
+  $$PayeesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get normalizedName => $composableBuilder(
+      column: $table.normalizedName,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get phone => $composableBuilder(
+      column: $table.phone, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+      column: $table.notes, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isActive => $composableBuilder(
+      column: $table.isActive, builder: (column) => ColumnOrderings(column));
+}
+
+class $$PayeesTableAnnotationComposer
+    extends Composer<_$WalletMeltDatabase, $PayeesTable> {
+  $$PayeesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get normalizedName => $composableBuilder(
+      column: $table.normalizedName, builder: (column) => column);
+
+  GeneratedColumn<String> get phone =>
+      $composableBuilder(column: $table.phone, builder: (column) => column);
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get isActive =>
+      $composableBuilder(column: $table.isActive, builder: (column) => column);
+
+  Expression<T> debtRecordsRefs<T extends Object>(
+      Expression<T> Function($$DebtRecordsTableAnnotationComposer a) f) {
+    final $$DebtRecordsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.debtRecords,
+        getReferencedColumn: (t) => t.payeeId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$DebtRecordsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.debtRecords,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+}
+
+class $$PayeesTableTableManager extends RootTableManager<
+    _$WalletMeltDatabase,
+    $PayeesTable,
+    Payee,
+    $$PayeesTableFilterComposer,
+    $$PayeesTableOrderingComposer,
+    $$PayeesTableAnnotationComposer,
+    $$PayeesTableCreateCompanionBuilder,
+    $$PayeesTableUpdateCompanionBuilder,
+    (Payee, $$PayeesTableReferences),
+    Payee,
+    PrefetchHooks Function({bool debtRecordsRefs})> {
+  $$PayeesTableTableManager(_$WalletMeltDatabase db, $PayeesTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PayeesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PayeesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PayeesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<String> normalizedName = const Value.absent(),
+            Value<String?> phone = const Value.absent(),
+            Value<String?> notes = const Value.absent(),
+            Value<String> createdAt = const Value.absent(),
+            Value<String> updatedAt = const Value.absent(),
+            Value<String?> deletedAt = const Value.absent(),
+            Value<bool> isActive = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              PayeesCompanion(
+            id: id,
+            name: name,
+            normalizedName: normalizedName,
+            phone: phone,
+            notes: notes,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            isActive: isActive,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String name,
+            required String normalizedName,
+            Value<String?> phone = const Value.absent(),
+            Value<String?> notes = const Value.absent(),
+            required String createdAt,
+            required String updatedAt,
+            Value<String?> deletedAt = const Value.absent(),
+            Value<bool> isActive = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              PayeesCompanion.insert(
+            id: id,
+            name: name,
+            normalizedName: normalizedName,
+            phone: phone,
+            notes: notes,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            isActive: isActive,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) =>
+                  (e.readTable(table), $$PayeesTableReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: ({debtRecordsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (debtRecordsRefs) db.debtRecords],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (debtRecordsRefs)
+                    await $_getPrefetchedData<Payee, $PayeesTable, DebtRecord>(
+                        currentTable: table,
+                        referencedTable:
+                            $$PayeesTableReferences._debtRecordsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$PayeesTableReferences(db, table, p0)
+                                .debtRecordsRefs,
+                        referencedItemsForCurrentItem: (item,
+                                referencedItems) =>
+                            referencedItems.where((e) => e.payeeId == item.id),
+                        typedResults: items)
+                ];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$PayeesTableProcessedTableManager = ProcessedTableManager<
+    _$WalletMeltDatabase,
+    $PayeesTable,
+    Payee,
+    $$PayeesTableFilterComposer,
+    $$PayeesTableOrderingComposer,
+    $$PayeesTableAnnotationComposer,
+    $$PayeesTableCreateCompanionBuilder,
+    $$PayeesTableUpdateCompanionBuilder,
+    (Payee, $$PayeesTableReferences),
+    Payee,
+    PrefetchHooks Function({bool debtRecordsRefs})>;
 typedef $$DebtRecordsTableCreateCompanionBuilder = DebtRecordsCompanion
     Function({
   required String id,
   required String personName,
+  Value<String?> payeeId,
   required String type,
   required double principalAmount,
   required double remainingAmount,
@@ -12935,6 +13765,7 @@ typedef $$DebtRecordsTableUpdateCompanionBuilder = DebtRecordsCompanion
     Function({
   Value<String> id,
   Value<String> personName,
+  Value<String?> payeeId,
   Value<String> type,
   Value<double> principalAmount,
   Value<double> remainingAmount,
@@ -12951,6 +13782,20 @@ typedef $$DebtRecordsTableUpdateCompanionBuilder = DebtRecordsCompanion
 final class $$DebtRecordsTableReferences extends BaseReferences<
     _$WalletMeltDatabase, $DebtRecordsTable, DebtRecord> {
   $$DebtRecordsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $PayeesTable _payeeIdTable(_$WalletMeltDatabase db) =>
+      db.payees.createAlias('debt_records__payeeId__payees__id');
+
+  $$PayeesTableProcessedTableManager? get payeeId {
+    final $_column = $_itemColumn<String>('payeeId');
+    if ($_column == null) return null;
+    final manager = $$PayeesTableTableManager($_db, $_db.payees)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_payeeIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
 
   static MultiTypedResultKey<$DebtRepaymentsTable, List<DebtRepayment>>
       _debtRepaymentsRefsTable(_$WalletMeltDatabase db) =>
@@ -13013,6 +13858,26 @@ class $$DebtRecordsTableFilterComposer
 
   ColumnFilters<String> get notes => $composableBuilder(
       column: $table.notes, builder: (column) => ColumnFilters(column));
+
+  $$PayeesTableFilterComposer get payeeId {
+    final $$PayeesTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.payeeId,
+        referencedTable: $db.payees,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$PayeesTableFilterComposer(
+              $db: $db,
+              $table: $db.payees,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
 
   Expression<bool> debtRepaymentsRefs(
       Expression<bool> Function($$DebtRepaymentsTableFilterComposer f) f) {
@@ -13082,6 +13947,26 @@ class $$DebtRecordsTableOrderingComposer
 
   ColumnOrderings<String> get notes => $composableBuilder(
       column: $table.notes, builder: (column) => ColumnOrderings(column));
+
+  $$PayeesTableOrderingComposer get payeeId {
+    final $$PayeesTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.payeeId,
+        referencedTable: $db.payees,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$PayeesTableOrderingComposer(
+              $db: $db,
+              $table: $db.payees,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
 }
 
 class $$DebtRecordsTableAnnotationComposer
@@ -13129,6 +14014,26 @@ class $$DebtRecordsTableAnnotationComposer
   GeneratedColumn<String> get notes =>
       $composableBuilder(column: $table.notes, builder: (column) => column);
 
+  $$PayeesTableAnnotationComposer get payeeId {
+    final $$PayeesTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.payeeId,
+        referencedTable: $db.payees,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$PayeesTableAnnotationComposer(
+              $db: $db,
+              $table: $db.payees,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
   Expression<T> debtRepaymentsRefs<T extends Object>(
       Expression<T> Function($$DebtRepaymentsTableAnnotationComposer a) f) {
     final $$DebtRepaymentsTableAnnotationComposer composer = $composerBuilder(
@@ -13162,7 +14067,7 @@ class $$DebtRecordsTableTableManager extends RootTableManager<
     $$DebtRecordsTableUpdateCompanionBuilder,
     (DebtRecord, $$DebtRecordsTableReferences),
     DebtRecord,
-    PrefetchHooks Function({bool debtRepaymentsRefs})> {
+    PrefetchHooks Function({bool payeeId, bool debtRepaymentsRefs})> {
   $$DebtRecordsTableTableManager(
       _$WalletMeltDatabase db, $DebtRecordsTable table)
       : super(TableManagerState(
@@ -13177,6 +14082,7 @@ class $$DebtRecordsTableTableManager extends RootTableManager<
           updateCompanionCallback: ({
             Value<String> id = const Value.absent(),
             Value<String> personName = const Value.absent(),
+            Value<String?> payeeId = const Value.absent(),
             Value<String> type = const Value.absent(),
             Value<double> principalAmount = const Value.absent(),
             Value<double> remainingAmount = const Value.absent(),
@@ -13192,6 +14098,7 @@ class $$DebtRecordsTableTableManager extends RootTableManager<
               DebtRecordsCompanion(
             id: id,
             personName: personName,
+            payeeId: payeeId,
             type: type,
             principalAmount: principalAmount,
             remainingAmount: remainingAmount,
@@ -13207,6 +14114,7 @@ class $$DebtRecordsTableTableManager extends RootTableManager<
           createCompanionCallback: ({
             required String id,
             required String personName,
+            Value<String?> payeeId = const Value.absent(),
             required String type,
             required double principalAmount,
             required double remainingAmount,
@@ -13222,6 +14130,7 @@ class $$DebtRecordsTableTableManager extends RootTableManager<
               DebtRecordsCompanion.insert(
             id: id,
             personName: personName,
+            payeeId: payeeId,
             type: type,
             principalAmount: principalAmount,
             remainingAmount: remainingAmount,
@@ -13240,13 +14149,39 @@ class $$DebtRecordsTableTableManager extends RootTableManager<
                     $$DebtRecordsTableReferences(db, table, e)
                   ))
               .toList(),
-          prefetchHooksCallback: ({debtRepaymentsRefs = false}) {
+          prefetchHooksCallback: (
+              {payeeId = false, debtRepaymentsRefs = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [
                 if (debtRepaymentsRefs) db.debtRepayments
               ],
-              addJoins: null,
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (payeeId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.payeeId,
+                    referencedTable:
+                        $$DebtRecordsTableReferences._payeeIdTable(db),
+                    referencedColumn:
+                        $$DebtRecordsTableReferences._payeeIdTable(db).id,
+                  ) as T;
+                }
+
+                return state;
+              },
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (debtRepaymentsRefs)
@@ -13280,7 +14215,7 @@ typedef $$DebtRecordsTableProcessedTableManager = ProcessedTableManager<
     $$DebtRecordsTableUpdateCompanionBuilder,
     (DebtRecord, $$DebtRecordsTableReferences),
     DebtRecord,
-    PrefetchHooks Function({bool debtRepaymentsRefs})>;
+    PrefetchHooks Function({bool payeeId, bool debtRepaymentsRefs})>;
 typedef $$DebtRepaymentsTableCreateCompanionBuilder = DebtRepaymentsCompanion
     Function({
   required String id,
@@ -14207,6 +15142,8 @@ class $WalletMeltDatabaseManager {
       $$ReceiptsTableTableManager(_db, _db.receipts);
   $$MigrationAuditTableTableManager get migrationAudit =>
       $$MigrationAuditTableTableManager(_db, _db.migrationAudit);
+  $$PayeesTableTableManager get payees =>
+      $$PayeesTableTableManager(_db, _db.payees);
   $$DebtRecordsTableTableManager get debtRecords =>
       $$DebtRecordsTableTableManager(_db, _db.debtRecords);
   $$DebtRepaymentsTableTableManager get debtRepayments =>

@@ -6,7 +6,8 @@ import 'package:provider/provider.dart';
 
 import '../../components/category/category_chip.dart';
 import '../../components/glass/app_background.dart';
-import '../../data/repositories/expense_repository.dart';
+import '../../types/expense.dart';
+import '../../types/grocery_item.dart';
 import '../../state/app_state.dart';
 import '../../theme/wallet_melt_theme.dart';
 import '../../utils/expense_validation.dart';

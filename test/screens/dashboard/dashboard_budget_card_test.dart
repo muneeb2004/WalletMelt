@@ -9,9 +9,9 @@ import 'package:wallet_melt/src/types/expense.dart';
 import 'package:wallet_melt/src/types/category.dart' as wm;
 import 'package:wallet_melt/src/types/budget.dart';
 import 'package:wallet_melt/src/types/grocery_item.dart';
-import 'package:wallet_melt/src/data/repositories/category_repository.dart';
-import 'package:wallet_melt/src/data/repositories/expense_repository.dart';
-import 'package:wallet_melt/src/data/repositories/budget_repository.dart';
+import 'package:wallet_melt/src/data/repositories/drift/drift_category_repository.dart';
+import 'package:wallet_melt/src/data/repositories/drift/drift_expense_repository.dart';
+import 'package:wallet_melt/src/data/repositories/drift/drift_budget_repository.dart';
 import 'package:wallet_melt/src/services/settings/settings_service.dart';
 import 'package:wallet_melt/src/theme/wallet_melt_theme.dart';
 
@@ -43,9 +43,9 @@ void main() {
     AppState createAppState(
         {double? monthlyBudget, List<Expense> expenses = const []}) {
       final state = AppState.test(
-        categoryRepository: FakeCategoryRepository(),
-        expenseRepository: FakeExpenseRepository()..activeExpenses = expenses,
-        budgetRepository: FakeBudgetRepository(),
+        driftCategoryRepository: FakeCategoryRepository(),
+        driftExpenseRepository: FakeExpenseRepository()..activeExpenses = expenses,
+        driftBudgetRepository: FakeBudgetRepository(),
         settingsService: FakeSettingsService(),
       );
       state.settings = WalletMeltSettings.defaults.copyWith(
@@ -188,12 +188,12 @@ void main() {
   });
 }
 
-class FakeCategoryRepository extends Fake implements CategoryRepository {
+class FakeCategoryRepository extends Fake implements DriftCategoryRepository {
   @override
   Future<List<wm.Category>> listCategories() async => const [];
 }
 
-class FakeExpenseRepository extends Fake implements ExpenseRepository {
+class FakeExpenseRepository extends Fake implements DriftExpenseRepository {
   List<Expense> activeExpenses = const [];
   @override
   Future<List<Expense>> listActive() async => activeExpenses;
@@ -203,7 +203,7 @@ class FakeExpenseRepository extends Fake implements ExpenseRepository {
   Future<List<GroceryItem>> listAllGroceryItems() async => const [];
 }
 
-class FakeBudgetRepository extends Fake implements BudgetRepository {
+class FakeBudgetRepository extends Fake implements DriftBudgetRepository {
   @override
   Future<List<CategoryBudget>> listForMonth(String month) async => const [];
   @override

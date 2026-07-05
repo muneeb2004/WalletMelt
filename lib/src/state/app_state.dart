@@ -1,14 +1,12 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-
-import '../data/db/app_database.dart';
+import 'package:collection/collection.dart';
+import 'package:drift/drift.dart';
+import 'package:drift/native.dart';
 import '../data/local/wallet_melt_database.dart' as local;
-import '../data/repositories/budget_repository.dart';
-import '../data/repositories/category_repository.dart';
 import '../data/repositories/drift/drift_budget_repository.dart';
 import '../data/repositories/drift/drift_category_repository.dart';
 import '../data/repositories/drift/drift_expense_repository.dart';
-import '../data/repositories/expense_repository.dart';
 import '../services/receipt_storage/receipt_storage_service.dart';
 import '../services/export/export_file_writer.dart';
 import '../services/export/wallet_melt_json_restore_dry_run_planner.dart';
@@ -32,41 +30,55 @@ import '../types/subscription.dart' show SubscriptionStatus;
 import '../data/repositories/drift/drift_debt_repository.dart';
 import '../data/repositories/drift/drift_grocery_template_repository.dart';
 import '../data/repositories/drift/drift_subscription_repository.dart';
+import '../types/payee.dart';
+import '../data/repositories/drift/drift_payee_repository.dart';
 
 class AppState extends ChangeNotifier {
   AppState({
-    SettingsService? settingsService,
-    ReceiptStorageService? receiptStorageService,
-  })  : _settingsService = settingsService ?? SettingsService(),
-        _requiresDriftRestoreRuntime = true,
-        receiptStorage = receiptStorageService ?? LocalReceiptStorageService();
-
-  @visibleForTesting
-  AppState.test({
-    required CategoryRepository categoryRepository,
-    required ExpenseRepository expenseRepository,
-    required BudgetRepository budgetRepository,
     DriftCategoryRepository? driftCategoryRepository,
     DriftBudgetRepository? driftBudgetRepository,
     DriftExpenseRepository? driftExpenseRepository,
     DriftDebtRepository? driftDebtRepository,
     DriftGroceryTemplateRepository? driftGroceryTemplateRepository,
     DriftSubscriptionRepository? driftSubscriptionRepository,
+    DriftPayeeRepository? driftPayeeRepository,
+    local.WalletMeltDatabase? driftDatabase,
+    SettingsService? settingsService,
+    ReceiptStorageService? receiptStorageService,
+  })  : _driftDatabase = driftDatabase,
+        _settingsService = settingsService ?? SettingsService(),
+        _requiresDriftRestoreRuntime = driftDatabase != null,
+        receiptStorage = receiptStorageService ?? LocalReceiptStorageService() {
+    _driftCategoryRepository = driftCategoryRepository ?? _FakeDriftCategoryRepository();
+    _driftBudgetRepository = driftBudgetRepository ?? _FakeDriftBudgetRepository();
+    _driftExpenseRepository = driftExpenseRepository ?? _FakeDriftExpenseRepository();
+    _driftDebtRepository = driftDebtRepository ?? _FakeDriftDebtRepository();
+    _driftGroceryTemplateRepository = driftGroceryTemplateRepository ?? _FakeDriftGroceryTemplateRepository();
+    _driftSubscriptionRepository = driftSubscriptionRepository ?? _FakeDriftSubscriptionRepository();
+    _driftPayeeRepository = driftPayeeRepository ?? _FakeDriftPayeeRepository();
+  }
+
+  AppState.test({
+    DriftCategoryRepository? driftCategoryRepository,
+    DriftBudgetRepository? driftBudgetRepository,
+    DriftExpenseRepository? driftExpenseRepository,
+    DriftDebtRepository? driftDebtRepository,
+    DriftGroceryTemplateRepository? driftGroceryTemplateRepository,
+    DriftSubscriptionRepository? driftSubscriptionRepository,
+    DriftPayeeRepository? driftPayeeRepository,
     SettingsService? settingsService,
     ReceiptStorageService? receiptStorageService,
     bool requiresDriftRestoreRuntime = false,
   })  : _settingsService = settingsService ?? SettingsService(),
         _requiresDriftRestoreRuntime = requiresDriftRestoreRuntime,
         receiptStorage = receiptStorageService ?? LocalReceiptStorageService() {
-    _categoryRepository = categoryRepository;
-    _expenseRepository = expenseRepository;
-    _budgetRepository = budgetRepository;
-    _driftCategoryRepository = driftCategoryRepository;
-    _driftBudgetRepository = driftBudgetRepository;
-    _driftExpenseRepository = driftExpenseRepository;
-    _driftDebtRepository = driftDebtRepository;
-    _driftGroceryTemplateRepository = driftGroceryTemplateRepository;
-    _driftSubscriptionRepository = driftSubscriptionRepository;
+    _driftCategoryRepository = driftCategoryRepository ?? _FakeDriftCategoryRepository();
+    _driftBudgetRepository = driftBudgetRepository ?? _FakeDriftBudgetRepository();
+    _driftExpenseRepository = driftExpenseRepository ?? _FakeDriftExpenseRepository();
+    _driftDebtRepository = driftDebtRepository ?? _FakeDriftDebtRepository();
+    _driftGroceryTemplateRepository = driftGroceryTemplateRepository ?? _FakeDriftGroceryTemplateRepository();
+    _driftSubscriptionRepository = driftSubscriptionRepository ?? _FakeDriftSubscriptionRepository();
+    _driftPayeeRepository = driftPayeeRepository ?? _FakeDriftPayeeRepository();
     isLoading = false;
   }
 
@@ -74,20 +86,19 @@ class AppState extends ChangeNotifier {
   final ReceiptStorageService receiptStorage;
   final bool _requiresDriftRestoreRuntime;
 
-  late CategoryRepository _categoryRepository;
-  late ExpenseRepository _expenseRepository;
-  late BudgetRepository _budgetRepository;
   local.WalletMeltDatabase? _driftDatabase;
-  DriftCategoryRepository? _driftCategoryRepository;
-  DriftBudgetRepository? _driftBudgetRepository;
-  DriftExpenseRepository? _driftExpenseRepository;
-  DriftDebtRepository? _driftDebtRepository;
-  DriftGroceryTemplateRepository? _driftGroceryTemplateRepository;
-  DriftSubscriptionRepository? _driftSubscriptionRepository;
+  late DriftCategoryRepository _driftCategoryRepository;
+  late DriftBudgetRepository _driftBudgetRepository;
+  late DriftExpenseRepository _driftExpenseRepository;
+  late DriftDebtRepository _driftDebtRepository;
+  late DriftGroceryTemplateRepository _driftGroceryTemplateRepository;
+  late DriftSubscriptionRepository _driftSubscriptionRepository;
+  late DriftPayeeRepository _driftPayeeRepository;
 
   List<wm_debt.DebtRecord> debts = const [];
   List<wm_template.GroceryTemplate> groceryTemplates = const [];
   List<wm_sub.Subscription> subscriptions = const [];
+  List<Payee> payees = const [];
 
   WalletMeltSettings settings = WalletMeltSettings.defaults;
   List<wm.Category> categories = const [];
@@ -167,11 +178,6 @@ class AppState extends ChangeNotifier {
     try {
       isLoading = true;
       notifyListeners();
-      final db = await AppDatabase.instance.database;
-      _categoryRepository = CategoryRepository(db);
-      _expenseRepository = ExpenseRepository(db);
-      _budgetRepository = BudgetRepository(db);
-      await _initializeDriftReadRepositories();
       settings = await _settingsService.load();
       await refresh();
     } catch (error) {
@@ -191,25 +197,18 @@ class AppState extends ChangeNotifier {
       _deletedExpensesLoaded = false;
       _deletedExpenses = const [];
     }
-    final subRepo = _driftSubscriptionRepository;
-    if (subRepo != null) {
-      await processSubscriptionRenewals();
-      subscriptions = await subRepo.listAll();
-    }
+
+    await processSubscriptionRenewals();
+    subscriptions = await _driftSubscriptionRepository.listAll();
 
     categories = await _listCategories();
     expenses = await _listActiveExpenses();
     currentBudgets = await _listBudgetsForMonth(currentMonthKey);
     _updateCurrentMonthExpenses();
 
-    final debtRepo = _driftDebtRepository;
-    if (debtRepo != null) {
-      debts = await debtRepo.listAll();
-    }
-    final templateRepo = _driftGroceryTemplateRepository;
-    if (templateRepo != null) {
-      groceryTemplates = await templateRepo.listAll();
-    }
+    debts = await _driftDebtRepository.listAll();
+    groceryTemplates = await _driftGroceryTemplateRepository.listAll();
+    payees = await _driftPayeeRepository.listAll();
 
     notifyListeners();
   }
@@ -275,7 +274,7 @@ class AppState extends ChangeNotifier {
     required double amount,
     required String month,
   }) async {
-    await _upsertBudget(
+    await _driftBudgetRepository.upsert(
       categoryId: categoryId,
       amount: amount,
       currency: settings.currency,
@@ -288,7 +287,7 @@ class AppState extends ChangeNotifier {
     required String categoryId,
     required String month,
   }) async {
-    await _deleteBudget(categoryId, month);
+    await _driftBudgetRepository.delete(categoryId, month);
     await refresh();
   }
 
@@ -348,105 +347,48 @@ class AppState extends ChangeNotifier {
     );
   }
 
-
   Future<wm.Category> addCategory(
       {required String name,
       required String icon,
       required String color}) async {
-    final category = await _categoryRepository.createCustom(
+    final category = await _driftCategoryRepository.createCustom(
         name: name, icon: icon, color: color);
     await refresh();
     return category;
   }
 
   Future<Expense> addExpense(ExpenseDraft draft) async {
-    final expense = await _addExpense(draft);
+    final expense = await _driftExpenseRepository.create(draft);
     await refresh();
     return expense;
   }
 
-  Future<Expense> _addExpense(ExpenseDraft draft) async {
-    final repository = _driftExpenseRepository;
-    if (repository != null) {
-      try {
-        return await repository.create(draft);
-      } catch (_) {
-        // Fall through to the proven sqflite path.
-      }
-    }
-    return _expenseRepository.create(draft);
-  }
-
   Future<void> updateExpense(Expense expense,
       {List<GroceryItemDraft>? groceryItems}) async {
-    await _updateExpense(expense, groceryItems: groceryItems);
+    await _driftExpenseRepository.update(expense, groceryItems: groceryItems);
     await refresh();
   }
 
-  Future<void> _updateExpense(Expense expense,
-      {List<GroceryItemDraft>? groceryItems}) async {
-    final repository = _driftExpenseRepository;
-    if (repository != null) {
-      try {
-        await repository.update(expense, groceryItems: groceryItems);
-        return;
-      } catch (_) {
-        // Fall through to the proven sqflite path.
-      }
-    }
-    await _expenseRepository.update(expense, groceryItems: groceryItems);
-  }
-
   Future<List<GroceryItem>> groceryItemsForExpense(String expenseId) async {
-    final repository = _driftExpenseRepository;
-    if (repository != null) {
-      try {
-        return await repository.groceryItemsForExpense(expenseId);
-      } catch (_) {
-        // Fall through to the proven sqflite path if the new read path fails.
-      }
-    }
-    return _expenseRepository.groceryItemsForExpense(expenseId);
+    return _driftExpenseRepository.groceryItemsForExpense(expenseId);
   }
 
   Future<List<GroceryItem>> listAllGroceryItemsForExport() async {
-    final repository = _driftExpenseRepository;
-    if (repository != null) {
-      try {
-        return await repository.listAllGroceryItems();
-      } catch (_) {
-        // Fall through to the proven sqflite path if the new read path fails.
-      }
-    }
-    return _expenseRepository.listAllGroceryItems();
+    return _driftExpenseRepository.listAllGroceryItems();
   }
 
   Future<List<CategoryBudget>> listAllBudgetsForExport() async {
-    final repository = _driftBudgetRepository;
-    if (repository != null) {
-      try {
-        return await repository.listAll();
-      } catch (_) {
-        // Fall through to the proven sqflite path if the new read path fails.
-      }
-    }
-    return _budgetRepository.listAll();
+    return _driftBudgetRepository.listAll();
   }
 
   Future<void> addDebt(wm_debt.DebtRecord debt) async {
-    final repo = _driftDebtRepository;
-    if (repo != null) {
-      await repo.createDebt(debt);
-      await refresh();
-    }
+    await _driftDebtRepository.createDebt(debt);
+    await refresh();
   }
 
   Future<void> deleteDebt(String id) async {
-    final repo = _driftDebtRepository;
-    if (repo != null) {
-      await repo.deleteDebt(id);
-      await refresh();
-    }
+    await _driftDebtRepository.deleteDebt(id);
+    await refresh();
   }
 
   Future<void> addRepayment({
@@ -454,58 +396,38 @@ class AppState extends ChangeNotifier {
     required double amount,
     String? notes,
   }) async {
-    final repo = _driftDebtRepository;
-    if (repo != null) {
-      final repayment = wm_debt.DebtRepayment(
-        id: const Uuid().v4(),
-        debtId: debtId,
-        amount: amount,
-        createdAt: DateTime.now().toIso8601String(),
-        notes: notes,
-      );
-      await repo.addRepayment(repayment);
-      await refresh();
-    }
+    final repayment = wm_debt.DebtRepayment(
+      id: const Uuid().v4(),
+      debtId: debtId,
+      amount: amount,
+      createdAt: DateTime.now().toIso8601String(),
+      notes: notes,
+    );
+    await _driftDebtRepository.addRepayment(repayment);
+    await refresh();
   }
 
   Future<List<wm_debt.DebtRepayment>> repaymentsForDebt(String debtId) async {
-    final repo = _driftDebtRepository;
-    if (repo != null) {
-      return repo.getRepayments(debtId);
-    }
-    return const [];
+    return _driftDebtRepository.getRepayments(debtId);
   }
 
   Future<void> addSubscription(wm_sub.Subscription sub) async {
-    final repo = _driftSubscriptionRepository;
-    if (repo != null) {
-      await repo.create(sub);
-      await refresh();
-    }
+    await _driftSubscriptionRepository.create(sub);
+    await refresh();
   }
 
   Future<void> updateSubscription(wm_sub.Subscription sub) async {
-    final repo = _driftSubscriptionRepository;
-    if (repo != null) {
-      await repo.update(sub);
-      await refresh();
-    }
+    await _driftSubscriptionRepository.update(sub);
+    await refresh();
   }
 
   Future<void> deleteSubscription(String id) async {
-    final repo = _driftSubscriptionRepository;
-    if (repo != null) {
-      await repo.delete(id);
-      await refresh();
-    }
+    await _driftSubscriptionRepository.delete(id);
+    await refresh();
   }
 
   Future<void> processSubscriptionRenewals() async {
-    final subRepo = _driftSubscriptionRepository;
-    final expRepo = _driftExpenseRepository;
-    if (subRepo == null || expRepo == null) return;
-
-    final subs = await subRepo.listAll();
+    final subs = await _driftSubscriptionRepository.listAll();
     final todayStr = DateTime.now().toIso8601String().substring(0, 10);
 
     for (final sub in subs) {
@@ -531,7 +453,7 @@ class AppState extends ChangeNotifier {
           taxAmount: sub.taxAmount,
         );
 
-        await expRepo.create(draft);
+        await _driftExpenseRepository.create(draft);
 
         final nextDate = sub.calculateNextRenewalDate(parsedDate);
         currentNextDateStr = nextDate.toIso8601String().substring(0, 10);
@@ -543,62 +465,49 @@ class AppState extends ChangeNotifier {
       }
 
       if (hasRenewals) {
-        await subRepo.update(updatedSub);
+        await _driftSubscriptionRepository.update(updatedSub);
       }
     }
   }
 
   Future<wm_debt.DebtRecord?> getDebtById(String id) async {
-    final repo = _driftDebtRepository;
-    if (repo != null) {
-      return repo.getById(id);
-    }
-    return null;
+    return _driftDebtRepository.getById(id);
   }
 
   Future<void> saveGroceryTemplate(String name, List<String> items) async {
-    final repo = _driftGroceryTemplateRepository;
-    if (repo != null) {
-      final template = wm_template.GroceryTemplate(
-        id: const Uuid().v4(),
-        name: name,
-        items: items,
-        createdAt: DateTime.now().toIso8601String(),
-      );
-      await repo.create(template);
-      await refresh();
-    }
+    final template = wm_template.GroceryTemplate(
+      id: const Uuid().v4(),
+      name: name,
+      items: items,
+      createdAt: DateTime.now().toIso8601String(),
+    );
+    await _driftGroceryTemplateRepository.create(template);
+    await refresh();
   }
 
   Future<void> updateGroceryTemplate(wm_template.GroceryTemplate template) async {
-    final repo = _driftGroceryTemplateRepository;
-    if (repo != null) {
-      await repo.update(template);
-      await refresh();
-    }
+    await _driftGroceryTemplateRepository.update(template);
+    await refresh();
   }
 
   Future<void> deleteGroceryTemplate(String id) async {
-    final repo = _driftGroceryTemplateRepository;
-    if (repo != null) {
-      await repo.delete(id);
-      await refresh();
-    }
+    await _driftGroceryTemplateRepository.delete(id);
+    await refresh();
   }
 
   Future<void> softDeleteExpense(String id) async {
-    await _softDeleteExpense(id);
+    await _driftExpenseRepository.softDelete(id);
     await refresh();
   }
 
   Future<void> restoreExpense(String id) async {
-    await _restoreExpense(id);
+    await _driftExpenseRepository.restore(id);
     await refresh();
   }
 
   Future<void> permanentlyDeleteExpense(String id) async {
-    final expense = await _getExpenseById(id, includeDeleted: true);
-    await _permanentlyDeleteExpense(id);
+    final expense = await _driftExpenseRepository.getById(id, includeDeleted: true);
+    await _driftExpenseRepository.permanentlyDelete(id);
     final receipt = expense?.receiptImageUri;
     if (receipt != null) {
       await receiptStorage.delete(receipt);
@@ -607,7 +516,7 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> setBudget(String categoryId, double amount) async {
-    await _upsertBudget(
+    await _driftBudgetRepository.upsert(
       categoryId: categoryId,
       amount: amount,
       currency: settings.currency,
@@ -617,7 +526,7 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> clearBudget(String categoryId) async {
-    await _deleteBudget(categoryId, currentMonthKey);
+    await _driftBudgetRepository.delete(categoryId, currentMonthKey);
     await refresh();
   }
 
@@ -642,40 +551,10 @@ class AppState extends ChangeNotifier {
     return _categoryMap![id];
   }
 
-  Future<void> _initializeDriftReadRepositories() async {
-    try {
-      final database = await local.WalletMeltDatabase.open();
-      _driftDatabase = database;
-      _driftCategoryRepository = DriftCategoryRepository(database);
-      _driftBudgetRepository = DriftBudgetRepository(database);
-      _driftExpenseRepository = DriftExpenseRepository(database);
-      _driftDebtRepository = DriftDebtRepository(database);
-      _driftGroceryTemplateRepository = DriftGroceryTemplateRepository(database);
-      _driftSubscriptionRepository = DriftSubscriptionRepository(database);
-    } catch (_) {
-      _driftDatabase = null;
-      _driftCategoryRepository = null;
-      _driftBudgetRepository = null;
-      _driftExpenseRepository = null;
-      _driftDebtRepository = null;
-      _driftGroceryTemplateRepository = null;
-      _driftSubscriptionRepository = null;
-    }
-  }
+
 
   Future<List<wm.Category>> _listCategories() async {
-    List<wm.Category> rawList;
-    final repository = _driftCategoryRepository;
-    if (repository != null) {
-      try {
-        rawList = await repository.listCategories();
-      } catch (_) {
-        rawList = await _categoryRepository.listCategories();
-      }
-    } else {
-      rawList = await _categoryRepository.listCategories();
-    }
-
+    final rawList = await _driftCategoryRepository.listCategories();
     final list = List<wm.Category>.from(rawList);
     final otherIndex = list.indexWhere((c) => c.id == 'other' || c.name.toLowerCase() == 'other');
     if (otherIndex != -1) {
@@ -686,139 +565,89 @@ class AppState extends ChangeNotifier {
   }
 
   Future<List<CategoryBudget>> _listBudgetsForMonth(String month) async {
-    final repository = _driftBudgetRepository;
-    if (repository != null) {
-      try {
-        return await repository.listForMonth(month);
-      } catch (_) {
-        // Fall through to the proven sqflite path if the new read path fails.
-      }
-    }
-    return _budgetRepository.listForMonth(month);
-  }
-
-  Future<void> _upsertBudget({
-    required String categoryId,
-    required double amount,
-    required String currency,
-    required String month,
-  }) async {
-    final repository = _driftBudgetRepository;
-    if (repository != null) {
-      try {
-        await repository.upsert(
-          categoryId: categoryId,
-          amount: amount,
-          currency: currency,
-          month: month,
-        );
-        return;
-      } catch (_) {
-        // Fall through to the proven sqflite path if the new write path fails.
-      }
-    }
-    await _budgetRepository.upsert(
-      categoryId: categoryId,
-      amount: amount,
-      currency: currency,
-      month: month,
-    );
-  }
-
-  Future<void> _deleteBudget(String categoryId, String month) async {
-    final repository = _driftBudgetRepository;
-    if (repository != null) {
-      try {
-        await repository.delete(categoryId, month);
-        return;
-      } catch (_) {
-        // Fall through to the proven sqflite path if the new write path fails.
-      }
-    }
-    await _budgetRepository.delete(categoryId, month);
+    return _driftBudgetRepository.listForMonth(month);
   }
 
   Future<List<Expense>> _listActiveExpenses() async {
-    final repository = _driftExpenseRepository;
-    if (repository != null) {
-      try {
-        return await repository.listActive();
-      } catch (_) {
-        // Fall through to the proven sqflite path if the new read path fails.
-      }
-    }
-    return _expenseRepository.listActive();
+    return _driftExpenseRepository.listActive();
   }
 
   Future<List<Expense>> _listDeletedExpenses() async {
-    final repository = _driftExpenseRepository;
-    if (repository != null) {
-      try {
-        return await repository.listDeleted();
-      } catch (_) {
-        // Fall through to the proven sqflite path if the new read path fails.
-      }
-    }
-    return _expenseRepository.listDeleted();
+    return _driftExpenseRepository.listDeleted();
   }
 
-  Future<Expense?> _getExpenseById(String id,
-      {bool includeDeleted = false}) async {
-    final repository = _driftExpenseRepository;
-    if (repository != null) {
-      try {
-        return await repository.getById(id, includeDeleted: includeDeleted);
-      } catch (_) {
-        // Fall through to the proven sqflite path if the new read path fails.
-      }
+  String payeeNameFor(wm_debt.DebtRecord debt) {
+    if (debt.payeeId != null) {
+      final payee = payees.firstWhereOrNull((p) => p.id == debt.payeeId);
+      if (payee != null) return payee.name;
     }
-    return _expenseRepository.getById(id, includeDeleted: includeDeleted);
+    return debt.personName;
   }
 
-  Future<void> _softDeleteExpense(String id) async {
-    final repository = _driftExpenseRepository;
-    if (repository != null) {
-      try {
-        await repository.softDelete(id);
-        return;
-      } catch (_) {
-        // Fall through to the proven sqflite path.
-      }
-    }
-    await _expenseRepository.softDelete(id);
+  Future<void> addPayee(Payee payee) async {
+    await _driftPayeeRepository.create(payee);
+    await refresh();
   }
 
-  Future<void> _restoreExpense(String id) async {
-    final repository = _driftExpenseRepository;
-    if (repository != null) {
-      try {
-        await repository.restore(id);
-        return;
-      } catch (_) {
-        // Fall through to the proven sqflite path.
-      }
-    }
-    await _expenseRepository.restore(id);
+  Future<void> updatePayee(Payee payee) async {
+    await _driftPayeeRepository.update(payee);
+    await refresh();
   }
 
-  Future<void> _permanentlyDeleteExpense(String id) async {
-    final repository = _driftExpenseRepository;
-    if (repository != null) {
-      try {
-        await repository.permanentlyDelete(id);
-        return;
-      } catch (_) {
-        // Fall through to the proven sqflite path.
-      }
-    }
-    await _expenseRepository.permanentlyDelete(id);
+  Future<void> deletePayee(String id) async {
+    await _driftPayeeRepository.delete(id);
+    await refresh();
+  }
+
+  Future<void> mergePayees({required String keepId, required String duplicateId}) async {
+    await _driftPayeeRepository.merge(keepId: keepId, duplicateId: duplicateId);
+    await refresh();
   }
 
   @override
   void dispose() {
-    // Do NOT close _driftDatabase here. WalletMeltDatabase.open() returns a
-    // singleton shared with Riverpod's walletMeltDatabaseProvider. The
-    // provider's ref.onDispose(database.close) owns the teardown lifecycle.
     super.dispose();
   }
 }
+
+class _FakeDriftCategoryRepository extends DriftCategoryRepository {
+  _FakeDriftCategoryRepository() : super(_dummyDb);
+  @override
+  Future<List<wm.Category>> listCategories() async => [];
+}
+
+class _FakeDriftBudgetRepository extends DriftBudgetRepository {
+  _FakeDriftBudgetRepository() : super(_dummyDb);
+  @override
+  Future<List<CategoryBudget>> listForMonth(String month) async => [];
+}
+
+class _FakeDriftExpenseRepository extends DriftExpenseRepository {
+  _FakeDriftExpenseRepository() : super(_dummyDb);
+  @override
+  Future<List<Expense>> listActive() async => [];
+}
+
+class _FakeDriftDebtRepository extends DriftDebtRepository {
+  _FakeDriftDebtRepository() : super(_dummyDb);
+  @override
+  Future<List<wm_debt.DebtRecord>> listAll() async => [];
+}
+
+class _FakeDriftGroceryTemplateRepository extends DriftGroceryTemplateRepository {
+  _FakeDriftGroceryTemplateRepository() : super(_dummyDb);
+  @override
+  Future<List<wm_template.GroceryTemplate>> listAll() async => [];
+}
+
+class _FakeDriftSubscriptionRepository extends DriftSubscriptionRepository {
+  _FakeDriftSubscriptionRepository() : super(_dummyDb);
+  @override
+  Future<List<wm_sub.Subscription>> listAll() async => [];
+}
+
+class _FakeDriftPayeeRepository extends DriftPayeeRepository {
+  _FakeDriftPayeeRepository() : super(_dummyDb);
+}
+
+final _dummyDb = local.WalletMeltDatabase(NativeDatabase.memory());

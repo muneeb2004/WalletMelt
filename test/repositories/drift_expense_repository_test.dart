@@ -2,7 +2,8 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wallet_melt/src/data/local/wallet_melt_database.dart';
 import 'package:wallet_melt/src/data/repositories/drift/drift_expense_repository.dart';
-import 'package:wallet_melt/src/data/repositories/expense_repository.dart';
+import 'package:wallet_melt/src/types/expense.dart';
+import 'package:wallet_melt/src/types/grocery_item.dart';
 
 void main() {
   test(

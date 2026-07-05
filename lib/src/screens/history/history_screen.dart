@@ -34,7 +34,9 @@ final class _ExpenseItem extends _ListItem {
 // ── Screen ───────────────────────────────────────────────────────────────────
 
 class HistoryScreen extends StatefulWidget {
-  const HistoryScreen({super.key});
+  const HistoryScreen({this.initialCategoryId, super.key});
+
+  final String? initialCategoryId;
 
   @override
   State<HistoryScreen> createState() => _HistoryScreenState();
@@ -62,7 +64,18 @@ class _HistoryScreenState extends State<HistoryScreen> {
   @override
   void initState() {
     super.initState();
+    _categoryId = widget.initialCategoryId;
     _searchController.addListener(_onSearchChanged);
+  }
+
+  @override
+  void didUpdateWidget(covariant HistoryScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialCategoryId != oldWidget.initialCategoryId) {
+      setState(() {
+        _categoryId = widget.initialCategoryId;
+      });
+    }
   }
 
   void _onSearchChanged() {

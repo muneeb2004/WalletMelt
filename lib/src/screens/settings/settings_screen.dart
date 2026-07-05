@@ -161,6 +161,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             const SizedBox(height: 16),
 
+            // CARD: PAYEES & CONTACTS
+            WMGlassSurface.tier2(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Payees & Contacts',
+                      style: theme.textTheme.titleLarge),
+                  const SizedBox(height: 4),
+                  Text('Manage list of people for lending, borrowing, and other people-centric records.',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                            color: WalletMeltColors.textMuted,
+                          )),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () => context.push('/payees'),
+                      icon: const Icon(Icons.people_alt_rounded),
+                      label: const Text('Manage Payees & Contacts'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+
             // CARD 2: BACKUP & DATA MANAGEMENT
             WMGlassSurface.tier2(
               child: Column(

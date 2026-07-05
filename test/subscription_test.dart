@@ -4,9 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:wallet_melt/src/data/local/wallet_melt_database.dart' as local;
 import 'package:wallet_melt/src/data/repositories/drift/drift_subscription_repository.dart';
 import 'package:wallet_melt/src/data/repositories/drift/drift_expense_repository.dart';
-import 'package:wallet_melt/src/data/repositories/expense_repository.dart';
-import 'package:wallet_melt/src/data/repositories/category_repository.dart';
-import 'package:wallet_melt/src/data/repositories/budget_repository.dart';
+import 'package:wallet_melt/src/data/repositories/drift/drift_category_repository.dart';
+import 'package:wallet_melt/src/data/repositories/drift/drift_budget_repository.dart';
 import 'package:wallet_melt/src/state/app_state.dart';
 import 'package:wallet_melt/src/types/subscription.dart';
 import 'package:wallet_melt/src/types/expense.dart';
@@ -87,9 +86,8 @@ void main() {
 
       // Construct AppState with injected database repositories
       final appState = AppState.test(
-        categoryRepository: FakeCategoryRepository(),
-        expenseRepository: FakeExpenseRepository(),
-        budgetRepository: FakeBudgetRepository(),
+        driftCategoryRepository: FakeDriftCategoryRepo(),
+        driftBudgetRepository: FakeDriftBudgetRepo(),
         driftExpenseRepository: expRepo,
         driftSubscriptionRepository: subRepo,
       );
@@ -135,9 +133,8 @@ void main() {
       await subRepo.create(sub);
 
       final appState = AppState.test(
-        categoryRepository: FakeCategoryRepository(),
-        expenseRepository: FakeExpenseRepository(),
-        budgetRepository: FakeBudgetRepository(),
+        driftCategoryRepository: FakeDriftCategoryRepo(),
+        driftBudgetRepository: FakeDriftBudgetRepo(),
         driftExpenseRepository: expRepo,
         driftSubscriptionRepository: subRepo,
       );
@@ -155,44 +152,6 @@ void main() {
   });
 }
 
-// Minimal Fakes for test construction
-class FakeCategoryRepository extends Fake implements CategoryRepository {
-  @override
-  Future<List<Category>> listCategories() async => [];
-  @override
-  Future<Category> createCustom({required String name, required String icon, required String color}) async {
-    return Category(id: 'c', name: name, icon: icon, color: color, isDefault: false, createdAt: '', updatedAt: '');
-  }
-}
+class FakeDriftCategoryRepo extends Fake implements DriftCategoryRepository {}
 
-class FakeExpenseRepository extends Fake implements ExpenseRepository {
-  @override
-  Future<List<Expense>> listActive() async => [];
-  @override
-  Future<List<Expense>> listDeleted() async => [];
-  @override
-  Future<List<GroceryItem>> groceryItemsForExpense(String expenseId) async => [];
-  @override
-  Future<List<GroceryItem>> listAllGroceryItems() async => [];
-  @override
-  Future<void> permanentlyDelete(String id) async {}
-  @override
-  Future<void> softDelete(String id) async {}
-  @override
-  Future<void> restore(String id) async {}
-  @override
-  Future<Expense> create(ExpenseDraft draft) async {
-    return Expense(id: 'e', amount: draft.amount, currency: draft.currency, categoryId: draft.categoryId, title: draft.title, date: draft.date.toIso8601String(), isRecurring: false, createdAt: '', updatedAt: '');
-  }
-  @override
-  Future<void> update(Expense expense, {List<GroceryItemDraft>? groceryItems}) async {}
-}
-
-class FakeBudgetRepository extends Fake implements BudgetRepository {
-  @override
-  Future<List<CategoryBudget>> listForMonth(String month) async => [];
-  @override
-  Future<void> upsert({required String categoryId, required double amount, required String currency, required String month}) async {}
-  @override
-  Future<void> delete(String categoryId, String month) async {}
-}
+class FakeDriftBudgetRepo extends Fake implements DriftBudgetRepository {}

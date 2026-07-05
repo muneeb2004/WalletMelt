@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
+import 'package:collection/collection.dart';
 
 import '../../components/glass/app_background.dart';
 import '../../state/app_state.dart';
 import '../../theme/wallet_melt_theme.dart';
 import '../../types/debt.dart';
+import '../../types/payee.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/app_snackbar.dart';
 
@@ -75,7 +77,7 @@ class DebtScreen extends StatefulWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      debt.personName,
+                                      state.payeeNameFor(debt),
                                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                                     ),
                                     Text(
@@ -105,6 +107,7 @@ class DebtScreen extends StatefulWidget {
 
   static Future<void> showAddDebtSheet(BuildContext context, {DebtType? initialType}) async {
     final nameController = TextEditingController();
+    final nameFocusNode = FocusNode();
     final amountController = TextEditingController();
     final notesController = TextEditingController();
     final descController = TextEditingController();
@@ -129,12 +132,60 @@ class DebtScreen extends StatefulWidget {
                             style: Theme.of(builderContext).textTheme.titleLarge),
                         AppSpacing.gapMd,
 
-                        TextField(
-                          controller: nameController,
-                          decoration: const InputDecoration(
-                            labelText: 'Person Name',
-                            hintText: 'e.g., Ali, Ahmed',
-                          ),
+                        RawAutocomplete<Payee>(
+                          textEditingController: nameController,
+                          focusNode: nameFocusNode,
+                          displayStringForOption: (Payee payee) => payee.name,
+                          optionsBuilder: (TextEditingValue textEditingValue) {
+                            final query = textEditingValue.text.trim().toLowerCase();
+                            if (query.isEmpty) {
+                              return state.payees.where((p) => p.deletedAt == null && p.isActive);
+                            }
+                            return state.payees.where((p) {
+                              return p.deletedAt == null && p.name.toLowerCase().contains(query);
+                            });
+                          },
+                          optionsViewBuilder: (context, onSelected, options) {
+                            return Align(
+                              alignment: Alignment.topLeft,
+                              child: Material(
+                                elevation: 4.0,
+                                borderRadius: BorderRadius.circular(12),
+                                color: Theme.of(context).brightness == Brightness.dark
+                                    ? WalletMeltColors.darkSurface
+                                    : Colors.white,
+                                child: Container(
+                                  width: MediaQuery.of(context).size.width - 40,
+                                  constraints: const BoxConstraints(maxHeight: 200),
+                                  child: ListView.builder(
+                                    padding: EdgeInsets.zero,
+                                    shrinkWrap: true,
+                                    itemCount: options.length,
+                                    itemBuilder: (BuildContext context, int index) {
+                                      final payee = options.elementAt(index);
+                                      return ListTile(
+                                        title: Text(payee.name, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                                        subtitle: payee.phone != null && payee.phone!.isNotEmpty
+                                            ? Text(payee.phone!, style: const TextStyle(fontSize: 11))
+                                            : null,
+                                        onTap: () => onSelected(payee),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                          fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
+                            return TextField(
+                              controller: controller,
+                              focusNode: focusNode,
+                              decoration: const InputDecoration(
+                                labelText: 'Person Name',
+                                hintText: 'e.g., Ali, Ahmed',
+                              ),
+                            );
+                          },
                         ),
                         AppSpacing.gapSm,
 
@@ -269,9 +320,30 @@ class DebtScreen extends StatefulWidget {
 
                             final navigator = Navigator.of(sheetContext);
 
+                            final normalized = name.toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
+                            var payee = state.payees.firstWhereOrNull((p) => p.deletedAt == null && p.name.toLowerCase().replaceAll(RegExp(r'\s+'), ' ') == normalized);
+
+                            String payeeId;
+                            if (payee != null) {
+                              payeeId = payee.id;
+                              if (!payee.isActive) {
+                                await state.updatePayee(payee.copyWith(isActive: true));
+                              }
+                            } else {
+                              payeeId = 'payee_${const Uuid().v4()}';
+                              final newPayee = Payee(
+                                id: payeeId,
+                                name: name,
+                                createdAt: DateTime.now().toIso8601String(),
+                                updatedAt: DateTime.now().toIso8601String(),
+                              );
+                              await state.addPayee(newPayee);
+                            }
+
                             final newDebt = DebtRecord(
                               id: const Uuid().v4(),
                               personName: name,
+                              payeeId: payeeId,
                               type: selectedType,
                               principalAmount: amount,
                               remainingAmount: amount,
@@ -304,6 +376,7 @@ class DebtScreen extends StatefulWidget {
         );
 
     nameController.dispose();
+    nameFocusNode.dispose();
     amountController.dispose();
     notesController.dispose();
     descController.dispose();
@@ -338,7 +411,7 @@ class DebtScreen extends StatefulWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      debt.personName,
+                                      state.payeeNameFor(debt),
                                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                             fontSize: 20,
                                             fontWeight: FontWeight.w900,
@@ -743,7 +816,7 @@ class _DebtScreenState extends State<DebtScreen> {
       // 1. Search Query
       if (_searchQuery.isNotEmpty) {
         final query = _searchQuery.toLowerCase();
-        final nameMatches = debt.personName.toLowerCase().contains(query);
+        final nameMatches = state.payeeNameFor(debt).toLowerCase().contains(query);
         final descMatches = debt.description?.toLowerCase().contains(query) ?? false;
         final notesMatches = debt.notes?.toLowerCase().contains(query) ?? false;
         if (!nameMatches && !descMatches && !notesMatches) {
@@ -1196,6 +1269,7 @@ class _DebtScreenState extends State<DebtScreen> {
 
 
   Widget _buildDebtTile(BuildContext context, DebtRecord debt) {
+    final state = context.read<AppState>();
     // Determine type indicators
     final isReceivable = debt.type == DebtType.owedToMe || debt.type == DebtType.loanGiven;
     final typeColor = isReceivable ? WalletMeltColors.positive : WalletMeltColors.danger;
@@ -1267,7 +1341,7 @@ class _DebtScreenState extends State<DebtScreen> {
                     children: [
                       Expanded(
                         child: Text(
-                          debt.personName,
+                          state.payeeNameFor(debt),
                           style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
                           overflow: TextOverflow.ellipsis,
                         ),

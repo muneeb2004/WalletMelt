@@ -179,14 +179,15 @@ class _InsightsScreenState extends State<InsightsScreen> {
 
       final isReceivable =
           debt.type == DebtType.owedToMe || debt.type == DebtType.loanGiven;
+      final resolvedName = state.payeeNameFor(debt);
       if (isReceivable) {
         receivables += debt.remainingAmount;
-        debtorAmounts[debt.personName] =
-            (debtorAmounts[debt.personName] ?? 0.0) + debt.remainingAmount;
+        debtorAmounts[resolvedName] =
+            (debtorAmounts[resolvedName] ?? 0.0) + debt.remainingAmount;
       } else {
         liabilities += debt.remainingAmount;
-        creditorAmounts[debt.personName] =
-            (creditorAmounts[debt.personName] ?? 0.0) + debt.remainingAmount;
+        creditorAmounts[resolvedName] =
+            (creditorAmounts[resolvedName] ?? 0.0) + debt.remainingAmount;
       }
 
       if (debt.dueDate != null && debt.dueDate!.compareTo(nowStr) < 0) {

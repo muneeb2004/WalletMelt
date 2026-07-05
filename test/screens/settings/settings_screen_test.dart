@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:wallet_melt/src/data/local/wallet_melt_database.dart' as local;
-import 'package:wallet_melt/src/data/repositories/budget_repository.dart';
-import 'package:wallet_melt/src/data/repositories/category_repository.dart';
-import 'package:wallet_melt/src/data/repositories/expense_repository.dart';
+import 'package:wallet_melt/src/data/repositories/drift/drift_budget_repository.dart';
+import 'package:wallet_melt/src/data/repositories/drift/drift_category_repository.dart';
+import 'package:wallet_melt/src/data/repositories/drift/drift_expense_repository.dart';
 import 'package:wallet_melt/src/screens/settings/settings_screen.dart';
 import 'package:wallet_melt/src/services/export/expense_csv_export_service.dart';
 import 'package:wallet_melt/src/services/export/export_file_writer.dart';
@@ -1342,9 +1342,9 @@ AppState _appState({
   FakeBudgetRepository? budgetRepository,
 }) {
   final state = AppState.test(
-    categoryRepository: FakeCategoryRepository(),
-    expenseRepository: expenseRepository ?? FakeExpenseRepository(),
-    budgetRepository: budgetRepository ?? FakeBudgetRepository(),
+    driftCategoryRepository: FakeCategoryRepository(),
+    driftExpenseRepository: expenseRepository ?? FakeExpenseRepository(),
+    driftBudgetRepository: budgetRepository ?? FakeBudgetRepository(),
     settingsService: FakeSettingsService(),
   );
   state.settings = WalletMeltSettings.defaults.copyWith(
@@ -1409,14 +1409,14 @@ CategoryBudget _budget({required String id}) {
   );
 }
 
-class FakeCategoryRepository extends Fake implements CategoryRepository {
+class FakeCategoryRepository extends Fake implements DriftCategoryRepository {
   List<wm.Category> categories = const [];
 
   @override
   Future<List<wm.Category>> listCategories() async => categories;
 }
 
-class FakeExpenseRepository extends Fake implements ExpenseRepository {
+class FakeExpenseRepository extends Fake implements DriftExpenseRepository {
   List<Expense> activeExpenses = const [];
   List<Expense> deletedExpenses = const [];
   List<GroceryItem> groceryItems = const [];
@@ -1431,7 +1431,7 @@ class FakeExpenseRepository extends Fake implements ExpenseRepository {
   Future<List<GroceryItem>> listAllGroceryItems() async => groceryItems;
 }
 
-class FakeBudgetRepository extends Fake implements BudgetRepository {
+class FakeBudgetRepository extends Fake implements DriftBudgetRepository {
   List<CategoryBudget> budgets = const [];
 
   @override

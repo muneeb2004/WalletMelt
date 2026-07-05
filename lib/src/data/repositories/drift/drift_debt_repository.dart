@@ -39,6 +39,7 @@ class DriftDebtRepository {
     final row = local.DebtRecordsCompanion.insert(
       id: debt.id,
       personName: debt.personName,
+      payeeId: Value(debt.payeeId),
       type: debt.type.name,
       principalAmount: debt.principalAmount,
       remainingAmount: debt.remainingAmount,
@@ -100,6 +101,7 @@ class DriftDebtRepository {
     return domain.DebtRecord(
       id: row.id,
       personName: row.personName,
+      payeeId: row.payeeId,
       type: domain.DebtType.values.firstWhere((e) => e.name == row.type),
       principalAmount: row.principalAmount,
       remainingAmount: row.remainingAmount,

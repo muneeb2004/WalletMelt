@@ -13,9 +13,9 @@ import 'package:wallet_melt/src/types/expense.dart';
 import 'package:wallet_melt/src/types/settings.dart';
 import 'package:wallet_melt/src/types/grocery_item.dart';
 import 'package:wallet_melt/src/types/budget.dart';
-import 'package:wallet_melt/src/data/repositories/expense_repository.dart';
-import 'package:wallet_melt/src/data/repositories/category_repository.dart';
-import 'package:wallet_melt/src/data/repositories/budget_repository.dart';
+import 'package:wallet_melt/src/data/repositories/drift/drift_expense_repository.dart';
+import 'package:wallet_melt/src/data/repositories/drift/drift_category_repository.dart';
+import 'package:wallet_melt/src/data/repositories/drift/drift_budget_repository.dart';
 import 'package:wallet_melt/src/services/settings/settings_service.dart';
 
 void main() {
@@ -240,9 +240,9 @@ Widget _viewerHarness({
 
 AppState _appState() {
   final state = AppState.test(
-    categoryRepository: FakeCategoryRepository(),
-    expenseRepository: FakeExpenseRepository(),
-    budgetRepository: FakeBudgetRepository(),
+    driftCategoryRepository: FakeDriftCategoryRepository(),
+    driftExpenseRepository: FakeDriftExpenseRepository(),
+    driftBudgetRepository: FakeDriftBudgetRepository(),
     settingsService: FakeSettingsService(),
   );
   state.settings = WalletMeltSettings.defaults.copyWith(
@@ -285,26 +285,11 @@ Expense _expense({
   );
 }
 
-class FakeCategoryRepository extends Fake implements CategoryRepository {
-  @override
-  Future<List<wm.Category>> listCategories() async => [];
-}
+class FakeDriftCategoryRepository extends Fake implements DriftCategoryRepository {}
 
-class FakeExpenseRepository extends Fake implements ExpenseRepository {
-  @override
-  Future<List<Expense>> listActive() async => [];
-  @override
-  Future<List<Expense>> listDeleted() async => [];
-  @override
-  Future<List<GroceryItem>> listAllGroceryItems() async => [];
-}
+class FakeDriftExpenseRepository extends Fake implements DriftExpenseRepository {}
 
-class FakeBudgetRepository extends Fake implements BudgetRepository {
-  @override
-  Future<List<CategoryBudget>> listForMonth(String month) async => [];
-  @override
-  Future<List<CategoryBudget>> listAll() async => [];
-}
+class FakeDriftBudgetRepository extends Fake implements DriftBudgetRepository {}
 
 class FakeSettingsService extends SettingsService {
   WalletMeltSettings saved = WalletMeltSettings.defaults;

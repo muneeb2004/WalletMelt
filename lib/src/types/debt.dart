@@ -12,6 +12,7 @@ class DebtRecord {
     required this.currency,
     required this.createdAt,
     required this.status,
+    this.payeeId,
     this.description,
     this.dueDate,
     this.settledAt,
@@ -20,6 +21,7 @@ class DebtRecord {
 
   final String id;
   final String personName;
+  final String? payeeId;
   final DebtType type;
   final double principalAmount;
   final double remainingAmount;
@@ -36,6 +38,7 @@ class DebtRecord {
   DebtRecord copyWith({
     String? id,
     String? personName,
+    String? payeeId,
     DebtType? type,
     double? principalAmount,
     double? remainingAmount,
@@ -52,6 +55,7 @@ class DebtRecord {
     return DebtRecord(
       id: id ?? this.id,
       personName: personName ?? this.personName,
+      payeeId: payeeId ?? this.payeeId,
       type: type ?? this.type,
       principalAmount: principalAmount ?? this.principalAmount,
       remainingAmount: remainingAmount ?? this.remainingAmount,

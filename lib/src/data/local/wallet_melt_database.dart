@@ -256,12 +256,34 @@ class MigrationAudit extends Table {
   Set<Column<Object>> get primaryKey => {id};
 }
 
+class Payees extends Table {
+  TextColumn get id => text()();
+  TextColumn get name => text()();
+  TextColumn get normalizedName => text().named('normalizedName')();
+  TextColumn get phone => text().nullable()();
+  TextColumn get notes => text().nullable()();
+  TextColumn get createdAt => text().named('createdAt')();
+  TextColumn get updatedAt => text().named('updatedAt')();
+  TextColumn get deletedAt => text().named('deletedAt').nullable()();
+  BoolColumn get isActive => boolean().named('isActive').withDefault(const Constant(true))();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+
+  @override
+  List<Set<Column<Object>>> get uniqueKeys => [
+        {normalizedName},
+      ];
+}
+
 class DebtRecords extends Table {
   @override
   String get tableName => 'debt_records';
 
   TextColumn get id => text()();
   TextColumn get personName => text().named('personName')();
+  TextColumn get payeeId =>
+      text().named('payeeId').nullable().references(Payees, #id)();
   TextColumn get type => text()(); // 'owedToMe', 'iOwe', 'loanGiven', 'loanTaken'
   RealColumn get principalAmount => real().named('principalAmount')();
   RealColumn get remainingAmount => real().named('remainingAmount')();
@@ -371,12 +393,13 @@ class V1MigrationMetrics {
     DebtRepayments,
     GroceryTemplates,
     Subscriptions,
+    Payees,
   ],
 )
 class WalletMeltDatabase extends _$WalletMeltDatabase {
   WalletMeltDatabase(super.executor, {this.preMigrationBackupPath});
 
-  static const currentSchemaVersion = 4;
+  static const currentSchemaVersion = 5;
 
   final String? preMigrationBackupPath;
 
@@ -472,6 +495,9 @@ class WalletMeltDatabase extends _$WalletMeltDatabase {
           if (from < 4 && to >= 4) {
             await _upgradeFromV3ToV4(m, from, to);
           }
+          if (from < 5 && to >= 5) {
+            await _upgradeFromV4ToV5(m, from, to);
+          }
         },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON;');
@@ -489,6 +515,47 @@ class WalletMeltDatabase extends _$WalletMeltDatabase {
     }
     if (!await _columnExists('expenses', 'taxAmount')) {
       await m.addColumn(expenses, expenses.taxAmount);
+    }
+  }
+
+  Future<void> _upgradeFromV4ToV5(Migrator m, int from, int to) async {
+    if (!await _tableExists('payees')) await m.createTable(payees);
+    if (!await _columnExists('debt_records', 'payeeId')) {
+      await m.addColumn(debtRecords, debtRecords.payeeId);
+    }
+    await _migrateLegacyDebtRecordsToPayees();
+  }
+
+  Future<void> _migrateLegacyDebtRecordsToPayees() async {
+    final rows = await customSelect('SELECT id, personName, createdAt FROM debt_records;').get();
+    if (rows.isEmpty) return;
+
+    final payeesInserted = <String, String>{};
+
+    for (final row in rows) {
+      final id = row.read<String>('id');
+      final personName = row.read<String>('personName');
+      final createdAt = row.read<String>('createdAt');
+      final normalized = _normalizeName(personName);
+
+      var payeeId = payeesInserted[normalized];
+      if (payeeId == null) {
+        payeeId = 'payee_${_stableFnv1a32(normalized)}';
+        payeesInserted[normalized] = payeeId;
+
+        await customStatement(
+          '''
+INSERT OR IGNORE INTO payees (id, name, normalizedName, phone, notes, createdAt, updatedAt, deletedAt, isActive)
+VALUES (?, ?, ?, NULL, NULL, ?, ?, NULL, 1);
+''',
+          [payeeId, personName.trim(), normalized, createdAt, createdAt],
+        );
+      }
+
+      await customStatement(
+        'UPDATE debt_records SET payeeId = ? WHERE id = ?;',
+        [payeeId, id],
+      );
     }
   }
 

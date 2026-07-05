@@ -11,9 +11,9 @@ import 'package:wallet_melt/src/types/expense.dart';
 import 'package:wallet_melt/src/services/export/wallet_melt_json_backup_encoder.dart';
 import 'package:wallet_melt/src/services/export/wallet_melt_json_restore_service.dart';
 import 'package:wallet_melt/src/services/export/wallet_melt_json_backup_validator.dart';
-import 'package:wallet_melt/src/data/repositories/category_repository.dart';
-import 'package:wallet_melt/src/data/repositories/expense_repository.dart';
-import 'package:wallet_melt/src/data/repositories/budget_repository.dart';
+import 'package:wallet_melt/src/data/repositories/drift/drift_category_repository.dart';
+import 'package:wallet_melt/src/data/repositories/drift/drift_expense_repository.dart';
+import 'package:wallet_melt/src/data/repositories/drift/drift_budget_repository.dart';
 import 'package:wallet_melt/src/services/export/wallet_melt_json_restore_dry_run_planner.dart';
 import 'package:wallet_melt/src/services/export/wallet_melt_json_backup_conflict_service.dart';
 import 'package:wallet_melt/src/services/export/export_file_writer.dart';
@@ -64,9 +64,9 @@ void main() {
     test('AppState spent and remaining math filters current month correctly',
         () {
       final appState = AppState.test(
-        categoryRepository: FakeCategoryRepo(),
-        expenseRepository: FakeExpenseRepo(),
-        budgetRepository: FakeBudgetRepo(),
+        driftCategoryRepository: FakeDriftCategoryRepo(),
+        driftExpenseRepository: FakeDriftExpenseRepo(),
+        driftBudgetRepository: FakeDriftBudgetRepo(),
       );
 
       appState.selectedMonth = DateTime(2026, 6);
@@ -209,8 +209,8 @@ void main() {
 }
 
 // Minimal fakes to instantiate AppState.test
-class FakeCategoryRepo extends Fake implements CategoryRepository {}
+class FakeDriftCategoryRepo extends Fake implements DriftCategoryRepository {}
 
-class FakeExpenseRepo extends Fake implements ExpenseRepository {}
+class FakeDriftExpenseRepo extends Fake implements DriftExpenseRepository {}
 
-class FakeBudgetRepo extends Fake implements BudgetRepository {}
+class FakeDriftBudgetRepo extends Fake implements DriftBudgetRepository {}

@@ -33,3 +33,17 @@ class GroceryItem {
     );
   }
 }
+
+class GroceryItemDraft {
+  const GroceryItemDraft({
+    required this.name,
+    required this.amount,
+    this.quantity,
+    this.unitPrice,
+  });
+
+  final String name;
+  final double amount;
+  final double? quantity;
+  final double? unitPrice;
+}
