@@ -23,6 +23,7 @@ import 'package:wallet_melt/src/services/export/wallet_melt_json_restore_plan.da
 import 'package:wallet_melt/src/services/export/wallet_melt_json_restore_service.dart';
 import 'package:wallet_melt/src/services/settings/settings_service.dart';
 import 'package:wallet_melt/src/state/app_state.dart';
+import 'package:wallet_melt/src/security/pin_lock_controller.dart';
 import 'package:wallet_melt/src/types/budget.dart';
 import 'package:wallet_melt/src/types/category.dart' as wm;
 import 'package:wallet_melt/src/types/expense.dart';
@@ -32,6 +33,12 @@ import 'package:wallet_melt/src/types/settings.dart';
 void main() {
   group('SettingsScreen CSV export', () {
     testWidgets('shows export action', (tester) async {
+      tester.view.physicalSize = const Size(800, 1200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
       await tester.pumpWidget(
         _settingsHarness(
           appState: _appState(),
@@ -47,6 +54,12 @@ void main() {
 
     testWidgets('exports current active expenses and shares generated file',
         (tester) async {
+      tester.view.physicalSize = const Size(800, 1200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
       final appState = _appState()
         ..categories = [_category(id: 'grocery', name: 'Groceries')]
         ..expenses = [_expense(id: 'active', title: 'Weekly grocery')];
@@ -81,6 +94,12 @@ void main() {
 
     testWidgets('include-deleted option passes active and deleted expenses',
         (tester) async {
+      tester.view.physicalSize = const Size(800, 1200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
       final appState = _appState()
         ..categories = [_category(id: 'grocery', name: 'Groceries')]
         ..expenses = [_expense(id: 'active', title: 'Weekly grocery')]
@@ -119,6 +138,12 @@ void main() {
     });
 
     testWidgets('handles empty expense list gracefully', (tester) async {
+      tester.view.physicalSize = const Size(800, 1200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
       final exportService = FakeExpenseCsvExportService();
       final shareService = FakeExportShareService();
 
@@ -143,6 +168,12 @@ void main() {
 
     testWidgets('creates JSON backup with active and deleted expenses',
         (tester) async {
+      tester.view.physicalSize = const Size(800, 1200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
       final expenseRepository = FakeExpenseRepository()
         ..groceryItems = [_groceryItem(id: 'milk_item')];
       final budgetRepository = FakeBudgetRepository()
@@ -1318,8 +1349,12 @@ Widget _settingsHarness({
   WalletMeltJsonRestoreService restoreService =
       const WalletMeltJsonRestoreService(),
 }) {
-  return ChangeNotifierProvider.value(
-    value: appState,
+  final pinLockController = FakePinLockController();
+  return MultiProvider(
+    providers: [
+      ChangeNotifierProvider.value(value: appState),
+      ChangeNotifierProvider<PinLockController>.value(value: pinLockController),
+    ],
     child: MaterialApp(
       home: SettingsScreen(
         expenseCsvExportService: exportService,
@@ -1789,4 +1824,44 @@ RestoreDryRunPlan _dryRunPlan({
     futureExecutionSteps: RestorePlan.mutationPlanningSteps,
     restorePlan: RestorePlan.safeMerge(),
   );
+}
+
+class FakePinLockController extends PinLockController {
+  FakePinLockController() : super();
+
+  @override
+  bool get isLocked => false;
+
+  @override
+  bool get isPinEnabled => false;
+
+  @override
+  bool get isInitialized => true;
+
+  @override
+  bool get isPinScreenOpen => false;
+
+  @override
+  set isPinScreenOpen(bool value) {}
+
+  @override
+  Future<void> initialize() async {}
+
+  @override
+  Future<void> refreshPinStatus() async {}
+
+  @override
+  void unlock() {}
+
+  @override
+  void lock() {}
+
+  @override
+  Future<void> enablePin(String rawPin) async {}
+
+  @override
+  Future<void> disablePin() async {}
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {}
 }

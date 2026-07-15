@@ -14,11 +14,14 @@ import '../screens/settings/settings_screen.dart';
 import '../screens/debt/debt_screen.dart';
 import '../screens/planning/planning_screen.dart';
 import '../screens/payee/payees_screen.dart';
+import '../screens/security/pin_lock_screen.dart';
 import '../components/navigation/app_shell.dart';
 import '../state/app_state.dart';
 import '../theme/wallet_melt_theme.dart';
 import '../types/settings.dart';
 import '../utils/security_utils.dart';
+import '../security/pin_lock_controller.dart';
+import '../providers/security_providers.dart';
 
 import '../providers/app_state_provider.dart';
 
@@ -46,8 +49,13 @@ class WalletMeltBootstrap extends StatelessWidget {
                 ),
               ),
             ),
-            data: (appState) => ChangeNotifierProvider<AppState>.value(
-              value: appState,
+            data: (appState) => MultiProvider(
+              providers: [
+                ChangeNotifierProvider<AppState>.value(value: appState),
+                ChangeNotifierProvider<PinLockController>.value(
+                  value: ref.read(pinLockControllerProvider),
+                ),
+              ],
               child: const WalletMeltApp(),
             ),
           );
@@ -66,6 +74,7 @@ class WalletMeltApp extends StatefulWidget {
 
 class _WalletMeltAppState extends State<WalletMeltApp> {
   late final GoRouter _router;
+  late final PinLockController _pinLockController;
 
   bool _isValidUuid(String? id) {
     if (id == null || id.length != 36) return false;
@@ -80,8 +89,19 @@ class _WalletMeltAppState extends State<WalletMeltApp> {
     super.initState();
     SecurityUtils.enableSecureScreen();
     final appState = context.read<AppState>();
+    _pinLockController = context.read<PinLockController>();
+
+    // Mark the PIN screen open on startup if we start in a locked state
+    if (_pinLockController.isPinEnabled && _pinLockController.isLocked) {
+      _pinLockController.isPinScreenOpen = true;
+    }
+
+    _pinLockController.addListener(_onPinLockChanged);
+
     _router = GoRouter(
-      initialLocation: '/',
+      initialLocation: _pinLockController.isPinEnabled && _pinLockController.isLocked
+          ? '/pin-lock?from=%2F'
+          : '/',
       redirect: (context, state) {
         if (appState.isLoading) return null;
         final onboarding = appState.settings.hasCompletedOnboarding;
@@ -92,6 +112,13 @@ class _WalletMeltAppState extends State<WalletMeltApp> {
       },
       refreshListenable: appState,
       routes: [
+        GoRoute(
+          path: '/pin-lock',
+          builder: (context, state) {
+            final from = state.uri.queryParameters['from'];
+            return PinLockScreen(from: from);
+          },
+        ),
         GoRoute(
             path: '/onboarding',
             builder: (context, state) => const OnboardingScreen()),
@@ -178,6 +205,19 @@ class _WalletMeltAppState extends State<WalletMeltApp> {
     );
   }
 
+  void _onPinLockChanged() {
+    if (_pinLockController.isLocked && !_pinLockController.isPinScreenOpen) {
+      _pinLockController.isPinScreenOpen = true;
+      _router.push('/pin-lock');
+    }
+  }
+
+  @override
+  void dispose() {
+    _pinLockController.removeListener(_onPinLockChanged);
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final settings = context.watch<AppState>().settings;
@@ -203,16 +243,11 @@ class WalletMeltScrollBehavior extends MaterialScrollBehavior {
   @override
   Widget buildOverscrollIndicator(
       BuildContext context, Widget child, ScrollableDetails details) {
-    // Under Material 3, buildOverscrollIndicator returns a StretchingOverscrollIndicator on Android.
-    // By returning child directly, we completely disable the stretch overscroll indicator,
-    // which resolves the dark shadow / black screen stretching artifact when scrolling lists.
     return child;
   }
 
   @override
   ScrollPhysics getScrollPhysics(BuildContext context) {
-    // BouncingScrollPhysics provides a premium, bouncy iOS-like scrolling experience globally,
-    // which matches the premium glassmorphic feel and behaves beautifully across all platforms.
     return const BouncingScrollPhysics(
       parent: AlwaysScrollableScrollPhysics(),
     );

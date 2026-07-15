@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wallet_melt/src/state/app_state.dart';
 import 'package:wallet_melt/src/providers/repository_providers.dart';
 import 'package:wallet_melt/src/providers/database_providers.dart';
+import 'security_providers.dart';
 
 final appStateProvider = FutureProvider<AppState>((ref) async {
   final categoryRepo = await ref.watch(driftCategoryRepositoryProvider.future);
@@ -25,5 +26,11 @@ final appStateProvider = FutureProvider<AppState>((ref) async {
   );
 
   await appState.initialize();
+
+  // Load PIN settings securely before startup completes
+  final pinLockController = ref.read(pinLockControllerProvider);
+  await pinLockController.initialize();
+
   return appState;
 });
+

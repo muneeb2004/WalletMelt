@@ -23,6 +23,9 @@ import '../../state/app_state.dart';
 import '../../theme/wallet_melt_theme.dart';
 import '../../types/settings.dart';
 import '../../widgets/app_snackbar.dart';
+import '../security/create_pin_screen.dart';
+import '../security/verify_pin_screen.dart';
+import '../../security/pin_lock_controller.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({
@@ -158,6 +161,137 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ],
               ),
+            ),
+            const SizedBox(height: 16),
+
+            // CARD: PRIVACY (PIN LOCK)
+            Consumer<PinLockController>(
+              builder: (context, pinController, child) {
+                final isPinEnabled = pinController.isPinEnabled;
+                return WMGlassSurface.tier2(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Privacy', style: theme.textTheme.titleLarge),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Secure your financial records with a local 4-digit PIN lock.',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: WalletMeltColors.textMuted,
+                        ),
+                      ),
+                      Material(
+                        type: MaterialType.transparency,
+                        child: SwitchListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(
+                            'Enable PIN Lock',
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          value: isPinEnabled,
+                          onChanged: (bool value) async {
+                            if (value) {
+                              final wasSet = await Navigator.push<bool>(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const CreatePinScreen(),
+                                ),
+                              );
+                              if (wasSet == true) {
+                                await pinController.refreshPinStatus();
+                              }
+                            } else {
+                              final verified = await Navigator.push<bool>(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const VerifyPinScreen(
+                                    title: 'Disable PIN',
+                                    instruction: 'Enter your PIN to disable the lock',
+                                  ),
+                                ),
+                              );
+                              if (verified == true) {
+                                await pinController.disablePin();
+                                if (!context.mounted) return;
+                                showSuccessSnackbar(context, 'PIN Lock disabled.');
+                              }
+                            }
+                          },
+                        ),
+                      ),
+                      if (isPinEnabled) ...[
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed: () async {
+                                  final verified = await Navigator.push<bool>(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => const VerifyPinScreen(
+                                        title: 'Verify PIN',
+                                        instruction: 'Enter current PIN to change it',
+                                      ),
+                                    ),
+                                  );
+                                  if (verified == true) {
+                                    if (!context.mounted) return;
+                                    final wasChanged = await Navigator.push<bool>(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => const CreatePinScreen(),
+                                      ),
+                                    );
+                                    if (wasChanged == true) {
+                                      if (!context.mounted) return;
+                                      showSuccessSnackbar(context, 'PIN changed successfully.');
+                                    }
+                                  }
+                                },
+                                icon: const Icon(Icons.edit_rounded),
+                                label: const Text('Change PIN'),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: theme.colorScheme.error,
+                                  side: BorderSide(
+                                    color: theme.colorScheme.error.withValues(alpha: 0.28),
+                                    width: 1.4,
+                                  ),
+                                ),
+                                onPressed: () async {
+                                  final verified = await Navigator.push<bool>(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => const VerifyPinScreen(
+                                        title: 'Disable PIN',
+                                        instruction: 'Enter your PIN to disable the lock',
+                                      ),
+                                    ),
+                                  );
+                                  if (verified == true) {
+                                    await pinController.disablePin();
+                                    if (!context.mounted) return;
+                                    showSuccessSnackbar(context, 'PIN Lock disabled.');
+                                  }
+                                },
+                                icon: const Icon(Icons.lock_open_rounded),
+                                label: const Text('Disable PIN'),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 16),
 
