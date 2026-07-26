@@ -484,7 +484,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       Text('Version',
                           style: theme.textTheme.bodyMedium
                               ?.copyWith(fontWeight: FontWeight.bold)),
-                      Text('v0.1.1',
+                      Text('v1.0.0',
                           style: theme.textTheme.bodyMedium),
                     ],
                   ),

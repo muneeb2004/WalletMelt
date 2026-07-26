@@ -316,8 +316,8 @@ class _AppFloatingActionButtonState extends State<_AppFloatingActionButton> {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      Color(0xFFFCD34D), // Soft golden brand highlight
-                      Color(0xFFF59E0B), // Premium amber brand shade
+                      WalletMeltColors.brandSoft,
+                      WalletMeltColors.brand,
                     ],
                   ),
                   boxShadow: [

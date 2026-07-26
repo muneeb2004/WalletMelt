@@ -58,6 +58,9 @@ void main() {
       final subRepo = DriftSubscriptionRepository(database);
       final expRepo = DriftExpenseRepository(database);
 
+      final todayStr = DateTime.now().toIso8601String().substring(0, 10);
+      final todayDate = DateTime.parse(todayStr);
+
       // The categories are seeded by default in onCreate.
       final sub = Subscription(
         id: 'netflix-sub',
@@ -66,12 +69,12 @@ void main() {
         amount: 1100.0,
         taxAmount: 198.0,
         currency: 'PKR',
-        startDate: '2026-06-20',
-        nextOccurrenceDate: '2026-06-20', // past date
+        startDate: todayStr,
+        nextOccurrenceDate: todayStr, // today's date
         billingCycle: 'monthly',
         status: SubscriptionStatus.active,
-        createdAt: '2026-06-20T00:00:00.000',
-        updatedAt: '2026-06-20T00:00:00.000',
+        createdAt: '${todayStr}T00:00:00.000',
+        updatedAt: '${todayStr}T00:00:00.000',
       );
 
       await subRepo.create(sub);
@@ -92,9 +95,10 @@ void main() {
       await appState.processSubscriptionRenewals();
 
       // Check subscription record was updated with next renewal date
+      final expectedNextDate = sub.calculateNextRenewalDate(todayDate).toIso8601String().substring(0, 10);
       final updatedSubs = await subRepo.listAll();
       expect(updatedSubs, hasLength(1));
-      expect(updatedSubs.first.nextOccurrenceDate, '2026-07-20');
+      expect(updatedSubs.first.nextOccurrenceDate, expectedNextDate);
 
       // Check expense was auto-generated in database
       final generatedExpenses = await expRepo.listActive();
