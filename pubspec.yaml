@@ -45,6 +45,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/brand/optimized/walletmelt_main_logo_960.webp
+    - assets/brand/optimized/walletmelt_icon_transparent.webp
 
 flutter_launcher_icons:
   android: true

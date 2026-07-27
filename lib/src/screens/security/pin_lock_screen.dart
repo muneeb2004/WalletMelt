@@ -31,7 +31,7 @@ class _PinLockScreenState extends State<PinLockScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     precacheImage(
-      const AssetImage('assets/brand/optimized/walletmelt_main_logo_960.webp'),
+      const AssetImage('assets/brand/optimized/walletmelt_icon_transparent.webp'),
       context,
     );
   }
@@ -95,21 +95,15 @@ class _PinLockScreenState extends State<PinLockScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Spacer(),
-              // Logo & App Name
+              // Logo (Transparent background, non-redundant, good scale & alignment)
               Image.asset(
-                'assets/brand/optimized/walletmelt_main_logo_960.webp',
-                width: 96,
-                height: 96,
+                'assets/brand/optimized/walletmelt_icon_transparent.webp',
+                height: 72,
+                fit: BoxFit.contain,
+                filterQuality: FilterQuality.high,
+                semanticLabel: 'WalletMelt logo',
               ),
-              const SizedBox(height: 12),
-              Text(
-                'WalletMelt',
-                style: theme.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.5,
-                ),
-              ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 16),
               Text(
                 'Enter PIN to unlock',
                 style: theme.textTheme.bodyMedium,
