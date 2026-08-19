@@ -2,9 +2,8 @@ import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../local/wallet_melt_database.dart' as local;
-import '../../../types/expense.dart';
-import '../../../types/grocery_item.dart';
 import '../../../types/expense.dart' as domain;
+import '../../../types/fuel.dart' as domain;
 import '../../../types/grocery_item.dart' as domain;
 
 class DriftExpenseRepository {
@@ -49,7 +48,7 @@ class DriftExpenseRepository {
     return _toDomain(row);
   }
 
-  Future<domain.Expense> create(ExpenseDraft draft) async {
+  Future<domain.Expense> create(domain.ExpenseDraft draft) async {
     final now = DateTime.now().toIso8601String();
     final title =
         draft.title.trim().isEmpty ? 'Household expense' : draft.title.trim();
@@ -75,6 +74,9 @@ class DriftExpenseRepository {
       await _db.into(_db.expenses).insert(_expenseInsertCompanion(expense));
       await _replaceGroceryItems(expense.id, draft.groceryItems, now,
           expense.currency, expense.categoryId);
+      if (draft.fuelTransaction != null) {
+        await _replaceFuelTransaction(expense.id, draft.fuelTransaction, now);
+      }
       if (expense.receiptImageUri != null) {
         await _insertReceiptForLegacyPath(
             expense.id, expense.receiptImageUri!, now, null);
@@ -84,7 +86,8 @@ class DriftExpenseRepository {
   }
 
   Future<void> update(domain.Expense expense,
-      {List<GroceryItemDraft>? groceryItems}) async {
+      {List<domain.GroceryItemDraft>? groceryItems,
+      domain.FuelTransactionDraft? fuelTransaction}) async {
     final updatedAt = DateTime.now().toIso8601String();
     final updated = expense.copyWith(updatedAt: updatedAt);
     await _db.transaction(() async {
@@ -94,6 +97,9 @@ class DriftExpenseRepository {
       if (groceryItems != null) {
         await _replaceGroceryItems(expense.id, groceryItems, updatedAt,
             expense.currency, expense.categoryId);
+      }
+      if (fuelTransaction != null) {
+        await _replaceFuelTransaction(expense.id, fuelTransaction, updatedAt);
       }
       await (_db.delete(_db.receipts)
             ..where((row) => row.id.equals(_legacyReceiptId(expense.id))))
@@ -180,7 +186,7 @@ class DriftExpenseRepository {
 
   Future<void> _replaceGroceryItems(
     String expenseId,
-    List<GroceryItemDraft> items,
+    List<domain.GroceryItemDraft> items,
     String now,
     String currency,
     String categoryId,
@@ -348,6 +354,82 @@ class DriftExpenseRepository {
     final trimmed = value?.trim();
     if (trimmed == null || trimmed.isEmpty) return null;
     return trimmed;
+  }
+
+  Future<void> _replaceFuelTransaction(
+      String expenseId, domain.FuelTransactionDraft? fuelTx, String now) async {
+    final existingTx = await (_db.select(_db.fuelTransactions)
+          ..where((row) => row.expenseId.equals(expenseId)))
+        .getSingleOrNull();
+
+    if (existingTx != null) {
+      await (_db.delete(_db.fuelComponents)
+            ..where((row) => row.fuelTransactionId.equals(existingTx.id)))
+          .go();
+      await (_db.delete(_db.fuelTransactions)
+            ..where((row) => row.id.equals(existingTx.id)))
+          .go();
+    }
+
+    if (fuelTx == null || fuelTx.components.isEmpty) return;
+
+    final txId = fuelTx.id ?? _uuid.v4();
+    await _db.into(_db.fuelTransactions).insert(
+          local.FuelTransactionsCompanion.insert(
+            id: txId,
+            expenseId: expenseId,
+            odometerReading: Value(fuelTx.odometerReading),
+            createdAt: now,
+          ),
+        );
+
+    for (final comp in fuelTx.components) {
+      final compId = comp.id ?? _uuid.v4();
+      await _db.into(_db.fuelComponents).insert(
+            local.FuelComponentsCompanion.insert(
+              id: compId,
+              fuelTransactionId: txId,
+              fuelType: comp.fuelType.name,
+              quantityLitres: comp.quantityLitres,
+              pricePerLitre: comp.pricePerLitre,
+              subtotal: comp.subtotal,
+              createdAt: now,
+            ),
+          );
+    }
+  }
+
+  Future<domain.FuelTransaction?> fuelTransactionForExpense(
+      String expenseId) async {
+    final txRow = await (_db.select(_db.fuelTransactions)
+          ..where((row) => row.expenseId.equals(expenseId)))
+        .getSingleOrNull();
+    if (txRow == null) return null;
+
+    final compRows = await (_db.select(_db.fuelComponents)
+          ..where((row) => row.fuelTransactionId.equals(txRow.id))
+          ..orderBy([(row) => OrderingTerm(expression: row.createdAt)]))
+        .get();
+
+    final comps = compRows.map((r) {
+      return domain.FuelComponent(
+        id: r.id,
+        fuelTransactionId: r.fuelTransactionId,
+        fuelType: domain.FuelType.fromName(r.fuelType),
+        quantityLitres: r.quantityLitres,
+        pricePerLitre: r.pricePerLitre,
+        subtotal: r.subtotal,
+        createdAt: r.createdAt,
+      );
+    }).toList();
+
+    return domain.FuelTransaction(
+      id: txRow.id,
+      expenseId: txRow.expenseId,
+      odometerReading: txRow.odometerReading,
+      createdAt: txRow.createdAt,
+      components: comps,
+    );
   }
 
   String _normalizeName(String value) {

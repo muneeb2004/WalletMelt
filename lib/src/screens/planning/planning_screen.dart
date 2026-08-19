@@ -5,6 +5,7 @@ import '../../components/glass/app_background.dart';
 import '../../state/app_state.dart';
 import '../budget/budget_screen.dart';
 import '../subscription/subscription_screen.dart';
+import '../essentials/essential_expenses_screen.dart';
 
 class PlanningScreen extends StatefulWidget {
   final int initialIndex;
@@ -22,9 +23,9 @@ class _PlanningScreenState extends State<PlanningScreen>
   void initState() {
     super.initState();
     _tabController = TabController(
-      length: 2,
+      length: 3,
       vsync: this,
-      initialIndex: widget.initialIndex,
+      initialIndex: widget.initialIndex.clamp(0, 2),
     );
     _tabController.addListener(() {
       setState(() {});
@@ -35,7 +36,7 @@ class _PlanningScreenState extends State<PlanningScreen>
   void didUpdateWidget(covariant PlanningScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.initialIndex != oldWidget.initialIndex) {
-      _tabController.animateTo(widget.initialIndex);
+      _tabController.animateTo(widget.initialIndex.clamp(0, 2));
     }
   }
 
@@ -72,14 +73,18 @@ class _PlanningScreenState extends State<PlanningScreen>
                   IconButton(
                     tooltip: _tabController.index == 0
                         ? 'Set Budget'
-                        : 'Add Subscription',
+                        : (_tabController.index == 1
+                            ? 'Add Subscription'
+                            : 'Add Essential'),
                     onPressed: () {
                       if (_tabController.index == 0) {
                         final monthlyBudget = state.getMonthlyBudgetAmount();
                         BudgetScreen.showSetBudgetSheet(
                             context, state, monthlyBudget);
-                      } else {
+                      } else if (_tabController.index == 1) {
                         SubscriptionScreen.showAddSubscriptionSheet(context);
+                      } else {
+                        EssentialExpensesScreen.showAddEssentialSheet(context);
                       }
                     },
                     icon: Icon(
@@ -139,6 +144,7 @@ class _PlanningScreenState extends State<PlanningScreen>
                   tabs: const [
                     Tab(text: 'Budgets'),
                     Tab(text: 'Subscriptions'),
+                    Tab(text: 'Essentials'),
                   ],
                 ),
               ),
@@ -151,6 +157,7 @@ class _PlanningScreenState extends State<PlanningScreen>
                 children: const [
                   BudgetScreen(isEmbedded: true),
                   SubscriptionScreen(isEmbedded: true),
+                  EssentialExpensesScreen(isEmbedded: true),
                 ],
               ),
             ),

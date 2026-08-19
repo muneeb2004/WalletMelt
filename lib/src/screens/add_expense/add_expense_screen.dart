@@ -5,8 +5,10 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../components/category/category_chip.dart';
+import '../../components/fuel/fuel_editor.dart';
 import '../../components/glass/app_background.dart';
 import '../../types/expense.dart';
+import '../../types/fuel.dart';
 import '../../types/grocery_item.dart';
 import '../../state/app_state.dart';
 import '../../theme/wallet_melt_theme.dart';
@@ -32,6 +34,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   final _vendorController = TextEditingController();
   final _notesController = TextEditingController();
   final List<GroceryItemDraft> _groceryItems = [];
+  FuelTransactionDraft? _fuelTransactionDraft;
 
   String? _categoryId;
   DateTime _date = DateTime.now();
@@ -61,6 +64,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       _date = DateTime.parse(expense.date);
       _receiptUri = expense.receiptImageUri;
       _loadGroceryItems(expense.id);
+      _loadFuelTransaction(expense.id);
     }
     _hydrated = true;
   }
@@ -86,6 +90,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     final selectedCategory =
         _categoryId == null ? null : state.categoryById(_categoryId!);
     final isGroceryMode = selectedCategory?.id == 'grocery';
+    final isFuelMode = selectedCategory?.id == 'fuel' ||
+        selectedCategory?.name.toLowerCase() == 'fuel';
 
     return Scaffold(
       body: AppBackground(
@@ -95,7 +101,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
             16.0 /* AppSpacing.md */,
             18.0,
             16.0 /* AppSpacing.md */,
-            isGroceryMode ? 140.0 : 24.0 /* AppSpacing.lg */,
+            (isGroceryMode || isFuelMode) ? 140.0 : 24.0 /* AppSpacing.lg */,
           ),
           children: [
             Row(
@@ -107,9 +113,11 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    isGroceryMode
-                        ? 'Bulk Grocery Entry'
-                        : (isEditing ? 'Edit expense' : 'Add expense'),
+                    isFuelMode
+                        ? 'Fuel Purchase Entry'
+                        : (isGroceryMode
+                            ? 'Bulk Grocery Entry'
+                            : (isEditing ? 'Edit expense' : 'Add expense')),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.headlineMedium,
@@ -320,7 +328,184 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                 onRemove: () => setState(() => _receiptUri = null),
               ),
             ],
-            if (!isGroceryMode) ...[
+            if (isFuelMode) ...[
+              // Dedicated Fuel Mode
+              FuelEditor(
+                initialDraft: _fuelTransactionDraft,
+                currency: currency,
+                onChanged: (draft) {
+                  setState(() {
+                    _fuelTransactionDraft = draft;
+                  });
+                  final sum = draft.totalAmount;
+                  _amountController.text = sum > 0
+                      ? sum.toStringAsFixed(sum % 1 == 0 ? 0 : 2)
+                      : '';
+                },
+              ),
+              const SizedBox(height: 14),
+              _buildTaxSection(context, _getFuelSubtotal()),
+              const SizedBox(height: 18),
+
+              // Collapsible Details Card
+              WMGlassSurface.tier2(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  children: [
+                    InkWell(
+                      onTap: () => setState(() => _showAdditionalDetails = !_showAdditionalDetails),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(Icons.tune_rounded, size: 20, color: WalletMeltColors.brandDeep),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Additional Details',
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                            ],
+                          ),
+                          Icon(
+                            _showAdditionalDetails
+                                ? Icons.expand_less_rounded
+                                : Icons.expand_more_rounded,
+                            color: WalletMeltColors.textMuted,
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (_showAdditionalDetails) ...[
+                      const SizedBox(height: 14),
+                      TextField(
+                        controller: _titleController,
+                        decoration: const InputDecoration(
+                          labelText: 'Title',
+                          hintText: 'e.g., Shell Station, Monthly Refill',
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: _vendorController,
+                        decoration: const InputDecoration(
+                          labelText: 'Station / Vendor',
+                          hintText: 'e.g., Total Parco, PSO, Shell',
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      WMGlassSurface.tier1(
+                        onTap: _pickDate,
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.calendar_month_rounded, color: WalletMeltColors.brandDeep, size: 18),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                'Date: ${_date.day}/${_date.month}/${_date.year}',
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                              ),
+                            ),
+                            const Icon(Icons.chevron_right_rounded, size: 18, color: WalletMeltColors.textMuted),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: _notesController,
+                        minLines: 2,
+                        maxLines: 4,
+                        decoration: const InputDecoration(labelText: 'Notes'),
+                      ),
+                      const SizedBox(height: 14),
+                      const _SectionTitle(title: 'Receipt or bill', actionLabel: null, onAction: null),
+                      const SizedBox(height: 8),
+                      _ReceiptCard(
+                        receiptUri: _receiptUri,
+                        onCamera: () => _pickReceipt(fromCamera: true),
+                        onGallery: () => _pickReceipt(fromCamera: false),
+                        onRemove: () => setState(() => _receiptUri = null),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ] else if (!isGroceryMode) ...[
+              // Traditional Form
+              TextField(
+                controller: _amountController,
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                style: theme.textTheme.displaySmall,
+                decoration: InputDecoration(
+                  labelText: 'Amount',
+                  prefixText: '$currency ',
+                  errorText: _validation?.amountError,
+                ),
+                onChanged: (_) => setState(() {}),
+              ),
+              const SizedBox(height: 14),
+              _buildTaxSection(context, double.tryParse(_amountController.text.trim()) ?? 0.0),
+              const SizedBox(height: 14),
+              TextField(
+                controller: _titleController,
+                decoration:
+                    const InputDecoration(labelText: 'Title or bill name')),
+              const SizedBox(height: 14),
+              TextField(
+                controller: _vendorController,
+                decoration:
+                    const InputDecoration(labelText: 'Vendor or provider')),
+              const SizedBox(height: 18),
+              WMGlassSurface.tier2(
+                onTap: _pickDate,
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+                child: Row(
+                  children: [
+                    const Icon(Icons.calendar_month_rounded, color: WalletMeltColors.brandDeep),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Date', style: theme.textTheme.labelMedium?.copyWith(fontSize: 11)),
+                          const SizedBox(height: 2),
+                          Text(
+                            '${_date.day}/${_date.month}/${_date.year}',
+                            style: theme.textTheme.titleMedium,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.54),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 18),
+              TextField(
+                controller: _notesController,
+                minLines: 2,
+                maxLines: 4,
+                decoration: const InputDecoration(labelText: 'Notes')),
+              const SizedBox(height: 18),
+              const _SectionTitle(
+                  title: 'Receipt or bill', actionLabel: null, onAction: null),
+              const SizedBox(height: 10),
+              _ReceiptCard(
+                receiptUri: _receiptUri,
+                onCamera: () => _pickReceipt(fromCamera: true),
+                onGallery: () => _pickReceipt(fromCamera: false),
+                onRemove: () => setState(() => _receiptUri = null),
+              ),
+            ],
+            if (!isGroceryMode && !isFuelMode) ...[
               const SizedBox(height: 24),
               PrimaryButton(
                 onPressed: () => _save(state),
@@ -331,7 +516,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: isGroceryMode
+      bottomNavigationBar: (isGroceryMode || isFuelMode)
           ? SafeArea(
               child: WMGlassSurface.tier3(
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
@@ -339,16 +524,29 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _buildSummaryItem(context, 'Items', '$_totalGroceryItemsCount'),
-                        _buildSummaryItem(context, 'Qty', _totalGroceryQty.toStringAsFixed(_totalGroceryQty % 1 == 0 ? 0 : 1)),
-                        _buildSummaryItem(context, 'Subtotal', '${_getGrocerySubtotal().toStringAsFixed(_getGrocerySubtotal() % 1 == 0 ? 0 : 2)} $currency'),
-                        _buildSummaryItem(context, 'Tax', '${_getTaxAmount().toStringAsFixed(_getTaxAmount() % 1 == 0 ? 0 : 2)} $currency'),
-                        _buildSummaryItem(context, 'Total', '${_getGroceryGrandTotal().toStringAsFixed(_getGroceryGrandTotal() % 1 == 0 ? 0 : 2)} $currency', isHighlight: true),
-                      ],
-                    ),
+                    if (isGroceryMode) ...[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          _buildSummaryItem(context, 'Items', '$_totalGroceryItemsCount'),
+                          _buildSummaryItem(context, 'Qty', _totalGroceryQty.toStringAsFixed(_totalGroceryQty % 1 == 0 ? 0 : 1)),
+                          _buildSummaryItem(context, 'Subtotal', '${_getGrocerySubtotal().toStringAsFixed(_getGrocerySubtotal() % 1 == 0 ? 0 : 2)} $currency'),
+                          _buildSummaryItem(context, 'Tax', '${_getTaxAmount().toStringAsFixed(_getTaxAmount() % 1 == 0 ? 0 : 2)} $currency'),
+                          _buildSummaryItem(context, 'Total', '${_getGroceryGrandTotal().toStringAsFixed(_getGroceryGrandTotal() % 1 == 0 ? 0 : 2)} $currency', isHighlight: true),
+                        ],
+                      ),
+                    ] else if (isFuelMode) ...[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          _buildSummaryItem(context, 'Types', '$_totalFuelComponentsCount'),
+                          _buildSummaryItem(context, 'Litres', '${_totalFuelLitres.toStringAsFixed(_totalFuelLitres % 1 == 0 ? 0 : 2)} L'),
+                          _buildSummaryItem(context, 'Subtotal', '${_getFuelSubtotal().toStringAsFixed(_getFuelSubtotal() % 1 == 0 ? 0 : 2)} $currency'),
+                          _buildSummaryItem(context, 'Tax', '${_getTaxAmount().toStringAsFixed(_getTaxAmount() % 1 == 0 ? 0 : 2)} $currency'),
+                          _buildSummaryItem(context, 'Total', '${_getFuelGrandTotal().toStringAsFixed(_getFuelGrandTotal() % 1 == 0 ? 0 : 2)} $currency', isHighlight: true),
+                        ],
+                      ),
+                    ],
                     const SizedBox(height: 12),
                     PrimaryButton(
                       onPressed: () => _save(state),
@@ -371,6 +569,22 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     return _groceryItems
         .where((item) => item.name.trim().isNotEmpty)
         .fold(0.0, (sum, item) => sum + (item.quantity ?? 1.0));
+  }
+
+  int get _totalFuelComponentsCount {
+    return _fuelTransactionDraft?.components.length ?? 0;
+  }
+
+  double get _totalFuelLitres {
+    return _fuelTransactionDraft?.totalLitres ?? 0.0;
+  }
+
+  double _getFuelSubtotal() {
+    return _fuelTransactionDraft?.totalAmount ?? double.tryParse(_amountController.text.trim()) ?? 0.0;
+  }
+
+  double _getFuelGrandTotal() {
+    return _getFuelSubtotal() + _getTaxAmount();
   }
 
   double _getTaxAmount() {
@@ -429,6 +643,26 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     });
   }
 
+  Future<void> _loadFuelTransaction(String expenseId) async {
+    final tx =
+        await context.read<AppState>().fuelTransactionForExpense(expenseId);
+    if (!mounted || tx == null) return;
+    setState(() {
+      _fuelTransactionDraft = FuelTransactionDraft(
+        id: tx.id,
+        odometerReading: tx.odometerReading,
+        components: tx.components
+            .map((c) => FuelComponentDraft(
+                  id: c.id,
+                  fuelType: c.fuelType,
+                  quantityLitres: c.quantityLitres,
+                  pricePerLitre: c.pricePerLitre,
+                ))
+            .toList(),
+      );
+    });
+  }
+
   Future<void> _pickReceipt({required bool fromCamera}) async {
     final service = context.read<AppState>().receiptStorage;
     final uri = fromCamera
@@ -439,6 +673,17 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   }
 
   Future<void> _save(AppState state) async {
+    final isFuelMode = _categoryId == 'fuel' ||
+        state.categoryById(_categoryId ?? '')?.name.toLowerCase() == 'fuel';
+
+    if (isFuelMode &&
+        _fuelTransactionDraft != null &&
+        _fuelTransactionDraft!.components.isNotEmpty) {
+      final fuelSub = _fuelTransactionDraft!.totalAmount;
+      _amountController.text =
+          fuelSub.toStringAsFixed(fuelSub % 1 == 0 ? 0 : 2);
+    }
+
     final validation = validateExpenseInput(
         amount: _amountController.text, categoryId: _categoryId, date: _date);
     setState(() => _validation = validation);
@@ -456,7 +701,11 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
             ? (_vendorController.text.trim().isNotEmpty
                 ? 'Groceries at ${_vendorController.text.trim()}'
                 : 'Grocery Shopping')
-            : state.categoryById(_categoryId!)?.name ?? 'Household expense')
+            : (isFuelMode
+                ? (_vendorController.text.trim().isNotEmpty
+                    ? 'Fuel at ${_vendorController.text.trim()}'
+                    : 'Fuel Purchase')
+                : state.categoryById(_categoryId!)?.name ?? 'Household expense'))
         : _titleController.text.trim();
     final existing = widget.expenseId == null
         ? null
@@ -475,6 +724,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
           notes: _notesController.text,
           receiptImageUri: _receiptUri,
           groceryItems: _groceryItems,
+          fuelTransaction: isFuelMode ? _fuelTransactionDraft : null,
           subtotalAmount: subtotalVal,
           taxAmount: taxVal,
         ),
@@ -495,6 +745,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
           taxAmount: taxVal,
         ),
         groceryItems: _groceryItems,
+        fuelTransaction: isFuelMode ? _fuelTransactionDraft : null,
       );
     }
     router.go(existing == null ? '/' : '/expense/${existing.id}');

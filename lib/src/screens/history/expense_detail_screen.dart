@@ -8,6 +8,7 @@ import '../../components/glass/app_background.dart';
 import '../../state/app_state.dart';
 import '../../theme/wallet_melt_theme.dart';
 import '../../types/expense.dart';
+import '../../types/fuel.dart';
 import '../../types/grocery_item.dart';
 import '../../utils/currency_format.dart';
 import '../../utils/date_utils.dart';
@@ -150,6 +151,10 @@ class ExpenseDetailScreen extends StatelessWidget {
               _GroceryItemsCard(
                   expenseId: expense.id, currency: expense.currency),
             ],
+
+            // ── Fuel details ──────────────────────────────────────────
+            _FuelDetailsCard(
+                expenseId: expense.id, currency: expense.currency),
             const SizedBox(height: AppSpacing.md + 2),
 
             // ── Soft delete / restore actions ─────────────────────────
@@ -226,6 +231,99 @@ class ExpenseDetailScreen extends StatelessWidget {
       if (!context.mounted) return;
       router.pop();
     }
+  }
+}
+
+class _FuelDetailsCard extends StatefulWidget {
+  const _FuelDetailsCard({required this.expenseId, required this.currency});
+
+  final String expenseId;
+  final String currency;
+
+  @override
+  State<_FuelDetailsCard> createState() => _FuelDetailsCardState();
+}
+
+class _FuelDetailsCardState extends State<_FuelDetailsCard> {
+  late final Future<FuelTransaction?> _fuelFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _fuelFuture =
+        context.read<AppState>().fuelTransactionForExpense(widget.expenseId);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<FuelTransaction?>(
+      future: _fuelFuture,
+      builder: (context, snapshot) {
+        final tx = snapshot.data;
+        if (tx == null || tx.components.isEmpty) return const SizedBox.shrink();
+
+        return Padding(
+          padding: const EdgeInsets.only(top: 16.0),
+          child: WMGlassSurface.tier2(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SectionHeader(
+                  title: 'Fuel breakdown',
+                  icon: Icons.local_gas_station_rounded,
+                  padding: EdgeInsets.only(bottom: AppSpacing.xs),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                for (final comp in tx.components)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4.0),
+                    child: Row(
+                      children: [
+                        Icon(comp.fuelType.icon, size: 18, color: WalletMeltColors.brand),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                comp.fuelType.displayName,
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                              ),
+                              Text(
+                                '${comp.quantityLitres.toStringAsFixed(comp.quantityLitres % 1 == 0 ? 0 : 2)} L @ ${formatMoney(comp.pricePerLitre, widget.currency)}/L',
+                                style: const TextStyle(fontSize: 12, color: WalletMeltColors.textSecondary),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Text(
+                          formatMoney(comp.subtotal, widget.currency),
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                        ),
+                      ],
+                    ),
+                  ),
+                const Divider(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Total: ${tx.totalLitres.toStringAsFixed(tx.totalLitres % 1 == 0 ? 0 : 2)} L',
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                    ),
+                    if (tx.odometerReading != null)
+                      Text(
+                        'Odometer: ${tx.odometerReading! % 1 == 0 ? tx.odometerReading!.toInt() : tx.odometerReading} km',
+                        style: const TextStyle(fontSize: 12, color: WalletMeltColors.textSecondary),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 }
 

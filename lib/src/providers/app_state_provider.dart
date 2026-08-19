@@ -12,6 +12,8 @@ final appStateProvider = FutureProvider<AppState>((ref) async {
   final groceryTemplateRepo = await ref.watch(driftGroceryTemplateRepositoryProvider.future);
   final subscriptionRepo = await ref.watch(driftSubscriptionRepositoryProvider.future);
   final payeeRepo = await ref.watch(driftPayeeRepositoryProvider.future);
+  final essentialRepo = await ref.watch(driftEssentialExpenseRepositoryProvider.future);
+  final fuelRepo = await ref.watch(driftFuelRepositoryProvider.future);
   final database = await ref.watch(walletMeltDatabaseProvider.future);
 
   final appState = AppState(
@@ -22,6 +24,8 @@ final appStateProvider = FutureProvider<AppState>((ref) async {
     driftGroceryTemplateRepository: groceryTemplateRepo,
     driftSubscriptionRepository: subscriptionRepo,
     driftPayeeRepository: payeeRepo,
+    driftEssentialExpenseRepository: essentialRepo,
+    driftFuelRepository: fuelRepo,
     driftDatabase: database,
   );
 

@@ -355,6 +355,86 @@ class Subscriptions extends Table {
   Set<Column<Object>> get primaryKey => {id};
 }
 
+class EssentialExpenseTemplates extends Table {
+  @override
+  String get tableName => 'essential_expense_templates';
+
+  TextColumn get id => text()();
+  TextColumn get name => text()();
+  TextColumn get categoryId =>
+      text().named('categoryId').references(Categories, #id)();
+  TextColumn get frequency => text()(); // 'monthly', 'weekly', 'quarterly', 'yearly', 'custom_X'
+  RealColumn get expectedAmount => real().named('expectedAmount')();
+  IntColumn get expectedDay => integer().named('expectedDay').nullable()();
+  TextColumn get dueDate => text().named('dueDate').nullable()();
+  BoolColumn get isActive =>
+      boolean().named('isActive').withDefault(const Constant(true))();
+  BoolColumn get isFuel =>
+      boolean().named('isFuel').withDefault(const Constant(false))();
+  TextColumn get notes => text().nullable()();
+  TextColumn get createdAt => text().named('createdAt')();
+  TextColumn get updatedAt => text().named('updatedAt')();
+  TextColumn get deletedAt => text().named('deletedAt').nullable()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+class FuelTemplateComponents extends Table {
+  @override
+  String get tableName => 'fuel_template_components';
+
+  TextColumn get id => text()();
+  TextColumn get templateId => text()
+      .named('templateId')
+      .references(EssentialExpenseTemplates, #id, onDelete: KeyAction.cascade)();
+  TextColumn get fuelType => text().named('fuelType')(); // 'regular', 'premium', 'diesel'
+  RealColumn get expectedLitres => real().named('expectedLitres')();
+  RealColumn get expectedPricePerLitre => real().named('expectedPricePerLitre')();
+  TextColumn get createdAt => text().named('createdAt')();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+class FuelTransactions extends Table {
+  @override
+  String get tableName => 'fuel_transactions';
+
+  TextColumn get id => text()();
+  TextColumn get expenseId => text()
+      .named('expenseId')
+      .references(Expenses, #id, onDelete: KeyAction.cascade)();
+  RealColumn get odometerReading => real().named('odometerReading').nullable()();
+  TextColumn get createdAt => text().named('createdAt')();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+
+  @override
+  List<Set<Column<Object>>> get uniqueKeys => [
+        {expenseId},
+      ];
+}
+
+class FuelComponents extends Table {
+  @override
+  String get tableName => 'fuel_components';
+
+  TextColumn get id => text()();
+  TextColumn get fuelTransactionId => text()
+      .named('fuelTransactionId')
+      .references(FuelTransactions, #id, onDelete: KeyAction.cascade)();
+  TextColumn get fuelType => text().named('fuelType')(); // 'regular', 'premium', 'diesel'
+  RealColumn get quantityLitres => real().named('quantityLitres')();
+  RealColumn get pricePerLitre => real().named('pricePerLitre')();
+  RealColumn get subtotal => real()();
+  TextColumn get createdAt => text().named('createdAt')();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
 class V1MigrationMetrics {
   const V1MigrationMetrics({
     required this.expenseCount,
@@ -394,12 +474,16 @@ class V1MigrationMetrics {
     GroceryTemplates,
     Subscriptions,
     Payees,
+    EssentialExpenseTemplates,
+    FuelTemplateComponents,
+    FuelTransactions,
+    FuelComponents,
   ],
 )
 class WalletMeltDatabase extends _$WalletMeltDatabase {
   WalletMeltDatabase(super.executor, {this.preMigrationBackupPath});
 
-  static const currentSchemaVersion = 5;
+  static const currentSchemaVersion = 6;
 
   final String? preMigrationBackupPath;
 
@@ -498,6 +582,9 @@ class WalletMeltDatabase extends _$WalletMeltDatabase {
           if (from < 5 && to >= 5) {
             await _upgradeFromV4ToV5(m, from, to);
           }
+          if (from < 6 && to >= 6) {
+            await _upgradeFromV5ToV6(m, from, to);
+          }
         },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON;');
@@ -505,6 +592,10 @@ class WalletMeltDatabase extends _$WalletMeltDatabase {
           await customStatement('CREATE INDEX IF NOT EXISTS expenses_date_idx ON expenses (date);');
           await customStatement('CREATE INDEX IF NOT EXISTS expenses_deletedAt_idx ON expenses (deletedAt);');
           await customStatement('CREATE INDEX IF NOT EXISTS grocery_items_expenseId_idx ON grocery_items (expenseId);');
+          await customStatement('CREATE INDEX IF NOT EXISTS fuel_transactions_expenseId_idx ON fuel_transactions (expenseId);');
+          await customStatement('CREATE INDEX IF NOT EXISTS fuel_components_fuelTransactionId_idx ON fuel_components (fuelTransactionId);');
+          await customStatement('CREATE INDEX IF NOT EXISTS fuel_template_components_templateId_idx ON fuel_template_components (templateId);');
+          await customStatement('CREATE INDEX IF NOT EXISTS essential_templates_categoryId_idx ON essential_expense_templates (categoryId);');
         },
       );
 
@@ -524,6 +615,21 @@ class WalletMeltDatabase extends _$WalletMeltDatabase {
       await m.addColumn(debtRecords, debtRecords.payeeId);
     }
     await _migrateLegacyDebtRecordsToPayees();
+  }
+
+  Future<void> _upgradeFromV5ToV6(Migrator m, int from, int to) async {
+    if (!await _tableExists('essential_expense_templates')) {
+      await m.createTable(essentialExpenseTemplates);
+    }
+    if (!await _tableExists('fuel_template_components')) {
+      await m.createTable(fuelTemplateComponents);
+    }
+    if (!await _tableExists('fuel_transactions')) {
+      await m.createTable(fuelTransactions);
+    }
+    if (!await _tableExists('fuel_components')) {
+      await m.createTable(fuelComponents);
+    }
   }
 
   Future<void> _migrateLegacyDebtRecordsToPayees() async {

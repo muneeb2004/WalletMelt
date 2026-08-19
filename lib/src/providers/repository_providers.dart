@@ -10,6 +10,8 @@ import '../data/repositories/drift/drift_debt_repository.dart';
 import '../data/repositories/drift/drift_grocery_template_repository.dart';
 import '../data/repositories/drift/drift_subscription_repository.dart';
 import '../data/repositories/drift/drift_payee_repository.dart';
+import '../data/repositories/drift/drift_essential_expense_repository.dart';
+import '../data/repositories/drift/drift_fuel_repository.dart';
 import 'database_providers.dart';
 
 final driftCategoryRepositoryProvider =
@@ -70,4 +72,16 @@ final driftPayeeRepositoryProvider =
     FutureProvider<DriftPayeeRepository>((ref) async {
   final database = await ref.watch(walletMeltDatabaseProvider.future);
   return DriftPayeeRepository(database);
+});
+
+final driftEssentialExpenseRepositoryProvider =
+    FutureProvider<DriftEssentialExpenseRepository>((ref) async {
+  final database = await ref.watch(walletMeltDatabaseProvider.future);
+  return DriftEssentialExpenseRepository(database);
+});
+
+final driftFuelRepositoryProvider =
+    FutureProvider<DriftFuelRepository>((ref) async {
+  final database = await ref.watch(walletMeltDatabaseProvider.future);
+  return DriftFuelRepository(database);
 });

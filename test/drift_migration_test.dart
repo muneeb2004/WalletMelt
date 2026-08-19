@@ -172,7 +172,8 @@ void main() {
 
     final raw = sqlite3.sqlite3.open(dbFile.path);
     try {
-      expect(raw.select('PRAGMA user_version;').first['user_version'], 5);
+      expect(raw.select('PRAGMA user_version;').first['user_version'],
+          WalletMeltDatabase.currentSchemaVersion);
     } finally {
       raw.close();
     }
@@ -212,6 +213,34 @@ void main() {
     expect(debtRecords, hasLength(2));
     expect(debtRecords[0].payeeId, payees.first.id);
     expect(debtRecords[1].payeeId, payees.first.id);
+  });
+
+  test('V5 to V6 migration creates essential templates and fuel tables', () async {
+    final tempDir = await Directory.systemTemp.createTemp('wallet_melt_v5_to_v6_test_');
+    addTearDown(() async {
+      if (await tempDir.exists()) {
+        await tempDir.delete(recursive: true);
+      }
+    });
+
+    final dbFile = File('${tempDir.path}${Platform.pathSeparator}${DatabaseSchema.databaseName}');
+    _createV1Fixture(dbFile.path);
+
+    final db = WalletMeltDatabase(NativeDatabase.createInBackground(dbFile));
+    addTearDown(db.close);
+
+    final essentials = await db.select(db.essentialExpenseTemplates).get();
+    expect(essentials, isEmpty);
+
+    final fuelTxs = await db.select(db.fuelTransactions).get();
+    expect(fuelTxs, isEmpty);
+
+    final raw = sqlite3.sqlite3.open(dbFile.path);
+    try {
+      expect(raw.select('PRAGMA user_version;').first['user_version'], 6);
+    } finally {
+      raw.close();
+    }
   });
 }
 

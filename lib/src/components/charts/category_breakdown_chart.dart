@@ -186,6 +186,7 @@ class CategoryBreakdownChart extends StatelessWidget {
       'water_drop' => Icons.water_drop_rounded,
       'home' => Icons.home_rounded,
       'build' => Icons.build_rounded,
+      'local_gas_station' => Icons.local_gas_station_rounded,
       _ => Icons.more_horiz_rounded,
     };
   }

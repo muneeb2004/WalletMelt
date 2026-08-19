@@ -8241,6 +8241,1726 @@ class SubscriptionsCompanion extends UpdateCompanion<Subscription> {
   }
 }
 
+class $EssentialExpenseTemplatesTable extends EssentialExpenseTemplates
+    with TableInfo<$EssentialExpenseTemplatesTable, EssentialExpenseTemplate> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $EssentialExpenseTemplatesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _categoryIdMeta =
+      const VerificationMeta('categoryId');
+  @override
+  late final GeneratedColumn<String> categoryId = GeneratedColumn<String>(
+      'categoryId', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('REFERENCES categories (id)'));
+  static const VerificationMeta _frequencyMeta =
+      const VerificationMeta('frequency');
+  @override
+  late final GeneratedColumn<String> frequency = GeneratedColumn<String>(
+      'frequency', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _expectedAmountMeta =
+      const VerificationMeta('expectedAmount');
+  @override
+  late final GeneratedColumn<double> expectedAmount = GeneratedColumn<double>(
+      'expectedAmount', aliasedName, false,
+      type: DriftSqlType.double, requiredDuringInsert: true);
+  static const VerificationMeta _expectedDayMeta =
+      const VerificationMeta('expectedDay');
+  @override
+  late final GeneratedColumn<int> expectedDay = GeneratedColumn<int>(
+      'expectedDay', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _dueDateMeta =
+      const VerificationMeta('dueDate');
+  @override
+  late final GeneratedColumn<String> dueDate = GeneratedColumn<String>(
+      'dueDate', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _isActiveMeta =
+      const VerificationMeta('isActive');
+  @override
+  late final GeneratedColumn<bool> isActive = GeneratedColumn<bool>(
+      'isActive', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("isActive" IN (0, 1))'),
+      defaultValue: const Constant(true));
+  static const VerificationMeta _isFuelMeta = const VerificationMeta('isFuel');
+  @override
+  late final GeneratedColumn<bool> isFuel = GeneratedColumn<bool>(
+      'isFuel', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("isFuel" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+      'notes', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+      'createdAt', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<String> updatedAt = GeneratedColumn<String>(
+      'updatedAt', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _deletedAtMeta =
+      const VerificationMeta('deletedAt');
+  @override
+  late final GeneratedColumn<String> deletedAt = GeneratedColumn<String>(
+      'deletedAt', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        name,
+        categoryId,
+        frequency,
+        expectedAmount,
+        expectedDay,
+        dueDate,
+        isActive,
+        isFuel,
+        notes,
+        createdAt,
+        updatedAt,
+        deletedAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'essential_expense_templates';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<EssentialExpenseTemplate> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('categoryId')) {
+      context.handle(
+          _categoryIdMeta,
+          categoryId.isAcceptableOrUnknown(
+              data['categoryId']!, _categoryIdMeta));
+    } else if (isInserting) {
+      context.missing(_categoryIdMeta);
+    }
+    if (data.containsKey('frequency')) {
+      context.handle(_frequencyMeta,
+          frequency.isAcceptableOrUnknown(data['frequency']!, _frequencyMeta));
+    } else if (isInserting) {
+      context.missing(_frequencyMeta);
+    }
+    if (data.containsKey('expectedAmount')) {
+      context.handle(
+          _expectedAmountMeta,
+          expectedAmount.isAcceptableOrUnknown(
+              data['expectedAmount']!, _expectedAmountMeta));
+    } else if (isInserting) {
+      context.missing(_expectedAmountMeta);
+    }
+    if (data.containsKey('expectedDay')) {
+      context.handle(
+          _expectedDayMeta,
+          expectedDay.isAcceptableOrUnknown(
+              data['expectedDay']!, _expectedDayMeta));
+    }
+    if (data.containsKey('dueDate')) {
+      context.handle(_dueDateMeta,
+          dueDate.isAcceptableOrUnknown(data['dueDate']!, _dueDateMeta));
+    }
+    if (data.containsKey('isActive')) {
+      context.handle(_isActiveMeta,
+          isActive.isAcceptableOrUnknown(data['isActive']!, _isActiveMeta));
+    }
+    if (data.containsKey('isFuel')) {
+      context.handle(_isFuelMeta,
+          isFuel.isAcceptableOrUnknown(data['isFuel']!, _isFuelMeta));
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+          _notesMeta, notes.isAcceptableOrUnknown(data['notes']!, _notesMeta));
+    }
+    if (data.containsKey('createdAt')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['createdAt']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updatedAt')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updatedAt']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deletedAt')) {
+      context.handle(_deletedAtMeta,
+          deletedAt.isAcceptableOrUnknown(data['deletedAt']!, _deletedAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  EssentialExpenseTemplate map(Map<String, dynamic> data,
+      {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return EssentialExpenseTemplate(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      categoryId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}categoryId'])!,
+      frequency: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}frequency'])!,
+      expectedAmount: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}expectedAmount'])!,
+      expectedDay: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}expectedDay']),
+      dueDate: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}dueDate']),
+      isActive: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}isActive'])!,
+      isFuel: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}isFuel'])!,
+      notes: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}notes']),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}createdAt'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}updatedAt'])!,
+      deletedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}deletedAt']),
+    );
+  }
+
+  @override
+  $EssentialExpenseTemplatesTable createAlias(String alias) {
+    return $EssentialExpenseTemplatesTable(attachedDatabase, alias);
+  }
+}
+
+class EssentialExpenseTemplate extends DataClass
+    implements Insertable<EssentialExpenseTemplate> {
+  final String id;
+  final String name;
+  final String categoryId;
+  final String frequency;
+  final double expectedAmount;
+  final int? expectedDay;
+  final String? dueDate;
+  final bool isActive;
+  final bool isFuel;
+  final String? notes;
+  final String createdAt;
+  final String updatedAt;
+  final String? deletedAt;
+  const EssentialExpenseTemplate(
+      {required this.id,
+      required this.name,
+      required this.categoryId,
+      required this.frequency,
+      required this.expectedAmount,
+      this.expectedDay,
+      this.dueDate,
+      required this.isActive,
+      required this.isFuel,
+      this.notes,
+      required this.createdAt,
+      required this.updatedAt,
+      this.deletedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    map['categoryId'] = Variable<String>(categoryId);
+    map['frequency'] = Variable<String>(frequency);
+    map['expectedAmount'] = Variable<double>(expectedAmount);
+    if (!nullToAbsent || expectedDay != null) {
+      map['expectedDay'] = Variable<int>(expectedDay);
+    }
+    if (!nullToAbsent || dueDate != null) {
+      map['dueDate'] = Variable<String>(dueDate);
+    }
+    map['isActive'] = Variable<bool>(isActive);
+    map['isFuel'] = Variable<bool>(isFuel);
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
+    map['createdAt'] = Variable<String>(createdAt);
+    map['updatedAt'] = Variable<String>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deletedAt'] = Variable<String>(deletedAt);
+    }
+    return map;
+  }
+
+  EssentialExpenseTemplatesCompanion toCompanion(bool nullToAbsent) {
+    return EssentialExpenseTemplatesCompanion(
+      id: Value(id),
+      name: Value(name),
+      categoryId: Value(categoryId),
+      frequency: Value(frequency),
+      expectedAmount: Value(expectedAmount),
+      expectedDay: expectedDay == null && nullToAbsent
+          ? const Value.absent()
+          : Value(expectedDay),
+      dueDate: dueDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(dueDate),
+      isActive: Value(isActive),
+      isFuel: Value(isFuel),
+      notes:
+          notes == null && nullToAbsent ? const Value.absent() : Value(notes),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+    );
+  }
+
+  factory EssentialExpenseTemplate.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return EssentialExpenseTemplate(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      categoryId: serializer.fromJson<String>(json['categoryId']),
+      frequency: serializer.fromJson<String>(json['frequency']),
+      expectedAmount: serializer.fromJson<double>(json['expectedAmount']),
+      expectedDay: serializer.fromJson<int?>(json['expectedDay']),
+      dueDate: serializer.fromJson<String?>(json['dueDate']),
+      isActive: serializer.fromJson<bool>(json['isActive']),
+      isFuel: serializer.fromJson<bool>(json['isFuel']),
+      notes: serializer.fromJson<String?>(json['notes']),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+      updatedAt: serializer.fromJson<String>(json['updatedAt']),
+      deletedAt: serializer.fromJson<String?>(json['deletedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'categoryId': serializer.toJson<String>(categoryId),
+      'frequency': serializer.toJson<String>(frequency),
+      'expectedAmount': serializer.toJson<double>(expectedAmount),
+      'expectedDay': serializer.toJson<int?>(expectedDay),
+      'dueDate': serializer.toJson<String?>(dueDate),
+      'isActive': serializer.toJson<bool>(isActive),
+      'isFuel': serializer.toJson<bool>(isFuel),
+      'notes': serializer.toJson<String?>(notes),
+      'createdAt': serializer.toJson<String>(createdAt),
+      'updatedAt': serializer.toJson<String>(updatedAt),
+      'deletedAt': serializer.toJson<String?>(deletedAt),
+    };
+  }
+
+  EssentialExpenseTemplate copyWith(
+          {String? id,
+          String? name,
+          String? categoryId,
+          String? frequency,
+          double? expectedAmount,
+          Value<int?> expectedDay = const Value.absent(),
+          Value<String?> dueDate = const Value.absent(),
+          bool? isActive,
+          bool? isFuel,
+          Value<String?> notes = const Value.absent(),
+          String? createdAt,
+          String? updatedAt,
+          Value<String?> deletedAt = const Value.absent()}) =>
+      EssentialExpenseTemplate(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        categoryId: categoryId ?? this.categoryId,
+        frequency: frequency ?? this.frequency,
+        expectedAmount: expectedAmount ?? this.expectedAmount,
+        expectedDay: expectedDay.present ? expectedDay.value : this.expectedDay,
+        dueDate: dueDate.present ? dueDate.value : this.dueDate,
+        isActive: isActive ?? this.isActive,
+        isFuel: isFuel ?? this.isFuel,
+        notes: notes.present ? notes.value : this.notes,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+      );
+  EssentialExpenseTemplate copyWithCompanion(
+      EssentialExpenseTemplatesCompanion data) {
+    return EssentialExpenseTemplate(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      categoryId:
+          data.categoryId.present ? data.categoryId.value : this.categoryId,
+      frequency: data.frequency.present ? data.frequency.value : this.frequency,
+      expectedAmount: data.expectedAmount.present
+          ? data.expectedAmount.value
+          : this.expectedAmount,
+      expectedDay:
+          data.expectedDay.present ? data.expectedDay.value : this.expectedDay,
+      dueDate: data.dueDate.present ? data.dueDate.value : this.dueDate,
+      isActive: data.isActive.present ? data.isActive.value : this.isActive,
+      isFuel: data.isFuel.present ? data.isFuel.value : this.isFuel,
+      notes: data.notes.present ? data.notes.value : this.notes,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('EssentialExpenseTemplate(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('categoryId: $categoryId, ')
+          ..write('frequency: $frequency, ')
+          ..write('expectedAmount: $expectedAmount, ')
+          ..write('expectedDay: $expectedDay, ')
+          ..write('dueDate: $dueDate, ')
+          ..write('isActive: $isActive, ')
+          ..write('isFuel: $isFuel, ')
+          ..write('notes: $notes, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id,
+      name,
+      categoryId,
+      frequency,
+      expectedAmount,
+      expectedDay,
+      dueDate,
+      isActive,
+      isFuel,
+      notes,
+      createdAt,
+      updatedAt,
+      deletedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is EssentialExpenseTemplate &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.categoryId == this.categoryId &&
+          other.frequency == this.frequency &&
+          other.expectedAmount == this.expectedAmount &&
+          other.expectedDay == this.expectedDay &&
+          other.dueDate == this.dueDate &&
+          other.isActive == this.isActive &&
+          other.isFuel == this.isFuel &&
+          other.notes == this.notes &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt);
+}
+
+class EssentialExpenseTemplatesCompanion
+    extends UpdateCompanion<EssentialExpenseTemplate> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<String> categoryId;
+  final Value<String> frequency;
+  final Value<double> expectedAmount;
+  final Value<int?> expectedDay;
+  final Value<String?> dueDate;
+  final Value<bool> isActive;
+  final Value<bool> isFuel;
+  final Value<String?> notes;
+  final Value<String> createdAt;
+  final Value<String> updatedAt;
+  final Value<String?> deletedAt;
+  final Value<int> rowid;
+  const EssentialExpenseTemplatesCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.categoryId = const Value.absent(),
+    this.frequency = const Value.absent(),
+    this.expectedAmount = const Value.absent(),
+    this.expectedDay = const Value.absent(),
+    this.dueDate = const Value.absent(),
+    this.isActive = const Value.absent(),
+    this.isFuel = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  EssentialExpenseTemplatesCompanion.insert({
+    required String id,
+    required String name,
+    required String categoryId,
+    required String frequency,
+    required double expectedAmount,
+    this.expectedDay = const Value.absent(),
+    this.dueDate = const Value.absent(),
+    this.isActive = const Value.absent(),
+    this.isFuel = const Value.absent(),
+    this.notes = const Value.absent(),
+    required String createdAt,
+    required String updatedAt,
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        name = Value(name),
+        categoryId = Value(categoryId),
+        frequency = Value(frequency),
+        expectedAmount = Value(expectedAmount),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt);
+  static Insertable<EssentialExpenseTemplate> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<String>? categoryId,
+    Expression<String>? frequency,
+    Expression<double>? expectedAmount,
+    Expression<int>? expectedDay,
+    Expression<String>? dueDate,
+    Expression<bool>? isActive,
+    Expression<bool>? isFuel,
+    Expression<String>? notes,
+    Expression<String>? createdAt,
+    Expression<String>? updatedAt,
+    Expression<String>? deletedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (categoryId != null) 'categoryId': categoryId,
+      if (frequency != null) 'frequency': frequency,
+      if (expectedAmount != null) 'expectedAmount': expectedAmount,
+      if (expectedDay != null) 'expectedDay': expectedDay,
+      if (dueDate != null) 'dueDate': dueDate,
+      if (isActive != null) 'isActive': isActive,
+      if (isFuel != null) 'isFuel': isFuel,
+      if (notes != null) 'notes': notes,
+      if (createdAt != null) 'createdAt': createdAt,
+      if (updatedAt != null) 'updatedAt': updatedAt,
+      if (deletedAt != null) 'deletedAt': deletedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  EssentialExpenseTemplatesCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? name,
+      Value<String>? categoryId,
+      Value<String>? frequency,
+      Value<double>? expectedAmount,
+      Value<int?>? expectedDay,
+      Value<String?>? dueDate,
+      Value<bool>? isActive,
+      Value<bool>? isFuel,
+      Value<String?>? notes,
+      Value<String>? createdAt,
+      Value<String>? updatedAt,
+      Value<String?>? deletedAt,
+      Value<int>? rowid}) {
+    return EssentialExpenseTemplatesCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      categoryId: categoryId ?? this.categoryId,
+      frequency: frequency ?? this.frequency,
+      expectedAmount: expectedAmount ?? this.expectedAmount,
+      expectedDay: expectedDay ?? this.expectedDay,
+      dueDate: dueDate ?? this.dueDate,
+      isActive: isActive ?? this.isActive,
+      isFuel: isFuel ?? this.isFuel,
+      notes: notes ?? this.notes,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (categoryId.present) {
+      map['categoryId'] = Variable<String>(categoryId.value);
+    }
+    if (frequency.present) {
+      map['frequency'] = Variable<String>(frequency.value);
+    }
+    if (expectedAmount.present) {
+      map['expectedAmount'] = Variable<double>(expectedAmount.value);
+    }
+    if (expectedDay.present) {
+      map['expectedDay'] = Variable<int>(expectedDay.value);
+    }
+    if (dueDate.present) {
+      map['dueDate'] = Variable<String>(dueDate.value);
+    }
+    if (isActive.present) {
+      map['isActive'] = Variable<bool>(isActive.value);
+    }
+    if (isFuel.present) {
+      map['isFuel'] = Variable<bool>(isFuel.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (createdAt.present) {
+      map['createdAt'] = Variable<String>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updatedAt'] = Variable<String>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deletedAt'] = Variable<String>(deletedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('EssentialExpenseTemplatesCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('categoryId: $categoryId, ')
+          ..write('frequency: $frequency, ')
+          ..write('expectedAmount: $expectedAmount, ')
+          ..write('expectedDay: $expectedDay, ')
+          ..write('dueDate: $dueDate, ')
+          ..write('isActive: $isActive, ')
+          ..write('isFuel: $isFuel, ')
+          ..write('notes: $notes, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $FuelTemplateComponentsTable extends FuelTemplateComponents
+    with TableInfo<$FuelTemplateComponentsTable, FuelTemplateComponent> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $FuelTemplateComponentsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _templateIdMeta =
+      const VerificationMeta('templateId');
+  @override
+  late final GeneratedColumn<String> templateId = GeneratedColumn<String>(
+      'templateId', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES essential_expense_templates (id) ON DELETE CASCADE'));
+  static const VerificationMeta _fuelTypeMeta =
+      const VerificationMeta('fuelType');
+  @override
+  late final GeneratedColumn<String> fuelType = GeneratedColumn<String>(
+      'fuelType', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _expectedLitresMeta =
+      const VerificationMeta('expectedLitres');
+  @override
+  late final GeneratedColumn<double> expectedLitres = GeneratedColumn<double>(
+      'expectedLitres', aliasedName, false,
+      type: DriftSqlType.double, requiredDuringInsert: true);
+  static const VerificationMeta _expectedPricePerLitreMeta =
+      const VerificationMeta('expectedPricePerLitre');
+  @override
+  late final GeneratedColumn<double> expectedPricePerLitre =
+      GeneratedColumn<double>('expectedPricePerLitre', aliasedName, false,
+          type: DriftSqlType.double, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+      'createdAt', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        templateId,
+        fuelType,
+        expectedLitres,
+        expectedPricePerLitre,
+        createdAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'fuel_template_components';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<FuelTemplateComponent> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('templateId')) {
+      context.handle(
+          _templateIdMeta,
+          templateId.isAcceptableOrUnknown(
+              data['templateId']!, _templateIdMeta));
+    } else if (isInserting) {
+      context.missing(_templateIdMeta);
+    }
+    if (data.containsKey('fuelType')) {
+      context.handle(_fuelTypeMeta,
+          fuelType.isAcceptableOrUnknown(data['fuelType']!, _fuelTypeMeta));
+    } else if (isInserting) {
+      context.missing(_fuelTypeMeta);
+    }
+    if (data.containsKey('expectedLitres')) {
+      context.handle(
+          _expectedLitresMeta,
+          expectedLitres.isAcceptableOrUnknown(
+              data['expectedLitres']!, _expectedLitresMeta));
+    } else if (isInserting) {
+      context.missing(_expectedLitresMeta);
+    }
+    if (data.containsKey('expectedPricePerLitre')) {
+      context.handle(
+          _expectedPricePerLitreMeta,
+          expectedPricePerLitre.isAcceptableOrUnknown(
+              data['expectedPricePerLitre']!, _expectedPricePerLitreMeta));
+    } else if (isInserting) {
+      context.missing(_expectedPricePerLitreMeta);
+    }
+    if (data.containsKey('createdAt')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['createdAt']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  FuelTemplateComponent map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return FuelTemplateComponent(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      templateId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}templateId'])!,
+      fuelType: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}fuelType'])!,
+      expectedLitres: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}expectedLitres'])!,
+      expectedPricePerLitre: attachedDatabase.typeMapping.read(
+          DriftSqlType.double,
+          data['${effectivePrefix}expectedPricePerLitre'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}createdAt'])!,
+    );
+  }
+
+  @override
+  $FuelTemplateComponentsTable createAlias(String alias) {
+    return $FuelTemplateComponentsTable(attachedDatabase, alias);
+  }
+}
+
+class FuelTemplateComponent extends DataClass
+    implements Insertable<FuelTemplateComponent> {
+  final String id;
+  final String templateId;
+  final String fuelType;
+  final double expectedLitres;
+  final double expectedPricePerLitre;
+  final String createdAt;
+  const FuelTemplateComponent(
+      {required this.id,
+      required this.templateId,
+      required this.fuelType,
+      required this.expectedLitres,
+      required this.expectedPricePerLitre,
+      required this.createdAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['templateId'] = Variable<String>(templateId);
+    map['fuelType'] = Variable<String>(fuelType);
+    map['expectedLitres'] = Variable<double>(expectedLitres);
+    map['expectedPricePerLitre'] = Variable<double>(expectedPricePerLitre);
+    map['createdAt'] = Variable<String>(createdAt);
+    return map;
+  }
+
+  FuelTemplateComponentsCompanion toCompanion(bool nullToAbsent) {
+    return FuelTemplateComponentsCompanion(
+      id: Value(id),
+      templateId: Value(templateId),
+      fuelType: Value(fuelType),
+      expectedLitres: Value(expectedLitres),
+      expectedPricePerLitre: Value(expectedPricePerLitre),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory FuelTemplateComponent.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return FuelTemplateComponent(
+      id: serializer.fromJson<String>(json['id']),
+      templateId: serializer.fromJson<String>(json['templateId']),
+      fuelType: serializer.fromJson<String>(json['fuelType']),
+      expectedLitres: serializer.fromJson<double>(json['expectedLitres']),
+      expectedPricePerLitre:
+          serializer.fromJson<double>(json['expectedPricePerLitre']),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'templateId': serializer.toJson<String>(templateId),
+      'fuelType': serializer.toJson<String>(fuelType),
+      'expectedLitres': serializer.toJson<double>(expectedLitres),
+      'expectedPricePerLitre': serializer.toJson<double>(expectedPricePerLitre),
+      'createdAt': serializer.toJson<String>(createdAt),
+    };
+  }
+
+  FuelTemplateComponent copyWith(
+          {String? id,
+          String? templateId,
+          String? fuelType,
+          double? expectedLitres,
+          double? expectedPricePerLitre,
+          String? createdAt}) =>
+      FuelTemplateComponent(
+        id: id ?? this.id,
+        templateId: templateId ?? this.templateId,
+        fuelType: fuelType ?? this.fuelType,
+        expectedLitres: expectedLitres ?? this.expectedLitres,
+        expectedPricePerLitre:
+            expectedPricePerLitre ?? this.expectedPricePerLitre,
+        createdAt: createdAt ?? this.createdAt,
+      );
+  FuelTemplateComponent copyWithCompanion(
+      FuelTemplateComponentsCompanion data) {
+    return FuelTemplateComponent(
+      id: data.id.present ? data.id.value : this.id,
+      templateId:
+          data.templateId.present ? data.templateId.value : this.templateId,
+      fuelType: data.fuelType.present ? data.fuelType.value : this.fuelType,
+      expectedLitres: data.expectedLitres.present
+          ? data.expectedLitres.value
+          : this.expectedLitres,
+      expectedPricePerLitre: data.expectedPricePerLitre.present
+          ? data.expectedPricePerLitre.value
+          : this.expectedPricePerLitre,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FuelTemplateComponent(')
+          ..write('id: $id, ')
+          ..write('templateId: $templateId, ')
+          ..write('fuelType: $fuelType, ')
+          ..write('expectedLitres: $expectedLitres, ')
+          ..write('expectedPricePerLitre: $expectedPricePerLitre, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, templateId, fuelType, expectedLitres,
+      expectedPricePerLitre, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is FuelTemplateComponent &&
+          other.id == this.id &&
+          other.templateId == this.templateId &&
+          other.fuelType == this.fuelType &&
+          other.expectedLitres == this.expectedLitres &&
+          other.expectedPricePerLitre == this.expectedPricePerLitre &&
+          other.createdAt == this.createdAt);
+}
+
+class FuelTemplateComponentsCompanion
+    extends UpdateCompanion<FuelTemplateComponent> {
+  final Value<String> id;
+  final Value<String> templateId;
+  final Value<String> fuelType;
+  final Value<double> expectedLitres;
+  final Value<double> expectedPricePerLitre;
+  final Value<String> createdAt;
+  final Value<int> rowid;
+  const FuelTemplateComponentsCompanion({
+    this.id = const Value.absent(),
+    this.templateId = const Value.absent(),
+    this.fuelType = const Value.absent(),
+    this.expectedLitres = const Value.absent(),
+    this.expectedPricePerLitre = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  FuelTemplateComponentsCompanion.insert({
+    required String id,
+    required String templateId,
+    required String fuelType,
+    required double expectedLitres,
+    required double expectedPricePerLitre,
+    required String createdAt,
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        templateId = Value(templateId),
+        fuelType = Value(fuelType),
+        expectedLitres = Value(expectedLitres),
+        expectedPricePerLitre = Value(expectedPricePerLitre),
+        createdAt = Value(createdAt);
+  static Insertable<FuelTemplateComponent> custom({
+    Expression<String>? id,
+    Expression<String>? templateId,
+    Expression<String>? fuelType,
+    Expression<double>? expectedLitres,
+    Expression<double>? expectedPricePerLitre,
+    Expression<String>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (templateId != null) 'templateId': templateId,
+      if (fuelType != null) 'fuelType': fuelType,
+      if (expectedLitres != null) 'expectedLitres': expectedLitres,
+      if (expectedPricePerLitre != null)
+        'expectedPricePerLitre': expectedPricePerLitre,
+      if (createdAt != null) 'createdAt': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  FuelTemplateComponentsCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? templateId,
+      Value<String>? fuelType,
+      Value<double>? expectedLitres,
+      Value<double>? expectedPricePerLitre,
+      Value<String>? createdAt,
+      Value<int>? rowid}) {
+    return FuelTemplateComponentsCompanion(
+      id: id ?? this.id,
+      templateId: templateId ?? this.templateId,
+      fuelType: fuelType ?? this.fuelType,
+      expectedLitres: expectedLitres ?? this.expectedLitres,
+      expectedPricePerLitre:
+          expectedPricePerLitre ?? this.expectedPricePerLitre,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (templateId.present) {
+      map['templateId'] = Variable<String>(templateId.value);
+    }
+    if (fuelType.present) {
+      map['fuelType'] = Variable<String>(fuelType.value);
+    }
+    if (expectedLitres.present) {
+      map['expectedLitres'] = Variable<double>(expectedLitres.value);
+    }
+    if (expectedPricePerLitre.present) {
+      map['expectedPricePerLitre'] =
+          Variable<double>(expectedPricePerLitre.value);
+    }
+    if (createdAt.present) {
+      map['createdAt'] = Variable<String>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FuelTemplateComponentsCompanion(')
+          ..write('id: $id, ')
+          ..write('templateId: $templateId, ')
+          ..write('fuelType: $fuelType, ')
+          ..write('expectedLitres: $expectedLitres, ')
+          ..write('expectedPricePerLitre: $expectedPricePerLitre, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $FuelTransactionsTable extends FuelTransactions
+    with TableInfo<$FuelTransactionsTable, FuelTransaction> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $FuelTransactionsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _expenseIdMeta =
+      const VerificationMeta('expenseId');
+  @override
+  late final GeneratedColumn<String> expenseId = GeneratedColumn<String>(
+      'expenseId', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES expenses (id) ON DELETE CASCADE'));
+  static const VerificationMeta _odometerReadingMeta =
+      const VerificationMeta('odometerReading');
+  @override
+  late final GeneratedColumn<double> odometerReading = GeneratedColumn<double>(
+      'odometerReading', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+      'createdAt', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, expenseId, odometerReading, createdAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'fuel_transactions';
+  @override
+  VerificationContext validateIntegrity(Insertable<FuelTransaction> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('expenseId')) {
+      context.handle(_expenseIdMeta,
+          expenseId.isAcceptableOrUnknown(data['expenseId']!, _expenseIdMeta));
+    } else if (isInserting) {
+      context.missing(_expenseIdMeta);
+    }
+    if (data.containsKey('odometerReading')) {
+      context.handle(
+          _odometerReadingMeta,
+          odometerReading.isAcceptableOrUnknown(
+              data['odometerReading']!, _odometerReadingMeta));
+    }
+    if (data.containsKey('createdAt')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['createdAt']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+        {expenseId},
+      ];
+  @override
+  FuelTransaction map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return FuelTransaction(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      expenseId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}expenseId'])!,
+      odometerReading: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}odometerReading']),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}createdAt'])!,
+    );
+  }
+
+  @override
+  $FuelTransactionsTable createAlias(String alias) {
+    return $FuelTransactionsTable(attachedDatabase, alias);
+  }
+}
+
+class FuelTransaction extends DataClass implements Insertable<FuelTransaction> {
+  final String id;
+  final String expenseId;
+  final double? odometerReading;
+  final String createdAt;
+  const FuelTransaction(
+      {required this.id,
+      required this.expenseId,
+      this.odometerReading,
+      required this.createdAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['expenseId'] = Variable<String>(expenseId);
+    if (!nullToAbsent || odometerReading != null) {
+      map['odometerReading'] = Variable<double>(odometerReading);
+    }
+    map['createdAt'] = Variable<String>(createdAt);
+    return map;
+  }
+
+  FuelTransactionsCompanion toCompanion(bool nullToAbsent) {
+    return FuelTransactionsCompanion(
+      id: Value(id),
+      expenseId: Value(expenseId),
+      odometerReading: odometerReading == null && nullToAbsent
+          ? const Value.absent()
+          : Value(odometerReading),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory FuelTransaction.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return FuelTransaction(
+      id: serializer.fromJson<String>(json['id']),
+      expenseId: serializer.fromJson<String>(json['expenseId']),
+      odometerReading: serializer.fromJson<double?>(json['odometerReading']),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'expenseId': serializer.toJson<String>(expenseId),
+      'odometerReading': serializer.toJson<double?>(odometerReading),
+      'createdAt': serializer.toJson<String>(createdAt),
+    };
+  }
+
+  FuelTransaction copyWith(
+          {String? id,
+          String? expenseId,
+          Value<double?> odometerReading = const Value.absent(),
+          String? createdAt}) =>
+      FuelTransaction(
+        id: id ?? this.id,
+        expenseId: expenseId ?? this.expenseId,
+        odometerReading: odometerReading.present
+            ? odometerReading.value
+            : this.odometerReading,
+        createdAt: createdAt ?? this.createdAt,
+      );
+  FuelTransaction copyWithCompanion(FuelTransactionsCompanion data) {
+    return FuelTransaction(
+      id: data.id.present ? data.id.value : this.id,
+      expenseId: data.expenseId.present ? data.expenseId.value : this.expenseId,
+      odometerReading: data.odometerReading.present
+          ? data.odometerReading.value
+          : this.odometerReading,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FuelTransaction(')
+          ..write('id: $id, ')
+          ..write('expenseId: $expenseId, ')
+          ..write('odometerReading: $odometerReading, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, expenseId, odometerReading, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is FuelTransaction &&
+          other.id == this.id &&
+          other.expenseId == this.expenseId &&
+          other.odometerReading == this.odometerReading &&
+          other.createdAt == this.createdAt);
+}
+
+class FuelTransactionsCompanion extends UpdateCompanion<FuelTransaction> {
+  final Value<String> id;
+  final Value<String> expenseId;
+  final Value<double?> odometerReading;
+  final Value<String> createdAt;
+  final Value<int> rowid;
+  const FuelTransactionsCompanion({
+    this.id = const Value.absent(),
+    this.expenseId = const Value.absent(),
+    this.odometerReading = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  FuelTransactionsCompanion.insert({
+    required String id,
+    required String expenseId,
+    this.odometerReading = const Value.absent(),
+    required String createdAt,
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        expenseId = Value(expenseId),
+        createdAt = Value(createdAt);
+  static Insertable<FuelTransaction> custom({
+    Expression<String>? id,
+    Expression<String>? expenseId,
+    Expression<double>? odometerReading,
+    Expression<String>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (expenseId != null) 'expenseId': expenseId,
+      if (odometerReading != null) 'odometerReading': odometerReading,
+      if (createdAt != null) 'createdAt': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  FuelTransactionsCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? expenseId,
+      Value<double?>? odometerReading,
+      Value<String>? createdAt,
+      Value<int>? rowid}) {
+    return FuelTransactionsCompanion(
+      id: id ?? this.id,
+      expenseId: expenseId ?? this.expenseId,
+      odometerReading: odometerReading ?? this.odometerReading,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (expenseId.present) {
+      map['expenseId'] = Variable<String>(expenseId.value);
+    }
+    if (odometerReading.present) {
+      map['odometerReading'] = Variable<double>(odometerReading.value);
+    }
+    if (createdAt.present) {
+      map['createdAt'] = Variable<String>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FuelTransactionsCompanion(')
+          ..write('id: $id, ')
+          ..write('expenseId: $expenseId, ')
+          ..write('odometerReading: $odometerReading, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $FuelComponentsTable extends FuelComponents
+    with TableInfo<$FuelComponentsTable, FuelComponent> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $FuelComponentsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _fuelTransactionIdMeta =
+      const VerificationMeta('fuelTransactionId');
+  @override
+  late final GeneratedColumn<String> fuelTransactionId =
+      GeneratedColumn<String>('fuelTransactionId', aliasedName, false,
+          type: DriftSqlType.string,
+          requiredDuringInsert: true,
+          defaultConstraints: GeneratedColumn.constraintIsAlways(
+              'REFERENCES fuel_transactions (id) ON DELETE CASCADE'));
+  static const VerificationMeta _fuelTypeMeta =
+      const VerificationMeta('fuelType');
+  @override
+  late final GeneratedColumn<String> fuelType = GeneratedColumn<String>(
+      'fuelType', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _quantityLitresMeta =
+      const VerificationMeta('quantityLitres');
+  @override
+  late final GeneratedColumn<double> quantityLitres = GeneratedColumn<double>(
+      'quantityLitres', aliasedName, false,
+      type: DriftSqlType.double, requiredDuringInsert: true);
+  static const VerificationMeta _pricePerLitreMeta =
+      const VerificationMeta('pricePerLitre');
+  @override
+  late final GeneratedColumn<double> pricePerLitre = GeneratedColumn<double>(
+      'pricePerLitre', aliasedName, false,
+      type: DriftSqlType.double, requiredDuringInsert: true);
+  static const VerificationMeta _subtotalMeta =
+      const VerificationMeta('subtotal');
+  @override
+  late final GeneratedColumn<double> subtotal = GeneratedColumn<double>(
+      'subtotal', aliasedName, false,
+      type: DriftSqlType.double, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+      'createdAt', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        fuelTransactionId,
+        fuelType,
+        quantityLitres,
+        pricePerLitre,
+        subtotal,
+        createdAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'fuel_components';
+  @override
+  VerificationContext validateIntegrity(Insertable<FuelComponent> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('fuelTransactionId')) {
+      context.handle(
+          _fuelTransactionIdMeta,
+          fuelTransactionId.isAcceptableOrUnknown(
+              data['fuelTransactionId']!, _fuelTransactionIdMeta));
+    } else if (isInserting) {
+      context.missing(_fuelTransactionIdMeta);
+    }
+    if (data.containsKey('fuelType')) {
+      context.handle(_fuelTypeMeta,
+          fuelType.isAcceptableOrUnknown(data['fuelType']!, _fuelTypeMeta));
+    } else if (isInserting) {
+      context.missing(_fuelTypeMeta);
+    }
+    if (data.containsKey('quantityLitres')) {
+      context.handle(
+          _quantityLitresMeta,
+          quantityLitres.isAcceptableOrUnknown(
+              data['quantityLitres']!, _quantityLitresMeta));
+    } else if (isInserting) {
+      context.missing(_quantityLitresMeta);
+    }
+    if (data.containsKey('pricePerLitre')) {
+      context.handle(
+          _pricePerLitreMeta,
+          pricePerLitre.isAcceptableOrUnknown(
+              data['pricePerLitre']!, _pricePerLitreMeta));
+    } else if (isInserting) {
+      context.missing(_pricePerLitreMeta);
+    }
+    if (data.containsKey('subtotal')) {
+      context.handle(_subtotalMeta,
+          subtotal.isAcceptableOrUnknown(data['subtotal']!, _subtotalMeta));
+    } else if (isInserting) {
+      context.missing(_subtotalMeta);
+    }
+    if (data.containsKey('createdAt')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['createdAt']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  FuelComponent map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return FuelComponent(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      fuelTransactionId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}fuelTransactionId'])!,
+      fuelType: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}fuelType'])!,
+      quantityLitres: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}quantityLitres'])!,
+      pricePerLitre: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}pricePerLitre'])!,
+      subtotal: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}subtotal'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}createdAt'])!,
+    );
+  }
+
+  @override
+  $FuelComponentsTable createAlias(String alias) {
+    return $FuelComponentsTable(attachedDatabase, alias);
+  }
+}
+
+class FuelComponent extends DataClass implements Insertable<FuelComponent> {
+  final String id;
+  final String fuelTransactionId;
+  final String fuelType;
+  final double quantityLitres;
+  final double pricePerLitre;
+  final double subtotal;
+  final String createdAt;
+  const FuelComponent(
+      {required this.id,
+      required this.fuelTransactionId,
+      required this.fuelType,
+      required this.quantityLitres,
+      required this.pricePerLitre,
+      required this.subtotal,
+      required this.createdAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['fuelTransactionId'] = Variable<String>(fuelTransactionId);
+    map['fuelType'] = Variable<String>(fuelType);
+    map['quantityLitres'] = Variable<double>(quantityLitres);
+    map['pricePerLitre'] = Variable<double>(pricePerLitre);
+    map['subtotal'] = Variable<double>(subtotal);
+    map['createdAt'] = Variable<String>(createdAt);
+    return map;
+  }
+
+  FuelComponentsCompanion toCompanion(bool nullToAbsent) {
+    return FuelComponentsCompanion(
+      id: Value(id),
+      fuelTransactionId: Value(fuelTransactionId),
+      fuelType: Value(fuelType),
+      quantityLitres: Value(quantityLitres),
+      pricePerLitre: Value(pricePerLitre),
+      subtotal: Value(subtotal),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory FuelComponent.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return FuelComponent(
+      id: serializer.fromJson<String>(json['id']),
+      fuelTransactionId: serializer.fromJson<String>(json['fuelTransactionId']),
+      fuelType: serializer.fromJson<String>(json['fuelType']),
+      quantityLitres: serializer.fromJson<double>(json['quantityLitres']),
+      pricePerLitre: serializer.fromJson<double>(json['pricePerLitre']),
+      subtotal: serializer.fromJson<double>(json['subtotal']),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'fuelTransactionId': serializer.toJson<String>(fuelTransactionId),
+      'fuelType': serializer.toJson<String>(fuelType),
+      'quantityLitres': serializer.toJson<double>(quantityLitres),
+      'pricePerLitre': serializer.toJson<double>(pricePerLitre),
+      'subtotal': serializer.toJson<double>(subtotal),
+      'createdAt': serializer.toJson<String>(createdAt),
+    };
+  }
+
+  FuelComponent copyWith(
+          {String? id,
+          String? fuelTransactionId,
+          String? fuelType,
+          double? quantityLitres,
+          double? pricePerLitre,
+          double? subtotal,
+          String? createdAt}) =>
+      FuelComponent(
+        id: id ?? this.id,
+        fuelTransactionId: fuelTransactionId ?? this.fuelTransactionId,
+        fuelType: fuelType ?? this.fuelType,
+        quantityLitres: quantityLitres ?? this.quantityLitres,
+        pricePerLitre: pricePerLitre ?? this.pricePerLitre,
+        subtotal: subtotal ?? this.subtotal,
+        createdAt: createdAt ?? this.createdAt,
+      );
+  FuelComponent copyWithCompanion(FuelComponentsCompanion data) {
+    return FuelComponent(
+      id: data.id.present ? data.id.value : this.id,
+      fuelTransactionId: data.fuelTransactionId.present
+          ? data.fuelTransactionId.value
+          : this.fuelTransactionId,
+      fuelType: data.fuelType.present ? data.fuelType.value : this.fuelType,
+      quantityLitres: data.quantityLitres.present
+          ? data.quantityLitres.value
+          : this.quantityLitres,
+      pricePerLitre: data.pricePerLitre.present
+          ? data.pricePerLitre.value
+          : this.pricePerLitre,
+      subtotal: data.subtotal.present ? data.subtotal.value : this.subtotal,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FuelComponent(')
+          ..write('id: $id, ')
+          ..write('fuelTransactionId: $fuelTransactionId, ')
+          ..write('fuelType: $fuelType, ')
+          ..write('quantityLitres: $quantityLitres, ')
+          ..write('pricePerLitre: $pricePerLitre, ')
+          ..write('subtotal: $subtotal, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, fuelTransactionId, fuelType,
+      quantityLitres, pricePerLitre, subtotal, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is FuelComponent &&
+          other.id == this.id &&
+          other.fuelTransactionId == this.fuelTransactionId &&
+          other.fuelType == this.fuelType &&
+          other.quantityLitres == this.quantityLitres &&
+          other.pricePerLitre == this.pricePerLitre &&
+          other.subtotal == this.subtotal &&
+          other.createdAt == this.createdAt);
+}
+
+class FuelComponentsCompanion extends UpdateCompanion<FuelComponent> {
+  final Value<String> id;
+  final Value<String> fuelTransactionId;
+  final Value<String> fuelType;
+  final Value<double> quantityLitres;
+  final Value<double> pricePerLitre;
+  final Value<double> subtotal;
+  final Value<String> createdAt;
+  final Value<int> rowid;
+  const FuelComponentsCompanion({
+    this.id = const Value.absent(),
+    this.fuelTransactionId = const Value.absent(),
+    this.fuelType = const Value.absent(),
+    this.quantityLitres = const Value.absent(),
+    this.pricePerLitre = const Value.absent(),
+    this.subtotal = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  FuelComponentsCompanion.insert({
+    required String id,
+    required String fuelTransactionId,
+    required String fuelType,
+    required double quantityLitres,
+    required double pricePerLitre,
+    required double subtotal,
+    required String createdAt,
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        fuelTransactionId = Value(fuelTransactionId),
+        fuelType = Value(fuelType),
+        quantityLitres = Value(quantityLitres),
+        pricePerLitre = Value(pricePerLitre),
+        subtotal = Value(subtotal),
+        createdAt = Value(createdAt);
+  static Insertable<FuelComponent> custom({
+    Expression<String>? id,
+    Expression<String>? fuelTransactionId,
+    Expression<String>? fuelType,
+    Expression<double>? quantityLitres,
+    Expression<double>? pricePerLitre,
+    Expression<double>? subtotal,
+    Expression<String>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (fuelTransactionId != null) 'fuelTransactionId': fuelTransactionId,
+      if (fuelType != null) 'fuelType': fuelType,
+      if (quantityLitres != null) 'quantityLitres': quantityLitres,
+      if (pricePerLitre != null) 'pricePerLitre': pricePerLitre,
+      if (subtotal != null) 'subtotal': subtotal,
+      if (createdAt != null) 'createdAt': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  FuelComponentsCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? fuelTransactionId,
+      Value<String>? fuelType,
+      Value<double>? quantityLitres,
+      Value<double>? pricePerLitre,
+      Value<double>? subtotal,
+      Value<String>? createdAt,
+      Value<int>? rowid}) {
+    return FuelComponentsCompanion(
+      id: id ?? this.id,
+      fuelTransactionId: fuelTransactionId ?? this.fuelTransactionId,
+      fuelType: fuelType ?? this.fuelType,
+      quantityLitres: quantityLitres ?? this.quantityLitres,
+      pricePerLitre: pricePerLitre ?? this.pricePerLitre,
+      subtotal: subtotal ?? this.subtotal,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (fuelTransactionId.present) {
+      map['fuelTransactionId'] = Variable<String>(fuelTransactionId.value);
+    }
+    if (fuelType.present) {
+      map['fuelType'] = Variable<String>(fuelType.value);
+    }
+    if (quantityLitres.present) {
+      map['quantityLitres'] = Variable<double>(quantityLitres.value);
+    }
+    if (pricePerLitre.present) {
+      map['pricePerLitre'] = Variable<double>(pricePerLitre.value);
+    }
+    if (subtotal.present) {
+      map['subtotal'] = Variable<double>(subtotal.value);
+    }
+    if (createdAt.present) {
+      map['createdAt'] = Variable<String>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FuelComponentsCompanion(')
+          ..write('id: $id, ')
+          ..write('fuelTransactionId: $fuelTransactionId, ')
+          ..write('fuelType: $fuelType, ')
+          ..write('quantityLitres: $quantityLitres, ')
+          ..write('pricePerLitre: $pricePerLitre, ')
+          ..write('subtotal: $subtotal, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$WalletMeltDatabase extends GeneratedDatabase {
   _$WalletMeltDatabase(QueryExecutor e) : super(e);
   $WalletMeltDatabaseManager get managers => $WalletMeltDatabaseManager(this);
@@ -8263,6 +9983,13 @@ abstract class _$WalletMeltDatabase extends GeneratedDatabase {
   late final $GroceryTemplatesTable groceryTemplates =
       $GroceryTemplatesTable(this);
   late final $SubscriptionsTable subscriptions = $SubscriptionsTable(this);
+  late final $EssentialExpenseTemplatesTable essentialExpenseTemplates =
+      $EssentialExpenseTemplatesTable(this);
+  late final $FuelTemplateComponentsTable fuelTemplateComponents =
+      $FuelTemplateComponentsTable(this);
+  late final $FuelTransactionsTable fuelTransactions =
+      $FuelTransactionsTable(this);
+  late final $FuelComponentsTable fuelComponents = $FuelComponentsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -8284,7 +10011,11 @@ abstract class _$WalletMeltDatabase extends GeneratedDatabase {
         debtRecords,
         debtRepayments,
         groceryTemplates,
-        subscriptions
+        subscriptions,
+        essentialExpenseTemplates,
+        fuelTemplateComponents,
+        fuelTransactions,
+        fuelComponents
       ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
@@ -8322,6 +10053,27 @@ abstract class _$WalletMeltDatabase extends GeneratedDatabase {
                 limitUpdateKind: UpdateKind.delete),
             result: [
               TableUpdate('debt_repayments', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('essential_expense_templates',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('fuel_template_components', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('expenses',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('fuel_transactions', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('fuel_transactions',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('fuel_components', kind: UpdateKind.delete),
             ],
           ),
         ],
@@ -8421,6 +10173,24 @@ final class $$CategoriesTableReferences
         .filter((f) => f.categoryId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_subscriptionsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
+  static MultiTypedResultKey<$EssentialExpenseTemplatesTable,
+      List<EssentialExpenseTemplate>> _essentialExpenseTemplatesRefsTable(
+          _$WalletMeltDatabase db) =>
+      MultiTypedResultKey.fromTable(db.essentialExpenseTemplates,
+          aliasName: 'categories__id__essential_expense_templates__categoryId');
+
+  $$EssentialExpenseTemplatesTableProcessedTableManager
+      get essentialExpenseTemplatesRefs {
+    final manager = $$EssentialExpenseTemplatesTableTableManager(
+            $_db, $_db.essentialExpenseTemplates)
+        .filter((f) => f.categoryId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult
+        .readTableOrNull(_essentialExpenseTemplatesRefsTable($_db));
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: cache));
   }
@@ -8558,6 +10328,30 @@ class $$CategoriesTableFilterComposer
               $removeJoinBuilderFromRootComposer:
                   $removeJoinBuilderFromRootComposer,
             ));
+    return f(composer);
+  }
+
+  Expression<bool> essentialExpenseTemplatesRefs(
+      Expression<bool> Function(
+              $$EssentialExpenseTemplatesTableFilterComposer f)
+          f) {
+    final $$EssentialExpenseTemplatesTableFilterComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.id,
+            referencedTable: $db.essentialExpenseTemplates,
+            getReferencedColumn: (t) => t.categoryId,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$EssentialExpenseTemplatesTableFilterComposer(
+                  $db: $db,
+                  $table: $db.essentialExpenseTemplates,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
     return f(composer);
   }
 }
@@ -8727,6 +10521,30 @@ class $$CategoriesTableAnnotationComposer
             ));
     return f(composer);
   }
+
+  Expression<T> essentialExpenseTemplatesRefs<T extends Object>(
+      Expression<T> Function(
+              $$EssentialExpenseTemplatesTableAnnotationComposer a)
+          f) {
+    final $$EssentialExpenseTemplatesTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.id,
+            referencedTable: $db.essentialExpenseTemplates,
+            getReferencedColumn: (t) => t.categoryId,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$EssentialExpenseTemplatesTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.essentialExpenseTemplates,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return f(composer);
+  }
 }
 
 class $$CategoriesTableTableManager extends RootTableManager<
@@ -8745,7 +10563,8 @@ class $$CategoriesTableTableManager extends RootTableManager<
         bool categoryBudgetsRefs,
         bool itemsRefs,
         bool expenseItemsRefs,
-        bool subscriptionsRefs})> {
+        bool subscriptionsRefs,
+        bool essentialExpenseTemplatesRefs})> {
   $$CategoriesTableTableManager(_$WalletMeltDatabase db, $CategoriesTable table)
       : super(TableManagerState(
           db: db,
@@ -8807,7 +10626,8 @@ class $$CategoriesTableTableManager extends RootTableManager<
               categoryBudgetsRefs = false,
               itemsRefs = false,
               expenseItemsRefs = false,
-              subscriptionsRefs = false}) {
+              subscriptionsRefs = false,
+              essentialExpenseTemplatesRefs = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [
@@ -8815,7 +10635,8 @@ class $$CategoriesTableTableManager extends RootTableManager<
                 if (categoryBudgetsRefs) db.categoryBudgets,
                 if (itemsRefs) db.items,
                 if (expenseItemsRefs) db.expenseItems,
-                if (subscriptionsRefs) db.subscriptions
+                if (subscriptionsRefs) db.subscriptions,
+                if (essentialExpenseTemplatesRefs) db.essentialExpenseTemplates
               ],
               addJoins: null,
               getPrefetchedDataCallback: (items) async {
@@ -8883,6 +10704,19 @@ class $$CategoriesTableTableManager extends RootTableManager<
                         referencedItemsForCurrentItem:
                             (item, referencedItems) => referencedItems
                                 .where((e) => e.categoryId == item.id),
+                        typedResults: items),
+                  if (essentialExpenseTemplatesRefs)
+                    await $_getPrefetchedData<Category, $CategoriesTable,
+                            EssentialExpenseTemplate>(
+                        currentTable: table,
+                        referencedTable: $$CategoriesTableReferences
+                            ._essentialExpenseTemplatesRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$CategoriesTableReferences(db, table, p0)
+                                .essentialExpenseTemplatesRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.categoryId == item.id),
                         typedResults: items)
                 ];
               },
@@ -8907,7 +10741,8 @@ typedef $$CategoriesTableProcessedTableManager = ProcessedTableManager<
         bool categoryBudgetsRefs,
         bool itemsRefs,
         bool expenseItemsRefs,
-        bool subscriptionsRefs})>;
+        bool subscriptionsRefs,
+        bool essentialExpenseTemplatesRefs})>;
 typedef $$StoresTableCreateCompanionBuilder = StoresCompanion Function({
   required String id,
   required String name,
@@ -9378,6 +11213,22 @@ final class $$ExpensesTableReferences
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: cache));
   }
+
+  static MultiTypedResultKey<$FuelTransactionsTable, List<FuelTransaction>>
+      _fuelTransactionsRefsTable(_$WalletMeltDatabase db) =>
+          MultiTypedResultKey.fromTable(db.fuelTransactions,
+              aliasName: 'expenses__id__fuel_transactions__expenseId');
+
+  $$FuelTransactionsTableProcessedTableManager get fuelTransactionsRefs {
+    final manager = $$FuelTransactionsTableTableManager(
+            $_db, $_db.fuelTransactions)
+        .filter((f) => f.expenseId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache =
+        $_typedResult.readTableOrNull(_fuelTransactionsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
 }
 
 class $$ExpensesTableFilterComposer
@@ -9540,6 +11391,27 @@ class $$ExpensesTableFilterComposer
             $$ReceiptsTableFilterComposer(
               $db: $db,
               $table: $db.receipts,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<bool> fuelTransactionsRefs(
+      Expression<bool> Function($$FuelTransactionsTableFilterComposer f) f) {
+    final $$FuelTransactionsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.fuelTransactions,
+        getReferencedColumn: (t) => t.expenseId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$FuelTransactionsTableFilterComposer(
+              $db: $db,
+              $table: $db.fuelTransactions,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -9817,6 +11689,27 @@ class $$ExpensesTableAnnotationComposer
             ));
     return f(composer);
   }
+
+  Expression<T> fuelTransactionsRefs<T extends Object>(
+      Expression<T> Function($$FuelTransactionsTableAnnotationComposer a) f) {
+    final $$FuelTransactionsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.fuelTransactions,
+        getReferencedColumn: (t) => t.expenseId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$FuelTransactionsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.fuelTransactions,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 }
 
 class $$ExpensesTableTableManager extends RootTableManager<
@@ -9835,7 +11728,8 @@ class $$ExpensesTableTableManager extends RootTableManager<
         bool storeId,
         bool groceryItemsRefs,
         bool expenseItemsRefs,
-        bool receiptsRefs})> {
+        bool receiptsRefs,
+        bool fuelTransactionsRefs})> {
   $$ExpensesTableTableManager(_$WalletMeltDatabase db, $ExpensesTable table)
       : super(TableManagerState(
           db: db,
@@ -9943,13 +11837,15 @@ class $$ExpensesTableTableManager extends RootTableManager<
               storeId = false,
               groceryItemsRefs = false,
               expenseItemsRefs = false,
-              receiptsRefs = false}) {
+              receiptsRefs = false,
+              fuelTransactionsRefs = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [
                 if (groceryItemsRefs) db.groceryItems,
                 if (expenseItemsRefs) db.expenseItems,
-                if (receiptsRefs) db.receipts
+                if (receiptsRefs) db.receipts,
+                if (fuelTransactionsRefs) db.fuelTransactions
               ],
               addJoins: <
                   T extends TableManagerState<
@@ -10026,6 +11922,19 @@ class $$ExpensesTableTableManager extends RootTableManager<
                         referencedItemsForCurrentItem:
                             (item, referencedItems) => referencedItems
                                 .where((e) => e.expenseId == item.id),
+                        typedResults: items),
+                  if (fuelTransactionsRefs)
+                    await $_getPrefetchedData<Expense, $ExpensesTable,
+                            FuelTransaction>(
+                        currentTable: table,
+                        referencedTable: $$ExpensesTableReferences
+                            ._fuelTransactionsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$ExpensesTableReferences(db, table, p0)
+                                .fuelTransactionsRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.expenseId == item.id),
                         typedResults: items)
                 ];
               },
@@ -10050,7 +11959,8 @@ typedef $$ExpensesTableProcessedTableManager = ProcessedTableManager<
         bool storeId,
         bool groceryItemsRefs,
         bool expenseItemsRefs,
-        bool receiptsRefs})>;
+        bool receiptsRefs,
+        bool fuelTransactionsRefs})>;
 typedef $$GroceryItemsTableCreateCompanionBuilder = GroceryItemsCompanion
     Function({
   required String id,
@@ -15114,6 +17024,1458 @@ typedef $$SubscriptionsTableProcessedTableManager = ProcessedTableManager<
     (Subscription, $$SubscriptionsTableReferences),
     Subscription,
     PrefetchHooks Function({bool categoryId})>;
+typedef $$EssentialExpenseTemplatesTableCreateCompanionBuilder
+    = EssentialExpenseTemplatesCompanion Function({
+  required String id,
+  required String name,
+  required String categoryId,
+  required String frequency,
+  required double expectedAmount,
+  Value<int?> expectedDay,
+  Value<String?> dueDate,
+  Value<bool> isActive,
+  Value<bool> isFuel,
+  Value<String?> notes,
+  required String createdAt,
+  required String updatedAt,
+  Value<String?> deletedAt,
+  Value<int> rowid,
+});
+typedef $$EssentialExpenseTemplatesTableUpdateCompanionBuilder
+    = EssentialExpenseTemplatesCompanion Function({
+  Value<String> id,
+  Value<String> name,
+  Value<String> categoryId,
+  Value<String> frequency,
+  Value<double> expectedAmount,
+  Value<int?> expectedDay,
+  Value<String?> dueDate,
+  Value<bool> isActive,
+  Value<bool> isFuel,
+  Value<String?> notes,
+  Value<String> createdAt,
+  Value<String> updatedAt,
+  Value<String?> deletedAt,
+  Value<int> rowid,
+});
+
+final class $$EssentialExpenseTemplatesTableReferences extends BaseReferences<
+    _$WalletMeltDatabase,
+    $EssentialExpenseTemplatesTable,
+    EssentialExpenseTemplate> {
+  $$EssentialExpenseTemplatesTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static $CategoriesTable _categoryIdTable(_$WalletMeltDatabase db) => db
+      .categories
+      .createAlias('essential_expense_templates__categoryId__categories__id');
+
+  $$CategoriesTableProcessedTableManager get categoryId {
+    final $_column = $_itemColumn<String>('categoryId')!;
+
+    final manager = $$CategoriesTableTableManager($_db, $_db.categories)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_categoryIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static MultiTypedResultKey<$FuelTemplateComponentsTable,
+      List<FuelTemplateComponent>> _fuelTemplateComponentsRefsTable(
+          _$WalletMeltDatabase db) =>
+      MultiTypedResultKey.fromTable(db.fuelTemplateComponents,
+          aliasName:
+              'essential_expense_templates__id__fuel_template_components__templateId');
+
+  $$FuelTemplateComponentsTableProcessedTableManager
+      get fuelTemplateComponentsRefs {
+    final manager = $$FuelTemplateComponentsTableTableManager(
+            $_db, $_db.fuelTemplateComponents)
+        .filter((f) => f.templateId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache =
+        $_typedResult.readTableOrNull(_fuelTemplateComponentsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+}
+
+class $$EssentialExpenseTemplatesTableFilterComposer
+    extends Composer<_$WalletMeltDatabase, $EssentialExpenseTemplatesTable> {
+  $$EssentialExpenseTemplatesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get frequency => $composableBuilder(
+      column: $table.frequency, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get expectedAmount => $composableBuilder(
+      column: $table.expectedAmount,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get expectedDay => $composableBuilder(
+      column: $table.expectedDay, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get dueDate => $composableBuilder(
+      column: $table.dueDate, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isActive => $composableBuilder(
+      column: $table.isActive, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isFuel => $composableBuilder(
+      column: $table.isFuel, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get notes => $composableBuilder(
+      column: $table.notes, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnFilters(column));
+
+  $$CategoriesTableFilterComposer get categoryId {
+    final $$CategoriesTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.categoryId,
+        referencedTable: $db.categories,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$CategoriesTableFilterComposer(
+              $db: $db,
+              $table: $db.categories,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  Expression<bool> fuelTemplateComponentsRefs(
+      Expression<bool> Function($$FuelTemplateComponentsTableFilterComposer f)
+          f) {
+    final $$FuelTemplateComponentsTableFilterComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.id,
+            referencedTable: $db.fuelTemplateComponents,
+            getReferencedColumn: (t) => t.templateId,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$FuelTemplateComponentsTableFilterComposer(
+                  $db: $db,
+                  $table: $db.fuelTemplateComponents,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return f(composer);
+  }
+}
+
+class $$EssentialExpenseTemplatesTableOrderingComposer
+    extends Composer<_$WalletMeltDatabase, $EssentialExpenseTemplatesTable> {
+  $$EssentialExpenseTemplatesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get frequency => $composableBuilder(
+      column: $table.frequency, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get expectedAmount => $composableBuilder(
+      column: $table.expectedAmount,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get expectedDay => $composableBuilder(
+      column: $table.expectedDay, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get dueDate => $composableBuilder(
+      column: $table.dueDate, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isActive => $composableBuilder(
+      column: $table.isActive, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isFuel => $composableBuilder(
+      column: $table.isFuel, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+      column: $table.notes, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
+
+  $$CategoriesTableOrderingComposer get categoryId {
+    final $$CategoriesTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.categoryId,
+        referencedTable: $db.categories,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$CategoriesTableOrderingComposer(
+              $db: $db,
+              $table: $db.categories,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$EssentialExpenseTemplatesTableAnnotationComposer
+    extends Composer<_$WalletMeltDatabase, $EssentialExpenseTemplatesTable> {
+  $$EssentialExpenseTemplatesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get frequency =>
+      $composableBuilder(column: $table.frequency, builder: (column) => column);
+
+  GeneratedColumn<double> get expectedAmount => $composableBuilder(
+      column: $table.expectedAmount, builder: (column) => column);
+
+  GeneratedColumn<int> get expectedDay => $composableBuilder(
+      column: $table.expectedDay, builder: (column) => column);
+
+  GeneratedColumn<String> get dueDate =>
+      $composableBuilder(column: $table.dueDate, builder: (column) => column);
+
+  GeneratedColumn<bool> get isActive =>
+      $composableBuilder(column: $table.isActive, builder: (column) => column);
+
+  GeneratedColumn<bool> get isFuel =>
+      $composableBuilder(column: $table.isFuel, builder: (column) => column);
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  $$CategoriesTableAnnotationComposer get categoryId {
+    final $$CategoriesTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.categoryId,
+        referencedTable: $db.categories,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$CategoriesTableAnnotationComposer(
+              $db: $db,
+              $table: $db.categories,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  Expression<T> fuelTemplateComponentsRefs<T extends Object>(
+      Expression<T> Function($$FuelTemplateComponentsTableAnnotationComposer a)
+          f) {
+    final $$FuelTemplateComponentsTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.id,
+            referencedTable: $db.fuelTemplateComponents,
+            getReferencedColumn: (t) => t.templateId,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$FuelTemplateComponentsTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.fuelTemplateComponents,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return f(composer);
+  }
+}
+
+class $$EssentialExpenseTemplatesTableTableManager extends RootTableManager<
+    _$WalletMeltDatabase,
+    $EssentialExpenseTemplatesTable,
+    EssentialExpenseTemplate,
+    $$EssentialExpenseTemplatesTableFilterComposer,
+    $$EssentialExpenseTemplatesTableOrderingComposer,
+    $$EssentialExpenseTemplatesTableAnnotationComposer,
+    $$EssentialExpenseTemplatesTableCreateCompanionBuilder,
+    $$EssentialExpenseTemplatesTableUpdateCompanionBuilder,
+    (EssentialExpenseTemplate, $$EssentialExpenseTemplatesTableReferences),
+    EssentialExpenseTemplate,
+    PrefetchHooks Function(
+        {bool categoryId, bool fuelTemplateComponentsRefs})> {
+  $$EssentialExpenseTemplatesTableTableManager(
+      _$WalletMeltDatabase db, $EssentialExpenseTemplatesTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$EssentialExpenseTemplatesTableFilterComposer(
+                  $db: db, $table: table),
+          createOrderingComposer: () =>
+              $$EssentialExpenseTemplatesTableOrderingComposer(
+                  $db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$EssentialExpenseTemplatesTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<String> categoryId = const Value.absent(),
+            Value<String> frequency = const Value.absent(),
+            Value<double> expectedAmount = const Value.absent(),
+            Value<int?> expectedDay = const Value.absent(),
+            Value<String?> dueDate = const Value.absent(),
+            Value<bool> isActive = const Value.absent(),
+            Value<bool> isFuel = const Value.absent(),
+            Value<String?> notes = const Value.absent(),
+            Value<String> createdAt = const Value.absent(),
+            Value<String> updatedAt = const Value.absent(),
+            Value<String?> deletedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              EssentialExpenseTemplatesCompanion(
+            id: id,
+            name: name,
+            categoryId: categoryId,
+            frequency: frequency,
+            expectedAmount: expectedAmount,
+            expectedDay: expectedDay,
+            dueDate: dueDate,
+            isActive: isActive,
+            isFuel: isFuel,
+            notes: notes,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String name,
+            required String categoryId,
+            required String frequency,
+            required double expectedAmount,
+            Value<int?> expectedDay = const Value.absent(),
+            Value<String?> dueDate = const Value.absent(),
+            Value<bool> isActive = const Value.absent(),
+            Value<bool> isFuel = const Value.absent(),
+            Value<String?> notes = const Value.absent(),
+            required String createdAt,
+            required String updatedAt,
+            Value<String?> deletedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              EssentialExpenseTemplatesCompanion.insert(
+            id: id,
+            name: name,
+            categoryId: categoryId,
+            frequency: frequency,
+            expectedAmount: expectedAmount,
+            expectedDay: expectedDay,
+            dueDate: dueDate,
+            isActive: isActive,
+            isFuel: isFuel,
+            notes: notes,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$EssentialExpenseTemplatesTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: (
+              {categoryId = false, fuelTemplateComponentsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (fuelTemplateComponentsRefs) db.fuelTemplateComponents
+              ],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (categoryId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.categoryId,
+                    referencedTable: $$EssentialExpenseTemplatesTableReferences
+                        ._categoryIdTable(db),
+                    referencedColumn: $$EssentialExpenseTemplatesTableReferences
+                        ._categoryIdTable(db)
+                        .id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (fuelTemplateComponentsRefs)
+                    await $_getPrefetchedData<
+                            EssentialExpenseTemplate,
+                            $EssentialExpenseTemplatesTable,
+                            FuelTemplateComponent>(
+                        currentTable: table,
+                        referencedTable:
+                            $$EssentialExpenseTemplatesTableReferences
+                                ._fuelTemplateComponentsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$EssentialExpenseTemplatesTableReferences(
+                                    db, table, p0)
+                                .fuelTemplateComponentsRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.templateId == item.id),
+                        typedResults: items)
+                ];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$EssentialExpenseTemplatesTableProcessedTableManager
+    = ProcessedTableManager<
+        _$WalletMeltDatabase,
+        $EssentialExpenseTemplatesTable,
+        EssentialExpenseTemplate,
+        $$EssentialExpenseTemplatesTableFilterComposer,
+        $$EssentialExpenseTemplatesTableOrderingComposer,
+        $$EssentialExpenseTemplatesTableAnnotationComposer,
+        $$EssentialExpenseTemplatesTableCreateCompanionBuilder,
+        $$EssentialExpenseTemplatesTableUpdateCompanionBuilder,
+        (EssentialExpenseTemplate, $$EssentialExpenseTemplatesTableReferences),
+        EssentialExpenseTemplate,
+        PrefetchHooks Function(
+            {bool categoryId, bool fuelTemplateComponentsRefs})>;
+typedef $$FuelTemplateComponentsTableCreateCompanionBuilder
+    = FuelTemplateComponentsCompanion Function({
+  required String id,
+  required String templateId,
+  required String fuelType,
+  required double expectedLitres,
+  required double expectedPricePerLitre,
+  required String createdAt,
+  Value<int> rowid,
+});
+typedef $$FuelTemplateComponentsTableUpdateCompanionBuilder
+    = FuelTemplateComponentsCompanion Function({
+  Value<String> id,
+  Value<String> templateId,
+  Value<String> fuelType,
+  Value<double> expectedLitres,
+  Value<double> expectedPricePerLitre,
+  Value<String> createdAt,
+  Value<int> rowid,
+});
+
+final class $$FuelTemplateComponentsTableReferences extends BaseReferences<
+    _$WalletMeltDatabase, $FuelTemplateComponentsTable, FuelTemplateComponent> {
+  $$FuelTemplateComponentsTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static $EssentialExpenseTemplatesTable _templateIdTable(
+          _$WalletMeltDatabase db) =>
+      db.essentialExpenseTemplates.createAlias(
+          'fuel_template_components__templateId__essential_expense_templates__id');
+
+  $$EssentialExpenseTemplatesTableProcessedTableManager get templateId {
+    final $_column = $_itemColumn<String>('templateId')!;
+
+    final manager = $$EssentialExpenseTemplatesTableTableManager(
+            $_db, $_db.essentialExpenseTemplates)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_templateIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$FuelTemplateComponentsTableFilterComposer
+    extends Composer<_$WalletMeltDatabase, $FuelTemplateComponentsTable> {
+  $$FuelTemplateComponentsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get fuelType => $composableBuilder(
+      column: $table.fuelType, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get expectedLitres => $composableBuilder(
+      column: $table.expectedLitres,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get expectedPricePerLitre => $composableBuilder(
+      column: $table.expectedPricePerLitre,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  $$EssentialExpenseTemplatesTableFilterComposer get templateId {
+    final $$EssentialExpenseTemplatesTableFilterComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.templateId,
+            referencedTable: $db.essentialExpenseTemplates,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$EssentialExpenseTemplatesTableFilterComposer(
+                  $db: $db,
+                  $table: $db.essentialExpenseTemplates,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+}
+
+class $$FuelTemplateComponentsTableOrderingComposer
+    extends Composer<_$WalletMeltDatabase, $FuelTemplateComponentsTable> {
+  $$FuelTemplateComponentsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get fuelType => $composableBuilder(
+      column: $table.fuelType, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get expectedLitres => $composableBuilder(
+      column: $table.expectedLitres,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get expectedPricePerLitre => $composableBuilder(
+      column: $table.expectedPricePerLitre,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  $$EssentialExpenseTemplatesTableOrderingComposer get templateId {
+    final $$EssentialExpenseTemplatesTableOrderingComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.templateId,
+            referencedTable: $db.essentialExpenseTemplates,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$EssentialExpenseTemplatesTableOrderingComposer(
+                  $db: $db,
+                  $table: $db.essentialExpenseTemplates,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+}
+
+class $$FuelTemplateComponentsTableAnnotationComposer
+    extends Composer<_$WalletMeltDatabase, $FuelTemplateComponentsTable> {
+  $$FuelTemplateComponentsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get fuelType =>
+      $composableBuilder(column: $table.fuelType, builder: (column) => column);
+
+  GeneratedColumn<double> get expectedLitres => $composableBuilder(
+      column: $table.expectedLitres, builder: (column) => column);
+
+  GeneratedColumn<double> get expectedPricePerLitre => $composableBuilder(
+      column: $table.expectedPricePerLitre, builder: (column) => column);
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$EssentialExpenseTemplatesTableAnnotationComposer get templateId {
+    final $$EssentialExpenseTemplatesTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.templateId,
+            referencedTable: $db.essentialExpenseTemplates,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$EssentialExpenseTemplatesTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.essentialExpenseTemplates,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+}
+
+class $$FuelTemplateComponentsTableTableManager extends RootTableManager<
+    _$WalletMeltDatabase,
+    $FuelTemplateComponentsTable,
+    FuelTemplateComponent,
+    $$FuelTemplateComponentsTableFilterComposer,
+    $$FuelTemplateComponentsTableOrderingComposer,
+    $$FuelTemplateComponentsTableAnnotationComposer,
+    $$FuelTemplateComponentsTableCreateCompanionBuilder,
+    $$FuelTemplateComponentsTableUpdateCompanionBuilder,
+    (FuelTemplateComponent, $$FuelTemplateComponentsTableReferences),
+    FuelTemplateComponent,
+    PrefetchHooks Function({bool templateId})> {
+  $$FuelTemplateComponentsTableTableManager(
+      _$WalletMeltDatabase db, $FuelTemplateComponentsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$FuelTemplateComponentsTableFilterComposer(
+                  $db: db, $table: table),
+          createOrderingComposer: () =>
+              $$FuelTemplateComponentsTableOrderingComposer(
+                  $db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$FuelTemplateComponentsTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> templateId = const Value.absent(),
+            Value<String> fuelType = const Value.absent(),
+            Value<double> expectedLitres = const Value.absent(),
+            Value<double> expectedPricePerLitre = const Value.absent(),
+            Value<String> createdAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              FuelTemplateComponentsCompanion(
+            id: id,
+            templateId: templateId,
+            fuelType: fuelType,
+            expectedLitres: expectedLitres,
+            expectedPricePerLitre: expectedPricePerLitre,
+            createdAt: createdAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String templateId,
+            required String fuelType,
+            required double expectedLitres,
+            required double expectedPricePerLitre,
+            required String createdAt,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              FuelTemplateComponentsCompanion.insert(
+            id: id,
+            templateId: templateId,
+            fuelType: fuelType,
+            expectedLitres: expectedLitres,
+            expectedPricePerLitre: expectedPricePerLitre,
+            createdAt: createdAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$FuelTemplateComponentsTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: ({templateId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (templateId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.templateId,
+                    referencedTable: $$FuelTemplateComponentsTableReferences
+                        ._templateIdTable(db),
+                    referencedColumn: $$FuelTemplateComponentsTableReferences
+                        ._templateIdTable(db)
+                        .id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$FuelTemplateComponentsTableProcessedTableManager
+    = ProcessedTableManager<
+        _$WalletMeltDatabase,
+        $FuelTemplateComponentsTable,
+        FuelTemplateComponent,
+        $$FuelTemplateComponentsTableFilterComposer,
+        $$FuelTemplateComponentsTableOrderingComposer,
+        $$FuelTemplateComponentsTableAnnotationComposer,
+        $$FuelTemplateComponentsTableCreateCompanionBuilder,
+        $$FuelTemplateComponentsTableUpdateCompanionBuilder,
+        (FuelTemplateComponent, $$FuelTemplateComponentsTableReferences),
+        FuelTemplateComponent,
+        PrefetchHooks Function({bool templateId})>;
+typedef $$FuelTransactionsTableCreateCompanionBuilder
+    = FuelTransactionsCompanion Function({
+  required String id,
+  required String expenseId,
+  Value<double?> odometerReading,
+  required String createdAt,
+  Value<int> rowid,
+});
+typedef $$FuelTransactionsTableUpdateCompanionBuilder
+    = FuelTransactionsCompanion Function({
+  Value<String> id,
+  Value<String> expenseId,
+  Value<double?> odometerReading,
+  Value<String> createdAt,
+  Value<int> rowid,
+});
+
+final class $$FuelTransactionsTableReferences extends BaseReferences<
+    _$WalletMeltDatabase, $FuelTransactionsTable, FuelTransaction> {
+  $$FuelTransactionsTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static $ExpensesTable _expenseIdTable(_$WalletMeltDatabase db) =>
+      db.expenses.createAlias('fuel_transactions__expenseId__expenses__id');
+
+  $$ExpensesTableProcessedTableManager get expenseId {
+    final $_column = $_itemColumn<String>('expenseId')!;
+
+    final manager = $$ExpensesTableTableManager($_db, $_db.expenses)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_expenseIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static MultiTypedResultKey<$FuelComponentsTable, List<FuelComponent>>
+      _fuelComponentsRefsTable(_$WalletMeltDatabase db) =>
+          MultiTypedResultKey.fromTable(db.fuelComponents,
+              aliasName:
+                  'fuel_transactions__id__fuel_components__fuelTransactionId');
+
+  $$FuelComponentsTableProcessedTableManager get fuelComponentsRefs {
+    final manager = $$FuelComponentsTableTableManager($_db, $_db.fuelComponents)
+        .filter((f) =>
+            f.fuelTransactionId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_fuelComponentsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+}
+
+class $$FuelTransactionsTableFilterComposer
+    extends Composer<_$WalletMeltDatabase, $FuelTransactionsTable> {
+  $$FuelTransactionsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get odometerReading => $composableBuilder(
+      column: $table.odometerReading,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  $$ExpensesTableFilterComposer get expenseId {
+    final $$ExpensesTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.expenseId,
+        referencedTable: $db.expenses,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ExpensesTableFilterComposer(
+              $db: $db,
+              $table: $db.expenses,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  Expression<bool> fuelComponentsRefs(
+      Expression<bool> Function($$FuelComponentsTableFilterComposer f) f) {
+    final $$FuelComponentsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.fuelComponents,
+        getReferencedColumn: (t) => t.fuelTransactionId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$FuelComponentsTableFilterComposer(
+              $db: $db,
+              $table: $db.fuelComponents,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+}
+
+class $$FuelTransactionsTableOrderingComposer
+    extends Composer<_$WalletMeltDatabase, $FuelTransactionsTable> {
+  $$FuelTransactionsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get odometerReading => $composableBuilder(
+      column: $table.odometerReading,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  $$ExpensesTableOrderingComposer get expenseId {
+    final $$ExpensesTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.expenseId,
+        referencedTable: $db.expenses,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ExpensesTableOrderingComposer(
+              $db: $db,
+              $table: $db.expenses,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$FuelTransactionsTableAnnotationComposer
+    extends Composer<_$WalletMeltDatabase, $FuelTransactionsTable> {
+  $$FuelTransactionsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<double> get odometerReading => $composableBuilder(
+      column: $table.odometerReading, builder: (column) => column);
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$ExpensesTableAnnotationComposer get expenseId {
+    final $$ExpensesTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.expenseId,
+        referencedTable: $db.expenses,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ExpensesTableAnnotationComposer(
+              $db: $db,
+              $table: $db.expenses,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  Expression<T> fuelComponentsRefs<T extends Object>(
+      Expression<T> Function($$FuelComponentsTableAnnotationComposer a) f) {
+    final $$FuelComponentsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.fuelComponents,
+        getReferencedColumn: (t) => t.fuelTransactionId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$FuelComponentsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.fuelComponents,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+}
+
+class $$FuelTransactionsTableTableManager extends RootTableManager<
+    _$WalletMeltDatabase,
+    $FuelTransactionsTable,
+    FuelTransaction,
+    $$FuelTransactionsTableFilterComposer,
+    $$FuelTransactionsTableOrderingComposer,
+    $$FuelTransactionsTableAnnotationComposer,
+    $$FuelTransactionsTableCreateCompanionBuilder,
+    $$FuelTransactionsTableUpdateCompanionBuilder,
+    (FuelTransaction, $$FuelTransactionsTableReferences),
+    FuelTransaction,
+    PrefetchHooks Function({bool expenseId, bool fuelComponentsRefs})> {
+  $$FuelTransactionsTableTableManager(
+      _$WalletMeltDatabase db, $FuelTransactionsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$FuelTransactionsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$FuelTransactionsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$FuelTransactionsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> expenseId = const Value.absent(),
+            Value<double?> odometerReading = const Value.absent(),
+            Value<String> createdAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              FuelTransactionsCompanion(
+            id: id,
+            expenseId: expenseId,
+            odometerReading: odometerReading,
+            createdAt: createdAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String expenseId,
+            Value<double?> odometerReading = const Value.absent(),
+            required String createdAt,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              FuelTransactionsCompanion.insert(
+            id: id,
+            expenseId: expenseId,
+            odometerReading: odometerReading,
+            createdAt: createdAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$FuelTransactionsTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: (
+              {expenseId = false, fuelComponentsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (fuelComponentsRefs) db.fuelComponents
+              ],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (expenseId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.expenseId,
+                    referencedTable:
+                        $$FuelTransactionsTableReferences._expenseIdTable(db),
+                    referencedColumn: $$FuelTransactionsTableReferences
+                        ._expenseIdTable(db)
+                        .id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (fuelComponentsRefs)
+                    await $_getPrefetchedData<FuelTransaction,
+                            $FuelTransactionsTable, FuelComponent>(
+                        currentTable: table,
+                        referencedTable: $$FuelTransactionsTableReferences
+                            ._fuelComponentsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$FuelTransactionsTableReferences(db, table, p0)
+                                .fuelComponentsRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.fuelTransactionId == item.id),
+                        typedResults: items)
+                ];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$FuelTransactionsTableProcessedTableManager = ProcessedTableManager<
+    _$WalletMeltDatabase,
+    $FuelTransactionsTable,
+    FuelTransaction,
+    $$FuelTransactionsTableFilterComposer,
+    $$FuelTransactionsTableOrderingComposer,
+    $$FuelTransactionsTableAnnotationComposer,
+    $$FuelTransactionsTableCreateCompanionBuilder,
+    $$FuelTransactionsTableUpdateCompanionBuilder,
+    (FuelTransaction, $$FuelTransactionsTableReferences),
+    FuelTransaction,
+    PrefetchHooks Function({bool expenseId, bool fuelComponentsRefs})>;
+typedef $$FuelComponentsTableCreateCompanionBuilder = FuelComponentsCompanion
+    Function({
+  required String id,
+  required String fuelTransactionId,
+  required String fuelType,
+  required double quantityLitres,
+  required double pricePerLitre,
+  required double subtotal,
+  required String createdAt,
+  Value<int> rowid,
+});
+typedef $$FuelComponentsTableUpdateCompanionBuilder = FuelComponentsCompanion
+    Function({
+  Value<String> id,
+  Value<String> fuelTransactionId,
+  Value<String> fuelType,
+  Value<double> quantityLitres,
+  Value<double> pricePerLitre,
+  Value<double> subtotal,
+  Value<String> createdAt,
+  Value<int> rowid,
+});
+
+final class $$FuelComponentsTableReferences extends BaseReferences<
+    _$WalletMeltDatabase, $FuelComponentsTable, FuelComponent> {
+  $$FuelComponentsTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static $FuelTransactionsTable _fuelTransactionIdTable(
+          _$WalletMeltDatabase db) =>
+      db.fuelTransactions.createAlias(
+          'fuel_components__fuelTransactionId__fuel_transactions__id');
+
+  $$FuelTransactionsTableProcessedTableManager get fuelTransactionId {
+    final $_column = $_itemColumn<String>('fuelTransactionId')!;
+
+    final manager =
+        $$FuelTransactionsTableTableManager($_db, $_db.fuelTransactions)
+            .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_fuelTransactionIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$FuelComponentsTableFilterComposer
+    extends Composer<_$WalletMeltDatabase, $FuelComponentsTable> {
+  $$FuelComponentsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get fuelType => $composableBuilder(
+      column: $table.fuelType, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get quantityLitres => $composableBuilder(
+      column: $table.quantityLitres,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get pricePerLitre => $composableBuilder(
+      column: $table.pricePerLitre, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get subtotal => $composableBuilder(
+      column: $table.subtotal, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  $$FuelTransactionsTableFilterComposer get fuelTransactionId {
+    final $$FuelTransactionsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.fuelTransactionId,
+        referencedTable: $db.fuelTransactions,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$FuelTransactionsTableFilterComposer(
+              $db: $db,
+              $table: $db.fuelTransactions,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$FuelComponentsTableOrderingComposer
+    extends Composer<_$WalletMeltDatabase, $FuelComponentsTable> {
+  $$FuelComponentsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get fuelType => $composableBuilder(
+      column: $table.fuelType, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get quantityLitres => $composableBuilder(
+      column: $table.quantityLitres,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get pricePerLitre => $composableBuilder(
+      column: $table.pricePerLitre,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get subtotal => $composableBuilder(
+      column: $table.subtotal, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  $$FuelTransactionsTableOrderingComposer get fuelTransactionId {
+    final $$FuelTransactionsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.fuelTransactionId,
+        referencedTable: $db.fuelTransactions,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$FuelTransactionsTableOrderingComposer(
+              $db: $db,
+              $table: $db.fuelTransactions,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$FuelComponentsTableAnnotationComposer
+    extends Composer<_$WalletMeltDatabase, $FuelComponentsTable> {
+  $$FuelComponentsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get fuelType =>
+      $composableBuilder(column: $table.fuelType, builder: (column) => column);
+
+  GeneratedColumn<double> get quantityLitres => $composableBuilder(
+      column: $table.quantityLitres, builder: (column) => column);
+
+  GeneratedColumn<double> get pricePerLitre => $composableBuilder(
+      column: $table.pricePerLitre, builder: (column) => column);
+
+  GeneratedColumn<double> get subtotal =>
+      $composableBuilder(column: $table.subtotal, builder: (column) => column);
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$FuelTransactionsTableAnnotationComposer get fuelTransactionId {
+    final $$FuelTransactionsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.fuelTransactionId,
+        referencedTable: $db.fuelTransactions,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$FuelTransactionsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.fuelTransactions,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$FuelComponentsTableTableManager extends RootTableManager<
+    _$WalletMeltDatabase,
+    $FuelComponentsTable,
+    FuelComponent,
+    $$FuelComponentsTableFilterComposer,
+    $$FuelComponentsTableOrderingComposer,
+    $$FuelComponentsTableAnnotationComposer,
+    $$FuelComponentsTableCreateCompanionBuilder,
+    $$FuelComponentsTableUpdateCompanionBuilder,
+    (FuelComponent, $$FuelComponentsTableReferences),
+    FuelComponent,
+    PrefetchHooks Function({bool fuelTransactionId})> {
+  $$FuelComponentsTableTableManager(
+      _$WalletMeltDatabase db, $FuelComponentsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$FuelComponentsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$FuelComponentsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$FuelComponentsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> fuelTransactionId = const Value.absent(),
+            Value<String> fuelType = const Value.absent(),
+            Value<double> quantityLitres = const Value.absent(),
+            Value<double> pricePerLitre = const Value.absent(),
+            Value<double> subtotal = const Value.absent(),
+            Value<String> createdAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              FuelComponentsCompanion(
+            id: id,
+            fuelTransactionId: fuelTransactionId,
+            fuelType: fuelType,
+            quantityLitres: quantityLitres,
+            pricePerLitre: pricePerLitre,
+            subtotal: subtotal,
+            createdAt: createdAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String fuelTransactionId,
+            required String fuelType,
+            required double quantityLitres,
+            required double pricePerLitre,
+            required double subtotal,
+            required String createdAt,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              FuelComponentsCompanion.insert(
+            id: id,
+            fuelTransactionId: fuelTransactionId,
+            fuelType: fuelType,
+            quantityLitres: quantityLitres,
+            pricePerLitre: pricePerLitre,
+            subtotal: subtotal,
+            createdAt: createdAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$FuelComponentsTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: ({fuelTransactionId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (fuelTransactionId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.fuelTransactionId,
+                    referencedTable: $$FuelComponentsTableReferences
+                        ._fuelTransactionIdTable(db),
+                    referencedColumn: $$FuelComponentsTableReferences
+                        ._fuelTransactionIdTable(db)
+                        .id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$FuelComponentsTableProcessedTableManager = ProcessedTableManager<
+    _$WalletMeltDatabase,
+    $FuelComponentsTable,
+    FuelComponent,
+    $$FuelComponentsTableFilterComposer,
+    $$FuelComponentsTableOrderingComposer,
+    $$FuelComponentsTableAnnotationComposer,
+    $$FuelComponentsTableCreateCompanionBuilder,
+    $$FuelComponentsTableUpdateCompanionBuilder,
+    (FuelComponent, $$FuelComponentsTableReferences),
+    FuelComponent,
+    PrefetchHooks Function({bool fuelTransactionId})>;
 
 class $WalletMeltDatabaseManager {
   final _$WalletMeltDatabase _db;
@@ -15152,4 +18514,14 @@ class $WalletMeltDatabaseManager {
       $$GroceryTemplatesTableTableManager(_db, _db.groceryTemplates);
   $$SubscriptionsTableTableManager get subscriptions =>
       $$SubscriptionsTableTableManager(_db, _db.subscriptions);
+  $$EssentialExpenseTemplatesTableTableManager get essentialExpenseTemplates =>
+      $$EssentialExpenseTemplatesTableTableManager(
+          _db, _db.essentialExpenseTemplates);
+  $$FuelTemplateComponentsTableTableManager get fuelTemplateComponents =>
+      $$FuelTemplateComponentsTableTableManager(
+          _db, _db.fuelTemplateComponents);
+  $$FuelTransactionsTableTableManager get fuelTransactions =>
+      $$FuelTransactionsTableTableManager(_db, _db.fuelTransactions);
+  $$FuelComponentsTableTableManager get fuelComponents =>
+      $$FuelComponentsTableTableManager(_db, _db.fuelComponents);
 }

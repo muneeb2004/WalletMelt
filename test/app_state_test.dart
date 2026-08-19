@@ -12,6 +12,7 @@ import 'package:wallet_melt/src/types/expense.dart';
 import 'package:wallet_melt/src/types/category.dart' as wm;
 import 'package:wallet_melt/src/types/grocery_item.dart';
 import 'package:wallet_melt/src/types/budget.dart';
+import 'package:wallet_melt/src/types/fuel.dart';
 import 'package:wallet_melt/src/services/receipt_storage/receipt_storage_service.dart';
 
 class FakeReceiptStorageService extends Fake implements ReceiptStorageService {
@@ -195,7 +196,8 @@ class FakeDriftExpenseRepository extends Fake
 
   @override
   Future<void> update(Expense expense,
-      {List<GroceryItemDraft>? groceryItems}) async {
+      {List<GroceryItemDraft>? groceryItems,
+      FuelTransactionDraft? fuelTransaction}) async {
     updateCalled = true;
     lastUpdatedExpense = expense;
     lastUpdatedGroceryItems = groceryItems;

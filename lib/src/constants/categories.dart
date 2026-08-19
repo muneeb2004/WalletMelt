@@ -10,6 +10,7 @@ const categoryColors = {
   'water': '#77C8D4',
   'rent': '#A88CC2',
   'maintenance': '#C09366',
+  'fuel': '#E85D75',
   'other': '#9A958B',
 };
 
@@ -69,6 +70,14 @@ List<Category> buildDefaultCategories(DateTime now) {
         name: 'Maintenance',
         icon: 'build',
         color: categoryColors['maintenance']!,
+        isDefault: true,
+        createdAt: timestamp,
+        updatedAt: timestamp),
+    Category(
+        id: 'fuel',
+        name: 'Fuel',
+        icon: 'local_gas_station',
+        color: categoryColors['fuel']!,
         isDefault: true,
         createdAt: timestamp,
         updatedAt: timestamp),

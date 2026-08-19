@@ -144,8 +144,9 @@ class _WalletMeltAppState extends State<WalletMeltApp> {
                   path: '/planning',
                   builder: (context, state) {
                     final tab = state.uri.queryParameters['tab'];
-                    final allowlist = {'subscriptions', 'budgets'};
-                    final initialIndex = allowlist.contains(tab) && tab == 'subscriptions' ? 1 : 0;
+                    final initialIndex = tab == 'essentials'
+                        ? 2
+                        : (tab == 'subscriptions' ? 1 : 0);
                     return PlanningScreen(initialIndex: initialIndex);
                   })
             ]),
@@ -171,6 +172,9 @@ class _WalletMeltAppState extends State<WalletMeltApp> {
         GoRoute(
             path: '/subscriptions',
             redirect: (context, state) => '/planning?tab=subscriptions'),
+        GoRoute(
+            path: '/essentials',
+            redirect: (context, state) => '/planning?tab=essentials'),
         GoRoute(
           path: '/expense/:id',
           redirect: (context, state) {

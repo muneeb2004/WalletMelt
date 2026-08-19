@@ -26,11 +26,15 @@ import '../types/debt.dart' as wm_debt;
 import '../types/grocery_template.dart' as wm_template;
 import '../types/subscription.dart' as wm_sub;
 import '../types/subscription.dart' show SubscriptionStatus;
+import '../types/essential_expense.dart' as wm_essential;
+import '../types/fuel.dart' as wm_fuel;
 import '../data/repositories/drift/drift_debt_repository.dart';
 import '../data/repositories/drift/drift_grocery_template_repository.dart';
 import '../data/repositories/drift/drift_subscription_repository.dart';
 import '../types/payee.dart';
 import '../data/repositories/drift/drift_payee_repository.dart';
+import '../data/repositories/drift/drift_essential_expense_repository.dart';
+import '../data/repositories/drift/drift_fuel_repository.dart';
 
 class AppState extends ChangeNotifier {
   AppState({
@@ -41,6 +45,8 @@ class AppState extends ChangeNotifier {
     DriftGroceryTemplateRepository? driftGroceryTemplateRepository,
     DriftSubscriptionRepository? driftSubscriptionRepository,
     DriftPayeeRepository? driftPayeeRepository,
+    DriftEssentialExpenseRepository? driftEssentialExpenseRepository,
+    DriftFuelRepository? driftFuelRepository,
     local.WalletMeltDatabase? driftDatabase,
     SettingsService? settingsService,
     ReceiptStorageService? receiptStorageService,
@@ -55,6 +61,8 @@ class AppState extends ChangeNotifier {
     _driftGroceryTemplateRepository = driftGroceryTemplateRepository ?? _FakeDriftGroceryTemplateRepository();
     _driftSubscriptionRepository = driftSubscriptionRepository ?? _FakeDriftSubscriptionRepository();
     _driftPayeeRepository = driftPayeeRepository ?? _FakeDriftPayeeRepository();
+    _driftEssentialExpenseRepository = driftEssentialExpenseRepository ?? _FakeDriftEssentialExpenseRepository();
+    _driftFuelRepository = driftFuelRepository ?? _FakeDriftFuelRepository();
   }
 
   AppState.test({
@@ -65,6 +73,8 @@ class AppState extends ChangeNotifier {
     DriftGroceryTemplateRepository? driftGroceryTemplateRepository,
     DriftSubscriptionRepository? driftSubscriptionRepository,
     DriftPayeeRepository? driftPayeeRepository,
+    DriftEssentialExpenseRepository? driftEssentialExpenseRepository,
+    DriftFuelRepository? driftFuelRepository,
     SettingsService? settingsService,
     ReceiptStorageService? receiptStorageService,
     bool requiresDriftRestoreRuntime = false,
@@ -78,6 +88,8 @@ class AppState extends ChangeNotifier {
     _driftGroceryTemplateRepository = driftGroceryTemplateRepository ?? _FakeDriftGroceryTemplateRepository();
     _driftSubscriptionRepository = driftSubscriptionRepository ?? _FakeDriftSubscriptionRepository();
     _driftPayeeRepository = driftPayeeRepository ?? _FakeDriftPayeeRepository();
+    _driftEssentialExpenseRepository = driftEssentialExpenseRepository ?? _FakeDriftEssentialExpenseRepository();
+    _driftFuelRepository = driftFuelRepository ?? _FakeDriftFuelRepository();
     isLoading = false;
   }
 
@@ -93,11 +105,14 @@ class AppState extends ChangeNotifier {
   late DriftGroceryTemplateRepository _driftGroceryTemplateRepository;
   late DriftSubscriptionRepository _driftSubscriptionRepository;
   late DriftPayeeRepository _driftPayeeRepository;
+  late DriftEssentialExpenseRepository _driftEssentialExpenseRepository;
+  late DriftFuelRepository _driftFuelRepository;
 
   List<wm_debt.DebtRecord> debts = const [];
   List<wm_template.GroceryTemplate> groceryTemplates = const [];
   List<wm_sub.Subscription> subscriptions = const [];
   List<Payee> payees = const [];
+  List<wm_essential.EssentialExpenseTemplate> essentialTemplates = const [];
 
   WalletMeltSettings settings = WalletMeltSettings.defaults;
   List<wm.Category> categories = const [];
@@ -208,6 +223,7 @@ class AppState extends ChangeNotifier {
     debts = await _driftDebtRepository.listAll();
     groceryTemplates = await _driftGroceryTemplateRepository.listAll();
     payees = await _driftPayeeRepository.listAll();
+    essentialTemplates = await _driftEssentialExpenseRepository.listAll();
 
     notifyListeners();
   }
@@ -363,9 +379,82 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> updateExpense(Expense expense,
-      {List<GroceryItemDraft>? groceryItems}) async {
-    await _driftExpenseRepository.update(expense, groceryItems: groceryItems);
+      {List<GroceryItemDraft>? groceryItems,
+      wm_fuel.FuelTransactionDraft? fuelTransaction}) async {
+    await _driftExpenseRepository.update(expense,
+        groceryItems: groceryItems, fuelTransaction: fuelTransaction);
     await refresh();
+  }
+
+  Future<wm_fuel.FuelTransaction?> fuelTransactionForExpense(
+      String expenseId) async {
+    return _driftFuelRepository.getByExpenseId(expenseId);
+  }
+
+  Future<void> addEssentialTemplate(
+    wm_essential.EssentialExpenseTemplate template, {
+    List<wm_essential.FuelTemplateComponent>? fuelComponents,
+  }) async {
+    await _driftEssentialExpenseRepository.create(template,
+        fuelComponents: fuelComponents);
+    await refresh();
+  }
+
+  Future<void> updateEssentialTemplate(
+    wm_essential.EssentialExpenseTemplate template, {
+    List<wm_essential.FuelTemplateComponent>? fuelComponents,
+  }) async {
+    await _driftEssentialExpenseRepository.update(template,
+        fuelComponents: fuelComponents);
+    await refresh();
+  }
+
+  Future<void> deleteEssentialTemplate(String id) async {
+    await _driftEssentialExpenseRepository.delete(id);
+    await refresh();
+  }
+
+  Future<void> toggleEssentialTemplateActive(String id, bool isActive) async {
+    await _driftEssentialExpenseRepository.toggleActive(id, isActive);
+    await refresh();
+  }
+
+  Map<String, double> getMonthlyEssentialSummary(DateTime month) {
+    double expectedTotal = 0.0;
+    for (final t in essentialTemplates) {
+      if (!t.isActive || t.isDeleted) continue;
+      expectedTotal += t.computedExpectedAmount;
+    }
+
+    final essentialCategoryIds = essentialTemplates
+        .where((t) => t.isActive && !t.isDeleted)
+        .map((t) => t.categoryId)
+        .toSet();
+
+    // Default essential categories recognized in personal finance
+    essentialCategoryIds.addAll(['fuel', 'rent', 'electricity', 'gas', 'water', 'internet']);
+
+    final monthExpenses = expenses.where((e) {
+      if (e.deletedAt != null) return false;
+      try {
+        final d = parseIsoDate(e.date);
+        return isSameMonth(d, month);
+      } catch (_) {
+        return false;
+      }
+    });
+
+    double actualTotal = 0.0;
+    for (final e in monthExpenses) {
+      if (essentialCategoryIds.contains(e.categoryId)) {
+        actualTotal += e.amount;
+      }
+    }
+
+    return {
+      'expected': wm_fuel.roundToTwoDecimals(expectedTotal),
+      'actual': wm_fuel.roundToTwoDecimals(actualTotal),
+    };
   }
 
   Future<List<GroceryItem>> groceryItemsForExpense(String expenseId) async {
@@ -644,6 +733,20 @@ class _FakeDriftSubscriptionRepository extends DriftSubscriptionRepository {
 
 class _FakeDriftPayeeRepository extends DriftPayeeRepository {
   _FakeDriftPayeeRepository() : super(_dummyDb);
+}
+
+class _FakeDriftEssentialExpenseRepository extends DriftEssentialExpenseRepository {
+  _FakeDriftEssentialExpenseRepository() : super(_dummyDb);
+  @override
+  Future<List<wm_essential.EssentialExpenseTemplate>> listAll({bool includeDeleted = false}) async => [];
+}
+
+class _FakeDriftFuelRepository extends DriftFuelRepository {
+  _FakeDriftFuelRepository() : super(_dummyDb);
+  @override
+  Future<wm_fuel.FuelTransaction?> getByExpenseId(String expenseId) async => null;
+  @override
+  Future<List<wm_fuel.FuelTransaction>> listAll() async => [];
 }
 
 final _dummyDb = local.WalletMeltDatabase(NativeDatabase.memory());
