@@ -131,6 +131,62 @@ void main() {
     });
 
     test(
+        'setMonthlyBudgetAmount retains current month expenses and does not reset spent to 0',
+        () async {
+      final appState = AppState.test(
+        driftCategoryRepository: FakeDriftCategoryRepo(),
+        driftExpenseRepository: FakeDriftExpenseRepo(),
+        driftBudgetRepository: FakeDriftBudgetRepo(),
+      );
+
+      final now = DateTime.now();
+      appState.selectedMonth = DateTime(now.year, now.month);
+      appState.expenses = [
+        Expense(
+          id: '1',
+          amount: 5000.0,
+          currency: 'PKR',
+          categoryId: 'grocery',
+          title: 'Grocery',
+          date: DateTime(now.year, now.month, 10).toIso8601String(),
+          isRecurring: false,
+          createdAt: '',
+          updatedAt: '',
+        ),
+        Expense(
+          id: '2',
+          amount: 3000.0,
+          currency: 'PKR',
+          categoryId: 'fuel',
+          title: 'Fuel',
+          date: DateTime(now.year, now.month, 12).toIso8601String(),
+          isRecurring: false,
+          createdAt: '',
+          updatedAt: '',
+        ),
+      ];
+
+      // Initial budget = 25,000
+      await appState.setMonthlyBudgetAmount(25000.0);
+      expect(appState.getMonthlyBudgetAmount(), 25000.0);
+      expect(appState.getCurrentMonthTotalSpent(), 8000.0);
+      expect(appState.getCurrentMonthBudgetRemaining(), 17000.0);
+
+      // Re-adjust / increase budget = 30,000
+      await appState.setMonthlyBudgetAmount(30000.0);
+      expect(appState.getMonthlyBudgetAmount(), 30000.0);
+      // Spent must NOT reset to 0
+      expect(appState.getCurrentMonthTotalSpent(), 8000.0);
+      expect(appState.getCurrentMonthBudgetRemaining(), 22000.0);
+
+      // Decrease budget = 5,000 (over budget)
+      await appState.setMonthlyBudgetAmount(5000.0);
+      expect(appState.getMonthlyBudgetAmount(), 5000.0);
+      expect(appState.getCurrentMonthTotalSpent(), 8000.0);
+      expect(appState.getCurrentMonthBudgetRemaining(), -3000.0);
+    });
+
+    test(
         'Backup format compatible extension persists and restores monthlyBudgetAmount',
         () async {
       const encoder = WalletMeltJsonBackupEncoder();

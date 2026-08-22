@@ -2,15 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../../components/charts/category_breakdown_chart.dart';
 import '../../components/expense/expense_list_tile.dart';
 import '../../components/glass/app_background.dart';
+import '../../screens/budget/budget_screen.dart';
 import '../../state/app_state.dart';
 import '../../theme/wallet_melt_theme.dart';
 import '../../utils/currency_format.dart';
 import '../../utils/date_utils.dart';
-import '../../widgets/empty_state.dart';
-import '../../widgets/progress_bar.dart';
 import '../../types/debt.dart';
 import '../../widgets/section_header.dart';
 import '../../types/subscription.dart' as wm_sub;
@@ -18,6 +16,13 @@ import '../../widgets/triple_metric_row.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
+
+  String _greeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return 'Good Morning';
+    if (hour < 17) return 'Good Afternoon';
+    return 'Good Evening';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,8 +33,8 @@ class DashboardScreen extends StatelessWidget {
     final insights = context.select((AppState s) => s.monthlyInsights);
     final selectedMonth =
         context.select<AppState, DateTime>((s) => s.selectedMonth);
-    final hasBudget = context
-        .select<AppState, bool>((s) => s.getMonthlyBudgetAmount() != null);
+    final monthlyBudget = context
+        .select<AppState, double?>((s) => s.getMonthlyBudgetAmount());
     final hasExpenses =
         context.select<AppState, bool>((s) => s.expenses.isNotEmpty);
     final currency =
@@ -37,15 +42,24 @@ class DashboardScreen extends StatelessWidget {
     final state = context.watch<AppState>();
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
+    final isDark = theme.brightness == Brightness.dark;
+
+    final totalSpent = state.getCurrentMonthTotalSpent();
+    final hasBudget = monthlyBudget != null && monthlyBudget > 0;
+    final budgetLimit = monthlyBudget ?? 0.0;
+    final remaining = budgetLimit - totalSpent;
+    final isOverBudget = hasBudget && remaining < 0;
+    final ratio = hasBudget ? (totalSpent / budgetLimit).clamp(0.0, 1.5) : 0.0;
+    final Color budgetColor = budgetProgressColor(ratio);
 
     return Scaffold(
       body: AppBackground(
         child: RefreshIndicator(
           onRefresh: context.read<AppState>().refresh,
           child: ListView(
-            padding: const EdgeInsets.fromLTRB(20, 18, 20, 120),
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 120),
             children: [
-              // ── Header row ──────────────────────────────────────────────
+              // ── Header row: Greeting, Month Selector Pill & Shortcuts ─────
               Row(
                 children: [
                   Expanded(
@@ -53,388 +67,413 @@ class DashboardScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
+                          _greeting(),
+                          style: textTheme.bodySmall?.copyWith(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: WalletMeltColors.textMuted,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
                           'WalletMelt',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: textTheme.headlineMedium,
+                          style: textTheme.headlineMedium?.copyWith(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w900,
+                          ),
                         ),
-                        const SizedBox(height: AppSpacing.xs),
-                        Text('Where did your money go this month?',
-                            style: textTheme.bodyMedium),
                       ],
                     ),
                   ),
-                  IconButton(
-                    tooltip: 'Previous month',
-                    onPressed: context.read<AppState>().previousMonth,
-                    icon: const Icon(Icons.chevron_left_rounded),
+
+                  // Month Switcher Controls
+                  Container(
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? WalletMeltColors.darkSurface
+                          : Colors.white,
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(
+                        color: isDark
+                            ? WalletMeltColors.darkBorder
+                            : WalletMeltColors.lightBorder,
+                        width: 1.0,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: isDark ? 0.12 : 0.03),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                          tooltip: 'Previous month',
+                          onPressed: context.read<AppState>().previousMonth,
+                          icon: const Icon(Icons.chevron_left_rounded, size: 20),
+                        ),
+                        Text(
+                          readableMonth(selectedMonth),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        IconButton(
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                          tooltip: 'Next month',
+                          onPressed: context.read<AppState>().nextMonth,
+                          icon: const Icon(Icons.chevron_right_rounded, size: 20),
+                        ),
+                      ],
+                    ),
                   ),
-                  IconButton(
-                    tooltip: 'Next month',
-                    onPressed: context.read<AppState>().nextMonth,
-                    icon: const Icon(Icons.chevron_right_rounded),
-                  ),
-                  IconButton(
-                    tooltip: 'Insights',
-                    onPressed: () => context.push('/insights'),
-                    icon: const Icon(Icons.insights_rounded),
-                  ),
-                  IconButton(
-                    tooltip: 'Settings',
-                    onPressed: () => context.push('/settings'),
-                    icon: const Icon(Icons.settings_rounded),
+
+                  const SizedBox(width: 8),
+
+                  // Settings Shortcut
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? WalletMeltColors.darkSurface
+                          : Colors.white,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: isDark
+                            ? WalletMeltColors.darkBorder
+                            : WalletMeltColors.lightBorder,
+                        width: 1.0,
+                      ),
+                    ),
+                    child: IconButton(
+                      padding: EdgeInsets.zero,
+                      tooltip: 'Settings',
+                      onPressed: () => context.push('/settings'),
+                      icon: const Icon(Icons.settings_outlined, size: 18),
+                    ),
                   ),
                 ],
               ),
-              const SizedBox(height: AppSpacing.md + 2),
+              const SizedBox(height: 18),
 
-              // ── Hero spend card ─────────────────────────────────────────
-              LiquidGlass(
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                child: Stack(
-                  clipBehavior: Clip.none,
+              // ── Primary FinSight-Style Dark Financial Hero Card ──────────
+              WMDarkHeroCard(
+                onTap: () {
+                  BudgetScreen.showSetBudgetSheet(
+                    context,
+                    state,
+                    monthlyBudget,
+                    totalSpent,
+                  );
+                },
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Positioned(
-                      right: -30,
-                      top: -30,
-                      child: Container(
-                        width: 150,
-                        height: 150,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: RadialGradient(
-                            colors: [
-                              WalletMeltColors.brandSoft
-                                  .withValues(alpha: 0.36),
-                              WalletMeltColors.brandSoft.withValues(alpha: 0.0),
-                            ],
+                    // Card Top Meta Row
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 8,
+                              height: 8,
+                              decoration: const BoxDecoration(
+                                color: WalletMeltColors.brand,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              '${readableMonth(selectedMonth).toUpperCase()} SPEND',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 1.1,
+                                color: Color(0xFF94A3B8),
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (insights.monthOverMonthDelta != null) ...[
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: insights.monthOverMonthDelta! <= 0
+                                  ? WalletMeltColors.positive.withValues(alpha: 0.18)
+                                  : WalletMeltColors.danger.withValues(alpha: 0.18),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  insights.monthOverMonthDelta! <= 0
+                                      ? Icons.arrow_downward_rounded
+                                      : Icons.arrow_upward_rounded,
+                                  size: 11,
+                                  color: insights.monthOverMonthDelta! <= 0
+                                      ? WalletMeltColors.positive
+                                      : WalletMeltColors.danger,
+                                ),
+                                const SizedBox(width: 3),
+                                Text(
+                                  '${insights.monthOverMonthDelta!.abs().toStringAsFixed(1)}%',
+                                  style: TextStyle(
+                                    fontSize: 10.5,
+                                    fontWeight: FontWeight.w800,
+                                    color: insights.monthOverMonthDelta! <= 0
+                                        ? WalletMeltColors.positive
+                                        : WalletMeltColors.danger,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Big Confident Spend Typography
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        formatMoney(totalSpent, currency),
+                        style: const TextStyle(
+                          fontSize: 38,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white,
+                          letterSpacing: -0.8,
+                          height: 1.05,
                         ),
                       ),
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(readableMonth(selectedMonth),
-                            style: textTheme.labelLarge),
-                        const SizedBox(height: AppSpacing.sm),
-                        Text(formatMoney(insights.total, currency),
-                            style: textTheme.displaySmall),
-                        const SizedBox(height: AppSpacing.sm),
-                        Text(
-                          insights.highestCategory == null
-                              ? 'Add your first expense to reveal where the month melted.'
-                              : 'Highest melt: ${insights.highestCategory!.category.name}',
-                          style: textTheme.bodyMedium,
-                        ),
-                      ],
-                    ),
+                    const SizedBox(height: 14),
+
+                    // Budget Progress & Remaining Amount Context
+                    if (hasBudget) ...[
+                      // Progress Bar
+                      LinearProgressIndicator(
+                        value: ratio.clamp(0.0, 1.0),
+                        minHeight: 6,
+                        backgroundColor: Colors.white.withValues(alpha: 0.12),
+                        valueColor: AlwaysStoppedAnimation<Color>(budgetColor),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            isOverBudget
+                                ? 'Over budget by ${formatMoney(-remaining, currency)}'
+                                : '${formatMoney(remaining, currency)} remaining',
+                            style: TextStyle(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w700,
+                              color: isOverBudget
+                                  ? WalletMeltColors.danger
+                                  : Colors.white.withValues(alpha: 0.85),
+                            ),
+                          ),
+                          Text(
+                            'Budget: ${formatMoney(budgetLimit, currency)}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white.withValues(alpha: 0.5),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ] else ...[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            insights.highestCategory == null
+                                ? 'No budget set for this month'
+                                : 'Highest: ${insights.highestCategory!.category.name}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white.withValues(alpha: 0.6),
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                'Set Budget',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: WalletMeltColors.brand,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              Icon(
+                                Icons.arrow_forward_rounded,
+                                size: 12,
+                                color: WalletMeltColors.brand,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: 24),
 
-              // ── Budget summary card ─────────────────────────────────────
-              if (hasBudget) ...[
-                const _DashboardBudgetCard(),
-                const SizedBox(height: AppSpacing.md),
-              ],
+              // ── Quick Action Controls Row (FinSight Action Buttons) ──────
+              Row(
+                children: [
+                  WMQuickActionButton(
+                    icon: Icons.add_rounded,
+                    label: 'Add Expense',
+                    isPrimary: true,
+                    onTap: () => context.push('/expense/new'),
+                  ),
+                  const SizedBox(width: 10),
+                  WMQuickActionButton(
+                    icon: Icons.local_gas_station_rounded,
+                    label: 'Fuel Refill',
+                    onTap: () => context.push('/expense/new?categoryId=fuel'),
+                  ),
+                  const SizedBox(width: 10),
+                  WMQuickActionButton(
+                    icon: Icons.shopping_basket_rounded,
+                    label: 'Groceries',
+                    onTap: () => context.push('/expense/new?categoryId=grocery'),
+                  ),
+                  const SizedBox(width: 10),
+                  WMQuickActionButton(
+                    icon: Icons.insights_rounded,
+                    label: 'Insights',
+                    onTap: () => context.push('/insights'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 28),
 
-              // ── Financial Obligations Card ──────────────────────────────
-              if (state.debts.any((d) => !d.isSettled)) ...[
-                _DashboardObligationsCard(state: state, currency: currency),
-                const SizedBox(height: AppSpacing.md),
-              ],
-
-              // ── Tax Paid Card ──────────────────────────────────────────
-              if (state.currentMonthExpenses.any((e) => e.taxAmount != null && e.taxAmount! > 0)) ...[
-                _DashboardTaxCard(state: state, currency: currency),
-                const SizedBox(height: AppSpacing.md),
-              ],
-
-              // ── Upcoming Renewals Card ──────────────────────────────────
-              if (state.subscriptions.any((s) => s.status == wm_sub.SubscriptionStatus.active)) ...[
-                _DashboardUpcomingRenewalsCard(state: state, currency: currency),
-                const SizedBox(height: AppSpacing.md),
-              ],
-
-              // ── Content: empty or charts + recent ──────────────────────
-              if (!hasExpenses)
-                const EmptyState(
-                  icon: Icons.receipt_long_outlined,
-                  title: 'No expenses yet',
-                  subtitle: 'Tap + to add your first expense.',
-                )
-              else ...[
-                LiquidGlass(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SectionHeader(
-                        title: 'Category melt',
-                        icon: Icons.donut_small_rounded,
-                        padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+              // ── Recent Activity / Transaction Timeline ───────────────────
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Recent Activity',
+                    style: textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 17,
+                    ),
+                  ),
+                  if (hasExpenses)
+                    GestureDetector(
+                      onTap: () => context.go('/history'),
+                      child: Text(
+                        'View All',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: isDark ? WalletMeltColors.brand : WalletMeltColors.textPrimary,
+                        ),
                       ),
-                      const SizedBox(height: AppSpacing.sm),
-                      RepaintBoundary(
-                        child: CategoryBreakdownChart(
-                            items: insights.categorySpend),
-                      ),
-                    ],
+                    ),
+                ],
+              ),
+              const SizedBox(height: 12),
+
+              if (!hasExpenses) ...[
+                WMGlassSurface.tier1(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 28),
+                  child: Center(
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.receipt_long_outlined,
+                          size: 40,
+                          color: WalletMeltColors.textMuted.withValues(alpha: 0.6),
+                        ),
+                        const SizedBox(height: 10),
+                        const Text(
+                          'No expenses recorded yet',
+                          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          'Tap + Add Expense above to log your first purchase.',
+                          style: TextStyle(fontSize: 12, color: WalletMeltColors.textMuted),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                const SizedBox(height: AppSpacing.md),
-                LiquidGlass(
+              ] else ...[
+                WMGlassSurface.tier1(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SectionHeader(
-                        title: 'Grocery vs utilities',
-                        icon: Icons.compare_arrows_rounded,
-                        padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      _ComparisonBar(
-                        leftLabel: 'Grocery',
-                        leftValue: insights.groceryTotal,
-                        rightLabel: 'Utilities',
-                        rightValue: insights.utilitiesTotal,
-                        currency: currency,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                LiquidGlass(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SectionHeader(
-                        title: 'Recent expenses',
-                        icon: Icons.history_rounded,
-                        padding: EdgeInsets.only(bottom: AppSpacing.xs),
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      for (final expense in insights.recentExpenses)
+                      for (int i = 0; i < insights.recentExpenses.length; i++) ...[
                         ExpenseListTile(
-                          expense: expense,
+                          expense: insights.recentExpenses[i],
                           category: context
                               .read<AppState>()
-                              .categoryById(expense.categoryId),
-                          onTap: () => context.push('/expense/${expense.id}'),
+                              .categoryById(insights.recentExpenses[i].categoryId),
+                          onTap: () => context.push('/expense/${insights.recentExpenses[i].id}'),
                         ),
+                        if (i < insights.recentExpenses.length - 1)
+                          Divider(
+                            height: 1,
+                            indent: 64,
+                            color: isDark
+                                ? WalletMeltColors.darkBorder
+                                : WalletMeltColors.lightBorder,
+                          ),
+                      ],
                     ],
                   ),
                 ),
               ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
+              const SizedBox(height: 28),
 
-// ── Private widgets ──────────────────────────────────────────────────────────
-
-class _ComparisonBar extends StatelessWidget {
-  const _ComparisonBar({
-    required this.leftLabel,
-    required this.leftValue,
-    required this.rightLabel,
-    required this.rightValue,
-    required this.currency,
-  });
-
-  final String leftLabel;
-  final double leftValue;
-  final String rightLabel;
-  final double rightValue;
-  final String currency;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final total = leftValue + rightValue;
-    final leftPercent = total == 0 ? 0.5 : leftValue / total;
-    final leftFlex = (leftPercent * 100).round().clamp(1, 99).toInt();
-    final rightFlex = (100 - leftFlex).clamp(1, 99).toInt();
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-
-    return Column(
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(999),
-          child: SizedBox(
-            height: 12,
-            child: Row(
-              children: [
-                Expanded(
-                  flex: leftFlex,
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Color(0xFF8FD6B5),
-                          Color(0xFF5AB693),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                Container(
-                  width: 2,
-                  color: isDark ? WalletMeltColors.darkSurface : Colors.white,
-                ),
-                Expanded(
-                  flex: rightFlex,
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Color(0xFFFFD98A),
-                          Color(0xFFF4B740),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
+              // ── Upcoming Commitments & Obligations ───────────────────────
+              if (state.subscriptions.any((s) => s.status == wm_sub.SubscriptionStatus.active)) ...[
+                _DashboardUpcomingRenewalsCard(state: state, currency: currency),
+                const SizedBox(height: 16),
               ],
-            ),
-          ),
-        ),
-        const SizedBox(height: AppSpacing.sm + 2),
-        Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    leftLabel,
-                    style: textTheme.bodySmall?.copyWith(
-                          color: textTheme.bodySmall?.color?.withValues(alpha: 0.8),
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    formatMoney(leftValue, currency),
-                    style: textTheme.titleMedium?.copyWith(
-                          color: WalletMeltColors.positive,
-                          fontSize: 15,
-                        ),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    rightLabel,
-                    style: textTheme.bodySmall?.copyWith(
-                          color: textTheme.bodySmall?.color?.withValues(alpha: 0.8),
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    formatMoney(rightValue, currency),
-                    style: textTheme.titleMedium?.copyWith(
-                          color: WalletMeltColors.brand,
-                          fontSize: 15,
-                        ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
 
-class _DashboardBudgetCard extends StatelessWidget {
-  const _DashboardBudgetCard();
+              if (state.debts.any((d) => !d.isSettled)) ...[
+                _DashboardObligationsCard(state: state, currency: currency),
+                const SizedBox(height: 16),
+              ],
 
-  @override
-  Widget build(BuildContext context) {
-    final monthlyBudget = context
-        .select<AppState, double>((s) => s.getMonthlyBudgetAmount() ?? 0.0);
-    final totalSpent =
-        context.select<AppState, double>((s) => s.getCurrentMonthTotalSpent());
-    final currency =
-        context.select<AppState, String>((s) => s.settings.currency);
-    final remaining = monthlyBudget - totalSpent;
-    final isOverBudget = remaining < 0;
-    final ratio = monthlyBudget > 0 ? totalSpent / monthlyBudget : 0.0;
-    final Color budgetColor = budgetProgressColor(ratio);
-
-    return LiquidGlass(
-      onTap: () => context.go('/planning'),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "This Month's Budget",
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                    vertical: AppSpacing.xs, horizontal: AppSpacing.sm),
-                child: Text(
-                  'Details →',
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                ),
-              ),
+              if (state.currentMonthExpenses.any((e) => e.taxAmount != null && e.taxAmount! > 0)) ...[
+                _DashboardTaxCard(state: state, currency: currency),
+                const SizedBox(height: 16),
+              ],
             ],
           ),
-          const SizedBox(height: AppSpacing.sm),
-          ProgressBar(fraction: ratio, color: budgetColor),
-          const SizedBox(height: AppSpacing.sm),
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  'Spent: ${formatMoney(totalSpent, currency)}',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Text(
-                  isOverBudget
-                      ? 'Over by ${formatMoney(-remaining, currency)}'
-                      : 'Remaining: ${formatMoney(remaining, currency)}',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: isOverBudget ? Theme.of(context).colorScheme.error : null,
-                      ),
-                  textAlign: TextAlign.right,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-        ],
+        ),
       ),
     );
   }
 }
+
+// ── Private Sub-Components ───────────────────────────────────────────────────
 
 class _DashboardObligationsCard extends StatelessWidget {
   const _DashboardObligationsCard({
@@ -462,7 +501,6 @@ class _DashboardObligationsCard extends StatelessWidget {
     final netPosition = owedToMe - iOwe;
     final isNegative = netPosition < 0;
 
-    // Show obligations only if there are active outstanding debts/loans.
     if (owedToMe == 0 && iOwe == 0) {
       return const SizedBox.shrink();
     }
@@ -550,6 +588,8 @@ class _DashboardTaxCard extends StatelessWidget {
             formatMoney(taxThisMonth, currency),
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   color: Theme.of(context).colorScheme.error,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w900,
                 ),
           ),
         ],
@@ -580,7 +620,7 @@ class _DashboardUpcomingRenewalsCard extends StatelessWidget {
 
     return WMGlassSurface.tier2(
       padding: const EdgeInsets.all(AppSpacing.md),
-      onTap: () => context.go('/planning?tab=subscriptions'),
+      onTap: () => context.go('/planning'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -594,13 +634,17 @@ class _DashboardUpcomingRenewalsCard extends StatelessWidget {
               ),
               Text(
                 'View all →',
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? WalletMeltColors.brand
+                      : WalletMeltColors.textPrimary,
+                ),
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.sm + 2),
+          const SizedBox(height: AppSpacing.sm),
           ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -629,7 +673,7 @@ class _DashboardUpcomingRenewalsCard extends StatelessWidget {
                 } else if (days == 1) {
                   daysText = 'tomorrow';
                 } else {
-                  daysText = '$days days';
+                  daysText = 'in $days days';
                 }
               } else {
                 daysText = 'unknown';
@@ -648,20 +692,17 @@ class _DashboardUpcomingRenewalsCard extends StatelessWidget {
                           style: Theme.of(context)
                               .textTheme
                               .titleMedium
-                              ?.copyWith(fontSize: 14),
+                              ?.copyWith(fontSize: 14, fontWeight: FontWeight.w700),
                         ),
                         Text(
                           daysText,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall
-                              ?.copyWith(
-                                color:
-                                    daysText == 'today' || daysText == 'overdue'
-                                        ? WalletMeltColors.warning
-                                        : WalletMeltColors.textMuted,
-                                fontWeight: FontWeight.bold,
-                              ),
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: daysText == 'today' || daysText == 'overdue'
+                                ? WalletMeltColors.danger
+                                : WalletMeltColors.textMuted,
+                          ),
                         ),
                       ],
                     ),
@@ -670,7 +711,7 @@ class _DashboardUpcomingRenewalsCard extends StatelessWidget {
                       style: Theme.of(context)
                           .textTheme
                           .titleMedium
-                          ?.copyWith(fontSize: 14),
+                          ?.copyWith(fontSize: 14, fontWeight: FontWeight.w800),
                     ),
                   ],
                 ),

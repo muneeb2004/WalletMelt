@@ -14,6 +14,7 @@ class AppShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final activeIndex = navigationShell.currentIndex;
     final action = ScreenActionResolver.resolve(context, activeIndex);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       extendBody: true,
@@ -21,79 +22,61 @@ class AppShell extends StatelessWidget {
         children: [
           Positioned.fill(child: navigationShell),
           Positioned(
-            left: AppSpacing.md,
-            right: AppSpacing.md,
-            bottom: AppSpacing.md,
+            left: 24,
+            right: 24,
+            bottom: 18,
             child: SafeArea(
-              child: FlatNavBar(
-                radius: 999,
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final totalWidth = constraints.maxWidth;
-                    final tabWidth = totalWidth / 4;
-                    final activeIndex = navigationShell.currentIndex;
-
-                    return Stack(
-                      children: [
-                        // Smoothly sliding active indicator tab background
-                        AnimatedPositioned(
-                          duration: AppMotion.medium,
-                          curve: AppMotion.entrance,
-                          left: activeIndex * tabWidth,
-                          width: tabWidth,
-                          top: 0,
-                          bottom: 0,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 2, vertical: 2),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .primary
-                                    .withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(999),
-                                border: Border.all(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .primary
-                                      .withValues(alpha: 0.18),
-                                  width: 1.0,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        // Tab Items Row
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            _NavItem(
-                                icon: Icons.dashboard_rounded,
-                                label: 'Home',
-                                index: 0,
-                                shell: navigationShell),
-                            _NavItem(
-                                icon: Icons.receipt_long_rounded,
-                                label: 'History',
-                                index: 1,
-                                shell: navigationShell),
-                            _NavItem(
-                                icon: Icons.calendar_today_rounded,
-                                label: 'Planning',
-                                index: 2,
-                                shell: navigationShell),
-                            _NavItem(
-                                icon: Icons.handshake_rounded,
-                                label: 'Debts',
-                                index: 3,
-                                shell: navigationShell),
-                          ],
-                        ),
-                      ],
-                    );
-                  },
+              child: Container(
+                height: 64,
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF161922) : Colors.white,
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(
+                    color: isDark ? WalletMeltColors.darkBorder : const Color(0x0E000000),
+                    width: 1.0,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
+                      blurRadius: 24,
+                      offset: const Offset(0, 8),
+                    ),
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.03),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _NavItem(
+                      icon: Icons.home_filled,
+                      label: 'Home',
+                      index: 0,
+                      shell: navigationShell,
+                    ),
+                    _NavItem(
+                      icon: Icons.receipt_long_rounded,
+                      label: 'History',
+                      index: 1,
+                      shell: navigationShell,
+                    ),
+                    _NavItem(
+                      icon: Icons.account_balance_wallet_rounded,
+                      label: 'Planning',
+                      index: 2,
+                      shell: navigationShell,
+                    ),
+                    _NavItem(
+                      icon: Icons.handshake_rounded,
+                      label: 'Debts',
+                      index: 3,
+                      shell: navigationShell,
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -121,6 +104,7 @@ class ScreenActionResolver {
   static ScreenAction? resolve(BuildContext context, int currentIndex) {
     switch (currentIndex) {
       case 0:
+        return null; // Dashboard has prominent Quick Actions bar
       case 1:
         return ScreenAction(
           icon: Icons.add_rounded,
@@ -377,69 +361,53 @@ class _NavItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final active = shell.currentIndex == index;
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final activeColor = colorScheme.primary;
-    final inactiveColor =
-        theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.54) ??
-            Colors.grey;
+    final isDark = theme.brightness == Brightness.dark;
 
-    return Expanded(
-      child: Semantics(
-        button: true,
-        selected: active,
-        label: label,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(999),
-          onTap: () {
-            WMHaptics.selection();
-            shell.goBranch(index, initialLocation: index == shell.currentIndex);
-          },
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-            decoration: const BoxDecoration(
-              color: Colors.transparent,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                AnimatedScale(
-                  scale: active ? 1.12 : 1.0,
-                  duration: AppMotion.medium,
-                  curve: AppMotion.entrance,
-                  child: TweenAnimationBuilder<Color?>(
-                    duration: AppMotion.medium,
-                    tween: ColorTween(
-                      end: active ? activeColor : inactiveColor,
-                    ),
-                    builder: (context, color, child) {
-                      return Icon(
-                        icon,
-                        color: color ?? (active ? activeColor : inactiveColor),
-                        size: 20,
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(height: 3),
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: AnimatedDefaultTextStyle(
-                    duration: AppMotion.medium,
-                    curve: AppMotion.entrance,
-                    style: theme.textTheme.labelMedium!.copyWith(
-                      fontSize: 9.5,
-                      fontWeight: active ? FontWeight.w800 : FontWeight.w600,
-                      color: active ? activeColor : inactiveColor,
-                    ),
-                    maxLines: 1,
-                    softWrap: false,
-                    overflow: TextOverflow.clip,
-                    child: Text(label),
+    final activeIconColor = isDark ? Colors.black : Colors.white;
+    final activeBgColor = isDark ? WalletMeltColors.brand : WalletMeltColors.textPrimary;
+    final inactiveIconColor = isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8);
+
+    return Semantics(
+      button: true,
+      selected: active,
+      label: label,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          WMHaptics.selection();
+          shell.goBranch(index, initialLocation: index == shell.currentIndex);
+        },
+        child: AnimatedContainer(
+          duration: AppMotion.fast,
+          padding: EdgeInsets.symmetric(
+            horizontal: active ? 16 : 12,
+            vertical: 8,
+          ),
+          decoration: BoxDecoration(
+            color: active ? activeBgColor : Colors.transparent,
+            borderRadius: BorderRadius.circular(999),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                color: active ? activeIconColor : inactiveIconColor,
+                size: 20,
+              ),
+              if (active) ...[
+                const SizedBox(width: 6),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    color: activeIconColor,
+                    letterSpacing: 0.2,
                   ),
                 ),
               ],
-            ),
+            ],
           ),
         ),
       ),

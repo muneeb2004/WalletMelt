@@ -60,14 +60,14 @@ void main() {
     }
 
     testWidgets(
-        'Dashboard shows no budget card when monthlyBudgetAmount is null',
+        'Dashboard shows no budget progress bar when monthlyBudgetAmount is null',
         (tester) async {
       final appState = createAppState(monthlyBudget: null);
       await tester.pumpWidget(buildDashboardHarness(appState: appState));
       await tester.pumpAndSettle();
 
-      expect(find.text("This Month's Budget"), findsNothing);
-      expect(find.text('Details →'), findsNothing);
+      expect(find.byType(LinearProgressIndicator), findsNothing);
+      expect(find.text('No budget set for this month'), findsOneWidget);
     });
 
     testWidgets(
@@ -92,10 +92,9 @@ void main() {
       await tester.pumpWidget(buildDashboardHarness(appState: appState));
       await tester.pumpAndSettle();
 
-      expect(find.text("This Month's Budget"), findsOneWidget);
-      expect(find.text('Details →'), findsOneWidget);
-      expect(find.textContaining('Spent: Rs 2,000'), findsOneWidget);
-      expect(find.textContaining('Remaining: Rs 3,000'), findsOneWidget);
+      expect(find.byType(LinearProgressIndicator), findsOneWidget);
+      expect(find.textContaining('2,000'), findsWidgets);
+      expect(find.textContaining('3,000 remaining'), findsOneWidget);
     });
 
     testWidgets(
@@ -158,7 +157,7 @@ void main() {
       expect(valueColorAnimation.value, WalletMeltColors.brand);
     });
 
-    testWidgets('Tapping the card navigates to the Budget route',
+    testWidgets('Tapping the hero card opens the budget adjustment sheet',
         (tester) async {
       final appState = createAppState(
         monthlyBudget: 5000.0,
@@ -166,24 +165,10 @@ void main() {
       await tester.pumpWidget(buildDashboardHarness(appState: appState));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text("This Month's Budget"));
+      await tester.tap(find.byType(WMDarkHeroCard));
       await tester.pumpAndSettle();
 
-      expect(find.text('Planning Screen Mock'), findsOneWidget);
-    });
-
-    testWidgets('Tapping Details navigates to the Budget route',
-        (tester) async {
-      final appState = createAppState(
-        monthlyBudget: 5000.0,
-      );
-      await tester.pumpWidget(buildDashboardHarness(appState: appState));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('Details →'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Planning Screen Mock'), findsOneWidget);
+      expect(find.text('Edit Monthly Budget'), findsOneWidget);
     });
   });
 }

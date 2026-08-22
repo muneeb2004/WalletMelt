@@ -18,11 +18,8 @@ class EssentialExpensesScreen extends StatefulWidget {
   const EssentialExpensesScreen({this.isEmbedded = false, super.key});
 
   static void showAddEssentialSheet(BuildContext context, {EssentialExpenseTemplate? existing}) {
-    showModalBottomSheet<void>(
-      context: context,
-      showDragHandle: true,
-      isScrollControlled: true,
-      constraints: const BoxConstraints(maxWidth: 600),
+    showAppBottomSheet<void>(
+      context,
       builder: (sheetContext) => _AddEditEssentialSheet(existing: existing),
     );
   }
@@ -268,7 +265,7 @@ class _EssentialExpensesScreenState extends State<EssentialExpensesScreen> {
 
   void _recordExpenseForTemplate(
       BuildContext context, EssentialExpenseTemplate template, AppState state) {
-    context.push('/expense/new');
+    context.push('/expense/new?categoryId=${template.categoryId}');
   }
 
   Future<void> _confirmDelete(
@@ -544,12 +541,7 @@ class _AddEditEssentialSheetState extends State<_AddEditEssentialSheet> {
     final isEditing = widget.existing != null;
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(
-        20,
-        10,
-        20,
-        MediaQuery.of(context).viewInsets.bottom + 24,
-      ),
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 24),
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,

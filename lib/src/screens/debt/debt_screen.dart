@@ -925,42 +925,140 @@ class _DebtScreenState extends State<DebtScreen> {
             ),
             const SizedBox(height: 18),
 
-            // Vertically stacked Summary Dashboard Card
-            WMGlassSurface.tier3(
-              padding: const EdgeInsets.all(20),
+            // Primary FinSight-Inspired Dark Summary Card
+            WMDarkHeroCard(
+              padding: const EdgeInsets.all(22),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildVerticalMetricRow(
-                    context,
-                    label: 'OWED TO ME (Receivables)',
-                    amount: owedToMe,
-                    currency: currency,
-                    color: WalletMeltColors.positive,
-                    icon: Icons.arrow_outward_rounded,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: const BoxDecoration(
+                              color: WalletMeltColors.brand,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          const Text(
+                            'NET OBLIGATION POSITION',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 1.1,
+                              color: Color(0xFF94A3B8),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: (netPosition >= 0 ? WalletMeltColors.positive : WalletMeltColors.danger).withValues(alpha: 0.18),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          netPosition >= 0 ? 'NET ASSET' : 'NET LIABILITY',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            color: netPosition >= 0 ? WalletMeltColors.positive : WalletMeltColors.danger,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 12),
-                  const Divider(height: 1, color: Color(0x1Fffffff)),
-                  const SizedBox(height: 12),
-                  _buildVerticalMetricRow(
-                    context,
-                    label: 'I OWE (Liabilities)',
-                    amount: iOwe,
-                    currency: currency,
-                    color: WalletMeltColors.danger,
-                    icon: Icons.call_received_rounded,
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      '${netPosition >= 0 ? "+" : "-"}${netPosition.abs().toStringAsFixed(netPosition % 1 == 0 ? 0 : 2)} $currency',
+                      style: TextStyle(
+                        fontSize: 34,
+                        fontWeight: FontWeight.w900,
+                        color: netPosition >= 0 ? WalletMeltColors.positive : WalletMeltColors.danger,
+                        letterSpacing: -0.6,
+                        height: 1.05,
+                      ),
+                    ),
                   ),
-                  const SizedBox(height: 12),
-                  const Divider(height: 1, color: Color(0x1Fffffff)),
-                  const SizedBox(height: 12),
-                  _buildVerticalMetricRow(
-                    context,
-                    label: 'NET POSITION',
-                    amount: netPosition,
-                    currency: currency,
-                    color: netPosition >= 0 ? WalletMeltColors.positive : WalletMeltColors.danger,
-                    icon: Icons.account_balance_wallet_rounded,
-                    isBold: true,
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.08),
+                        width: 1.0,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'OWED TO YOU',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.8,
+                                  color: Color(0xFF94A3B8),
+                                ),
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                '${owedToMe.toStringAsFixed(owedToMe % 1 == 0 ? 0 : 2)} $currency',
+                                style: const TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w900,
+                                  color: WalletMeltColors.positive,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          width: 1,
+                          height: 28,
+                          color: Colors.white.withValues(alpha: 0.12),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'YOU OWE',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.8,
+                                  color: Color(0xFF94A3B8),
+                                ),
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                '${iOwe.toStringAsFixed(iOwe % 1 == 0 ? 0 : 2)} $currency',
+                                style: const TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w900,
+                                  color: WalletMeltColors.danger,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -1186,63 +1284,6 @@ class _DebtScreenState extends State<DebtScreen> {
     );
   }
 
-
-
-  Widget _buildVerticalMetricRow(
-    BuildContext context, {
-    required String label,
-    required double amount,
-    required String currency,
-    required Color color,
-    required IconData icon,
-    bool isBold = false,
-  }) {
-    return Row(
-      children: [
-        Container(
-          width: 32,
-          height: 32,
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.12),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(icon, color: color, size: 16),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontSize: 10,
-                      letterSpacing: 0.8,
-                      fontWeight: FontWeight.w700,
-                      color: WalletMeltColors.textMuted,
-                    ),
-              ),
-              const SizedBox(height: 2),
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  '${amount >= 0 ? "" : "-"}${amount.abs().toStringAsFixed(amount % 1 == 0 ? 0 : 2)} $currency',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: isBold ? FontWeight.w900 : FontWeight.w800,
-                        fontSize: isBold ? 18 : 15,
-                        color: isBold ? color : null,
-                      ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-
-
   Widget _buildSectionHeader(BuildContext context, String title, Color color) {
     return Row(
       children: [
@@ -1433,24 +1474,29 @@ class _DebtScreenState extends State<DebtScreen> {
 
 
   Widget _buildFilterChip(String label, bool selected, VoidCallback onTap) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return FilterChip(
       label: Text(
         label,
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w700,
-          color: selected ? Colors.white : WalletMeltColors.textSecondary,
+          color: selected
+              ? (isDark ? Colors.black : Colors.white)
+              : (isDark ? WalletMeltColors.darkTextSecondary : WalletMeltColors.textSecondary),
         ),
       ),
       selected: selected,
       onSelected: (_) => onTap(),
       backgroundColor: Colors.transparent,
-      selectedColor: WalletMeltColors.brand,
-      checkmarkColor: Colors.white,
+      selectedColor: isDark ? WalletMeltColors.brand : WalletMeltColors.textPrimary,
+      checkmarkColor: isDark ? Colors.black : Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: selected ? WalletMeltColors.brand : const Color(0x1Fffffff),
+          color: selected
+              ? (isDark ? WalletMeltColors.brand : WalletMeltColors.textPrimary)
+              : (isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder),
           width: 1,
         ),
       ),

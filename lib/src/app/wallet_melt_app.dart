@@ -168,7 +168,10 @@ class _WalletMeltAppState extends State<WalletMeltApp> {
             builder: (context, state) => const InsightsScreen()),
         GoRoute(
             path: '/expense/new',
-            builder: (context, state) => const AddExpenseScreen()),
+            builder: (context, state) {
+              final catId = state.uri.queryParameters['categoryId'];
+              return AddExpenseScreen(initialCategoryId: catId);
+            }),
         GoRoute(
             path: '/subscriptions',
             redirect: (context, state) => '/planning?tab=subscriptions'),

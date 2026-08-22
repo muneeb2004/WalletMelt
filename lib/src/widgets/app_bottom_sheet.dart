@@ -13,13 +13,11 @@ Future<T?> showAppBottomSheet<T>(
   Color? backgroundColor,
 }) async {
   // Trigger tactile haptic feedback when the sheet starts opening
-  await WMHaptics.light();
-
-  if (!context.mounted) return null;
+  WMHaptics.light();
 
   return showModalBottomSheet<T>(
     context: context,
-    useRootNavigator: true,
+    useRootNavigator: false,
     isScrollControlled: isScrollControlled,
     showDragHandle: showDragHandle,
     backgroundColor: backgroundColor,

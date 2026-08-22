@@ -153,7 +153,12 @@ class AppState extends ChangeNotifier {
   MonthlyInsights? _cachedInsights;
 
   List<Expense> _currentMonthExpenses = const [];
-  List<Expense> get currentMonthExpenses => _currentMonthExpenses;
+  List<Expense> get currentMonthExpenses {
+    if (_currentMonthExpenses.isEmpty && expenses.isNotEmpty) {
+      _updateCurrentMonthExpenses();
+    }
+    return _currentMonthExpenses;
+  }
 
   Map<String, wm.Category>? _categoryMap;
 
@@ -161,10 +166,11 @@ class AppState extends ChangeNotifier {
     _cachedTotalSpent = null;
     _cachedInsights = null;
     _categoryMap = null;
-    _currentMonthExpenses = const [];
   }
 
   void _updateCurrentMonthExpenses() {
+    _cachedTotalSpent = null;
+    _cachedInsights = null;
     _currentMonthExpenses = expenses.where((e) {
       if (e.deletedAt != null) return false;
       try {
@@ -274,7 +280,7 @@ class AppState extends ChangeNotifier {
 
   double getCurrentMonthTotalSpent() {
     if (_cachedTotalSpent != null) return _cachedTotalSpent!;
-    _cachedTotalSpent = _currentMonthExpenses.fold<double>(0, (sum, e) => sum + e.amount);
+    _cachedTotalSpent = currentMonthExpenses.fold<double>(0, (sum, e) => sum + e.amount);
     return _cachedTotalSpent!;
   }
 

@@ -13,7 +13,6 @@ import '../../types/category.dart' as wm;
 import '../../types/expense.dart';
 import '../../utils/insights.dart';
 import '../../widgets/empty_state.dart';
-import '../../widgets/section_header.dart';
 
 enum ExpenseSort { newest, oldest, amountHigh, amountLow }
 
@@ -158,6 +157,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final expenses = context.select<AppState, List<Expense>>((s) => s.expenses);
     final deletedExpenses = context.select<AppState, List<Expense>>((s) => s.deletedExpenses);
     final categories = context.select<AppState, List<wm.Category>>((s) => s.categories);
@@ -171,129 +171,216 @@ class _HistoryScreenState extends State<HistoryScreen> {
         child: CustomScrollView(
           slivers: [
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
               sliver: SliverToBoxAdapter(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // ── Title row ─────────────────────────────────────────
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Expanded(
-                          child: Text(
-                            'History',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.headlineMedium,
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _showRecycleBin ? 'Recycle Bin' : 'Transaction History',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.headlineMedium?.copyWith(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              _showRecycleBin
+                                  ? 'Restore or permanently delete expenses'
+                                  : 'All past expenses and receipts',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: WalletMeltColors.textMuted,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: _showRecycleBin
+                                ? WalletMeltColors.danger.withValues(alpha: 0.15)
+                                : (isDark ? WalletMeltColors.darkSurface : Colors.white),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: _showRecycleBin
+                                  ? WalletMeltColors.danger
+                                  : (isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder),
+                              width: 1.0,
+                            ),
+                          ),
+                          child: IconButton(
+                            padding: EdgeInsets.zero,
+                            tooltip: _showRecycleBin
+                                ? 'Show active expenses'
+                                : 'Show recycle bin',
+                            onPressed: () {
+                              setState(() => _showRecycleBin = !_showRecycleBin);
+                              if (_showRecycleBin) {
+                                context.read<AppState>().loadDeletedExpenses();
+                              }
+                            },
+                            icon: Icon(
+                              _showRecycleBin
+                                  ? Icons.receipt_long_rounded
+                                  : Icons.delete_outline_rounded,
+                              size: 18,
+                              color: _showRecycleBin
+                                  ? WalletMeltColors.danger
+                                  : (isDark ? Colors.white : WalletMeltColors.textPrimary),
+                            ),
                           ),
                         ),
-                        IconButton(
-                          tooltip: _showRecycleBin
-                              ? 'Show active expenses'
-                              : 'Show recycle bin',
-                          onPressed: () {
-                            setState(() => _showRecycleBin = !_showRecycleBin);
-                            if (_showRecycleBin) {
-                              context.read<AppState>().loadDeletedExpenses();
-                            }
-                          },
-                          icon: Icon(_showRecycleBin
-                              ? Icons.receipt_long_rounded
-                              : Icons.delete_outline_rounded),
-                        ),
                       ],
                     ),
-                    const SizedBox(height: AppSpacing.md),
+                    const SizedBox(height: 16),
 
-                    // ── Search ────────────────────────────────────────────
-                    TextField(
-                      controller: _searchController,
-                      decoration: const InputDecoration(
-                          prefixIcon: Icon(Icons.search_rounded),
-                          labelText: 'Search vendor, title, notes'),
+                    // ── Search Bar ─────────────────────────────────────────
+                    Container(
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF161922) : Colors.white,
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(
+                          color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder,
+                          width: 1.0,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.03),
+                            blurRadius: 10,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: TextField(
+                        controller: _searchController,
+                        decoration: InputDecoration(
+                          hintText: 'Search merchant, title, notes...',
+                          hintStyle: TextStyle(
+                            fontSize: 13.5,
+                            color: WalletMeltColors.textMuted,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          prefixIcon: const Icon(Icons.search_rounded, size: 20),
+                          suffixIcon: _searchController.text.isNotEmpty
+                              ? IconButton(
+                                  icon: const Icon(Icons.clear_rounded, size: 18),
+                                  onPressed: () {
+                                    _searchController.clear();
+                                    setState(() => _searchQuery = '');
+                                  },
+                                )
+                              : null,
+                          filled: false,
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        ),
+                      ),
                     ),
-                    const SizedBox(height: AppSpacing.sm),
+                    const SizedBox(height: 12),
 
+                    // ── Filter Controls Row ────────────────────────────────
                     Row(
                       children: [
-                        ChoiceChip(
-                          label: const Text('All', style: TextStyle(fontSize: 11)),
-                          selected: _taxFilter == 'all',
-                          onSelected: (val) {
-                            if (val) setState(() => _taxFilter = 'all');
-                          },
+                        // Tax Filter Segmented Pills
+                        Container(
+                          padding: const EdgeInsets.all(3),
+                          decoration: BoxDecoration(
+                            color: isDark ? const Color(0xFF161922) : const Color(0xFFECEFF3),
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _buildTaxPill('all', 'All', isDark),
+                              _buildTaxPill('taxable', 'Taxed', isDark),
+                              _buildTaxPill('nontaxable', 'No Tax', isDark),
+                            ],
+                          ),
                         ),
-                        const SizedBox(width: 8),
-                        ChoiceChip(
-                          label: const Text('Taxable', style: TextStyle(fontSize: 11)),
-                          selected: _taxFilter == 'taxable',
-                          onSelected: (val) {
-                            if (val) setState(() => _taxFilter = 'taxable');
-                          },
-                        ),
-                        const SizedBox(width: 8),
-                        ChoiceChip(
-                          label: const Text('No Tax', style: TextStyle(fontSize: 11)),
-                          selected: _taxFilter == 'nontaxable',
-                          onSelected: (val) {
-                            if (val) setState(() => _taxFilter = 'nontaxable');
-                          },
+                        const Spacer(),
+                        // Sort selector
+                        Container(
+                          height: 36,
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          decoration: BoxDecoration(
+                            color: isDark ? const Color(0xFF161922) : Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder,
+                              width: 1.0,
+                            ),
+                          ),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<ExpenseSort>(
+                              value: _sort,
+                              icon: const Icon(Icons.sort_rounded, size: 16),
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: isDark ? Colors.white : WalletMeltColors.textPrimary,
+                              ),
+                              dropdownColor: isDark
+                                  ? WalletMeltColors.darkSurface
+                                  : Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              items: const [
+                                DropdownMenuItem(
+                                    value: ExpenseSort.newest, child: Text('Newest')),
+                                DropdownMenuItem(
+                                    value: ExpenseSort.oldest, child: Text('Oldest')),
+                                DropdownMenuItem(
+                                    value: ExpenseSort.amountHigh,
+                                    child: Text('Highest')),
+                                DropdownMenuItem(
+                                    value: ExpenseSort.amountLow,
+                                    child: Text('Lowest')),
+                              ],
+                              onChanged: (value) =>
+                                  setState(() => _sort = value ?? _sort),
+                            ),
+                          ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: AppSpacing.sm),
+                    const SizedBox(height: 12),
 
                     // ── Category filter chips ─────────────────────────────
                     SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       clipBehavior: Clip.none,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4),
-                        child: Row(
-                          children: [
-                            _CategoryAllChip(
-                                selected: _categoryId == null,
+                      child: Row(
+                        children: [
+                          _CategoryAllChip(
+                              selected: _categoryId == null,
+                              onTap: () =>
+                                  setState(() => _categoryId = null)),
+                          const SizedBox(width: 8),
+                          for (final category in categories) ...[
+                            WalletCategoryChip(
+                                category: category,
+                                selected: _categoryId == category.id,
                                 onTap: () =>
-                                    setState(() => _categoryId = null)),
-                            const SizedBox(width: AppSpacing.sm),
-                            for (final category in categories) ...[
-                              WalletCategoryChip(
-                                  category: category,
-                                  selected: _categoryId == category.id,
-                                  onTap: () =>
-                                      setState(() => _categoryId = category.id)),
-                              const SizedBox(width: AppSpacing.sm),
-                            ],
+                                    setState(() => _categoryId = category.id)),
+                            const SizedBox(width: 8),
                           ],
-                        ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: AppSpacing.sm),
-
-                    // ── Sort dropdown ─────────────────────────────────────
-                    DropdownButtonFormField<ExpenseSort>(
-                      initialValue: _sort,
-                      decoration: const InputDecoration(labelText: 'Sort'),
-                      dropdownColor: theme.brightness == Brightness.dark
-                          ? WalletMeltColors.darkSurface
-                          : Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      items: const [
-                        DropdownMenuItem(
-                            value: ExpenseSort.newest, child: Text('Newest')),
-                        DropdownMenuItem(
-                            value: ExpenseSort.oldest, child: Text('Oldest')),
-                        DropdownMenuItem(
-                            value: ExpenseSort.amountHigh,
-                            child: Text('Amount high to low')),
-                        DropdownMenuItem(
-                            value: ExpenseSort.amountLow,
-                            child: Text('Amount low to high')),
-                      ],
-                      onChanged: (value) =>
-                          setState(() => _sort = value ?? _sort),
-                    ),
-                    const SizedBox(height: AppSpacing.md + 2),
+                    const SizedBox(height: 16),
                   ],
                 ),
               ),
@@ -326,10 +413,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   itemBuilder: (context, index) {
                     final item = items[index];
                     if (item is _HeaderItem) {
-                      return SectionHeader(
-                        title: item.label,
-                        padding: const EdgeInsets.only(
-                            top: AppSpacing.md, bottom: AppSpacing.xs),
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 22, bottom: 8, left: 4),
+                        child: Text(
+                          item.label.toUpperCase(),
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 1.0,
+                            color: WalletMeltColors.textMuted,
+                          ),
+                        ),
                       );
                     }
                     final expItem = item as _ExpenseItem;
@@ -342,6 +436,33 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 ),
               ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTaxPill(String value, String label, bool isDark) {
+    final isSelected = _taxFilter == value;
+    return GestureDetector(
+      onTap: () => setState(() => _taxFilter = value),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? (isDark ? WalletMeltColors.brand : WalletMeltColors.textPrimary)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            color: isSelected
+                ? (isDark ? Colors.black : Colors.white)
+                : (isDark ? WalletMeltColors.darkTextSecondary : WalletMeltColors.textSecondary),
+          ),
         ),
       ),
     );

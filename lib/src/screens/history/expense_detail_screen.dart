@@ -58,44 +58,82 @@ class ExpenseDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.md + 2),
 
-            // ── Amount + meta card ─────────────────────────────────────
+            // ── Digital Fintech Receipt Card ──────────────────────────
             WMGlassSurface.tier2(
+              padding: const EdgeInsets.all(22),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (expense.taxAmount != null && expense.taxAmount! > 0) ...[
-                    Text(formatMoney(expense.amount, expense.currency),
-                        style: Theme.of(context).textTheme.displaySmall),
-                    const SizedBox(height: AppSpacing.sm),
-                    Text(
-                      'Subtotal: ${formatMoney(expense.subtotalAmount ?? (expense.amount - expense.taxAmount!), expense.currency)}',
-                      style: const TextStyle(fontSize: 13, color: WalletMeltColors.textSecondary),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Tax: ${formatMoney(expense.taxAmount!, expense.currency)}',
-                      style: const TextStyle(fontSize: 13, color: WalletMeltColors.danger),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Grand Total: ${formatMoney(expense.amount, expense.currency)}',
-                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: WalletMeltColors.brandDeep),
-                    ),
-                  ] else ...[
-                    Text(formatMoney(expense.amount, expense.currency),
-                        style: Theme.of(context).textTheme.displaySmall),
-                  ],
-                  const SizedBox(height: AppSpacing.sm),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'TOTAL AMOUNT',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 1.1,
+                          color: WalletMeltColors.textMuted,
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: category != null
+                              ? colorFromHex(category.color).withValues(alpha: 0.14)
+                              : const Color(0xFFF1F3F7),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          category?.name ?? 'Expense',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            color: category != null ? colorFromHex(category.color) : null,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
                   Text(
-                      '${category?.name ?? 'Unknown category'} • ${readableMonth(parseIsoDate(expense.date))}',
-                      style: Theme.of(context).textTheme.bodyMedium),
-                  if (expense.vendor != null)
-                    Text(expense.vendor!,
-                        style: Theme.of(context).textTheme.bodyMedium),
-                  if (expense.notes != null) ...[
-                    const SizedBox(height: AppSpacing.md),
-                    Text(expense.notes!,
-                        style: Theme.of(context).textTheme.bodyLarge),
+                    formatMoney(expense.amount, expense.currency),
+                    style: TextStyle(
+                      fontSize: 36,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.6,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white
+                          : WalletMeltColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  const Divider(height: 1, color: Color(0x18000000)),
+                  const SizedBox(height: 14),
+
+                  // Structured receipt rows
+                  _buildReceiptRow('Date', '${parseIsoDate(expense.date).day} ${readableMonth(parseIsoDate(expense.date))}'),
+                  if (expense.vendor != null && expense.vendor!.isNotEmpty)
+                    _buildReceiptRow('Merchant / Vendor', expense.vendor!),
+                  if (expense.taxAmount != null && expense.taxAmount! > 0) ...[
+                    _buildReceiptRow('Subtotal', formatMoney(expense.subtotalAmount ?? (expense.amount - expense.taxAmount!), expense.currency)),
+                    _buildReceiptRow('Tax Amount', formatMoney(expense.taxAmount!, expense.currency), isTax: true),
+                  ],
+                  if (expense.notes != null && expense.notes!.isNotEmpty) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      'Notes',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: WalletMeltColors.textMuted,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      expense.notes!,
+                      style: const TextStyle(fontSize: 13, height: 1.35),
+                    ),
                   ],
                 ],
               ),
@@ -195,6 +233,33 @@ class ExpenseDetailScreen extends StatelessWidget {
               ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildReceiptRow(String label, String value, {bool isTax = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: WalletMeltColors.textSecondary,
+            ),
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 13.5,
+              fontWeight: FontWeight.w800,
+              color: isTax ? WalletMeltColors.danger : null,
+            ),
+          ),
+        ],
       ),
     );
   }

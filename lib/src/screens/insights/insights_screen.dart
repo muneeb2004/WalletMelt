@@ -285,81 +285,96 @@ class _InsightsScreenState extends State<InsightsScreen> {
                     'Add expenses to see your monthly trend, category breakdown, and spending insights.',
               ),
             ] else ...[
-              WMGlassSurface.tier2(
+              WMDarkHeroCard(
+                padding: const EdgeInsets.all(22),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SectionHeader(
-                      title: 'Monthly trend',
-                      icon: Icons.trending_up_rounded,
-                      padding: EdgeInsets.only(bottom: AppSpacing.xs),
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    Text(formatMoney(insights.total, currency),
-                        style: theme.textTheme.displaySmall),
-                    if (insights.monthOverMonthDelta != null) ...[
-                      const SizedBox(height: AppSpacing.sm + 2),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: insights.monthOverMonthDelta! <= 0
-                              ? WalletMeltColors.positive
-                                  .withValues(alpha: 0.16)
-                              : WalletMeltColors.danger.withValues(alpha: 0.16),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: insights.monthOverMonthDelta! <= 0
-                                ? WalletMeltColors.positive
-                                    .withValues(alpha: 0.28)
-                                : WalletMeltColors.danger
-                                    .withValues(alpha: 0.28),
-                            width: 1.0,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
                           children: [
-                             Icon(
-                              insights.monthOverMonthDelta! <= 0
-                                  ? Icons.trending_down_rounded
-                                  : Icons.trending_up_rounded,
-                              color: insights.monthOverMonthDelta! <= 0
-                                  ? (isDark
-                                      ? WalletMeltColors.positive
-                                      : const Color(0xFF1E7E52))
-                                  : (isDark
-                                      ? WalletMeltColors.danger
-                                      : const Color(0xFFC0392B)),
-                              size: 16,
-                             ),
-                            const SizedBox(width: 6),
-                            Text(
-                              '${insights.monthOverMonthDelta! >= 0 ? '+' : ''}${insights.monthOverMonthDelta!.toStringAsFixed(1)}% vs previous month',
-                              style: theme
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.w800,
-                                    color: insights.monthOverMonthDelta! <= 0
-                                        ? (isDark
-                                            ? Colors.white
-                                            : const Color(0xFF1E7E52))
-                                        : (isDark
-                                            ? Colors.white
-                                            : const Color(0xFFC0392B)),
-                                  ),
+                            Container(
+                              width: 8,
+                              height: 8,
+                              decoration: const BoxDecoration(
+                                color: WalletMeltColors.brand,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            const Text(
+                              'MONTHLY SPEND TREND',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 1.1,
+                                color: Color(0xFF94A3B8),
+                              ),
                             ),
                           ],
                         ),
+                        if (insights.monthOverMonthDelta != null) ...[
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: insights.monthOverMonthDelta! <= 0
+                                  ? WalletMeltColors.positive.withValues(alpha: 0.18)
+                                  : WalletMeltColors.danger.withValues(alpha: 0.18),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  insights.monthOverMonthDelta! <= 0
+                                      ? Icons.trending_down_rounded
+                                      : Icons.trending_up_rounded,
+                                  color: insights.monthOverMonthDelta! <= 0
+                                      ? WalletMeltColors.positive
+                                      : WalletMeltColors.danger,
+                                  size: 14,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '${insights.monthOverMonthDelta! >= 0 ? '+' : ''}${insights.monthOverMonthDelta!.toStringAsFixed(1)}%',
+                                  style: TextStyle(
+                                    fontSize: 10.5,
+                                    fontWeight: FontWeight.w800,
+                                    color: insights.monthOverMonthDelta! <= 0
+                                        ? WalletMeltColors.positive
+                                        : WalletMeltColors.danger,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      formatMoney(insights.total, currency),
+                      style: const TextStyle(
+                        fontSize: 36,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white,
+                        letterSpacing: -0.6,
+                        height: 1.05,
                       ),
-                    ] else ...[
-                      const SizedBox(height: AppSpacing.sm),
-                      Text(
-                        'Add another month of expenses to compare trends.',
-                        style: theme.textTheme.bodyMedium,
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      insights.highestCategory == null
+                          ? 'Add another month of expenses to compare trends.'
+                          : 'Highest category: ${insights.highestCategory!.category.name} (${formatMoney(insights.highestCategory!.total, currency)})',
+                      style: const TextStyle(
+                        fontSize: 12.5,
+                        color: Color(0xFF94A3B8),
+                        fontWeight: FontWeight.w500,
                       ),
-                    ],
+                    ),
                   ],
                 ),
               ),

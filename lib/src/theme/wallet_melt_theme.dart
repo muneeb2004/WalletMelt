@@ -13,28 +13,41 @@ export '../utils/haptics.dart';
 class WalletMeltColors {
   const WalletMeltColors._();
 
-  static const background = Color(0xFFFAF7EF);
-  static const backgroundGradientStart = Color(0xFFFFF7E5);
-  static const backgroundGradientEnd = Color(0xFFEAF4EF);
-  static const textPrimary = Color(0xFF111111);
-  static const textSecondary = Color(0xFF7A756B);
-  static const textMuted = Color(0xFFA39D92);
-  static const brand = Color(0xFFF4B740);
-  static const brandSoft = Color(0xFFFFD98A);
-  static const brandDeep = Color(0xFFB87912);
-  static const positive = Color(0xFF8FD6B5);
-  static const warning = Color(0xFFE8805D);
-  static const danger = Color(0xFFD96B5F);
-  static const darkBackground = Color(0xFF090909);
-  static const darkTextPrimary = Color(0xFFFAF7EF);
-  static const darkTextSecondary = Color(0xFFBEB7AA);
+  // Primary backgrounds (warm, calm, off-white in light mode, deep carbon in dark mode)
+  static const background = Color(0xFFF7F8FA);
+  static const backgroundGradientStart = Color(0xFFFAFBFD);
+  static const backgroundGradientEnd = Color(0xFFF0F2F6);
 
-  // Semantic surfaces, containers, and borders
-  static const darkSurface = Color(0xFF1E1E24);
-  static const darkBackgroundContainer = Color(0xFF121218);
-  static const darkBackgroundAlt = Color(0xFF0F0F0F);
-  static const darkBorder = Color(0x1FFFFFFF);
-  static const lightBorder = Color(0x1F000000);
+  // Text hierarchy
+  static const textPrimary = Color(0xFF0F172A);
+  static const textSecondary = Color(0xFF64748B);
+  static const textMuted = Color(0xFF94A3B8);
+
+  // Brand Accent (Refined Warm Amber / Gold)
+  static const brand = Color(0xFFF59E0B);
+  static const brandSoft = Color(0xFFFEF3C7);
+  static const brandDeep = Color(0xFFB45309);
+
+  // Semantic Status Colors (Calm, disciplined)
+  static const positive = Color(0xFF10B981); // Emerald Green
+  static const warning = Color(0xFFF97316);  // Warm Amber / Orange
+  static const danger = Color(0xFFEF4444);   // Modern Crimson Red
+
+  // Dark Mode Surfaces
+  static const darkBackground = Color(0xFF0C0E12);
+  static const darkSurface = Color(0xFF161922);
+  static const darkBackgroundContainer = Color(0xFF1C202B);
+  static const darkBackgroundAlt = Color(0xFF111319);
+  static const darkTextPrimary = Color(0xFFF8FAFC);
+  static const darkTextSecondary = Color(0xFF94A3B8);
+
+  // Borders & Dividers
+  static const darkBorder = Color(0x1AFFFFFF);
+  static const lightBorder = Color(0x0E000000);
+
+  // Premium Hero Card Gradients (for FinSight-style Dark Financial Cards)
+  static const darkHeroStart = Color(0xFF12141A);
+  static const darkHeroEnd = Color(0xFF1E222D);
 }
 
 // ── Budget threshold color aliases ──────────────────────────────────────────
@@ -52,7 +65,7 @@ class WalletMeltTheme {
     final scheme = ColorScheme.fromSeed(
       seedColor: WalletMeltColors.brand,
       brightness: Brightness.light,
-      primary: WalletMeltColors.brandDeep,
+      primary: WalletMeltColors.textPrimary,
       surface: WalletMeltColors.background,
       error: WalletMeltColors.danger,
     );
@@ -77,66 +90,71 @@ class WalletMeltTheme {
   }
 
   static ThemeData _base(ColorScheme scheme) {
+    final isDark = scheme.brightness == Brightness.dark;
     return ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
       fontFamily: 'System',
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: scheme.brightness == Brightness.dark
-            ? const Color(0xFF16161C).withValues(alpha: 0.6)
-            : Colors.white.withValues(alpha: 0.6),
+        fillColor: isDark
+            ? const Color(0xFF181B24)
+            : Colors.white,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: BorderSide(
-            color: scheme.brightness == Brightness.dark
-                ? const Color.fromRGBO(255, 255, 255, 0.08)
-                : const Color.fromRGBO(0, 0, 0, 0.06),
-            width: 1.2,
+            color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder,
+            width: 1.0,
           ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: BorderSide(
-            color: scheme.brightness == Brightness.dark
-                ? const Color.fromRGBO(255, 255, 255, 0.08)
-                : const Color.fromRGBO(0, 0, 0, 0.06),
-            width: 1.2,
+            color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder,
+            width: 1.0,
           ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: BorderSide(color: scheme.primary, width: 1.6),
+          borderSide: BorderSide(
+            color: isDark ? WalletMeltColors.brand : WalletMeltColors.textPrimary,
+            width: 1.5,
+          ),
         ),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: WalletMeltColors.brand,
-          foregroundColor: WalletMeltColors.textPrimary,
+          backgroundColor: isDark ? WalletMeltColors.brand : WalletMeltColors.textPrimary,
+          foregroundColor: isDark ? WalletMeltColors.textPrimary : Colors.white,
           minimumSize: const Size.fromHeight(52),
+          elevation: 0,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.buttonRadius)),
-          textStyle: const TextStyle(fontWeight: FontWeight.w800),
+          textStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: scheme.primary,
-          side: BorderSide(color: scheme.primary.withValues(alpha: 0.28), width: 1.4),
+          side: BorderSide(
+            color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder,
+            width: 1.2,
+          ),
           minimumSize: const Size.fromHeight(52),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.buttonRadius)),
-          textStyle: const TextStyle(fontWeight: FontWeight.w800),
+          textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: scheme.primary,
-          foregroundColor: scheme.brightness == Brightness.dark ? Colors.black : Colors.white,
+          backgroundColor: isDark ? WalletMeltColors.brand : WalletMeltColors.textPrimary,
+          foregroundColor: isDark ? Colors.black : Colors.white,
           minimumSize: const Size.fromHeight(52),
+          elevation: 0,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.buttonRadius)),
-          textStyle: const TextStyle(fontWeight: FontWeight.w800),
+          textStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
         ),
       ),
     );
@@ -151,30 +169,32 @@ class WalletMeltTheme {
         : WalletMeltColors.textSecondary;
     return TextTheme(
       displaySmall: TextStyle(
-          fontSize: 40,
+          fontSize: 38,
           fontWeight: FontWeight.w900,
           color: primary,
-          height: 1.02),
+          letterSpacing: -0.6,
+          height: 1.05),
       headlineMedium: TextStyle(
-          fontSize: 28,
+          fontSize: 26,
           fontWeight: FontWeight.w800,
           color: primary,
-          height: 1.08),
+          letterSpacing: -0.4,
+          height: 1.1),
       titleLarge:
-          TextStyle(fontSize: 21, fontWeight: FontWeight.w800, color: primary),
+          TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: primary, letterSpacing: -0.3),
       titleMedium:
           TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: primary),
       bodyLarge:
-          TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: primary),
+          TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: primary),
       bodyMedium: TextStyle(
-          fontSize: 14,
+          fontSize: 13.5,
           fontWeight: FontWeight.w500,
           color: secondary,
           height: 1.35),
       labelLarge:
-          TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: primary),
+          TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: primary, letterSpacing: 0.2),
       labelMedium: TextStyle(
-          fontSize: 12, fontWeight: FontWeight.w700, color: secondary),
+          fontSize: 11, fontWeight: FontWeight.w700, color: secondary, letterSpacing: 0.4),
       bodySmall: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w400,
@@ -501,6 +521,163 @@ class LiquidGlass extends StatelessWidget {
       tier: blur > 0.0 ? WMRenderTier.tier3 : WMRenderTier.tier2,
       onTap: onTap,
       child: child,
+    );
+  }
+}
+
+/// Premium Dark Hero Financial Card (FinSight inspired)
+class WMDarkHeroCard extends StatelessWidget {
+  const WMDarkHeroCard({
+    required this.child,
+    super.key,
+    this.padding = const EdgeInsets.all(22),
+    this.radius = 28,
+    this.onTap,
+  });
+
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+  final double radius;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final cardContent = Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(radius),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF101217),
+            Color(0xFF1B1E28),
+          ],
+        ),
+        border: Border.all(
+          color: const Color(0x22FFFFFF),
+          width: 1.0,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.3),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+          ),
+          BoxShadow(
+            color: const Color(0xFFF59E0B).withValues(alpha: 0.04),
+            blurRadius: 32,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(radius),
+          onTap: onTap != null
+              ? () {
+                  WMHaptics.light();
+                  onTap!();
+                }
+              : null,
+          child: Padding(
+            padding: padding,
+            child: child,
+          ),
+        ),
+      ),
+    );
+
+    return cardContent;
+  }
+}
+
+/// Compact circular / pill action button (like the Send / Request / Add in FinSight reference)
+class WMQuickActionButton extends StatelessWidget {
+  const WMQuickActionButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    super.key,
+    this.isPrimary = false,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final bool isPrimary;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          WMHaptics.selection();
+          onTap();
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+          decoration: BoxDecoration(
+            color: isPrimary
+                ? (isDark ? WalletMeltColors.brand : WalletMeltColors.textPrimary)
+                : (isDark ? WalletMeltColors.darkSurface : Colors.white),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: isPrimary
+                  ? Colors.transparent
+                  : (isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder),
+              width: 1.0,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.12 : 0.03),
+                blurRadius: 8,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: isPrimary
+                      ? (isDark ? Colors.black.withValues(alpha: 0.15) : Colors.white.withValues(alpha: 0.15))
+                      : (isDark ? Colors.white.withValues(alpha: 0.08) : const Color(0xFF0F172A).withValues(alpha: 0.06)),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  icon,
+                  size: 18,
+                  color: isPrimary
+                      ? (isDark ? Colors.black : Colors.white)
+                      : (isDark ? Colors.white : WalletMeltColors.textPrimary),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 2),
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: isPrimary
+                        ? (isDark ? Colors.black : Colors.white)
+                        : (isDark ? WalletMeltColors.darkTextPrimary : WalletMeltColors.textPrimary),
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

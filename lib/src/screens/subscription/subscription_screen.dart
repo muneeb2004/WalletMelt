@@ -244,6 +244,23 @@ class _SubscriptionCard extends StatelessWidget {
   final String currency;
   final VoidCallback onTap;
 
+  String _formatRelativeRenewal(String dateStr) {
+    try {
+      final date = DateTime.parse(dateStr);
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final target = DateTime(date.year, date.month, date.day);
+      final diff = target.difference(today).inDays;
+      if (diff == 0) return 'Renews today';
+      if (diff == 1) return 'Renews tomorrow';
+      if (diff > 1 && diff <= 7) return 'Renews in $diff days';
+      if (diff < 0) return 'Renewal due';
+      return 'Next: $dateStr';
+    } catch (_) {
+      return 'Next: $dateStr';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -336,8 +353,10 @@ class _SubscriptionCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Next: ${subscription.nextOccurrenceDate}',
-                        style: theme.textTheme.bodySmall,
+                        _formatRelativeRenewal(subscription.nextOccurrenceDate),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),

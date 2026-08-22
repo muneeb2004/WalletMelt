@@ -91,8 +91,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       body: AppBackground(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 18, 20, 120),
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 120),
           children: [
+            // Top Bar
             Row(
               children: [
                 IconButton(
@@ -106,21 +107,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     'Settings',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.headlineMedium,
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 26,
+                    ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: 24),
 
-            // CARD 1: PREFERENCES
-            WMGlassSurface.tier2(
+            // SECTION 1: PREFERENCES
+            Text(
+              'PREFERENCES',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.0,
+                color: WalletMeltColors.textMuted,
+              ),
+            ),
+            const SizedBox(height: 10),
+            WMGlassSurface.tier1(
+              padding: const EdgeInsets.all(18),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Preferences',
-                      style: theme.textTheme.titleLarge),
-                  const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
                     initialValue: currency,
                     decoration: const InputDecoration(labelText: 'Currency'),
@@ -128,7 +140,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         theme.brightness == Brightness.dark
                             ? WalletMeltColors.darkSurface
                             : Colors.white,
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(18),
                     items: [
                       for (final currency in defaultCurrencyCodes)
                         DropdownMenuItem(
@@ -138,7 +150,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       if (value != null) state.updateCurrency(value);
                     },
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 14),
                   DropdownButtonFormField<ThemePreference>(
                     initialValue: themePreference,
                     decoration: const InputDecoration(labelText: 'Theme'),
@@ -146,7 +158,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         theme.brightness == Brightness.dark
                             ? WalletMeltColors.darkSurface
                             : Colors.white,
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(18),
                     items: const [
                       DropdownMenuItem(
                           value: ThemePreference.system, child: Text('System')),
@@ -162,24 +174,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 28),
 
-            // CARD: PRIVACY (PIN LOCK)
+            // SECTION 2: SECURITY & PRIVACY
+            Text(
+              'SECURITY & PRIVACY',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.0,
+                color: WalletMeltColors.textMuted,
+              ),
+            ),
+            const SizedBox(height: 10),
             Consumer<PinLockController>(
               builder: (context, pinController, child) {
                 final isPinEnabled = pinController.isPinEnabled;
-                return WMGlassSurface.tier2(
+                return WMGlassSurface.tier1(
+                  padding: const EdgeInsets.all(18),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Privacy', style: theme.textTheme.titleLarge),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Secure your financial records with a local 4-digit PIN lock.',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: WalletMeltColors.textMuted,
-                        ),
-                      ),
                       Material(
                         type: MaterialType.transparency,
                         child: SwitchListTile(
@@ -188,6 +203,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             'Enable PIN Lock',
                             style: theme.textTheme.bodyLarge?.copyWith(
                               fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          subtitle: Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Text(
+                              'Secure your financial records with a local 4-digit PIN lock.',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: WalletMeltColors.textMuted,
+                              ),
                             ),
                           ),
                           value: isPinEnabled,
@@ -222,7 +246,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ),
                       if (isPinEnabled) ...[
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 14),
                         Row(
                           children: [
                             Expanded(
@@ -251,18 +275,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     }
                                   }
                                 },
-                                icon: const Icon(Icons.edit_rounded),
+                                icon: const Icon(Icons.edit_rounded, size: 18),
                                 label: const Text('Change PIN'),
                               ),
                             ),
-                            const SizedBox(width: 12),
+                            const SizedBox(width: 10),
                             Expanded(
                               child: OutlinedButton.icon(
                                 style: OutlinedButton.styleFrom(
                                   foregroundColor: theme.colorScheme.error,
                                   side: BorderSide(
                                     color: theme.colorScheme.error.withValues(alpha: 0.28),
-                                    width: 1.4,
+                                    width: 1.2,
                                   ),
                                 ),
                                 onPressed: () async {
@@ -281,7 +305,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     showSuccessSnackbar(context, 'PIN Lock disabled.');
                                   }
                                 },
-                                icon: const Icon(Icons.lock_open_rounded),
+                                icon: const Icon(Icons.lock_open_rounded, size: 18),
                                 label: const Text('Disable PIN'),
                               ),
                             ),
@@ -293,49 +317,75 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 );
               },
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 28),
 
-            // CARD: PAYEES & CONTACTS
-            WMGlassSurface.tier2(
+            // SECTION 3: PEOPLE & CONTACTS
+            Text(
+              'PEOPLE & ENTITIES',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.0,
+                color: WalletMeltColors.textMuted,
+              ),
+            ),
+            const SizedBox(height: 10),
+            WMGlassSurface.tier1(
+              padding: const EdgeInsets.all(18),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Payees & Contacts',
-                      style: theme.textTheme.titleLarge),
+                  Text(
+                    'Payees & Contacts',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                   const SizedBox(height: 4),
-                  Text('Manage list of people for lending, borrowing, and other people-centric records.',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                            color: WalletMeltColors.textMuted,
-                          )),
-                  const SizedBox(height: 12),
+                  Text(
+                    'Manage list of people for lending, borrowing, and other people-centric records.',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: WalletMeltColors.textMuted,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
                       onPressed: () => context.push('/payees'),
-                      icon: const Icon(Icons.people_alt_rounded),
+                      icon: const Icon(Icons.people_alt_rounded, size: 18),
                       label: const Text('Manage Payees & Contacts'),
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 28),
 
-            // CARD 2: BACKUP & DATA MANAGEMENT
-            WMGlassSurface.tier2(
+            // SECTION 4: BACKUP & DATA MANAGEMENT
+            Text(
+              'DATA & BACKUPS',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.0,
+                color: WalletMeltColors.textMuted,
+              ),
+            ),
+            const SizedBox(height: 10),
+            WMGlassSurface.tier1(
+              padding: const EdgeInsets.all(18),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Backup & Data Management',
-                      style: theme.textTheme.titleLarge),
-                  const SizedBox(height: 12),
-
                   // Data export subsection
-                  Text('Data export',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          )),
+                  Text(
+                    'Data export',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   const SizedBox(height: 4),
                   Material(
                     type: MaterialType.transparency,
@@ -365,12 +415,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               dimension: 18,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Icon(Icons.ios_share_rounded),
+                          : const Icon(Icons.ios_share_rounded, size: 18),
                       label: Text(_isExportingExpenses
                           ? 'Preparing CSV'
                           : 'Export expenses CSV'),
                     ),
                   ),
+                  const SizedBox(height: 8),
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
@@ -382,7 +433,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               dimension: 18,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Icon(Icons.backup_outlined),
+                          : const Icon(Icons.backup_outlined, size: 18),
                       label: Text(_isCreatingJsonBackup
                           ? 'Preparing backup'
                           : 'Back up JSON'),
@@ -390,17 +441,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
 
                   const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 12),
-                    child:
-                        Divider(height: 1, color: Colors.grey, thickness: 0.12),
+                    padding: EdgeInsets.symmetric(vertical: 14),
+                    child: Divider(height: 1, thickness: 0.5),
                   ),
 
                   // Data import subsection
-                  Text('Data import',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          )),
+                  Text(
+                    'Data import',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   const SizedBox(height: 8),
                   SizedBox(
                     width: double.infinity,
@@ -413,7 +465,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               dimension: 18,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Icon(Icons.restore_outlined),
+                          : const Icon(Icons.restore_outlined, size: 18),
                       label: Text(_isValidatingBackup
                           ? 'Validating...'
                           : 'Validate backup file'),
@@ -422,7 +474,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   const SizedBox(height: 8),
                   Text(
                     'Select a backup JSON file to verify its structure and compatibility before importing. No changes will be made to your data.',
-                    style: theme.textTheme.bodySmall,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: WalletMeltColors.textMuted,
+                    ),
                   ),
 
                   const SizedBox(height: AppSpacing.md),
@@ -430,68 +484,90 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     _exportStatusText(currency, expensesLength,
                         deletedExpensesLength, lastExportedAt),
                     style: theme.textTheme.bodySmall?.copyWith(
-                          fontStyle: FontStyle.italic,
-                        ),
+                      fontStyle: FontStyle.italic,
+                      color: WalletMeltColors.textMuted,
+                    ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 28),
 
-            // CARD 3: ABOUT & PRIVACY
-            WMGlassSurface.tier2(
+            // SECTION 5: ABOUT & PRIVACY
+            Text(
+              'ABOUT WALLETMELT',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.0,
+                color: WalletMeltColors.textMuted,
+              ),
+            ),
+            const SizedBox(height: 10),
+            WMGlassSurface.tier1(
+              padding: const EdgeInsets.all(18),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('About WalletMelt',
-                      style: theme.textTheme.titleLarge),
-                  const SizedBox(height: 12),
-                  Text('Privacy First',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          )),
+                  Text(
+                    'Privacy First',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   const SizedBox(height: 4),
                   Text(
                     'All expenses, settings, categories, budgets, and receipt images stay stored locally on this device. There is no remote login, backend databases, or cloud tracking.',
-                    style: theme.textTheme.bodyMedium
-                        ?.copyWith(fontSize: 13),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: WalletMeltColors.textMuted,
+                      height: 1.4,
+                    ),
                   ),
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 12),
-                    child:
-                        Divider(height: 1, color: Colors.grey, thickness: 0.12),
+                    child: Divider(height: 1, thickness: 0.5),
                   ),
-                  Text('Future Scope',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          )),
+                  Text(
+                    'Future Scope',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   const SizedBox(height: 4),
                   Text(
                     'Automatic cloud synchronization, shared household ledger profiles, OCR-based receipt scanning, and recurring expense reminders are planned for future versions.',
-                    style: theme.textTheme.bodyMedium
-                        ?.copyWith(fontSize: 13),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: WalletMeltColors.textMuted,
+                      height: 1.4,
+                    ),
                   ),
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 12),
-                    child:
-                        Divider(height: 1, color: Colors.grey, thickness: 0.12),
+                    child: Divider(height: 1, thickness: 0.5),
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Version',
-                          style: theme.textTheme.bodyMedium
-                              ?.copyWith(fontWeight: FontWeight.bold)),
-                      Text('v1.0.0',
-                          style: theme.textTheme.bodyMedium),
+                      Text(
+                        'Version',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        'v1.0.0',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: WalletMeltColors.textMuted,
+                        ),
+                      ),
                     ],
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 84), // Space for floating app navigation bar
+            const SizedBox(height: 40),
           ],
         ),
       ),

@@ -20,7 +20,7 @@ class BudgetScreen extends StatefulWidget {
   final bool isEmbedded;
 
   static Future<void> showSetBudgetSheet(
-      BuildContext context, AppState state, double? currentAmount) async {
+      BuildContext context, AppState state, double? currentAmount, double totalSpent) async {
     final controller = TextEditingController(
       text: currentAmount != null ? currentAmount.toStringAsFixed(0) : '',
     );
@@ -28,7 +28,9 @@ class BudgetScreen extends StatefulWidget {
     await showAppBottomSheet<void>(
       context,
       builder: (sheetContext) {
-        return SingleChildScrollView(
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            return SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(
                     AppSpacing.lg,
@@ -46,17 +48,111 @@ class BudgetScreen extends StatefulWidget {
                           : 'Set Monthly Budget',
                       style: Theme.of(sheetContext).textTheme.titleLarge,
                     ),
-                    AppSpacing.gapSm,
+                    const SizedBox(height: AppSpacing.sm),
                     TextField(
                       controller: controller,
                       keyboardType:
                           const TextInputType.numberWithOptions(decimal: true),
                       autofocus: true,
+                      onChanged: (_) => setSheetState(() {}),
                       decoration: InputDecoration(
                         labelText: 'Budget Amount (${state.settings.currency})',
                         hintText: 'e.g. 50000',
                       ),
                     ),
+                    const SizedBox(height: AppSpacing.md),
+                    Builder(builder: (context) {
+                      final parsed = double.tryParse(controller.text.trim()) ?? 0.0;
+                      final remaining = parsed - totalSpent;
+                      final isOver = remaining < 0;
+                      return WMGlassSurface.tier1(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'ADJUSTMENT PREVIEW',
+                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 0.8,
+                                    color: WalletMeltColors.textMuted,
+                                  ),
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('Current Budget',
+                                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                            color: WalletMeltColors.textMuted, fontSize: 11)),
+                                    Text(
+                                      currentAmount != null
+                                          ? formatMoney(currentAmount, state.settings.currency)
+                                          : 'None',
+                                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                                    ),
+                                  ],
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text('Actual Spent',
+                                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                            color: WalletMeltColors.textMuted, fontSize: 11)),
+                                    Text(
+                                      formatMoney(totalSpent, state.settings.currency),
+                                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            const Divider(height: 16),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('New Budget',
+                                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                            color: WalletMeltColors.textMuted, fontSize: 11)),
+                                    Text(
+                                      formatMoney(parsed, state.settings.currency),
+                                      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+                                    ),
+                                  ],
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text('New Remaining',
+                                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                            color: WalletMeltColors.textMuted, fontSize: 11)),
+                                    Text(
+                                      isOver
+                                          ? 'Over by ${formatMoney(-remaining, state.settings.currency)}'
+                                          : formatMoney(remaining, state.settings.currency),
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w900,
+                                        fontSize: 14,
+                                        color: isOver
+                                            ? WalletMeltColors.danger
+                                            : (parsed > 0 ? WalletMeltColors.positive : null),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
                     const SizedBox(height: AppSpacing.md + 4),
                     Row(
                       children: [
@@ -89,6 +185,8 @@ class BudgetScreen extends StatefulWidget {
                 ),
               ),
             );
+          },
+        );
       },
     );
     controller.dispose();
@@ -201,7 +299,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
 
         // SECTION 1: TOTAL MONTHLY BUDGET (HERO)
         if (monthlyBudget == null)
-          _buildEmptyHeroCard(context, state)
+          _buildEmptyHeroCard(context, state, totalSpent)
         else
           _buildActiveHeroCard(
             context,
@@ -239,13 +337,13 @@ class _BudgetScreenState extends State<BudgetScreen> {
     );
   }
 
-  Widget _buildEmptyHeroCard(BuildContext context, AppState state) {
+  Widget _buildEmptyHeroCard(BuildContext context, AppState state, double totalSpent) {
     return EmptyState(
       icon: Icons.savings_outlined,
       title: 'No monthly budget set',
       subtitle: 'Set a monthly limit to track your total spending.',
       actionLabel: 'Set Budget',
-      onActionPressed: () => BudgetScreen.showSetBudgetSheet(context, state, null),
+      onActionPressed: () => BudgetScreen.showSetBudgetSheet(context, state, null, totalSpent),
     );
   }
 
@@ -280,7 +378,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                 icon: const Icon(Icons.more_vert_rounded),
                 onSelected: (value) {
                   if (value == 'edit') {
-                    BudgetScreen.showSetBudgetSheet(context, state, monthlyBudget);
+                    BudgetScreen.showSetBudgetSheet(context, state, monthlyBudget, totalSpent);
                   } else if (value == 'clear') {
                     _confirmClearBudget(context, state);
                   }

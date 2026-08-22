@@ -13,14 +13,15 @@ import '../../types/grocery_item.dart';
 import '../../state/app_state.dart';
 import '../../theme/wallet_melt_theme.dart';
 import '../../utils/expense_validation.dart';
-import '../../widgets/primary_button.dart';
 import '../../widgets/app_snackbar.dart';
+import '../../widgets/primary_button.dart';
 import '../../types/grocery_template.dart';
 
 class AddExpenseScreen extends StatefulWidget {
-  const AddExpenseScreen({super.key, this.expenseId});
+  const AddExpenseScreen({super.key, this.expenseId, this.initialCategoryId});
 
   final String? expenseId;
+  final String? initialCategoryId;
 
   @override
   State<AddExpenseScreen> createState() => _AddExpenseScreenState();
@@ -45,6 +46,14 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   bool _showAdditionalDetails = false;
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.initialCategoryId != null) {
+      _categoryId = widget.initialCategoryId;
+    }
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_hydrated || widget.expenseId == null) return;
@@ -63,6 +72,12 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       _categoryId = expense.categoryId;
       _date = DateTime.parse(expense.date);
       _receiptUri = expense.receiptImageUri;
+      if ((expense.vendor != null && expense.vendor!.isNotEmpty) ||
+          (expense.notes != null && expense.notes!.isNotEmpty) ||
+          (expense.taxAmount != null && expense.taxAmount! > 0) ||
+          expense.receiptImageUri != null) {
+        _showAdditionalDetails = true;
+      }
       _loadGroceryItems(expense.id);
       _loadFuelTransaction(expense.id);
     }
@@ -92,6 +107,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     final isGroceryMode = selectedCategory?.id == 'grocery';
     final isFuelMode = selectedCategory?.id == 'fuel' ||
         selectedCategory?.name.toLowerCase() == 'fuel';
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       body: AppBackground(
@@ -158,7 +174,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
             const SizedBox(height: 20),
 
             if (isGroceryMode) ...[
-              // Dedicated Bulk Grocery Mode
+              // ── Dedicated Bulk Grocery Mode ──────────────────────
               BulkGroceryEditor(
                 items: _groceryItems,
                 currency: currency,
@@ -257,79 +273,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                   ],
                 ),
               ),
-            ] else ...[
-              // Traditional Form
-              TextField(
-                controller: _amountController,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
-                style: theme.textTheme.displaySmall,
-                decoration: InputDecoration(
-                  labelText: 'Amount',
-                  prefixText: '$currency ',
-                  errorText: _validation?.amountError,
-                ),
-                onChanged: (_) => setState(() {}),
-              ),
-              const SizedBox(height: 14),
-              _buildTaxSection(context, double.tryParse(_amountController.text.trim()) ?? 0.0),
-              const SizedBox(height: 14),
-              TextField(
-                controller: _titleController,
-                decoration:
-                    const InputDecoration(labelText: 'Title or bill name')),
-              const SizedBox(height: 14),
-              TextField(
-                controller: _vendorController,
-                decoration:
-                    const InputDecoration(labelText: 'Vendor or provider')),
-              const SizedBox(height: 18),
-              WMGlassSurface.tier2(
-                onTap: _pickDate,
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-                child: Row(
-                  children: [
-                    const Icon(Icons.calendar_month_rounded, color: WalletMeltColors.brandDeep),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Date', style: theme.textTheme.labelMedium?.copyWith(fontSize: 11)),
-                          const SizedBox(height: 2),
-                          Text(
-                            '${_date.day}/${_date.month}/${_date.year}',
-                            style: theme.textTheme.titleMedium,
-                          ),
-                        ],
-                      ),
-                    ),
-                    Icon(
-                      Icons.chevron_right_rounded,
-                      color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.54),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 18),
-              TextField(
-                controller: _notesController,
-                minLines: 2,
-                maxLines: 4,
-                decoration: const InputDecoration(labelText: 'Notes')),
-              const SizedBox(height: 18),
-              const _SectionTitle(
-                  title: 'Receipt or bill', actionLabel: null, onAction: null),
-              const SizedBox(height: 10),
-              _ReceiptCard(
-                receiptUri: _receiptUri,
-                onCamera: () => _pickReceipt(fromCamera: true),
-                onGallery: () => _pickReceipt(fromCamera: false),
-                onRemove: () => setState(() => _receiptUri = null),
-              ),
-            ],
-            if (isFuelMode) ...[
-              // Dedicated Fuel Mode
+            ] else if (isFuelMode) ...[
+              // ── Dedicated Fuel Mode ──────────────────────────────
               FuelEditor(
                 initialDraft: _fuelTransactionDraft,
                 currency: currency,
@@ -434,39 +379,79 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                   ],
                 ),
               ),
-            ] else if (!isGroceryMode) ...[
-              // Traditional Form
-              TextField(
-                controller: _amountController,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
-                style: theme.textTheme.displaySmall,
-                decoration: InputDecoration(
-                  labelText: 'Amount',
-                  prefixText: '$currency ',
-                  errorText: _validation?.amountError,
+            ] else ...[
+              // ── Standard Expense Form ────────────────────────────
+              WMGlassSurface.tier2(
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'AMOUNT',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 1.0,
+                            color: WalletMeltColors.textMuted,
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: isDark ? WalletMeltColors.darkBackgroundContainer : const Color(0xFFF1F3F7),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            currency,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _amountController,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      autofocus: !isEditing,
+                      style: TextStyle(
+                        fontSize: 36,
+                        fontWeight: FontWeight.w900,
+                        color: isDark ? Colors.white : WalletMeltColors.textPrimary,
+                        letterSpacing: -0.5,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: '0.00',
+                        hintStyle: TextStyle(
+                          fontSize: 36,
+                          fontWeight: FontWeight.w900,
+                          color: WalletMeltColors.textMuted.withValues(alpha: 0.4),
+                          letterSpacing: -0.5,
+                        ),
+                        filled: false,
+                        border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        contentPadding: EdgeInsets.zero,
+                        errorText: _validation?.amountError,
+                      ),
+                      onChanged: (_) => setState(() {}),
+                    ),
+                  ],
                 ),
-                onChanged: (_) => setState(() {}),
               ),
               const SizedBox(height: 14),
-              _buildTaxSection(context, double.tryParse(_amountController.text.trim()) ?? 0.0),
-              const SizedBox(height: 14),
-              TextField(
-                controller: _titleController,
-                decoration:
-                    const InputDecoration(labelText: 'Title or bill name')),
-              const SizedBox(height: 14),
-              TextField(
-                controller: _vendorController,
-                decoration:
-                    const InputDecoration(labelText: 'Vendor or provider')),
-              const SizedBox(height: 18),
-              WMGlassSurface.tier2(
+              WMGlassSurface.tier1(
                 onTap: _pickDate,
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
                 child: Row(
                   children: [
-                    const Icon(Icons.calendar_month_rounded, color: WalletMeltColors.brandDeep),
+                    const Icon(Icons.calendar_month_rounded, color: WalletMeltColors.brand, size: 20),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
@@ -476,34 +461,90 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                           const SizedBox(height: 2),
                           Text(
                             '${_date.day}/${_date.month}/${_date.year}',
-                            style: theme.textTheme.titleMedium,
+                            style: theme.textTheme.titleMedium?.copyWith(fontSize: 14),
                           ),
                         ],
                       ),
                     ),
-                    Icon(
+                    const Icon(
                       Icons.chevron_right_rounded,
-                      color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.54),
+                      size: 20,
+                      color: WalletMeltColors.textMuted,
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 18),
-              TextField(
-                controller: _notesController,
-                minLines: 2,
-                maxLines: 4,
-                decoration: const InputDecoration(labelText: 'Notes')),
-              const SizedBox(height: 18),
-              const _SectionTitle(
-                  title: 'Receipt or bill', actionLabel: null, onAction: null),
-              const SizedBox(height: 10),
-              _ReceiptCard(
-                receiptUri: _receiptUri,
-                onCamera: () => _pickReceipt(fromCamera: true),
-                onGallery: () => _pickReceipt(fromCamera: false),
-                onRemove: () => setState(() => _receiptUri = null),
-              ),
+              const SizedBox(height: 14),
+              if (!_showAdditionalDetails) ...[
+                InkWell(
+                  borderRadius: BorderRadius.circular(14),
+                  onTap: () => setState(() => _showAdditionalDetails = true),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.tune_rounded, size: 16, color: WalletMeltColors.brand),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Add merchant, notes, tax & receipt',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: isDark ? WalletMeltColors.brandSoft : WalletMeltColors.brandDeep,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(Icons.keyboard_arrow_down_rounded, size: 18, color: WalletMeltColors.brand),
+                      ],
+                    ),
+                  ),
+                ),
+              ] else ...[
+                TextField(
+                  controller: _titleController,
+                  decoration: const InputDecoration(
+                    labelText: 'Title or bill name (optional)',
+                    hintText: 'e.g., Dinner with team, Office supplies',
+                  ),
+                ),
+                const SizedBox(height: 14),
+                TextField(
+                  controller: _vendorController,
+                  decoration: const InputDecoration(
+                    labelText: 'Vendor or merchant (optional)',
+                    hintText: 'e.g., Amazon, Uber, Local Cafe',
+                  ),
+                ),
+                const SizedBox(height: 14),
+                _buildTaxSection(context, double.tryParse(_amountController.text.trim()) ?? 0.0),
+                const SizedBox(height: 14),
+                TextField(
+                  controller: _notesController,
+                  minLines: 2,
+                  maxLines: 4,
+                  decoration: const InputDecoration(labelText: 'Notes (optional)'),
+                ),
+                const SizedBox(height: 16),
+                const _SectionTitle(
+                    title: 'Receipt or bill', actionLabel: null, onAction: null),
+                const SizedBox(height: 10),
+                _ReceiptCard(
+                  receiptUri: _receiptUri,
+                  onCamera: () => _pickReceipt(fromCamera: true),
+                  onGallery: () => _pickReceipt(fromCamera: false),
+                  onRemove: () => setState(() => _receiptUri = null),
+                ),
+                const SizedBox(height: 10),
+                Align(
+                  alignment: Alignment.center,
+                  child: TextButton.icon(
+                    onPressed: () => setState(() => _showAdditionalDetails = false),
+                    icon: const Icon(Icons.keyboard_arrow_up_rounded, size: 18),
+                    label: const Text('Hide extra details', style: TextStyle(fontSize: 12)),
+                  ),
+                ),
+              ],
             ],
             if (!isGroceryMode && !isFuelMode) ...[
               const SizedBox(height: 24),
@@ -763,18 +804,14 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       '#A88CC2'
     ];
     var selectedColor = colors.first;
-    await showModalBottomSheet<void>(
-      context: context,
-      showDragHandle: true,
-      isScrollControlled: true,
-      constraints: const BoxConstraints(maxWidth: 600),
+    await showAppBottomSheet<void>(
+      context,
       builder: (sheetContext) {
         return StatefulBuilder(
           builder: (context, setSheetState) {
             return SingleChildScrollView(
               child: Padding(
-                padding: EdgeInsets.fromLTRB(
-                    20, 10, 20, 20 + MediaQuery.of(context).viewInsets.bottom),
+                padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
