@@ -190,6 +190,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Consumer<PinLockController>(
               builder: (context, pinController, child) {
                 final isPinEnabled = pinController.isPinEnabled;
+                final isBiometricsAvailable = pinController.isBiometricsAvailable;
+                final isBiometricsEnabled = pinController.isBiometricsEnabled;
+                final biometricLabel = pinController.biometricLabel;
+
                 return WMGlassSurface.tier1(
                   padding: const EdgeInsets.all(18),
                   child: Column(
@@ -200,7 +204,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         child: SwitchListTile(
                           contentPadding: EdgeInsets.zero,
                           title: Text(
-                            'Enable PIN Lock',
+                            'PIN Lock',
                             style: theme.textTheme.bodyLarge?.copyWith(
                               fontWeight: FontWeight.w700,
                             ),
@@ -208,7 +212,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           subtitle: Padding(
                             padding: const EdgeInsets.only(top: 4),
                             child: Text(
-                              'Secure your financial records with a local 4-digit PIN lock.',
+                              'Protect WalletMelt with a 4-digit PIN.',
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: WalletMeltColors.textMuted,
                               ),
@@ -231,8 +235,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (_) => const VerifyPinScreen(
-                                    title: 'Disable PIN',
-                                    instruction: 'Enter your PIN to disable the lock',
+                                    title: 'Disable PIN Lock',
+                                    instruction: 'Enter your PIN to disable security lock',
                                   ),
                                 ),
                               );
@@ -245,6 +249,85 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           },
                         ),
                       ),
+                      if (isBiometricsAvailable) ...[
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8),
+                          child: Divider(height: 1, thickness: 0.5),
+                        ),
+                        Material(
+                          type: MaterialType.transparency,
+                          child: SwitchListTile(
+                            contentPadding: EdgeInsets.zero,
+                            title: Text(
+                              '$biometricLabel Unlock',
+                              style: theme.textTheme.bodyLarge?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: isPinEnabled
+                                    ? null
+                                    : (theme.brightness == Brightness.dark
+                                        ? WalletMeltColors.darkTextSecondary.withValues(alpha: 0.5)
+                                        : WalletMeltColors.textSecondary.withValues(alpha: 0.5)),
+                              ),
+                            ),
+                            subtitle: Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Text(
+                                isPinEnabled
+                                    ? 'Use device $biometricLabel to unlock faster.'
+                                    : '$biometricLabel requires PIN protection to be enabled first.',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: WalletMeltColors.textMuted,
+                                ),
+                              ),
+                            ),
+                            value: isBiometricsEnabled,
+                            onChanged: !isPinEnabled
+                                ? null
+                                : (bool value) async {
+                                    if (value) {
+                                      final verified = await Navigator.push<bool>(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => VerifyPinScreen(
+                                            title: 'Enable $biometricLabel',
+                                            instruction: 'Enter your PIN to setup $biometricLabel',
+                                          ),
+                                        ),
+                                      );
+                                      if (verified == true) {
+                                        if (!context.mounted) return;
+                                        final authResult = await pinController.biometricService.authenticate(
+                                          localizedReason: 'Confirm $biometricLabel to enable quick unlock',
+                                        );
+                                        if (authResult.isSuccess) {
+                                          await pinController.setBiometricsEnabled(true);
+                                          if (!context.mounted) return;
+                                          showSuccessSnackbar(context, '$biometricLabel unlock enabled.');
+                                        } else if (authResult.errorMessage != null) {
+                                          if (!context.mounted) return;
+                                          showErrorSnackbar(context, authResult.errorMessage!);
+                                        }
+                                      }
+                                    } else {
+                                      final verified = await Navigator.push<bool>(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => VerifyPinScreen(
+                                            title: 'Disable $biometricLabel',
+                                            instruction: 'Enter your PIN to disable $biometricLabel unlock',
+                                          ),
+                                        ),
+                                      );
+                                      if (verified == true) {
+                                        await pinController.setBiometricsEnabled(false);
+                                        if (!context.mounted) return;
+                                        showSuccessSnackbar(context, '$biometricLabel unlock disabled.');
+                                      }
+                                    }
+                                  },
+                          ),
+                        ),
+                      ],
                       if (isPinEnabled) ...[
                         const SizedBox(height: 14),
                         Row(
@@ -650,9 +733,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _validateBackupFile() async {
-    if (kDebugMode) {
-      debugPrint('_validateBackupFile CALLED');
-    }
     setState(() => _isValidatingBackup = true);
 
     try {
@@ -777,9 +857,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     BackupConflictSummary? conflictSummary,
     RestoreDryRunPlan? dryRunPlan,
   }) {
-    if (kDebugMode) {
-      debugPrint('SHOW DIALOG CALLED');
-    }
     showDialog(
       context: context,
       barrierDismissible: false,

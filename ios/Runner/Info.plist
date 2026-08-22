@@ -70,5 +70,7 @@
 	<string>WalletMelt uses your photo library to attach existing bill and receipt images to local expenses.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>WalletMelt stores optimized receipt images locally on this device.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>WalletMelt uses Face ID to securely unlock your financial records.</string>
 </dict>
 </plist>

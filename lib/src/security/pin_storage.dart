@@ -1,11 +1,15 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-/// Secure storage layer for storing PIN configuration.
+/// Secure storage layer for storing PIN and biometric authentication configuration.
+///
+/// Implements fail-closed semantics: storage failures never result in an unauthenticated unlock.
 class PinStorage {
   static const _pinHashKey = 'security.pin_hash';
   static const _pinEnabledKey = 'security.pin_enabled';
+  static const _biometricsEnabledKey = 'security.biometrics_enabled';
 
   final FlutterSecureStorage _secureStorage;
 
@@ -20,19 +24,31 @@ class PinStorage {
       _testStorage[key] = value;
       return;
     }
-    await _secureStorage.write(
-      key: key,
-      value: value,
-    );
+    try {
+      await _secureStorage.write(
+        key: key,
+        value: value,
+      );
+    } on PlatformException catch (e) {
+      throw PinStorageException('Failed to write secure key: ${e.code}');
+    } catch (e) {
+      throw PinStorageException('Failed to write to secure storage: $e');
+    }
   }
 
   Future<String?> _read(String key) async {
     if (kIsWeb || Platform.environment.containsKey('FLUTTER_TEST')) {
       return _testStorage[key];
     }
-    return await _secureStorage.read(
-      key: key,
-    );
+    try {
+      return await _secureStorage.read(
+        key: key,
+      );
+    } on PlatformException catch (e) {
+      throw PinStorageException('Failed to read secure key: ${e.code}');
+    } catch (e) {
+      throw PinStorageException('Failed to read from secure storage: $e');
+    }
   }
 
   Future<void> _delete(String key) async {
@@ -40,9 +56,15 @@ class PinStorage {
       _testStorage.remove(key);
       return;
     }
-    await _secureStorage.delete(
-      key: key,
-    );
+    try {
+      await _secureStorage.delete(
+        key: key,
+      );
+    } on PlatformException catch (e) {
+      throw PinStorageException('Failed to delete secure key: ${e.code}');
+    } catch (e) {
+      throw PinStorageException('Failed to delete from secure storage: $e');
+    }
   }
 
   /// Checks if the PIN lock feature is enabled.
@@ -66,9 +88,30 @@ class PinStorage {
     await _write(_pinHashKey, hash);
   }
 
-  /// Clears all PIN-related keys from secure storage.
+  /// Checks if biometric unlock is enabled.
+  Future<bool> isBiometricsEnabled() async {
+    final enabled = await _read(_biometricsEnabledKey);
+    return enabled == 'true';
+  }
+
+  /// Sets the biometric unlock status.
+  Future<void> setBiometricsEnabled(bool enabled) async {
+    await _write(_biometricsEnabledKey, enabled.toString());
+  }
+
+  /// Clears all PIN and biometric-related keys from secure storage.
   Future<void> clearPinData() async {
     await _delete(_pinHashKey);
     await _delete(_pinEnabledKey);
+    await _delete(_biometricsEnabledKey);
   }
+}
+
+/// Custom exception thrown on secure storage failures.
+class PinStorageException implements Exception {
+  final String message;
+  const PinStorageException(this.message);
+
+  @override
+  String toString() => 'PinStorageException: $message';
 }

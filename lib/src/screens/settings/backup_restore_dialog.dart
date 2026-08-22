@@ -326,7 +326,6 @@ class _BackupRestoreDialogState extends State<BackupRestoreDialog> {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('BACKUP RESTORE DIALOG BUILD CALLED');
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textTheme = Theme.of(context).textTheme;
 

@@ -1,49 +1,81 @@
 import 'package:flutter/material.dart';
+import '../../theme/wallet_melt_theme.dart';
 
-/// Animated indicator showing 4 dots representing entered digits.
+/// Animated indicator displaying PIN entry progress with smooth scale and color transitions.
 class PinIndicator extends StatelessWidget {
   final int length;
   final int maxLength;
+  final bool hasError;
+  final bool isSuccess;
 
   const PinIndicator({
     required this.length,
     this.maxLength = 4,
+    this.hasError = false,
+    this.isSuccess = false,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(maxLength, (index) {
-        final isFilled = index < length;
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeOutCubic,
-          margin: const EdgeInsets.symmetric(horizontal: 12),
-          width: 18,
-          height: 18,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: isFilled
-                ? theme.colorScheme.primary
-                : theme.colorScheme.onSurface.withValues(alpha: 0.12),
-            border: Border.all(
-              color: isFilled
-                  ? theme.colorScheme.primary
-                  : theme.colorScheme.onSurface.withValues(alpha: 0.24),
-              width: 2,
+    final isDark = theme.brightness == Brightness.dark;
+
+    final dotColor = hasError
+        ? theme.colorScheme.error
+        : (isSuccess
+            ? (isDark ? WalletMeltColors.brand : WalletMeltColors.textPrimary)
+            : (isDark ? WalletMeltColors.brand : WalletMeltColors.textPrimary));
+
+    final emptyBorderColor = hasError
+        ? theme.colorScheme.error.withValues(alpha: 0.5)
+        : (isDark
+            ? Colors.white.withValues(alpha: 0.22)
+            : Colors.black.withValues(alpha: 0.20));
+
+    final emptyFillColor = isDark
+        ? Colors.white.withValues(alpha: 0.05)
+        : Colors.black.withValues(alpha: 0.04);
+
+    return Semantics(
+      label: hasError
+          ? 'Incorrect PIN entered. 0 of $maxLength digits entered.'
+          : '$length of $maxLength digits entered.',
+      readOnly: true,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: List.generate(maxLength, (index) {
+          final isFilled = index < length;
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeOutCubic,
+            margin: const EdgeInsets.symmetric(horizontal: 10),
+            width: isFilled ? 16 : 14,
+            height: isFilled ? 16 : 14,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: isFilled ? dotColor : emptyFillColor,
+              border: Border.all(
+                color: isFilled ? dotColor : emptyBorderColor,
+                width: isFilled ? 2.0 : 1.5,
+              ),
+              boxShadow: isFilled
+                  ? [
+                      BoxShadow(
+                        color: dotColor.withValues(alpha: isDark ? 0.25 : 0.15),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ]
+                  : null,
             ),
-          ),
-          transform: Matrix4.diagonal3Values(
-            isFilled ? 1.15 : 1.0,
-            isFilled ? 1.15 : 1.0,
-            1.0,
-          ),
-          transformAlignment: Alignment.center,
-        );
-      }),
+          );
+        }),
+      ),
     );
   }
 }
+
+/// Convenience alias adhering to WalletMelt design token naming.
+typedef WMPinIndicator = PinIndicator;
