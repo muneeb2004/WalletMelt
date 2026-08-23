@@ -82,8 +82,8 @@ class _AppShellState extends State<AppShell>
             bottom: 18,
             child: SafeArea(
               child: Container(
-                height: 72,
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                height: 70,
+                padding: const EdgeInsets.all(5),
                 decoration: BoxDecoration(
                   color: isDark ? const Color(0xFF0C0E14) : Colors.white,
                   borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
@@ -108,35 +108,7 @@ class _AppShellState extends State<AppShell>
                     ),
                   ],
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _NavItem(
-                      icon: Icons.home_filled,
-                      label: 'Home',
-                      index: 0,
-                      shell: widget.navigationShell,
-                    ),
-                    _NavItem(
-                      icon: Icons.receipt_long_rounded,
-                      label: 'History',
-                      index: 1,
-                      shell: widget.navigationShell,
-                    ),
-                    _NavItem(
-                      icon: Icons.account_balance_wallet_rounded,
-                      label: 'Planning',
-                      index: 2,
-                      shell: widget.navigationShell,
-                    ),
-                    _NavItem(
-                      icon: Icons.handshake_rounded,
-                      label: 'Debts',
-                      index: 3,
-                      shell: widget.navigationShell,
-                    ),
-                  ],
-                ),
+                child: _FluidBlobNavBar(shell: widget.navigationShell),
               ),
             ),
           ),
@@ -411,91 +383,124 @@ class _AppFloatingActionButtonState extends State<_AppFloatingActionButton> {
   }
 }
 
-class _NavItem extends StatelessWidget {
-  const _NavItem({
-    required this.icon,
-    required this.label,
-    required this.index,
+class _FluidBlobNavBar extends StatelessWidget {
+  const _FluidBlobNavBar({
     required this.shell,
   });
 
-  final IconData icon;
-  final String label;
-  final int index;
   final StatefulNavigationShell shell;
+
+  static const _items = [
+    (icon: Icons.home_filled, label: 'Home'),
+    (icon: Icons.receipt_long_rounded, label: 'History'),
+    (icon: Icons.account_balance_wallet_rounded, label: 'Planning'),
+    (icon: Icons.handshake_rounded, label: 'Debts'),
+  ];
 
   @override
   Widget build(BuildContext context) {
-    final active = shell.currentIndex == index;
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    final activeIconColor = isDark ? Colors.black : Colors.white;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final currentIndex = shell.currentIndex;
     final activeBgColor = isDark ? WalletMeltColors.brand : WalletMeltColors.textPrimary;
-    final inactiveIconColor = isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8);
+    final activeTextColor = isDark ? Colors.black : Colors.white;
+    final inactiveColor = isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8);
 
-    return Expanded(
-      flex: active ? 4 : 2,
-      child: Semantics(
-        button: true,
-        selected: active,
-        label: label,
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: () {
-            WMHaptics.selection();
-            shell.goBranch(index, initialLocation: index == shell.currentIndex);
-          },
-          child: Container(
-            height: double.infinity,
-            alignment: Alignment.center,
-            child: AnimatedContainer(
-              duration: AppMotion.medium,
-              curve: AppMotion.standard,
-              padding: EdgeInsets.symmetric(
-                horizontal: active ? 12 : 8,
-                vertical: 8,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final totalWidth = constraints.maxWidth;
+        final activeWidth = (totalWidth * 0.36).clamp(90.0, 130.0);
+        final inactiveWidth = (totalWidth - activeWidth) / (_items.length - 1);
+        final pillLeft = currentIndex * inactiveWidth;
+
+        return Stack(
+          alignment: Alignment.centerLeft,
+          children: [
+            // ── Single Fluid Sliding Blob Pill ────────────────────────────
+            AnimatedPositioned(
+              duration: const Duration(milliseconds: 320),
+              curve: Curves.easeOutCubic,
+              left: pillLeft,
+              top: 2,
+              bottom: 2,
+              width: activeWidth,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: activeBgColor,
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+                  boxShadow: [
+                    BoxShadow(
+                      color: activeBgColor.withValues(alpha: isDark ? 0.35 : 0.22),
+                      blurRadius: 12,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
               ),
-              decoration: BoxDecoration(
-                color: active ? activeBgColor : Colors.transparent,
-                borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    icon,
-                    color: active ? activeIconColor : inactiveIconColor,
-                    size: 20,
-                  ),
-                  if (active) ...[
-                    const SizedBox(width: 6),
-                    Flexible(
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          label,
-                          maxLines: 1,
-                          softWrap: false,
-                          style: TextStyle(
-                            fontFamily: 'PlusJakartaSans',
-                            fontSize: 12,
-                            fontWeight: FontWeight.w800,
-                            color: activeIconColor,
-                            letterSpacing: 0.2,
-                          ),
+            ),
+
+            // ── Interactive Tab Slots ─────────────────────────────────────
+            Row(
+              children: List.generate(_items.length, (index) {
+                final active = index == currentIndex;
+                final item = _items[index];
+
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 320),
+                  curve: Curves.easeOutCubic,
+                  width: active ? activeWidth : inactiveWidth,
+                  height: double.infinity,
+                  child: Semantics(
+                    button: true,
+                    selected: active,
+                    label: item.label,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () {
+                        WMHaptics.selection();
+                        shell.goBranch(index, initialLocation: index == shell.currentIndex);
+                      },
+                      child: Container(
+                        alignment: Alignment.center,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              item.icon,
+                              color: active ? activeTextColor : inactiveColor,
+                              size: 20,
+                            ),
+                            if (active) ...[
+                              const SizedBox(width: 6),
+                              Flexible(
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                    item.label,
+                                    maxLines: 1,
+                                    softWrap: false,
+                                    style: TextStyle(
+                                      fontFamily: 'PlusJakartaSans',
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w800,
+                                      color: activeTextColor,
+                                      letterSpacing: 0.2,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
                       ),
                     ),
-                  ],
-                ],
-              ),
+                  ),
+                );
+              }),
             ),
-          ),
-        ),
-      ),
+          ],
+        );
+      },
     );
   }
 }

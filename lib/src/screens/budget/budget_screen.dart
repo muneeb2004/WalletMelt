@@ -465,29 +465,46 @@ class _BudgetScreenState extends State<BudgetScreen> {
           ),
           const SizedBox(height: 16),
 
-          // Ratio percentage text
+          // Ratio percentage text with generous breathing space
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(
-                isOverBudget
-                    ? 'Over Budget'
-                    : '${(ratio * 100).toStringAsFixed(0)}% Used',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: budgetColor,
-                      fontWeight: FontWeight.w800,
-                    ),
+              Container(
+                padding: isOverBudget
+                    ? const EdgeInsets.symmetric(horizontal: 10, vertical: 4)
+                    : EdgeInsets.zero,
+                decoration: isOverBudget
+                    ? BoxDecoration(
+                        color: WalletMeltColors.danger.withValues(alpha: 0.14),
+                        borderRadius: BorderRadius.circular(8),
+                      )
+                    : null,
+                child: Text(
+                  isOverBudget
+                      ? 'Over Budget'
+                      : '${(ratio * 100).toStringAsFixed(0)}% Used',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: budgetColor,
+                        fontWeight: FontWeight.w800,
+                        fontSize: isOverBudget ? 13 : null,
+                      ),
+                ),
               ),
-              const SizedBox(width: 8),
-              Flexible(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
+              const SizedBox(width: 16),
+              Expanded(
+                child: Align(
                   alignment: Alignment.centerRight,
-                  child: Text(
-                    '${formatMoney(totalSpent, currency)} of ${formatMoney(monthlyBudget, currency)}',
-                    style: Theme.of(context).textTheme.bodyMedium,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      '${formatMoney(totalSpent, currency)} of ${formatMoney(monthlyBudget, currency)}',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
+                    ),
                   ),
                 ),
               ),
@@ -530,26 +547,94 @@ class _BudgetScreenState extends State<BudgetScreen> {
           ),
           const SizedBox(height: AppSpacing.sm),
 
-          // ── Row 2: Days Left in Month ─────────────────────────────────────
-          StatTile(
-            label: 'Days Left in Month',
+          // ── Row 2: Days Left in Month (Full-width Cohesive Row) ───────────
+          _buildFullWidthMetricRow(
+            context: context,
+            isDark: isDark,
             icon: Icons.calendar_month_rounded,
+            label: 'Days Left in Month',
             value: '$daysLeft ${daysLeft == 1 ? 'Day' : 'Days'} Remaining',
           ),
 
-          // ── Row 3: Daily Spend Allowance ──────────────────────────────────
+          // ── Row 3: Daily Spend Allowance (Full-width Cohesive Row) ────────
           if (selectedMonth.year == DateTime.now().year &&
               selectedMonth.month == DateTime.now().month) ...[
             const SizedBox(height: AppSpacing.sm),
-            StatTile(
-              label: isOverBudget ? 'Daily Allowance' : 'Daily Spend Allowance',
+            _buildFullWidthMetricRow(
+              context: context,
+              isDark: isDark,
               icon: Icons.today_rounded,
+              label: isOverBudget ? 'Daily Allowance' : 'Daily Spend Allowance',
               value: isOverBudget
                   ? 'No allowance remaining'
                   : '${formatMoney(remaining / daysLeft.clamp(1, 999), currency)} / day',
               valueColor: isOverBudget ? WalletMeltColors.danger : WalletMeltColors.positive,
             ),
           ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFullWidthMetricRow({
+    required BuildContext context,
+    required bool isDark,
+    required IconData icon,
+    required String label,
+    required String value,
+    Color? valueColor,
+  }) {
+    final tt = Theme.of(context).textTheme;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: isDark
+            ? const Color.fromRGBO(255, 255, 255, 0.08)
+            : const Color.fromRGBO(0, 0, 0, 0.05),
+        borderRadius: BorderRadius.circular(AppSpacing.cardRadius - 8),
+        border: Border.all(
+          color: isDark
+              ? const Color.fromRGBO(255, 255, 255, 0.05)
+              : const Color.fromRGBO(0, 0, 0, 0.03),
+          width: 1.0,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            size: 17,
+            color: valueColor ?? (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: tt.labelMedium?.copyWith(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerRight,
+            child: Text(
+              value,
+              maxLines: 1,
+              style: tt.titleMedium?.copyWith(
+                fontSize: 13.5,
+                fontWeight: FontWeight.w800,
+                color: valueColor,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
+            ),
+          ),
         ],
       ),
     );

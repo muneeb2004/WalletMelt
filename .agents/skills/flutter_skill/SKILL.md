@@ -24,8 +24,11 @@ description: Guidelines for safe Flutter widget structure, styling tokens, spaci
   - `Theme.of(context).colorScheme.error`
 - **Spacing Guidelines:** Use a base spacing scale (4, 8, 12, 16, 24, 32) wrapped in `SizedBox` or `Padding` to maintain design grid coherence.
 
-## Responsive Layout Checks
-- **Overflow Prevention:** Always wrap scrollable components (like expense itemization lists) in `ListView`, `SingleChildScrollView`, or `CustomScrollView`.
+## Responsive Layout Checks & Learning Rules
+- **Column Full-Width Consistency:** When placing info rows or stat cards inside a `Column(crossAxisAlignment: CrossAxisAlignment.start)`, always enforce full width via `width: double.infinity` (or `SizedBox(width: double.infinity)`) so that full-width metric rows cleanly match sibling grid/column boundaries.
+- **Comparison Headers & Breathing Space:** In metric comparison rows (e.g. `% Used` / `Over Budget` vs `PKR Spent of Budget`), provide minimum 14–16dp breathing gap, enclose semantic status labels in contained badge pills, and wrap text in `Expanded` + `FittedBox(fit: BoxFit.scaleDown)` with tabular figures.
+- **Fluid Navigation Indicators:** For bottom navigation or tab bars, avoid localized opacity toggles across separate widgets. Instead, use a single continuous indicator (`AnimatedPositioned` / `AnimatedAlign`) that physically translates and stretches across the track for a fluid, continuous pill motion.
+- **Overflow Prevention:** Always wrap scrollable components (like expense itemization lists) in `ListView`, `SingleChildScrollView`, or `CustomScrollView`. Render and verify at 360dp width and 375pt.
 - **Adaptability:** Utilize `LayoutBuilder` or `MediaQuery` values to scale padding, grid dimensions, and alignments on larger screens or portrait/landscape shifts.
 
 ## Common Flutter CLI Commands
