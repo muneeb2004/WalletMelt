@@ -507,6 +507,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
           ],
           const SizedBox(height: AppSpacing.md + 4),
 
+          // ── Row 1: Spent & Remaining / Over by (2 equal columns) ─────────
           Row(
             children: [
               Expanded(
@@ -522,18 +523,21 @@ class _BudgetScreenState extends State<BudgetScreen> {
                   value: isOverBudget
                       ? formatMoney(-remaining, currency)
                       : formatMoney(remaining, currency),
-                  valueColor: isOverBudget ? WalletMeltColors.danger : null,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: StatTile(
-                  label: 'Days Left',
-                  value: '$daysLeft',
+                  valueColor: isOverBudget ? WalletMeltColors.danger : WalletMeltColors.positive,
                 ),
               ),
             ],
           ),
+          const SizedBox(height: AppSpacing.sm),
+
+          // ── Row 2: Days Left in Month ─────────────────────────────────────
+          StatTile(
+            label: 'Days Left in Month',
+            icon: Icons.calendar_month_rounded,
+            value: '$daysLeft ${daysLeft == 1 ? 'Day' : 'Days'} Remaining',
+          ),
+
+          // ── Row 3: Daily Spend Allowance ──────────────────────────────────
           if (selectedMonth.year == DateTime.now().year &&
               selectedMonth.month == DateTime.now().month) ...[
             const SizedBox(height: AppSpacing.sm),
