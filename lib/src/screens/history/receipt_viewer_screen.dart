@@ -245,12 +245,13 @@ class _ReceiptViewerScreenState extends State<ReceiptViewerScreen>
     _cancelHideTimer();
     showModalBottomSheet<void>(
       context: context,
+      useRootNavigator: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
         return Container(
           margin: const EdgeInsets.all(16),
           child: WMGlassSurface.tier3(
-            radius: 24,
+            radius: AppSpacing.radiusLg,
             padding: const EdgeInsets.all(24),
             child: Column(
               mainAxisSize: MainAxisSize.min,

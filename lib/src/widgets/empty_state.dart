@@ -77,13 +77,13 @@ class EmptyState extends StatelessWidget {
                   borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
                   gradient: const LinearGradient(
                     colors: [
-                      Color(0xFFFCD34D),
-                      Color(0xFFF59E0B),
+                      WalletMeltColors.brandSoft,
+                      WalletMeltColors.brand,
                     ],
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFFF59E0B).withValues(alpha: 0.25),
+                      color: WalletMeltColors.brand.withValues(alpha: 0.25),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),

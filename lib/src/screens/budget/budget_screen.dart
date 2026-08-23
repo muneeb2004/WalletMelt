@@ -12,8 +12,8 @@ import '../../widgets/app_snackbar.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/progress_bar.dart';
 import '../../widgets/section_header.dart';
-import '../../widgets/sheet_handle.dart';
 import '../../widgets/stat_tile.dart';
+import '../../widgets/state_views.dart';
 
 class BudgetScreen extends StatefulWidget {
   const BudgetScreen({this.isEmbedded = false, super.key});
@@ -42,7 +42,6 @@ class BudgetScreen extends StatefulWidget {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SheetHandle(),
                     Text(
                       currentAmount != null
                           ? 'Edit Monthly Budget'
@@ -201,7 +200,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final state = context.read<AppState>();
+    final state = context.watch<AppState>();
     final selectedMonth = context.select((AppState s) => s.selectedMonth);
     final monthlyBudget = context.select((AppState s) => s.getMonthlyBudgetAmount());
     final totalSpent = context.select((AppState s) => s.getCurrentMonthTotalSpent());
@@ -210,6 +209,43 @@ class _BudgetScreenState extends State<BudgetScreen> {
 
     final isDark = theme.brightness == Brightness.dark;
     final now = DateTime.now();
+
+    if (state.errorMessage != null) {
+      final errorWidget = Center(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: AppErrorState(
+            message: state.errorMessage!,
+            onRetry: () => context.read<AppState>().refresh(),
+          ),
+        ),
+      );
+      return widget.isEmbedded
+          ? errorWidget
+          : Scaffold(
+              body: AppBackground(
+                child: errorWidget,
+              ),
+            );
+    }
+
+    if (state.isOffline) {
+      final offlineWidget = Center(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: AppOfflineState(
+            onRetry: () => context.read<AppState>().refresh(),
+          ),
+        ),
+      );
+      return widget.isEmbedded
+          ? offlineWidget
+          : Scaffold(
+              body: AppBackground(
+                child: offlineWidget,
+              ),
+            );
+    }
 
     // Check if the navigated month is the current calendar month
     final isCurrentMonth = selectedMonth.year == now.year &&
@@ -250,6 +286,8 @@ class _BudgetScreenState extends State<BudgetScreen> {
               ),
               // Month Navigation
               IconButton(
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
                 tooltip: 'Previous month',
                 onPressed: state.previousMonth,
                 icon: const Icon(Icons.chevron_left_rounded),
@@ -259,6 +297,8 @@ class _BudgetScreenState extends State<BudgetScreen> {
                 style: theme.textTheme.titleMedium,
               ),
               IconButton(
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
                 tooltip: 'Next month',
                 onPressed: isCurrentMonth ? null : state.nextMonth,
                 icon: const Icon(Icons.chevron_right_rounded),
@@ -270,26 +310,37 @@ class _BudgetScreenState extends State<BudgetScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Month Ceiling',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+              const Expanded(
+                child: Text(
+                  'Month Ceiling',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                ),
               ),
+              const SizedBox(width: 8),
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   IconButton(
+                    visualDensity: VisualDensity.compact,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                     tooltip: 'Previous month',
                     onPressed: state.previousMonth,
-                    icon: const Icon(Icons.chevron_left_rounded),
+                    icon: const Icon(Icons.chevron_left_rounded, size: 20),
                   ),
                   Text(
                     readableMonth(selectedMonth),
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 14),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 13),
                   ),
                   IconButton(
+                    visualDensity: VisualDensity.compact,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                     tooltip: 'Next month',
                     onPressed: isCurrentMonth ? null : state.nextMonth,
-                    icon: const Icon(Icons.chevron_right_rounded),
+                    icon: const Icon(Icons.chevron_right_rounded, size: 20),
                   ),
                 ],
               ),
@@ -429,9 +480,16 @@ class _BudgetScreenState extends State<BudgetScreen> {
                       fontWeight: FontWeight.w800,
                     ),
               ),
-              Text(
-                '${formatMoney(totalSpent, currency)} of ${formatMoney(monthlyBudget, currency)}',
-                style: Theme.of(context).textTheme.bodyMedium,
+              const SizedBox(width: 8),
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    '${formatMoney(totalSpent, currency)} of ${formatMoney(monthlyBudget, currency)}',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ),
               ),
             ],
           ),
@@ -476,6 +534,18 @@ class _BudgetScreenState extends State<BudgetScreen> {
               ),
             ],
           ),
+          if (selectedMonth.year == DateTime.now().year &&
+              selectedMonth.month == DateTime.now().month) ...[
+            const SizedBox(height: AppSpacing.sm),
+            StatTile(
+              label: isOverBudget ? 'Daily Allowance' : 'Daily Spend Allowance',
+              icon: Icons.today_rounded,
+              value: isOverBudget
+                  ? 'No allowance remaining'
+                  : '${formatMoney(remaining / daysLeft.clamp(1, 999), currency)} / day',
+              valueColor: isOverBudget ? WalletMeltColors.danger : WalletMeltColors.positive,
+            ),
+          ],
         ],
       ),
     );
@@ -688,7 +758,6 @@ class _BudgetScreenState extends State<BudgetScreen> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SheetHandle(),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [

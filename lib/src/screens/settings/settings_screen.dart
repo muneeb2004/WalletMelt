@@ -859,6 +859,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }) {
     showDialog(
       context: context,
+      useRootNavigator: true,
       barrierDismissible: false,
       builder: (context) {
         return BackupRestoreDialog(
@@ -893,6 +894,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   ) {
     showDialog(
       context: context,
+      useRootNavigator: true,
       builder: (context) {
         return RestoreSummaryDialog(
           result: result,

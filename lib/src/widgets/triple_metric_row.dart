@@ -46,12 +46,18 @@ class TripleMetricRow extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 2.0 /* AppSpacing.xs / 2 */),
-              Text(
-                value1,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14.0,
-                  color: color1,
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  value1,
+                  maxLines: 1,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14.0,
+                    color: color1,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
                 ),
               ),
             ],
@@ -77,12 +83,18 @@ class TripleMetricRow extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 2.0),
-              Text(
-                value2,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14.0,
-                  color: color2,
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  value2,
+                  maxLines: 1,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14.0,
+                    color: color2,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
                 ),
               ),
             ],
@@ -108,12 +120,18 @@ class TripleMetricRow extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 2.0),
-              Text(
-                value3,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14.0,
-                  color: color3,
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  value3,
+                  maxLines: 1,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14.0,
+                    color: color3,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
                 ),
               ),
             ],

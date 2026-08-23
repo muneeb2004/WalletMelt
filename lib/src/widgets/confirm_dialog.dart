@@ -13,6 +13,7 @@ Future<bool?> showConfirmDialog(
   required String body,
   required String confirmLabel,
   bool isDestructive = false,
+  bool useRootNavigator = true,
 }) {
   // Trigger tactile sensory feedback
   if (isDestructive) {
@@ -23,6 +24,7 @@ Future<bool?> showConfirmDialog(
 
   return showDialog<bool>(
     context: context,
+    useRootNavigator: useRootNavigator,
     builder: (dialogContext) => AlertDialog(
       title: Text(title),
       content: Text(body),

@@ -420,12 +420,12 @@ class _BackupRestoreDialogState extends State<BackupRestoreDialog> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.warning_amber_rounded, size: 14, color: Colors.orange),
+                      const Icon(Icons.warning_amber_rounded, size: 14, color: WalletMeltColors.warning),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
                           warning,
-                          style: const TextStyle(color: Colors.orange, fontSize: 12),
+                          style: const TextStyle(color: WalletMeltColors.warning, fontSize: 12),
                         ),
                       ),
                     ],
@@ -444,11 +444,11 @@ class _BackupRestoreDialogState extends State<BackupRestoreDialog> {
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
                         color: requiresResolution 
-                            ? Colors.orange.withValues(alpha: 0.1) 
+                            ? WalletMeltColors.warning.withValues(alpha: 0.1) 
                             : Colors.green.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(
-                          color: requiresResolution ? Colors.orange : Colors.green,
+                          color: requiresResolution ? WalletMeltColors.warning : Colors.green,
                           width: 1,
                         ),
                       ),
@@ -456,7 +456,7 @@ class _BackupRestoreDialogState extends State<BackupRestoreDialog> {
                         children: [
                           Icon(
                             requiresResolution ? Icons.warning_amber_rounded : Icons.check_circle_outline_rounded,
-                            color: requiresResolution ? Colors.orange : Colors.green,
+                            color: requiresResolution ? WalletMeltColors.warning : Colors.green,
                           ),
                           const SizedBox(width: 10),
                           Expanded(
@@ -465,7 +465,7 @@ class _BackupRestoreDialogState extends State<BackupRestoreDialog> {
                                   ? '${_conflictSummary!.duplicateExpenseIdCount} expense ID(s) already exist in local data. You must resolve them before merging.'
                                   : 'All conflicting records resolved successfully.',
                               style: TextStyle(
-                                color: requiresResolution ? Colors.orange : Colors.green,
+                                color: requiresResolution ? WalletMeltColors.warning : Colors.green,
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold
                               ),
@@ -595,18 +595,18 @@ class _BackupRestoreDialogState extends State<BackupRestoreDialog> {
                   Container(
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: Colors.orange.withValues(alpha: 0.1),
+                      color: WalletMeltColors.warning.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: Colors.orange, width: 1),
+                      border: Border.all(color: WalletMeltColors.warning, width: 1),
                     ),
                     child: const Row(
                       children: [
-                        Icon(Icons.warning_amber_rounded, color: Colors.orange),
+                        Icon(Icons.warning_amber_rounded, color: WalletMeltColors.warning),
                         SizedBox(width: 10),
                         Expanded(
                           child: Text(
                             'Restore is unavailable until validation safety gates are satisfied.',
-                            style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold, fontSize: 13),
+                            style: TextStyle(color: WalletMeltColors.warning, fontWeight: FontWeight.bold, fontSize: 13),
                           ),
                         ),
                       ],

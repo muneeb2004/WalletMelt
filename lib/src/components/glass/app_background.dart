@@ -97,8 +97,8 @@ class BackgroundOrbsPainter extends CustomPainter {
       final radius = size.width * 0.8;
       paint.shader = RadialGradient(
         colors: [
-          const Color(0xFFFCD34D).withValues(alpha: 0.18),
-          const Color(0xFFFCD34D).withValues(alpha: 0.0),
+          WalletMeltColors.warning.withValues(alpha: 0.18),
+          WalletMeltColors.warning.withValues(alpha: 0.0),
         ],
       ).createShader(Rect.fromCircle(center: center, radius: radius));
       canvas.drawCircle(center, radius, paint);

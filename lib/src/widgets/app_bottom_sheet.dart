@@ -11,17 +11,26 @@ Future<T?> showAppBottomSheet<T>(
   bool showDragHandle = true,
   double maxWidth = 600,
   Color? backgroundColor,
+  bool useRootNavigator = true,
+  AnimationStyle? sheetAnimationStyle,
 }) async {
   // Trigger tactile haptic feedback when the sheet starts opening
   WMHaptics.light();
 
   return showModalBottomSheet<T>(
     context: context,
-    useRootNavigator: false,
+    useRootNavigator: useRootNavigator,
     isScrollControlled: isScrollControlled,
     showDragHandle: showDragHandle,
     backgroundColor: backgroundColor,
     constraints: BoxConstraints(maxWidth: maxWidth),
+    sheetAnimationStyle: sheetAnimationStyle ??
+        const AnimationStyle(
+          duration: AppMotion.medium,
+          reverseDuration: AppMotion.fast,
+          curve: AppMotion.entrance,
+          reverseCurve: AppMotion.exit,
+        ),
     builder: (sheetContext) {
       return SafeArea(
         child: AnimatedPadding(

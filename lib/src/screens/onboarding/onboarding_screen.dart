@@ -126,8 +126,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 borderRadius: BorderRadius.circular(999),
                 gradient: const LinearGradient(
                   colors: [
-                    Color(0xFFFCD34D), // Golden highlight
-                    Color(0xFFF59E0B), // Brand amber
+                    WalletMeltColors.brandSoft,
+                    WalletMeltColors.brand,
                   ],
                 ),
                 boxShadow: [

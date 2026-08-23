@@ -15,6 +15,7 @@ import '../../theme/wallet_melt_theme.dart';
 import '../../utils/expense_validation.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/primary_button.dart';
+import '../../widgets/state_views.dart';
 import '../../types/grocery_template.dart';
 
 class AddExpenseScreen extends StatefulWidget {
@@ -38,6 +39,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   FuelTransactionDraft? _fuelTransactionDraft;
 
   String? _categoryId;
+  String? _pendingInitialCategoryId;
+  bool _initialCategoryResolved = false;
   DateTime _date = DateTime.now();
   String? _receiptUri;
   ExpenseValidationResult? _validation;
@@ -49,15 +52,50 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   void initState() {
     super.initState();
     if (widget.initialCategoryId != null) {
+      _pendingInitialCategoryId = widget.initialCategoryId;
       _categoryId = widget.initialCategoryId;
+    }
+  }
+
+  void _resolveInitialCategory(AppState state) {
+    if (_initialCategoryResolved || _pendingInitialCategoryId == null) return;
+    if (state.categories.isEmpty) return;
+
+    final param = _pendingInitialCategoryId!;
+    final byId = state.categoryById(param);
+    if (byId != null) {
+      _categoryId = byId.id;
+      _initialCategoryResolved = true;
+    } else {
+      final byNameOrSlug = state.categories.where(
+        (c) =>
+            c.id.toLowerCase() == param.toLowerCase() ||
+            c.name.toLowerCase() == param.toLowerCase(),
+      ).firstOrNull;
+      if (byNameOrSlug != null) {
+        _categoryId = byNameOrSlug.id;
+        _initialCategoryResolved = true;
+      }
+    }
+
+    if (_initialCategoryResolved) {
+      if (_titleController.text.trim().isEmpty) {
+        if (param.toLowerCase() == 'fuel' || _categoryId == 'fuel') {
+          _titleController.text = 'Fuel Refill';
+        } else if (param.toLowerCase() == 'grocery' || _categoryId == 'grocery') {
+          _titleController.text = 'Groceries';
+        }
+      }
     }
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_hydrated || widget.expenseId == null) return;
     final state = context.read<AppState>();
+    _resolveInitialCategory(state);
+
+    if (_hydrated || widget.expenseId == null) return;
     final expense = state.expenses
         .where((expense) => expense.id == widget.expenseId)
         .firstOrNull;
@@ -102,12 +140,51 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     final currency = context.select((AppState s) => s.settings.currency);
     final categories = context.select((AppState s) => s.categories);
     final isEditing = widget.expenseId != null;
+
+    if (!_initialCategoryResolved && _pendingInitialCategoryId != null && categories.isNotEmpty) {
+      _resolveInitialCategory(state);
+    }
+
     final selectedCategory =
         _categoryId == null ? null : state.categoryById(_categoryId!);
-    final isGroceryMode = selectedCategory?.id == 'grocery';
+    final isGroceryMode = selectedCategory?.id == 'grocery' ||
+        selectedCategory?.name.toLowerCase() == 'grocery';
     final isFuelMode = selectedCategory?.id == 'fuel' ||
         selectedCategory?.name.toLowerCase() == 'fuel';
     final isDark = theme.brightness == Brightness.dark;
+    final errorMessage = context.select((AppState s) => s.errorMessage);
+    final isOffline = context.select((AppState s) => s.isOffline);
+
+    if (errorMessage != null) {
+      return Scaffold(
+        body: AppBackground(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: AppErrorState(
+                message: errorMessage,
+                onRetry: () => context.read<AppState>().refresh(),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    if (isOffline) {
+      return Scaffold(
+        body: AppBackground(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: AppOfflineState(
+                onRetry: () => context.read<AppState>().refresh(),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       body: AppBackground(
@@ -668,6 +745,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   Future<void> _pickDate() async {
     final picked = await showDatePicker(
       context: context,
+      useRootNavigator: true,
       initialDate: _date,
       firstDate: DateTime(2000),
       lastDate: DateTime(DateTime.now().year + 5),
@@ -815,7 +893,12 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
           builder: (context, setSheetState) {
             return SingleChildScrollView(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg,
+                  AppSpacing.sm,
+                  AppSpacing.lg,
+                  AppSpacing.lg,
+                ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1256,6 +1339,7 @@ class _BulkGroceryEditorState extends State<BulkGroceryEditor> {
     final state = context.read<AppState>();
     final result = await showDialog<String>(
       context: context,
+      useRootNavigator: true,
       builder: (ctx) => AlertDialog(
         title: const Text('Save Shopping Template'),
         content: TextField(
@@ -1293,6 +1377,7 @@ class _BulkGroceryEditorState extends State<BulkGroceryEditor> {
     if (state.groceryTemplates.isEmpty) {
       showDialog(
         context: context,
+        useRootNavigator: true,
         builder: (ctx) => AlertDialog(
           title: const Text('No Templates'),
           content: const Text('You haven\'t saved any shopping list templates yet. Add items and tap "Save as Template" to create one.'),
@@ -1309,6 +1394,7 @@ class _BulkGroceryEditorState extends State<BulkGroceryEditor> {
 
     final selected = await showDialog<GroceryTemplate>(
       context: context,
+      useRootNavigator: true,
       builder: (ctx) => AlertDialog(
         title: const Text('Load Grocery Template'),
         content: SizedBox(
@@ -1354,6 +1440,7 @@ class _BulkGroceryEditorState extends State<BulkGroceryEditor> {
                         final renameController = TextEditingController(text: t.name);
                         final newName = await showDialog<String>(
                           context: context,
+                          useRootNavigator: true,
                           builder: (renameCtx) => AlertDialog(
                             title: const Text('Rename Template'),
                             content: TextField(
@@ -1642,7 +1729,7 @@ class _BulkGroceryEditorState extends State<BulkGroceryEditor> {
                 Expanded(
                   flex: 3,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     height: 48,
                     decoration: BoxDecoration(
                       color: isDark ? const Color(0x0Affffff) : const Color(0x0A000000),

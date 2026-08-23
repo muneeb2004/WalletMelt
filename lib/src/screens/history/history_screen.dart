@@ -14,6 +14,7 @@ import '../../types/category.dart' as wm;
 import '../../types/expense.dart';
 import '../../utils/insights.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/state_views.dart';
 
 enum ExpenseSort { newest, oldest, amountHigh, amountLow }
 
@@ -165,8 +166,40 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final base = _showRecycleBin ? deletedExpenses : expenses;
     final items = _getOrCreateItems(base);
     final filteredEmpty = _cachedFilteredList?.isEmpty ?? true;
-
     final isLoading = context.select<AppState, bool>((s) => s.isLoading);
+    final errorMessage = context.select<AppState, String?>((s) => s.errorMessage);
+    final isOffline = context.select<AppState, bool>((s) => s.isOffline);
+
+    if (errorMessage != null) {
+      return Scaffold(
+        body: AppBackground(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: AppErrorState(
+                message: errorMessage,
+                onRetry: () => context.read<AppState>().refresh(),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    if (isOffline) {
+      return Scaffold(
+        body: AppBackground(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: AppOfflineState(
+                onRetry: () => context.read<AppState>().refresh(),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       body: AppBackground(
@@ -461,20 +494,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   void _showQuickCategorySheet(BuildContext context, Expense expense) {
     final categories = context.read<AppState>().categories;
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
+    showAppBottomSheet<void>(
+      context,
       builder: (ctx) {
-        final isDark = Theme.of(ctx).brightness == Brightness.dark;
-        return Container(
-          decoration: BoxDecoration(
-            color: isDark ? WalletMeltColors.darkSurface : Colors.white,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(AppSpacing.radiusLg)),
-            border: Border.all(
-              color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder,
-            ),
+        return Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.sm,
           ),
-          padding: const EdgeInsets.all(AppSpacing.lg),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,

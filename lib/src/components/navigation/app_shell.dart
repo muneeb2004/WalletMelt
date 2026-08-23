@@ -21,14 +21,14 @@ class AppShell extends StatelessWidget {
       body: Stack(
         children: [
           Positioned.fill(child: navigationShell),
-          Positioned(
+            Positioned(
             left: 24,
             right: 24,
             bottom: 18,
             child: SafeArea(
               child: Container(
-                height: 64,
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                height: 72,
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                 decoration: BoxDecoration(
                   color: isDark ? const Color(0xFF0C0E14) : Colors.white,
                   borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
@@ -128,10 +128,12 @@ class ScreenActionResolver {
     showAppBottomSheet<void>(
       context,
       builder: (sheetContext) {
-        return Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.lg,
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.md,
+            AppSpacing.sm,
+            AppSpacing.md,
+            AppSpacing.lg,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -275,6 +277,7 @@ class _AppFloatingActionButtonState extends State<_AppFloatingActionButton> {
   @override
   Widget build(BuildContext context) {
     final hasAction = widget.action != null;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AnimatedOpacity(
       opacity: hasAction ? 1.0 : 0.0,
@@ -296,13 +299,18 @@ class _AppFloatingActionButtonState extends State<_AppFloatingActionButton> {
                 height: 56,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: const LinearGradient(
+                  gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [
-                      WalletMeltColors.brandSoft,
-                      WalletMeltColors.brand,
-                    ],
+                    colors: isDark
+                        ? const [
+                            WalletMeltColors.brand,
+                            WalletMeltColors.brandDeep,
+                          ]
+                        : const [
+                            WalletMeltColors.textPrimary,
+                            Color(0xFF1E293B),
+                          ],
                   ),
                   boxShadow: [
                     BoxShadow(
@@ -332,7 +340,7 @@ class _AppFloatingActionButtonState extends State<_AppFloatingActionButton> {
                   child: Icon(
                     widget.action?.icon ?? Icons.add_rounded,
                     size: 28,
-                    color: WalletMeltColors.textPrimary,
+                    color: Colors.white,
                   ),
                 ),
               ),
@@ -367,48 +375,55 @@ class _NavItem extends StatelessWidget {
     final activeBgColor = isDark ? WalletMeltColors.brand : WalletMeltColors.textPrimary;
     final inactiveIconColor = isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8);
 
-    return Semantics(
-      button: true,
-      selected: active,
-      label: label,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () {
-          WMHaptics.selection();
-          shell.goBranch(index, initialLocation: index == shell.currentIndex);
-        },
-        child: AnimatedContainer(
-          duration: AppMotion.fast,
-          padding: EdgeInsets.symmetric(
-            horizontal: active ? 16 : 12,
-            vertical: 8,
-          ),
-          decoration: BoxDecoration(
-            color: active ? activeBgColor : Colors.transparent,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                icon,
-                color: active ? activeIconColor : inactiveIconColor,
-                size: 20,
+    return Expanded(
+      child: Semantics(
+        button: true,
+        selected: active,
+        label: label,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            WMHaptics.selection();
+            shell.goBranch(index, initialLocation: index == shell.currentIndex);
+          },
+          child: Container(
+            height: double.infinity,
+            alignment: Alignment.center,
+            child: AnimatedContainer(
+              duration: AppMotion.medium,
+              curve: AppMotion.standard,
+              padding: EdgeInsets.symmetric(
+                horizontal: active ? 14 : 10,
+                vertical: 8,
               ),
-              if (active) ...[
-                const SizedBox(width: 6),
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontFamily: 'PlusJakartaSans',
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                    color: activeIconColor,
-                    letterSpacing: 0.2,
+              decoration: BoxDecoration(
+                color: active ? activeBgColor : Colors.transparent,
+                borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    icon,
+                    color: active ? activeIconColor : inactiveIconColor,
+                    size: 20,
                   ),
-                ),
-              ],
-            ],
+                  if (active) ...[
+                    const SizedBox(width: 6),
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontFamily: 'PlusJakartaSans',
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                        color: activeIconColor,
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
           ),
         ),
       ),

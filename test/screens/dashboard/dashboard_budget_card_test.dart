@@ -154,7 +154,7 @@ void main() {
       );
       final valueColorAnimation =
           progressIndicator.valueColor as AlwaysStoppedAnimation<Color>;
-      expect(valueColorAnimation.value, WalletMeltColors.brand);
+      expect(valueColorAnimation.value, WalletMeltColors.warning);
     });
 
     testWidgets('Tapping the hero card opens the budget adjustment sheet',

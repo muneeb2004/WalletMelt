@@ -148,6 +148,7 @@ class AppState extends ChangeNotifier {
   }
   bool isLoading = true;
   String? errorMessage;
+  bool isOffline = false;
 
   double? _cachedTotalSpent;
   MonthlyInsights? _cachedInsights;

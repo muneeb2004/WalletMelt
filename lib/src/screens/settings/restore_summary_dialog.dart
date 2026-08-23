@@ -122,7 +122,7 @@ class _RestoreSummaryDialogState extends State<RestoreSummaryDialog> {
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Icon(Icons.warning_amber_rounded, size: 14, color: Colors.orange),
+                                const Icon(Icons.warning_amber_rounded, size: 14, color: WalletMeltColors.warning),
                                 const SizedBox(width: 6),
                                 Expanded(
                                   child: Text(

@@ -11,6 +11,7 @@ import '../../utils/currency_format.dart';
 import '../../utils/date_utils.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/section_header.dart';
+import '../../widgets/state_views.dart';
 import '../../types/debt.dart';
 import '../../types/expense.dart';
 import '../../types/subscription.dart' as wm_sub;
@@ -231,6 +232,37 @@ class _InsightsScreenState extends State<InsightsScreen> {
 
     final isDark = theme.brightness == Brightness.dark;
 
+    if (state.errorMessage != null) {
+      return Scaffold(
+        body: AppBackground(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: AppErrorState(
+                message: state.errorMessage!,
+                onRetry: () => context.read<AppState>().refresh(),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    if (state.isOffline) {
+      return Scaffold(
+        body: AppBackground(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: AppOfflineState(
+                onRetry: () => context.read<AppState>().refresh(),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       body: AppBackground(
         child: Skeletonizer(
@@ -282,7 +314,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
             const SizedBox(height: AppSpacing.md + 2),
             if (insights.total == 0) ...[
               const EmptyState(
-                icon: Icons.insights_rounded,
+                icon: Icons.bar_chart_rounded,
                 title: 'No data yet',
                 subtitle:
                     'Add expenses to see your monthly trend, category breakdown, and spending insights.',

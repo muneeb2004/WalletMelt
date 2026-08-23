@@ -13,6 +13,7 @@ import '../../utils/date_utils.dart';
 import '../../types/debt.dart';
 import '../../widgets/section_header.dart';
 import '../../types/subscription.dart' as wm_sub;
+import '../../widgets/state_views.dart';
 import '../../widgets/triple_metric_row.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -41,6 +42,37 @@ class DashboardScreen extends StatelessWidget {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
     final isDark = theme.brightness == Brightness.dark;
+
+    if (state.errorMessage != null) {
+      return Scaffold(
+        body: AppBackground(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: AppErrorState(
+                message: state.errorMessage!,
+                onRetry: () => context.read<AppState>().refresh(),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    if (state.isOffline) {
+      return Scaffold(
+        body: AppBackground(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: AppOfflineState(
+                onRetry: () => context.read<AppState>().refresh(),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     if (isLoading) {
       return Scaffold(
@@ -98,6 +130,10 @@ class DashboardScreen extends StatelessWidget {
     final isOverBudget = hasBudget && remaining < 0;
     final ratio = hasBudget ? (totalSpent / budgetLimit).clamp(0.0, 1.5) : 0.0;
     final Color budgetColor = budgetProgressColor(ratio);
+    final now = DateTime.now();
+    final isCurrentMonth = selectedMonth.year == now.year && selectedMonth.month == now.month;
+    final lastDayOfMonth = DateTime(selectedMonth.year, selectedMonth.month + 1, 0).day;
+    final daysRemaining = isCurrentMonth ? (lastDayOfMonth - now.day + 1).clamp(1, 31) : 1;
 
     return Scaffold(
       body: AppBackground(
@@ -111,17 +147,22 @@ class DashboardScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Expanded(
-                    child: Text(
-                      _greeting(),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: textTheme.headlineMedium?.copyWith(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -0.4,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        _greeting(),
+                        maxLines: 1,
+                        style: textTheme.headlineMedium?.copyWith(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -0.4,
+                        ),
                       ),
                     ),
                   ),
+
+                  const SizedBox(width: 8),
 
                   // Month Switcher Controls
                   Container(
@@ -150,7 +191,7 @@ class DashboardScreen extends StatelessWidget {
                       children: [
                         IconButton(
                           padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                          constraints: const BoxConstraints(minWidth: 36, minHeight: 38),
                           tooltip: 'Previous month',
                           onPressed: context.read<AppState>().previousMonth,
                           icon: const Icon(Icons.chevron_left_rounded, size: 20),
@@ -164,7 +205,7 @@ class DashboardScreen extends StatelessWidget {
                         ),
                         IconButton(
                           padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                          constraints: const BoxConstraints(minWidth: 36, minHeight: 38),
                           tooltip: 'Next month',
                           onPressed: context.read<AppState>().nextMonth,
                           icon: const Icon(Icons.chevron_right_rounded, size: 20),
@@ -175,27 +216,34 @@ class DashboardScreen extends StatelessWidget {
 
                   const SizedBox(width: 8),
 
-                  // Settings Shortcut
-                  Container(
-                    width: 38,
-                    height: 38,
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? WalletMeltColors.darkSurface
-                          : Colors.white,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: isDark
-                            ? WalletMeltColors.darkBorder
-                            : WalletMeltColors.lightBorder,
-                        width: 1.0,
+                  // Settings Shortcut (with 48dp minimum accessible touch target)
+                  SizedBox(
+                    width: 44,
+                    height: 44,
+                    child: Center(
+                      child: Container(
+                        width: 38,
+                        height: 38,
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? WalletMeltColors.darkSurface
+                              : Colors.white,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: isDark
+                                ? WalletMeltColors.darkBorder
+                                : WalletMeltColors.lightBorder,
+                            width: 1.0,
+                          ),
+                        ),
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+                          tooltip: 'Settings',
+                          onPressed: () => context.push('/settings'),
+                          icon: const Icon(Icons.settings_outlined, size: 18),
+                        ),
                       ),
-                    ),
-                    child: IconButton(
-                      padding: EdgeInsets.zero,
-                      tooltip: 'Settings',
-                      onPressed: () => context.push('/settings'),
-                      icon: const Icon(Icons.settings_outlined, size: 18),
                     ),
                   ),
                 ],
@@ -219,28 +267,35 @@ class DashboardScreen extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Row(
-                          children: [
-                            Container(
-                              width: 8,
-                              height: 8,
-                              decoration: const BoxDecoration(
-                                color: WalletMeltColors.brand,
-                                shape: BoxShape.circle,
+                        Expanded(
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 8,
+                                height: 8,
+                                decoration: const BoxDecoration(
+                                  color: WalletMeltColors.brand,
+                                  shape: BoxShape.circle,
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              '${readableMonth(selectedMonth).toUpperCase()} SPEND',
-                              style: const TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 1.1,
-                                color: Color(0xFF94A3B8),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  '${readableMonth(selectedMonth).toUpperCase()} SPEND',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 1.1,
+                                    color: Color(0xFF94A3B8),
+                                  ),
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
+                        const SizedBox(width: 8),
                         if (insights.monthOverMonthDelta != null) ...[
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -312,43 +367,108 @@ class DashboardScreen extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            isOverBudget
-                                ? 'Over budget by ${formatMoney(-remaining, currency)}'
-                                : '${formatMoney(remaining, currency)} remaining',
-                            style: TextStyle(
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w700,
-                              color: isOverBudget
-                                  ? WalletMeltColors.danger
-                                  : Colors.white.withValues(alpha: 0.85),
+                          Expanded(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                isOverBudget
+                                    ? 'Over budget by ${formatMoney(-remaining, currency)}'
+                                    : '${formatMoney(remaining, currency)} remaining',
+                                style: TextStyle(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w700,
+                                  color: isOverBudget
+                                      ? WalletMeltColors.danger
+                                      : Colors.white.withValues(alpha: 0.85),
+                                ),
+                              ),
                             ),
                           ),
-                          Text(
-                            'Budget: ${formatMoney(budgetLimit, currency)}',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.white.withValues(alpha: 0.5),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerRight,
+                              child: Text(
+                                'Budget: ${formatMoney(budgetLimit, currency)}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.white.withValues(alpha: 0.5),
+                                ),
+                              ),
                             ),
                           ),
                         ],
                       ),
+
+                      // Daily Spend Allowance (Feature)
+                      if (isCurrentMonth) ...[
+                        const SizedBox(height: 10),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.07),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'DAILY ALLOWANCE',
+                                style: TextStyle(
+                                  fontSize: 10.5,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.6,
+                                  color: Colors.white.withValues(alpha: 0.6),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  alignment: Alignment.centerRight,
+                                  child: Text(
+                                    isOverBudget
+                                        ? 'Over budget — no daily allowance'
+                                        : '${formatMoney(remaining / daysRemaining, currency)} / day',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                      color: isOverBudget
+                                          ? WalletMeltColors.danger
+                                          : Colors.white.withValues(alpha: 0.9),
+                                      fontFeatures: const [FontFeature.tabularFigures()],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ] else ...[
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            insights.highestCategory == null
-                                ? 'No budget set for this month'
-                                : 'Highest: ${insights.highestCategory!.category.name}',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.white.withValues(alpha: 0.6),
+                          Expanded(
+                            child: Text(
+                              insights.highestCategory == null
+                                  ? 'No budget set for this month'
+                                  : 'Highest: ${insights.highestCategory!.category.name}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white.withValues(alpha: 0.6),
+                              ),
                             ),
                           ),
+                          const SizedBox(width: 8),
                           Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
                                 'Set Budget',
@@ -397,7 +517,7 @@ class DashboardScreen extends StatelessWidget {
                   ),
                   const SizedBox(width: 10),
                   WMQuickActionButton(
-                    icon: Icons.insights_rounded,
+                    icon: Icons.bar_chart_rounded,
                     label: 'Insights',
                     onTap: () => context.push('/insights'),
                   ),
@@ -409,11 +529,15 @@ class DashboardScreen extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Recent Activity',
-                    style: textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 17,
+                  Expanded(
+                    child: Text(
+                      'Recent Activity',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 17,
+                      ),
                     ),
                   ),
                   if (hasExpenses)
@@ -546,23 +670,18 @@ class _DashboardObligationsCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const SectionHeader(
-                title: 'Financial obligations',
-                icon: Icons.handshake_rounded,
-                padding: EdgeInsets.zero,
-              ),
-              Icon(
-                Icons.chevron_right_rounded,
-                color: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.color
-                    ?.withValues(alpha: 0.54),
-              ),
-            ],
+          SectionHeader(
+            title: 'Financial obligations',
+            icon: Icons.handshake_rounded,
+            padding: EdgeInsets.zero,
+            trailing: Icon(
+              Icons.chevron_right_rounded,
+              color: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.color
+                  ?.withValues(alpha: 0.54),
+            ),
           ),
           const SizedBox(height: AppSpacing.sm + 2),
           TripleMetricRow(
@@ -600,23 +719,18 @@ class _DashboardTaxCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const SectionHeader(
-                title: 'Tax paid this month',
-                icon: Icons.account_balance_rounded,
-                padding: EdgeInsets.zero,
-              ),
-              Icon(
-                Icons.chevron_right_rounded,
-                color: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.color
-                    ?.withValues(alpha: 0.54),
-              ),
-            ],
+          SectionHeader(
+            title: 'Tax paid this month',
+            icon: Icons.account_balance_rounded,
+            padding: EdgeInsets.zero,
+            trailing: Icon(
+              Icons.chevron_right_rounded,
+              color: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.color
+                  ?.withValues(alpha: 0.54),
+            ),
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
@@ -659,25 +773,20 @@ class _DashboardUpcomingRenewalsCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const SectionHeader(
-                title: 'Upcoming renewals',
-                icon: Icons.repeat_rounded,
-                padding: EdgeInsets.zero,
+          SectionHeader(
+            title: 'Upcoming renewals',
+            icon: Icons.repeat_rounded,
+            padding: EdgeInsets.zero,
+            trailing: Text(
+              'View all →',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? WalletMeltColors.brand
+                    : WalletMeltColors.textPrimary,
               ),
-              Text(
-                'View all →',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? WalletMeltColors.brand
-                      : WalletMeltColors.textPrimary,
-                ),
-              ),
-            ],
+            ),
           ),
           const SizedBox(height: AppSpacing.sm),
           ListView.separated(

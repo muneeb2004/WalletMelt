@@ -280,7 +280,7 @@ class _ConflictCard extends StatelessWidget {
               ? Colors.blue.withValues(alpha: 0.3)
               : currentChoice == ConflictResolution.useBackup
                   ? Colors.green.withValues(alpha: 0.3)
-                  : Colors.orange.withValues(alpha: 0.3),
+                  : WalletMeltColors.warning.withValues(alpha: 0.3),
           width: 2,
         ),
       ),
@@ -412,10 +412,10 @@ class _ConflictCard extends StatelessWidget {
                   child: OutlinedButton(
                     style: OutlinedButton.styleFrom(
                       backgroundColor: currentChoice == ConflictResolution.mergeFields
-                          ? Colors.orange.withValues(alpha: 0.1)
+                          ? WalletMeltColors.warning.withValues(alpha: 0.1)
                           : Colors.transparent,
                       side: BorderSide(
-                        color: currentChoice == ConflictResolution.mergeFields ? Colors.orange : Colors.transparent,
+                        color: currentChoice == ConflictResolution.mergeFields ? WalletMeltColors.warning : Colors.transparent,
                       ),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),

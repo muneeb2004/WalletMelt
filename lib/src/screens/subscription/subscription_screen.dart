@@ -23,7 +23,6 @@ class SubscriptionScreen extends StatefulWidget {
   static void showAddSubscriptionSheet(BuildContext context) {
     showAppBottomSheet(
       context,
-      backgroundColor: Colors.transparent,
       builder: (context) => const _AddSubscriptionSheet(),
     );
   }
@@ -157,7 +156,6 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   void _showAddSubscriptionSheet(BuildContext context) {
     showAppBottomSheet(
       context,
-      backgroundColor: Colors.transparent,
       builder: (context) => const _AddSubscriptionSheet(),
     );
   }
@@ -165,8 +163,6 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   void _showSubscriptionActions(BuildContext context, wm_sub.Subscription sub) {
     showAppBottomSheet(
       context,
-      backgroundColor: Colors.transparent,
-      showDragHandle: false,
       builder: (context) => _SubscriptionActionsSheet(subscription: sub),
     );
   }
@@ -477,24 +473,18 @@ class _AddSubscriptionSheetState extends State<_AddSubscriptionSheet> {
     final parsedTax = double.tryParse(_taxController.text.trim()) ?? 0.0;
     final grandTotal = parsedAmount + parsedTax;
 
-    return Container(
-        decoration: BoxDecoration(
-          color: isDark ? WalletMeltColors.darkBackgroundContainer.withValues(alpha: 0.98) : Colors.white,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.3),
-              blurRadius: 20,
-              offset: const Offset(0, -5),
-            ),
-          ],
-        ),
-        padding: const EdgeInsets.all(24),
-        child: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            child: Column(
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.sm,
+        AppSpacing.lg,
+        AppSpacing.lg,
+      ),
+      child: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -704,6 +694,7 @@ class _AddSubscriptionSheetState extends State<_AddSubscriptionSheet> {
                   onTap: () async {
                     final picked = await showDatePicker(
                       context: context,
+                      useRootNavigator: true,
                       initialDate: _startDate,
                       firstDate: DateTime(2000),
                       lastDate: DateTime(2100),
@@ -849,29 +840,17 @@ class _SubscriptionActionsSheet extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: isDark ? WalletMeltColors.darkBackgroundContainer.withValues(alpha: 0.98) : Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.sm,
+        AppSpacing.lg,
+        AppSpacing.xl,
       ),
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 40),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Drag handle
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-          ),
-          const SizedBox(height: 18),
-
           Text(
             subscription.name,
             style: theme.textTheme.headlineMedium?.copyWith(fontSize: 20),
@@ -989,6 +968,7 @@ class _SubscriptionActionsSheet extends StatelessWidget {
 
     showDialog(
       context: context,
+      useRootNavigator: true,
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {

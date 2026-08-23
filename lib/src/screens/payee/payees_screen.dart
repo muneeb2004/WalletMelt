@@ -424,6 +424,7 @@ class _PayeesScreenState extends State<PayeesScreen> {
                                         
                                         final confirm = await showDialog<bool>(
                                           context: context,
+                                          useRootNavigator: true,
                                           builder: (dialogContext) {
                                             return AlertDialog(
                                               backgroundColor: isDark

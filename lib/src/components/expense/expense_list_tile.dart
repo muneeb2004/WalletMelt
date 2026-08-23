@@ -179,7 +179,7 @@ class ExpenseListTile extends StatelessWidget {
                         WMHaptics.light();
                         onCategorize!();
                       },
-                      backgroundColor: const Color(0xFF6366F1),
+                      backgroundColor: const Color(0xFF8B5CF6),
                       foregroundColor: Colors.white,
                       icon: Icons.category_rounded,
                       label: 'Category',

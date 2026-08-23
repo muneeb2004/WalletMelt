@@ -62,29 +62,34 @@ class _PlanningScreenState extends State<PlanningScreen>
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Financial Planning',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w900,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Financial Planning',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w900,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Budgets, renewals & predictable expenses',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: WalletMeltColors.textMuted,
-                          fontWeight: FontWeight.w500,
+                        const SizedBox(height: 2),
+                        Text(
+                          'Budgets, renewals & predictable expenses',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: WalletMeltColors.textMuted,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
+                  const SizedBox(width: 8),
                   // Dynamic Action Button based on active Tab
                   Container(
                     width: 40,
@@ -118,7 +123,7 @@ class _PlanningScreenState extends State<PlanningScreen>
                       },
                       icon: Icon(
                         _tabController.index == 0
-                            ? Icons.tune_rounded
+                            ? Icons.edit_rounded
                             : Icons.add_rounded,
                         size: 20,
                         color: isDark ? Colors.white : WalletMeltColors.textPrimary,
@@ -157,13 +162,13 @@ class _PlanningScreenState extends State<PlanningScreen>
                   unselectedLabelColor:
                       isDark ? WalletMeltColors.darkTextSecondary : WalletMeltColors.textSecondary,
                   labelStyle: const TextStyle(
-                      fontWeight: FontWeight.w800, fontSize: 12.5),
+                      fontWeight: FontWeight.w800, fontSize: 11.5),
                   unselectedLabelStyle: const TextStyle(
-                      fontWeight: FontWeight.w600, fontSize: 12.5),
+                      fontWeight: FontWeight.w600, fontSize: 11.5),
                   tabs: const [
-                    Tab(text: 'Budgets'),
-                    Tab(text: 'Subscriptions'),
-                    Tab(text: 'Essentials'),
+                    Tab(child: FittedBox(fit: BoxFit.scaleDown, child: Text('Budgets'))),
+                    Tab(child: FittedBox(fit: BoxFit.scaleDown, child: Text('Subscriptions'))),
+                    Tab(child: FittedBox(fit: BoxFit.scaleDown, child: Text('Essentials'))),
                   ],
                 ),
               ),

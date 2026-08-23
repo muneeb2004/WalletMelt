@@ -43,10 +43,19 @@ class StatTile extends StatelessWidget {
             Icon(icon, size: 16, color: valueColor),
             const SizedBox(height: AppSpacing.xs),
           ],
-          Text(
-            value,
-            textAlign: TextAlign.center,
-            style: tt.titleMedium?.copyWith(color: valueColor, fontSize: 14),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.center,
+            child: Text(
+              value,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              style: tt.titleMedium?.copyWith(
+                color: valueColor,
+                fontSize: 14,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
+            ),
           ),
           const SizedBox(height: 2),
           Text(

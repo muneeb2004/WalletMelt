@@ -83,23 +83,22 @@ class _EssentialExpensesScreenState extends State<EssentialExpensesScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.account_balance_wallet_rounded,
-                            size: 18, color: WalletMeltColors.brand),
-                        const SizedBox(width: 8),
-                        Text(
-                          'MONTHLY ESSENTIALS (${readableMonth(state.selectedMonth)})',
-                          style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 0.8,
-                            color: WalletMeltColors.textMuted,
-                          ),
+                    const Icon(Icons.account_balance_wallet_rounded,
+                        size: 18, color: WalletMeltColors.brand),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'MONTHLY ESSENTIALS (${readableMonth(state.selectedMonth)})',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.8,
+                          color: WalletMeltColors.textMuted,
                         ),
-                      ],
+                      ),
                     ),
                   ],
                 ),

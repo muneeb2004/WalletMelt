@@ -25,10 +25,10 @@ class WalletMeltColors {
   static const textSecondary = Color(0xFF64748B);
   static const textMuted = Color(0xFF94A3B8);
 
-  // Brand Accent (Refined Warm Amber / Gold)
-  static const brand = Color(0xFFF59E0B);
-  static const brandSoft = Color(0xFFFEF3C7);
-  static const brandDeep = Color(0xFFB45309);
+  // Brand Accent (Refined Electric Indigo)
+  static const brand = Color(0xFF6366F1);
+  static const brandSoft = Color(0xFFEEF2FF);
+  static const brandDeep = Color(0xFF4338CA);
 
   // Semantic Status Colors (WCAG AA compliant)
   static const positive = Color(0xFF10B981); // Emerald Green
@@ -56,7 +56,7 @@ class WalletMeltColors {
 // These are the ONLY raw Color literals permitted in budget-progress logic.
 // All other budget-color code must reference these constants.
 const Color kBudgetSafe = WalletMeltColors.positive; // < 70 %
-const Color kBudgetWarning = WalletMeltColors.brand; // 70–90 %
+const Color kBudgetWarning = WalletMeltColors.warning; // 70–90 %
 const Color kBudgetDanger = WalletMeltColors.warning; // 90–100 %
 const Color kBudgetOverrun = WalletMeltColors.danger; // > 100 %
 
@@ -184,6 +184,57 @@ class WalletMeltTheme {
           ),
         ),
       ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: isDark ? WalletMeltColors.darkSurface : Colors.white,
+        modalBackgroundColor: isDark ? WalletMeltColors.darkSurface : Colors.white,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        modalElevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(AppSpacing.radiusLg),
+          ),
+          side: BorderSide(
+            color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder,
+            width: 1.0,
+          ),
+        ),
+        clipBehavior: Clip.antiAlias,
+        showDragHandle: true,
+        dragHandleColor: isDark
+            ? Colors.white.withValues(alpha: 0.20)
+            : Colors.black.withValues(alpha: 0.20),
+        dragHandleSize: const Size(32, 4),
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: isDark ? WalletMeltColors.darkSurface : Colors.white,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+          side: BorderSide(
+            color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder,
+            width: 1.0,
+          ),
+        ),
+        titleTextStyle: TextStyle(
+          fontFamily: 'PlusJakartaSans',
+          fontSize: 19,
+          fontWeight: FontWeight.w800,
+          color: isDark ? WalletMeltColors.darkTextPrimary : WalletMeltColors.textPrimary,
+        ),
+        contentTextStyle: TextStyle(
+          fontFamily: 'PlusJakartaSans',
+          fontSize: 13.5,
+          fontWeight: FontWeight.w500,
+          color: isDark ? WalletMeltColors.darkTextSecondary : WalletMeltColors.textSecondary,
+        ),
+      ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: isDark ? WalletMeltColors.brand : WalletMeltColors.textPrimary,
+        foregroundColor: Colors.white,
+        elevation: 0,
+      ),
     );
   }
 
@@ -201,6 +252,7 @@ class WalletMeltTheme {
           fontFamily: 'PlusJakartaSans',
           fontSize: 38,
           fontWeight: FontWeight.w900,
+          fontVariations: const [FontVariation('wght', 900)],
           color: primary,
           letterSpacing: -0.6,
           height: 1.05,
@@ -209,6 +261,7 @@ class WalletMeltTheme {
           fontFamily: 'PlusJakartaSans',
           fontSize: 24,
           fontWeight: FontWeight.w800,
+          fontVariations: const [FontVariation('wght', 800)],
           color: primary,
           letterSpacing: -0.4,
           height: 1.1,
@@ -217,6 +270,7 @@ class WalletMeltTheme {
           fontFamily: 'PlusJakartaSans',
           fontSize: 19,
           fontWeight: FontWeight.w800,
+          fontVariations: const [FontVariation('wght', 800)],
           color: primary,
           letterSpacing: -0.3,
           fontFeatures: tabular),
@@ -224,18 +278,21 @@ class WalletMeltTheme {
           fontFamily: 'PlusJakartaSans',
           fontSize: 15.5,
           fontWeight: FontWeight.w700,
+          fontVariations: const [FontVariation('wght', 700)],
           color: primary,
           fontFeatures: tabular),
       bodyLarge: TextStyle(
           fontFamily: 'PlusJakartaSans',
           fontSize: 14.5,
           fontWeight: FontWeight.w500,
+          fontVariations: const [FontVariation('wght', 500)],
           color: primary,
           fontFeatures: tabular),
       bodyMedium: TextStyle(
           fontFamily: 'PlusJakartaSans',
           fontSize: 13.0,
           fontWeight: FontWeight.w500,
+          fontVariations: const [FontVariation('wght', 500)],
           color: secondary,
           height: 1.35,
           fontFeatures: tabular),
@@ -243,6 +300,7 @@ class WalletMeltTheme {
           fontFamily: 'PlusJakartaSans',
           fontSize: 12.5,
           fontWeight: FontWeight.w800,
+          fontVariations: const [FontVariation('wght', 800)],
           color: primary,
           letterSpacing: 0.2,
           fontFeatures: tabular),
@@ -250,6 +308,7 @@ class WalletMeltTheme {
           fontFamily: 'PlusJakartaSans',
           fontSize: 11,
           fontWeight: FontWeight.w700,
+          fontVariations: const [FontVariation('wght', 700)],
           color: secondary,
           letterSpacing: 0.4,
           fontFeatures: tabular),
@@ -257,6 +316,7 @@ class WalletMeltTheme {
           fontFamily: 'PlusJakartaSans',
           fontSize: 11.5,
           fontWeight: FontWeight.w400,
+          fontVariations: const [FontVariation('wght', 400)],
           color: secondary,
           height: 1.4,
           fontFeatures: tabular),
@@ -273,7 +333,7 @@ Color colorFromHex(String value) {
 /// Used by DashboardScreen and BudgetScreen to stay consistent.
 Color budgetProgressColor(double ratio) {
   if (ratio < 0.70) return WalletMeltColors.positive;
-  if (ratio < 0.90) return WalletMeltColors.brand;
+  if (ratio < 0.90) return WalletMeltColors.warning;
   if (ratio <= 1.0) return WalletMeltColors.warning;
   return WalletMeltColors.danger;
 }
@@ -602,6 +662,8 @@ class WMDarkHeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     final cardContent = Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(radius),
@@ -609,26 +671,39 @@ class WMDarkHeroCard extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFF0C0E14),
-            Color(0xFF161A26),
+            WalletMeltColors.darkSurface,
+            WalletMeltColors.darkBackgroundContainer,
           ],
         ),
         border: Border.all(
           color: const Color(0x28FFFFFF),
           width: 1.0,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.40),
-            blurRadius: 24,
-            offset: const Offset(0, 10),
-          ),
-          BoxShadow(
-            color: const Color(0xFFF59E0B).withValues(alpha: 0.05),
-            blurRadius: 32,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        boxShadow: isDark
+            ? [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.40),
+                  blurRadius: 24,
+                  offset: const Offset(0, 10),
+                ),
+                BoxShadow(
+                  color: WalletMeltColors.brand.withValues(alpha: 0.05),
+                  blurRadius: 32,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.12),
+                  blurRadius: 18,
+                  offset: const Offset(0, 6),
+                ),
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
       ),
       child: Material(
         color: Colors.transparent,
@@ -692,7 +767,7 @@ class _WMQuickActionButtonState extends State<WMQuickActionButton> {
           duration: AppMotion.fast,
           curve: AppMotion.entrance,
           child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 2),
             decoration: BoxDecoration(
               color: widget.isPrimary
                   ? (isDark ? WalletMeltColors.brand : WalletMeltColors.textPrimary)
@@ -735,18 +810,20 @@ class _WMQuickActionButtonState extends State<WMQuickActionButton> {
                 const SizedBox(height: 6),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 2),
-                  child: Text(
-                    widget.label,
-                    style: TextStyle(
-                      fontFamily: 'PlusJakartaSans',
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: widget.isPrimary
-                          ? (isDark ? Colors.black : Colors.white)
-                          : (isDark ? WalletMeltColors.darkTextPrimary : WalletMeltColors.textPrimary),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      widget.label,
+                      style: TextStyle(
+                        fontFamily: 'PlusJakartaSans',
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: widget.isPrimary
+                            ? (isDark ? Colors.black : Colors.white)
+                            : (isDark ? WalletMeltColors.darkTextPrimary : WalletMeltColors.textPrimary),
+                      ),
+                      maxLines: 1,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
