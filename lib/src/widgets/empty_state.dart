@@ -74,7 +74,7 @@ class EmptyState extends StatelessWidget {
               const SizedBox(height: AppSpacing.md + 4),
               Container(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(999),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
                   gradient: const LinearGradient(
                     colors: [
                       Color(0xFFFCD34D),
@@ -83,8 +83,8 @@ class EmptyState extends StatelessWidget {
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.16),
-                      blurRadius: 8,
+                      color: const Color(0xFFF59E0B).withValues(alpha: 0.25),
+                      blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
                   ],
@@ -96,14 +96,20 @@ class EmptyState extends StatelessWidget {
                     foregroundColor: WalletMeltColors.textPrimary,
                     shadowColor: Colors.transparent,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(999),
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
                     ),
                   ),
-                  onPressed: onActionPressed,
+                  onPressed: () {
+                    WMHaptics.light();
+                    onActionPressed!();
+                  },
                   child: Text(
                     actionLabel!,
                     style: const TextStyle(
-                        fontWeight: FontWeight.w900, fontSize: 14),
+                      fontFamily: 'PlusJakartaSans',
+                      fontWeight: FontWeight.w900,
+                      fontSize: 14,
+                    ),
                   ),
                 ),
               ),

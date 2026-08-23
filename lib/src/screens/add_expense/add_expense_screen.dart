@@ -420,16 +420,20 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       autofocus: !isEditing,
                       style: TextStyle(
+                        fontFamily: 'PlusJakartaSans',
                         fontSize: 36,
                         fontWeight: FontWeight.w900,
+                        fontFeatures: const [FontFeature.tabularFigures()],
                         color: isDark ? Colors.white : WalletMeltColors.textPrimary,
                         letterSpacing: -0.5,
                       ),
                       decoration: InputDecoration(
                         hintText: '0.00',
                         hintStyle: TextStyle(
+                          fontFamily: 'PlusJakartaSans',
                           fontSize: 36,
                           fontWeight: FontWeight.w900,
+                          fontFeatures: const [FontFeature.tabularFigures()],
                           color: WalletMeltColors.textMuted.withValues(alpha: 0.4),
                           letterSpacing: -0.5,
                         ),

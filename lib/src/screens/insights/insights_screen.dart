@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 import '../../components/charts/category_breakdown_chart.dart';
 import '../../components/glass/app_background.dart';
@@ -232,9 +233,11 @@ class _InsightsScreenState extends State<InsightsScreen> {
 
     return Scaffold(
       body: AppBackground(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 18, 20, 120),
-          children: [
+        child: Skeletonizer(
+          enabled: state.isLoading,
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(20, 18, 20, 120),
+            children: [
             Row(
               children: [
                 IconButton(
@@ -774,6 +777,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
           ],
         ),
       ),
-    );
+    ),
+  );
   }
 }

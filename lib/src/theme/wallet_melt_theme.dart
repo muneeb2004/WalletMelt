@@ -1,7 +1,9 @@
 import 'dart:ui';
 
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'app_spacing.dart';
+import 'app_motion.dart';
 import '../utils/haptics.dart';
 
 export 'app_spacing.dart';
@@ -13,7 +15,7 @@ export '../utils/haptics.dart';
 class WalletMeltColors {
   const WalletMeltColors._();
 
-  // Primary backgrounds (warm, calm, off-white in light mode, deep carbon in dark mode)
+  // Primary backgrounds (warm calm off-white in light mode, true-black OLED in dark mode)
   static const background = Color(0xFFF7F8FA);
   static const backgroundGradientStart = Color(0xFFFAFBFD);
   static const backgroundGradientEnd = Color(0xFFF0F2F6);
@@ -28,26 +30,26 @@ class WalletMeltColors {
   static const brandSoft = Color(0xFFFEF3C7);
   static const brandDeep = Color(0xFFB45309);
 
-  // Semantic Status Colors (Calm, disciplined)
+  // Semantic Status Colors (WCAG AA compliant)
   static const positive = Color(0xFF10B981); // Emerald Green
-  static const warning = Color(0xFFF97316);  // Warm Amber / Orange
+  static const warning = Color(0xFFF59E0B);  // Warm Amber / Gold
   static const danger = Color(0xFFEF4444);   // Modern Crimson Red
 
-  // Dark Mode Surfaces
-  static const darkBackground = Color(0xFF0C0E12);
-  static const darkSurface = Color(0xFF161922);
-  static const darkBackgroundContainer = Color(0xFF1C202B);
-  static const darkBackgroundAlt = Color(0xFF111319);
+  // Dark Mode Surfaces (True-black OLED foundation)
+  static const darkBackground = Color(0xFF000000);
+  static const darkSurface = Color(0xFF0C0E14);
+  static const darkBackgroundContainer = Color(0xFF141722);
+  static const darkBackgroundAlt = Color(0xFF08090D);
   static const darkTextPrimary = Color(0xFFF8FAFC);
   static const darkTextSecondary = Color(0xFF94A3B8);
 
-  // Borders & Dividers
-  static const darkBorder = Color(0x1AFFFFFF);
-  static const lightBorder = Color(0x0E000000);
+  // 1px Hairline Borders & Dividers
+  static const darkBorder = Color(0x1FFFFFFF);
+  static const lightBorder = Color(0x0F000000);
 
   // Premium Hero Card Gradients (for FinSight-style Dark Financial Cards)
-  static const darkHeroStart = Color(0xFF12141A);
-  static const darkHeroEnd = Color(0xFF1E222D);
+  static const darkHeroStart = Color(0xFF0C0E14);
+  static const darkHeroEnd = Color(0xFF181C28);
 }
 
 // ── Budget threshold color aliases ──────────────────────────────────────────
@@ -80,7 +82,7 @@ class WalletMeltTheme {
       seedColor: WalletMeltColors.brand,
       brightness: Brightness.dark,
       primary: WalletMeltColors.brand,
-      surface: WalletMeltColors.darkBackground,
+      surface: WalletMeltColors.darkSurface,
       error: WalletMeltColors.danger,
     );
     return _base(scheme).copyWith(
@@ -94,28 +96,38 @@ class WalletMeltTheme {
     return ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
-      fontFamily: 'System',
+      fontFamily: 'PlusJakartaSans',
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: SharedAxisPageTransitionsBuilder(
+            transitionType: SharedAxisTransitionType.horizontal,
+          ),
+          TargetPlatform.iOS: SharedAxisPageTransitionsBuilder(
+            transitionType: SharedAxisTransitionType.horizontal,
+          ),
+        },
+      ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: isDark
-            ? const Color(0xFF181B24)
+            ? const Color(0xFF10131B)
             : Colors.white,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           borderSide: BorderSide(
             color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder,
             width: 1.0,
           ),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           borderSide: BorderSide(
             color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder,
             width: 1.0,
           ),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           borderSide: BorderSide(
             color: isDark ? WalletMeltColors.brand : WalletMeltColors.textPrimary,
             width: 1.5,
@@ -127,12 +139,17 @@ class WalletMeltTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: isDark ? WalletMeltColors.brand : WalletMeltColors.textPrimary,
-          foregroundColor: isDark ? WalletMeltColors.textPrimary : Colors.white,
+          foregroundColor: isDark ? Colors.black : Colors.white,
           minimumSize: const Size.fromHeight(52),
           elevation: 0,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.buttonRadius)),
-          textStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
+          textStyle: const TextStyle(
+            fontFamily: 'PlusJakartaSans',
+            fontWeight: FontWeight.w800,
+            fontSize: 15,
+            fontFeatures: [FontFeature.tabularFigures()],
+          ),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -144,7 +161,12 @@ class WalletMeltTheme {
           ),
           minimumSize: const Size.fromHeight(52),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.buttonRadius)),
-          textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+          textStyle: const TextStyle(
+            fontFamily: 'PlusJakartaSans',
+            fontWeight: FontWeight.w700,
+            fontSize: 14,
+            fontFeatures: [FontFeature.tabularFigures()],
+          ),
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
@@ -154,7 +176,12 @@ class WalletMeltTheme {
           minimumSize: const Size.fromHeight(52),
           elevation: 0,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.buttonRadius)),
-          textStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
+          textStyle: const TextStyle(
+            fontFamily: 'PlusJakartaSans',
+            fontWeight: FontWeight.w800,
+            fontSize: 15,
+            fontFeatures: [FontFeature.tabularFigures()],
+          ),
         ),
       ),
     );
@@ -167,39 +194,72 @@ class WalletMeltTheme {
     final secondary = brightness == Brightness.dark
         ? WalletMeltColors.darkTextSecondary
         : WalletMeltColors.textSecondary;
+    const tabular = [FontFeature.tabularFigures()];
+
     return TextTheme(
       displaySmall: TextStyle(
+          fontFamily: 'PlusJakartaSans',
           fontSize: 38,
           fontWeight: FontWeight.w900,
           color: primary,
           letterSpacing: -0.6,
-          height: 1.05),
+          height: 1.05,
+          fontFeatures: tabular),
       headlineMedium: TextStyle(
-          fontSize: 26,
+          fontFamily: 'PlusJakartaSans',
+          fontSize: 24,
           fontWeight: FontWeight.w800,
           color: primary,
           letterSpacing: -0.4,
-          height: 1.1),
-      titleLarge:
-          TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: primary, letterSpacing: -0.3),
-      titleMedium:
-          TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: primary),
-      bodyLarge:
-          TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: primary),
+          height: 1.1,
+          fontFeatures: tabular),
+      titleLarge: TextStyle(
+          fontFamily: 'PlusJakartaSans',
+          fontSize: 19,
+          fontWeight: FontWeight.w800,
+          color: primary,
+          letterSpacing: -0.3,
+          fontFeatures: tabular),
+      titleMedium: TextStyle(
+          fontFamily: 'PlusJakartaSans',
+          fontSize: 15.5,
+          fontWeight: FontWeight.w700,
+          color: primary,
+          fontFeatures: tabular),
+      bodyLarge: TextStyle(
+          fontFamily: 'PlusJakartaSans',
+          fontSize: 14.5,
+          fontWeight: FontWeight.w500,
+          color: primary,
+          fontFeatures: tabular),
       bodyMedium: TextStyle(
-          fontSize: 13.5,
+          fontFamily: 'PlusJakartaSans',
+          fontSize: 13.0,
           fontWeight: FontWeight.w500,
           color: secondary,
-          height: 1.35),
-      labelLarge:
-          TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: primary, letterSpacing: 0.2),
+          height: 1.35,
+          fontFeatures: tabular),
+      labelLarge: TextStyle(
+          fontFamily: 'PlusJakartaSans',
+          fontSize: 12.5,
+          fontWeight: FontWeight.w800,
+          color: primary,
+          letterSpacing: 0.2,
+          fontFeatures: tabular),
       labelMedium: TextStyle(
-          fontSize: 11, fontWeight: FontWeight.w700, color: secondary, letterSpacing: 0.4),
+          fontFamily: 'PlusJakartaSans',
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          color: secondary,
+          letterSpacing: 0.4,
+          fontFeatures: tabular),
       bodySmall: TextStyle(
-          fontSize: 12,
+          fontFamily: 'PlusJakartaSans',
+          fontSize: 11.5,
           fontWeight: FontWeight.w400,
           color: secondary,
-          height: 1.4),
+          height: 1.4,
+          fontFeatures: tabular),
     );
   }
 }
@@ -224,8 +284,8 @@ class WMGlassSurface extends StatelessWidget {
   const WMGlassSurface({
     required this.child,
     super.key,
-    this.padding = const EdgeInsets.all(18),
-    this.radius = 28,
+    this.padding = const EdgeInsets.all(AppSpacing.md),
+    this.radius = AppSpacing.radiusLg,
     this.tier = WMRenderTier.tier2,
     this.onTap,
   });
@@ -239,8 +299,8 @@ class WMGlassSurface extends StatelessWidget {
   factory WMGlassSurface.tier1({
     required Widget child,
     Key? key,
-    EdgeInsetsGeometry padding = const EdgeInsets.all(18),
-    double radius = 28,
+    EdgeInsetsGeometry padding = const EdgeInsets.all(AppSpacing.md),
+    double radius = AppSpacing.radiusLg,
     VoidCallback? onTap,
   }) => WMGlassSurface(
     key: key,
@@ -254,8 +314,8 @@ class WMGlassSurface extends StatelessWidget {
   factory WMGlassSurface.tier2({
     required Widget child,
     Key? key,
-    EdgeInsetsGeometry padding = const EdgeInsets.all(18),
-    double radius = 28,
+    EdgeInsetsGeometry padding = const EdgeInsets.all(AppSpacing.md),
+    double radius = AppSpacing.radiusLg,
     VoidCallback? onTap,
   }) => WMGlassSurface(
     key: key,
@@ -269,8 +329,8 @@ class WMGlassSurface extends StatelessWidget {
   factory WMGlassSurface.tier3({
     required Widget child,
     Key? key,
-    EdgeInsetsGeometry padding = const EdgeInsets.all(18),
-    double radius = 28,
+    EdgeInsetsGeometry padding = const EdgeInsets.all(AppSpacing.md),
+    double radius = AppSpacing.radiusLg,
     VoidCallback? onTap,
   }) => WMGlassSurface(
     key: key,
@@ -285,15 +345,15 @@ class WMGlassSurface extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
-    // Auto-downgrade to Tier 1 when inside a Scrollable container to maintain smooth scrolling
+    // Auto-downgrade to Tier 1 when inside a Scrollable container to maintain smooth scrolling (Directive 2)
     final isScrollable = Scrollable.maybeOf(context) != null;
     final activeTier = isScrollable ? WMRenderTier.tier1 : tier;
 
     if (activeTier == WMRenderTier.tier1) {
-      // Tier 1: Flat, no shadows, no blur, solid border. GPU-friendly.
+      // Tier 1: Flat translucent fill, no shadows, no blur, 1px hairline border. 120fps GPU friendly.
       return Container(
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF16161C) : const Color(0xFFF4F4F0),
+          color: isDark ? const Color(0xFF0C0E14) : const Color(0xFFF4F5F8),
           borderRadius: BorderRadius.circular(radius),
           border: Border.all(
             color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder,
@@ -317,19 +377,19 @@ class WMGlassSurface extends StatelessWidget {
     }
 
     if (activeTier == WMRenderTier.tier2) {
-      // Tier 2: Solid background, single subtle shadow, solid border. GPU-efficient.
+      // Tier 2: Solid carbon surface, subtle soft shadow, 1px hairline border.
       return Container(
         decoration: BoxDecoration(
           color: isDark ? WalletMeltColors.darkSurface : Colors.white,
           borderRadius: BorderRadius.circular(radius),
           border: Border.all(
-            color: isDark ? const Color(0x28FFFFFF) : const Color(0x28000000),
+            color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder,
             width: 1.0,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.08 : 0.02),
-              blurRadius: 10,
+              color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.03),
+              blurRadius: 12,
               offset: const Offset(0, 4),
             ),
           ],
@@ -350,22 +410,22 @@ class WMGlassSurface extends StatelessWidget {
       );
     }
 
-    // Tier 3: Translucent surface, optional BackdropFilter blur, dual shadows. Used sparingly.
+    // Tier 3: Translucent surface, optional BackdropFilter blur, dual shadows. Used only on static non-scrollable surfaces.
     final fillGradient = isDark
         ? LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              WalletMeltColors.darkSurface.withValues(alpha: 0.72),
-              const Color(0xFF121216).withValues(alpha: 0.48),
+              WalletMeltColors.darkSurface.withValues(alpha: 0.85),
+              const Color(0xFF06070A).withValues(alpha: 0.65),
             ],
           )
         : LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Colors.white.withValues(alpha: 0.72),
-              Colors.white.withValues(alpha: 0.36),
+              Colors.white.withValues(alpha: 0.85),
+              Colors.white.withValues(alpha: 0.50),
             ],
           );
 
@@ -374,7 +434,7 @@ class WMGlassSurface extends StatelessWidget {
         gradient: fillGradient,
         borderRadius: BorderRadius.circular(radius - 1.0),
         border: Border.all(
-          color: isDark ? const Color(0x33FFFFFF) : const Color(0x33000000),
+          color: isDark ? const Color(0x28FFFFFF) : const Color(0x18000000),
           width: 1.0,
         ),
       ),
@@ -393,7 +453,7 @@ class WMGlassSurface extends StatelessWidget {
             ),
     );
 
-    // Apply BackdropFilter with moderate blur (sigma = 16)
+    // Apply BackdropFilter blur (sigma = 16) only on static surfaces
     final Widget glassContent = ClipRRect(
       borderRadius: BorderRadius.circular(radius),
       child: BackdropFilter(
@@ -411,14 +471,14 @@ class WMGlassSurface extends StatelessWidget {
         borderRadius: BorderRadius.circular(radius),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.16 : 0.03),
+            color: Colors.black.withValues(alpha: isDark ? 0.30 : 0.04),
             blurRadius: 20,
-            offset: const Offset(0, 10),
+            offset: const Offset(0, 8),
           ),
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.12 : 0.03),
+            color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.02),
             blurRadius: 8,
-            offset: const Offset(0, 3),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -431,8 +491,8 @@ class FlatCard extends StatelessWidget {
   const FlatCard({
     required this.child,
     super.key,
-    this.padding = const EdgeInsets.all(18),
-    this.radius = 28,
+    this.padding = const EdgeInsets.all(AppSpacing.md),
+    this.radius = AppSpacing.radiusLg,
     this.onTap,
   });
 
@@ -457,7 +517,7 @@ class FlatNavBar extends StatelessWidget {
     required this.child,
     super.key,
     this.padding = const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-    this.radius = 999,
+    this.radius = AppSpacing.radiusPill,
   });
 
   final Widget child;
@@ -477,8 +537,8 @@ class FlatNavBar extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.06),
-            blurRadius: 16,
+            color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
+            blurRadius: 20,
             offset: const Offset(0, 8),
           ),
         ],
@@ -501,8 +561,8 @@ class LiquidGlass extends StatelessWidget {
   const LiquidGlass({
     required this.child,
     super.key,
-    this.padding = const EdgeInsets.all(18),
-    this.radius = 28,
+    this.padding = const EdgeInsets.all(AppSpacing.md),
+    this.radius = AppSpacing.radiusLg,
     this.blur = 0.0,
     this.onTap,
   });
@@ -530,8 +590,8 @@ class WMDarkHeroCard extends StatelessWidget {
   const WMDarkHeroCard({
     required this.child,
     super.key,
-    this.padding = const EdgeInsets.all(22),
-    this.radius = 28,
+    this.padding = const EdgeInsets.all(20),
+    this.radius = AppSpacing.radiusLg,
     this.onTap,
   });
 
@@ -549,22 +609,22 @@ class WMDarkHeroCard extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFF101217),
-            Color(0xFF1B1E28),
+            Color(0xFF0C0E14),
+            Color(0xFF161A26),
           ],
         ),
         border: Border.all(
-          color: const Color(0x22FFFFFF),
+          color: const Color(0x28FFFFFF),
           width: 1.0,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
+            color: Colors.black.withValues(alpha: 0.40),
             blurRadius: 24,
             offset: const Offset(0, 10),
           ),
           BoxShadow(
-            color: const Color(0xFFF59E0B).withValues(alpha: 0.04),
+            color: const Color(0xFFF59E0B).withValues(alpha: 0.05),
             blurRadius: 32,
             offset: const Offset(0, 4),
           ),
@@ -592,8 +652,8 @@ class WMDarkHeroCard extends StatelessWidget {
   }
 }
 
-/// Compact circular / pill action button (like the Send / Request / Add in FinSight reference)
-class WMQuickActionButton extends StatelessWidget {
+/// Compact circular / pill action button with micro scale on press
+class WMQuickActionButton extends StatefulWidget {
   const WMQuickActionButton({
     required this.icon,
     required this.label,
@@ -608,73 +668,89 @@ class WMQuickActionButton extends StatelessWidget {
   final bool isPrimary;
 
   @override
+  State<WMQuickActionButton> createState() => _WMQuickActionButtonState();
+}
+
+class _WMQuickActionButtonState extends State<WMQuickActionButton> {
+  double _scale = 1.0;
+
+  @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Expanded(
       child: GestureDetector(
-        onTap: () {
+        onTapDown: (_) => setState(() => _scale = AppMotion.buttonPressScale),
+        onTapUp: (_) {
+          setState(() => _scale = 1.0);
           WMHaptics.selection();
-          onTap();
+          widget.onTap();
         },
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
-          decoration: BoxDecoration(
-            color: isPrimary
-                ? (isDark ? WalletMeltColors.brand : WalletMeltColors.textPrimary)
-                : (isDark ? WalletMeltColors.darkSurface : Colors.white),
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: isPrimary
-                  ? Colors.transparent
-                  : (isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder),
-              width: 1.0,
+        onTapCancel: () => setState(() => _scale = 1.0),
+        child: AnimatedScale(
+          scale: _scale,
+          duration: AppMotion.fast,
+          curve: AppMotion.entrance,
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+            decoration: BoxDecoration(
+              color: widget.isPrimary
+                  ? (isDark ? WalletMeltColors.brand : WalletMeltColors.textPrimary)
+                  : (isDark ? WalletMeltColors.darkSurface : Colors.white),
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+              border: Border.all(
+                color: widget.isPrimary
+                    ? Colors.transparent
+                    : (isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder),
+                width: 1.0,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.03),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
+                ),
+              ],
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.12 : 0.03),
-                blurRadius: 8,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: isPrimary
-                      ? (isDark ? Colors.black.withValues(alpha: 0.15) : Colors.white.withValues(alpha: 0.15))
-                      : (isDark ? Colors.white.withValues(alpha: 0.08) : const Color(0xFF0F172A).withValues(alpha: 0.06)),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  icon,
-                  size: 18,
-                  color: isPrimary
-                      ? (isDark ? Colors.black : Colors.white)
-                      : (isDark ? Colors.white : WalletMeltColors.textPrimary),
-                ),
-              ),
-              const SizedBox(height: 6),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 2),
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: isPrimary
-                        ? (isDark ? Colors.black : Colors.white)
-                        : (isDark ? WalletMeltColors.darkTextPrimary : WalletMeltColors.textPrimary),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: widget.isPrimary
+                        ? (isDark ? Colors.black.withValues(alpha: 0.15) : Colors.white.withValues(alpha: 0.15))
+                        : (isDark ? Colors.white.withValues(alpha: 0.08) : const Color(0xFF0F172A).withValues(alpha: 0.06)),
+                    shape: BoxShape.circle,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  child: Icon(
+                    widget.icon,
+                    size: 18,
+                    color: widget.isPrimary
+                        ? (isDark ? Colors.black : Colors.white)
+                        : (isDark ? Colors.white : WalletMeltColors.textPrimary),
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 6),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 2),
+                  child: Text(
+                    widget.label,
+                    style: TextStyle(
+                      fontFamily: 'PlusJakartaSans',
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: widget.isPrimary
+                          ? (isDark ? Colors.black : Colors.white)
+                          : (isDark ? WalletMeltColors.darkTextPrimary : WalletMeltColors.textPrimary),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

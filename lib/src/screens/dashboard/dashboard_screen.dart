@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 import '../../components/expense/expense_list_tile.dart';
 import '../../components/glass/app_background.dart';
@@ -27,9 +28,6 @@ class DashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isLoading = context.select<AppState, bool>((s) => s.isLoading);
-    if (isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
     final insights = context.select((AppState s) => s.monthlyInsights);
     final selectedMonth =
         context.select<AppState, DateTime>((s) => s.selectedMonth);
@@ -43,6 +41,55 @@ class DashboardScreen extends StatelessWidget {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
     final isDark = theme.brightness == Brightness.dark;
+
+    if (isLoading) {
+      return Scaffold(
+        body: AppBackground(
+          child: Skeletonizer(
+            enabled: true,
+            child: Stack(
+              children: [
+                ListView(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 120),
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Good Morning',
+                            style: textTheme.headlineMedium?.copyWith(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 18),
+                    const WMDarkHeroCard(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('MONTHLY SPEND'),
+                          SizedBox(height: 12),
+                          Text('0.00', style: TextStyle(fontSize: 38)),
+                          SizedBox(height: 14),
+                          Text('Loading financial metrics...'),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
 
     final totalSpent = state.getCurrentMonthTotalSpent();
     final hasBudget = monthlyBudget != null && monthlyBudget > 0;

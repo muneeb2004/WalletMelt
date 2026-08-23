@@ -42,14 +42,17 @@ class WalletCategoryChip extends StatelessWidget {
           constraints: const BoxConstraints(minHeight: 44.0),
           decoration: BoxDecoration(
             color: fill,
-            borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
             border: Border.all(color: border, width: 1.2),
           ),
           child: Material(
             color: Colors.transparent,
             child: InkWell(
-              borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
-              onTap: onTap,
+              borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+              onTap: () {
+                WMHaptics.selection();
+                onTap();
+              },
               child: Center(
                 widthFactor: 1.0,
                 heightFactor: 1.0,

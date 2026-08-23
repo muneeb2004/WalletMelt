@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 import '../../components/category/category_chip.dart';
 import '../../components/expense/expense_list_tile.dart';
@@ -165,279 +166,346 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final items = _getOrCreateItems(base);
     final filteredEmpty = _cachedFilteredList?.isEmpty ?? true;
 
+    final isLoading = context.select<AppState, bool>((s) => s.isLoading);
+
     return Scaffold(
       body: AppBackground(
         padding: EdgeInsets.zero,
-        child: CustomScrollView(
-          slivers: [
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-              sliver: SliverToBoxAdapter(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // ── Title row ─────────────────────────────────────────
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              _showRecycleBin ? 'Recycle Bin' : 'Transaction History',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.headlineMedium?.copyWith(
-                                fontSize: 24,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              _showRecycleBin
-                                  ? 'Restore or permanently delete expenses'
-                                  : 'All past expenses and receipts',
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: WalletMeltColors.textMuted,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: _showRecycleBin
-                                ? WalletMeltColors.danger.withValues(alpha: 0.15)
-                                : (isDark ? WalletMeltColors.darkSurface : Colors.white),
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: _showRecycleBin
-                                  ? WalletMeltColors.danger
-                                  : (isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder),
-                              width: 1.0,
-                            ),
-                          ),
-                          child: IconButton(
-                            padding: EdgeInsets.zero,
-                            tooltip: _showRecycleBin
-                                ? 'Show active expenses'
-                                : 'Show recycle bin',
-                            onPressed: () {
-                              setState(() => _showRecycleBin = !_showRecycleBin);
-                              if (_showRecycleBin) {
-                                context.read<AppState>().loadDeletedExpenses();
-                              }
-                            },
-                            icon: Icon(
-                              _showRecycleBin
-                                  ? Icons.receipt_long_rounded
-                                  : Icons.delete_outline_rounded,
-                              size: 18,
-                              color: _showRecycleBin
-                                  ? WalletMeltColors.danger
-                                  : (isDark ? Colors.white : WalletMeltColors.textPrimary),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-
-                    // ── Search Bar ─────────────────────────────────────────
-                    Container(
-                      decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF161922) : Colors.white,
-                        borderRadius: BorderRadius.circular(18),
-                        border: Border.all(
-                          color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder,
-                          width: 1.0,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.03),
-                            blurRadius: 10,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: TextField(
-                        controller: _searchController,
-                        decoration: InputDecoration(
-                          hintText: 'Search merchant, title, notes...',
-                          hintStyle: TextStyle(
-                            fontSize: 13.5,
-                            color: WalletMeltColors.textMuted,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          prefixIcon: const Icon(Icons.search_rounded, size: 20),
-                          suffixIcon: _searchController.text.isNotEmpty
-                              ? IconButton(
-                                  icon: const Icon(Icons.clear_rounded, size: 18),
-                                  onPressed: () {
-                                    _searchController.clear();
-                                    setState(() => _searchQuery = '');
-                                  },
-                                )
-                              : null,
-                          filled: false,
-                          border: InputBorder.none,
-                          enabledBorder: InputBorder.none,
-                          focusedBorder: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-
-                    // ── Filter Controls Row ────────────────────────────────
-                    Row(
-                      children: [
-                        // Tax Filter Segmented Pills
-                        Container(
-                          padding: const EdgeInsets.all(3),
-                          decoration: BoxDecoration(
-                            color: isDark ? const Color(0xFF161922) : const Color(0xFFECEFF3),
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
+        child: Skeletonizer(
+          enabled: isLoading,
+          child: CustomScrollView(
+            slivers: [
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                sliver: SliverToBoxAdapter(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // ── Title row ─────────────────────────────────────────
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildTaxPill('all', 'All', isDark),
-                              _buildTaxPill('taxable', 'Taxed', isDark),
-                              _buildTaxPill('nontaxable', 'No Tax', isDark),
+                              Text(
+                                _showRecycleBin ? 'Recycle Bin' : 'Transaction History',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.textTheme.headlineMedium?.copyWith(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                _showRecycleBin
+                                    ? 'Restore or permanently delete expenses'
+                                    : 'All past expenses and receipts',
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  color: WalletMeltColors.textMuted,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
                             ],
                           ),
-                        ),
-                        const Spacer(),
-                        // Sort selector
-                        Container(
-                          height: 36,
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
-                          decoration: BoxDecoration(
-                            color: isDark ? const Color(0xFF161922) : Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder,
-                              width: 1.0,
-                            ),
-                          ),
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton<ExpenseSort>(
-                              value: _sort,
-                              icon: const Icon(Icons.sort_rounded, size: 16),
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                color: isDark ? Colors.white : WalletMeltColors.textPrimary,
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: _showRecycleBin
+                                  ? WalletMeltColors.danger.withValues(alpha: 0.15)
+                                  : (isDark ? WalletMeltColors.darkSurface : Colors.white),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: _showRecycleBin
+                                    ? WalletMeltColors.danger
+                                    : (isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder),
+                                width: 1.0,
                               ),
-                              dropdownColor: isDark
-                                  ? WalletMeltColors.darkSurface
-                                  : Colors.white,
-                              borderRadius: BorderRadius.circular(16),
-                              items: const [
-                                DropdownMenuItem(
-                                    value: ExpenseSort.newest, child: Text('Newest')),
-                                DropdownMenuItem(
-                                    value: ExpenseSort.oldest, child: Text('Oldest')),
-                                DropdownMenuItem(
-                                    value: ExpenseSort.amountHigh,
-                                    child: Text('Highest')),
-                                DropdownMenuItem(
-                                    value: ExpenseSort.amountLow,
-                                    child: Text('Lowest')),
-                              ],
-                              onChanged: (value) =>
-                                  setState(() => _sort = value ?? _sort),
+                            ),
+                            child: IconButton(
+                              padding: EdgeInsets.zero,
+                              tooltip: _showRecycleBin
+                                  ? 'Show active expenses'
+                                  : 'Show recycle bin',
+                              onPressed: () {
+                                setState(() => _showRecycleBin = !_showRecycleBin);
+                                if (_showRecycleBin) {
+                                  context.read<AppState>().loadDeletedExpenses();
+                                }
+                              },
+                              icon: Icon(
+                                _showRecycleBin
+                                    ? Icons.receipt_long_rounded
+                                    : Icons.delete_outline_rounded,
+                                size: 18,
+                                color: _showRecycleBin
+                                    ? WalletMeltColors.danger
+                                    : (isDark ? Colors.white : WalletMeltColors.textPrimary),
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-
-                    // ── Category filter chips ─────────────────────────────
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      clipBehavior: Clip.none,
-                      child: Row(
-                        children: [
-                          _CategoryAllChip(
-                              selected: _categoryId == null,
-                              onTap: () =>
-                                  setState(() => _categoryId = null)),
-                          const SizedBox(width: 8),
-                          for (final category in categories) ...[
-                            WalletCategoryChip(
-                                category: category,
-                                selected: _categoryId == category.id,
-                                onTap: () =>
-                                    setState(() => _categoryId = category.id)),
-                            const SizedBox(width: 8),
-                          ],
                         ],
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                  ],
-                ),
-              ),
-            ),
+                      const SizedBox(height: 16),
 
-            // ── Empty state ──────────────────────────────────────────────
-            if (filteredEmpty)
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
-                sliver: SliverToBoxAdapter(
-                  child: EmptyState(
-                    icon: _showRecycleBin
-                        ? Icons.delete_sweep_outlined
-                        : Icons.search_off_rounded,
-                    title: _showRecycleBin
-                        ? 'Recycle bin is empty'
-                        : 'No expenses found',
-                    subtitle: _showRecycleBin
-                        ? 'Deleted expenses will appear here.'
-                        : 'Try a different search term or category filter.',
-                  ),
-                ),
-              )
-            else
-              // ── Lazy expense list with date-group headers ───────────────
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
-                sliver: SliverList.builder(
-                  itemCount: items.length,
-                  itemBuilder: (context, index) {
-                    final item = items[index];
-                    if (item is _HeaderItem) {
-                      return Padding(
-                        padding: const EdgeInsets.only(top: 22, bottom: 8, left: 4),
-                        child: Text(
-                          item.label.toUpperCase(),
-                          style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 1.0,
-                            color: WalletMeltColors.textMuted,
+                      // ── Search Bar (Directive 2: flat translucent fill, no BackdropFilter) ──
+                      Container(
+                        decoration: BoxDecoration(
+                          color: isDark ? const Color(0xFF0C0E14) : Colors.white,
+                          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                          border: Border.all(
+                            color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder,
+                            width: 1.0,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: isDark ? 0.20 : 0.03),
+                              blurRadius: 10,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: TextField(
+                          controller: _searchController,
+                          decoration: InputDecoration(
+                            hintText: 'Search merchant, title, notes...',
+                            hintStyle: const TextStyle(
+                              fontSize: 13.5,
+                              color: WalletMeltColors.textMuted,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            prefixIcon: const Icon(Icons.search_rounded, size: 20),
+                            suffixIcon: _searchController.text.isNotEmpty
+                                ? IconButton(
+                                    icon: const Icon(Icons.clear_rounded, size: 18),
+                                    onPressed: () {
+                                      _searchController.clear();
+                                      setState(() => _searchQuery = '');
+                                    },
+                                  )
+                                : null,
+                            filled: false,
+                            border: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                           ),
                         ),
-                      );
-                    }
-                    final expItem = item as _ExpenseItem;
-                    return ExpenseListTile(
-                      expense: expItem.expense,
-                      category: context.read<AppState>().categoryById(expItem.expense.categoryId),
-                      onTap: () => context.push('/expense/${expItem.expense.id}'),
-                    );
-                  },
+                      ),
+                      const SizedBox(height: 12),
+
+                      // ── Filter Controls Row ────────────────────────────────
+                      Row(
+                        children: [
+                          // Tax Filter Segmented Pills
+                          Container(
+                            padding: const EdgeInsets.all(3),
+                            decoration: BoxDecoration(
+                              color: isDark ? const Color(0xFF0C0E14) : const Color(0xFFECEFF3),
+                              borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                _buildTaxPill('all', 'All', isDark),
+                                _buildTaxPill('taxable', 'Taxed', isDark),
+                                _buildTaxPill('nontaxable', 'No Tax', isDark),
+                              ],
+                            ),
+                          ),
+                          const Spacer(),
+                          // Sort selector
+                          Container(
+                            height: 36,
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            decoration: BoxDecoration(
+                              color: isDark ? WalletMeltColors.darkSurface : Colors.white,
+                              borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                              border: Border.all(
+                                color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder,
+                                width: 1.0,
+                              ),
+                            ),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<ExpenseSort>(
+                                value: _sort,
+                                icon: const Icon(Icons.sort_rounded, size: 16),
+                                style: TextStyle(
+                                  fontFamily: 'PlusJakartaSans',
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: isDark ? Colors.white : WalletMeltColors.textPrimary,
+                                ),
+                                dropdownColor: isDark
+                                    ? WalletMeltColors.darkSurface
+                                    : Colors.white,
+                                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                                items: const [
+                                  DropdownMenuItem(
+                                      value: ExpenseSort.newest, child: Text('Newest')),
+                                  DropdownMenuItem(
+                                      value: ExpenseSort.oldest, child: Text('Oldest')),
+                                  DropdownMenuItem(
+                                      value: ExpenseSort.amountHigh,
+                                      child: Text('Highest')),
+                                  DropdownMenuItem(
+                                      value: ExpenseSort.amountLow,
+                                      child: Text('Lowest')),
+                                ],
+                                onChanged: (value) =>
+                                    setState(() => _sort = value ?? _sort),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+
+                      // ── Category filter chips ─────────────────────────────
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        clipBehavior: Clip.none,
+                        child: Row(
+                          children: [
+                            _CategoryAllChip(
+                                selected: _categoryId == null,
+                                onTap: () =>
+                                    setState(() => _categoryId = null)),
+                            const SizedBox(width: 8),
+                            for (final category in categories) ...[
+                              WalletCategoryChip(
+                                  category: category,
+                                  selected: _categoryId == category.id,
+                                  onTap: () =>
+                                      setState(() => _categoryId = category.id)),
+                              const SizedBox(width: 8),
+                            ],
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
                 ),
               ),
-          ],
+
+              // ── Empty state ──────────────────────────────────────────────
+              if (filteredEmpty)
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
+                  sliver: SliverToBoxAdapter(
+                    child: EmptyState(
+                      icon: _showRecycleBin
+                          ? Icons.delete_sweep_outlined
+                          : Icons.search_off_rounded,
+                      title: _showRecycleBin
+                          ? 'Recycle bin is empty'
+                          : 'No expenses found',
+                      subtitle: _showRecycleBin
+                          ? 'Deleted expenses will appear here.'
+                          : 'Try a different search term or category filter.',
+                    ),
+                  ),
+                )
+              else
+                // ── Lazy expense list with date-group headers and Slidable actions split (Directive 7) ──
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
+                  sliver: SliverList.builder(
+                    itemCount: items.length,
+                    itemBuilder: (context, index) {
+                      final item = items[index];
+                      if (item is _HeaderItem) {
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 22, bottom: 8, left: 4),
+                          child: Text(
+                            item.label.toUpperCase(),
+                            style: const TextStyle(
+                              fontFamily: 'PlusJakartaSans',
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 1.0,
+                              color: WalletMeltColors.textMuted,
+                            ),
+                          ),
+                        );
+                      }
+                      final expItem = item as _ExpenseItem;
+                      return ExpenseListTile(
+                        expense: expItem.expense,
+                        category: context.read<AppState>().categoryById(expItem.expense.categoryId),
+                        onTap: () => context.push('/expense/${expItem.expense.id}'),
+                        onEdit: () => context.push('/expense/${expItem.expense.id}'),
+                        onCategorize: () => _showQuickCategorySheet(context, expItem.expense),
+                        onDelete: () async {
+                          final appState = context.read<AppState>();
+                          await appState.softDeleteExpense(expItem.expense.id);
+                        },
+                        onRestore: () async {
+                          final appState = context.read<AppState>();
+                          await appState.restoreExpense(expItem.expense.id);
+                        },
+                      );
+                    },
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  void _showQuickCategorySheet(BuildContext context, Expense expense) {
+    final categories = context.read<AppState>().categories;
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        final isDark = Theme.of(ctx).brightness == Brightness.dark;
+        return Container(
+          decoration: BoxDecoration(
+            color: isDark ? WalletMeltColors.darkSurface : Colors.white,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(AppSpacing.radiusLg)),
+            border: Border.all(
+              color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder,
+            ),
+          ),
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Change Category',
+                style: Theme.of(ctx).textTheme.titleLarge,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final cat in categories)
+                    WalletCategoryChip(
+                      category: cat,
+                      selected: expense.categoryId == cat.id,
+                      onTap: () {
+                        context.read<AppState>().updateExpense(
+                          expense.copyWith(categoryId: cat.id),
+                        );
+                        Navigator.pop(ctx);
+                      },
+                    ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.lg),
+            ],
+          ),
+        );
+      },
     );
   }
 

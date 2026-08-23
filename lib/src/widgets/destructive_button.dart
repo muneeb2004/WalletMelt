@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../theme/wallet_melt_theme.dart';
 
-/// Full-width destructive action button. Use for irreversible actions such as
-/// "Delete", "Clear", or "Remove". Color comes from [colorScheme.error].
-class DestructiveButton extends StatelessWidget {
+/// Full-width destructive action button with touch scale response.
+class DestructiveButton extends StatefulWidget {
   const DestructiveButton({
     required this.label,
     required this.onPressed,
@@ -19,42 +18,68 @@ class DestructiveButton extends StatelessWidget {
   final bool isLoading;
 
   @override
+  State<DestructiveButton> createState() => _DestructiveButtonState();
+}
+
+class _DestructiveButtonState extends State<DestructiveButton> {
+  double _scale = 1.0;
+
+  @override
   Widget build(BuildContext context) {
     final error = Theme.of(context).colorScheme.error;
-    final Widget child = isLoading
+    final isEnabled = !widget.isLoading && widget.onPressed != null;
+
+    final Widget child = widget.isLoading
         ? const SizedBox.square(
             dimension: 18,
-            child: CircularProgressIndicator(strokeWidth: 2),
+            child: CircularProgressIndicator(strokeWidth: 2.2, color: Colors.white),
           )
-        : icon != null
+        : widget.icon != null
             ? Row(
                 mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(icon, size: 18),
+                  Icon(widget.icon, size: 18),
                   const SizedBox(width: AppSpacing.sm),
-                  Text(label),
+                  Text(
+                    widget.label,
+                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
+                  ),
                 ],
               )
-            : Text(label);
+            : Text(
+                widget.label,
+                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
+              );
 
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: error,
-          foregroundColor: Colors.white,
-          minimumSize: const Size.fromHeight(52),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppSpacing.buttonRadius),
+    return AnimatedScale(
+      scale: isEnabled ? _scale : 1.0,
+      duration: AppMotion.fast,
+      curve: AppMotion.entrance,
+      child: SizedBox(
+        width: double.infinity,
+        child: Listener(
+          onPointerDown: isEnabled ? (_) => setState(() => _scale = AppMotion.buttonPressScale) : null,
+          onPointerUp: isEnabled ? (_) => setState(() => _scale = 1.0) : null,
+          onPointerCancel: isEnabled ? (_) => setState(() => _scale = 1.0) : null,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: error,
+              foregroundColor: Colors.white,
+              minimumSize: const Size.fromHeight(52),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.buttonRadius),
+              ),
+            ),
+            onPressed: isEnabled
+                ? () {
+                    WMHaptics.heavy();
+                    widget.onPressed!();
+                  }
+                : null,
+            child: child,
           ),
         ),
-        onPressed: isLoading || onPressed == null
-            ? null
-            : () {
-                WMHaptics.medium();
-                onPressed!();
-              },
-        child: child,
       ),
     );
   }

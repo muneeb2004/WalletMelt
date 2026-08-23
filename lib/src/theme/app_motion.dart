@@ -9,6 +9,10 @@ import 'package:flutter/widgets.dart';
 abstract final class AppMotion {
   AppMotion._();
 
+  // ── Micro-Interaction Scale ──────────────────────────────────────────────
+  static const double buttonPressScale = 0.96;
+  static const double cardPressScale = 0.98;
+
   // ── Animation Durations ──────────────────────────────────────────────────
   /// Quick responses like tap down transitions, chip state switches.
   static const Duration fast = Duration(milliseconds: 150);
@@ -24,14 +28,17 @@ abstract final class AppMotion {
 
   // ── Animation Curves ─────────────────────────────────────────────────────
   /// Standard smooth entrance/exit curve.
-  static const Curve standard = Curves.easeInOut;
+  static const Curve standard = Curves.easeInOutCubic;
 
   /// Sleek decelerating curve for slide-ins or entries.
   static const Curve entrance = Curves.easeOutCubic;
 
   /// Fast acceleration for slide-outs or exits.
-  static const Curve exit = Curves.easeIn;
+  static const Curve exit = Curves.easeInCubic;
 
   /// Bouncy back-elastic curve for premium visual feedback (e.g. keypads, FABs, toasts).
   static const Curve bounce = Curves.easeOutBack;
+
+  /// Spring-like curve for natural tactile micro-interactions.
+  static const Curve spring = Curves.elasticOut;
 }

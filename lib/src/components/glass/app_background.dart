@@ -22,8 +22,8 @@ class AppBackground extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color(0xFF06050A), // Extremely deep space indigo
-              Color(0xFF0F0E16), // Dark charcoal space background
+              Color(0xFF000000), // True-black OLED foundation
+              Color(0xFF07080D), // Subtle deep carbon
             ],
           )
         : const LinearGradient(
@@ -40,10 +40,12 @@ class AppBackground extends StatelessWidget {
       decoration: BoxDecoration(gradient: baseGradient),
       child: Stack(
         children: [
-          // Glowing liquid orbs in the background layer
+          // Glowing liquid orbs in the background layer (isolated with RepaintBoundary)
           Positioned.fill(
-            child: CustomPaint(
-              painter: BackgroundOrbsPainter(isDark: dark),
+            child: RepaintBoundary(
+              child: CustomPaint(
+                painter: BackgroundOrbsPainter(isDark: dark),
+              ),
             ),
           ),
           // Screen content layer

@@ -62,118 +62,126 @@ class CategoryBreakdownChart extends StatelessWidget {
     // Sort descending by total spend
     displayItems.sort((a, b) => b.total.compareTo(a.total));
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        for (final item in displayItems) ...[
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4.0),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(12),
-                onTap: () {
-                  if (item.category.id == 'other_collapsed') {
-                    // Navigate to all transactions
-                    context.go('/history');
-                  } else {
-                    // Navigate to category transactions
-                    context.go('/history?categoryId=${item.category.id}');
-                  }
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
-                  child: Row(
-                    children: [
-                      // Category Icon container with color background
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: colorFromHex(item.category.color).withValues(alpha: 0.16),
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: colorFromHex(item.category.color).withValues(alpha: 0.28),
-                            width: 1.5,
-                          ),
-                        ),
-                        child: Center(
-                          child: Icon(
-                            _iconFor(item.category.icon),
-                            color: colorFromHex(item.category.color),
-                            size: 20,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  item.category.name,
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                                Text(
-                                  formatMoney(item.total, currency),
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ],
+    return RepaintBoundary(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (final item in displayItems) ...[
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4.0),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                  onTap: () {
+                    WMHaptics.light();
+                    if (item.category.id == 'other_collapsed') {
+                      // Navigate to all transactions
+                      context.go('/history');
+                    } else {
+                      // Navigate to category transactions
+                      context.go('/history?categoryId=${item.category.id}');
+                    }
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
+                    child: Row(
+                      children: [
+                        // Category Icon container with color background
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: colorFromHex(item.category.color).withValues(alpha: 0.16),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: colorFromHex(item.category.color).withValues(alpha: 0.28),
+                              width: 1.5,
                             ),
-                            const SizedBox(height: 6),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(4),
-                                    child: TweenAnimationBuilder<double>(
-                                      tween: Tween<double>(begin: 0.0, end: item.percentOfTotal),
-                                      duration: const Duration(milliseconds: 700),
-                                      curve: Curves.easeOutCubic,
-                                      builder: (context, value, child) {
-                                        return LinearProgressIndicator(
-                                          value: value,
-                                          backgroundColor: isDark ? Colors.white12 : Colors.black12,
-                                          valueColor: AlwaysStoppedAnimation<Color>(
-                                            colorFromHex(item.category.color),
-                                          ),
-                                          minHeight: 8,
-                                        );
-                                      },
+                          ),
+                          child: Center(
+                            child: Icon(
+                              _iconFor(item.category.icon),
+                              color: colorFromHex(item.category.color),
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    item.category.name,
+                                    style: theme.textTheme.titleMedium?.copyWith(
+                                      fontFamily: 'PlusJakartaSans',
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
                                     ),
                                   ),
-                                ),
-                                const SizedBox(width: 10),
-                                Text(
-                                  '${(item.percentOfTotal * 100).toStringAsFixed(0)}%',
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: WalletMeltColors.textMuted,
-                                    fontWeight: FontWeight.bold,
+                                  Text(
+                                    formatMoney(item.total, currency),
+                                    style: theme.textTheme.titleMedium?.copyWith(
+                                      fontFamily: 'PlusJakartaSans',
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 14,
+                                      fontFeatures: const [FontFeature.tabularFigures()],
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          ],
+                                ],
+                              ),
+                              const SizedBox(height: 6),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(4),
+                                      child: TweenAnimationBuilder<double>(
+                                        tween: Tween<double>(begin: 0.0, end: item.percentOfTotal),
+                                        duration: const Duration(milliseconds: 700),
+                                        curve: Curves.easeOutCubic,
+                                        builder: (context, value, child) {
+                                          return LinearProgressIndicator(
+                                            value: value,
+                                            backgroundColor: isDark ? Colors.white12 : Colors.black12,
+                                            valueColor: AlwaysStoppedAnimation<Color>(
+                                              colorFromHex(item.category.color),
+                                            ),
+                                            minHeight: 8,
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Text(
+                                    '${(item.percentOfTotal * 100).toStringAsFixed(0)}%',
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      fontFamily: 'PlusJakartaSans',
+                                      color: WalletMeltColors.textMuted,
+                                      fontWeight: FontWeight.bold,
+                                      fontFeatures: const [FontFeature.tabularFigures()],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
+          ],
         ],
-      ],
+      ),
     );
   }
 

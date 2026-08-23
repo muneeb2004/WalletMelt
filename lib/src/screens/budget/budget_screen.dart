@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 import '../../components/glass/app_background.dart';
 import '../../state/app_state.dart';
@@ -326,14 +327,15 @@ class _BudgetScreenState extends State<BudgetScreen> {
       ],
     );
 
-    if (widget.isEmbedded) {
-      return content;
-    }
-
-    return Scaffold(
-      body: AppBackground(
-        child: content,
-      ),
+    return Skeletonizer(
+      enabled: state.isLoading,
+      child: widget.isEmbedded
+          ? content
+          : Scaffold(
+              body: AppBackground(
+                child: content,
+              ),
+            ),
     );
   }
 

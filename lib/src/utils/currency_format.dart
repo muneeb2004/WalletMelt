@@ -1,4 +1,17 @@
+import 'dart:ui';
+import 'package:flutter/painting.dart';
 import 'package:intl/intl.dart';
+
+const List<FontFeature> kTabularFigures = [FontFeature.tabularFigures()];
+
+TextStyle withTabularFigures(TextStyle? base) {
+  return (base ?? const TextStyle()).copyWith(
+    fontFeatures: [
+      ...?base?.fontFeatures,
+      const FontFeature.tabularFigures(),
+    ],
+  );
+}
 
 final Map<String, NumberFormat> _formatCache = {};
 

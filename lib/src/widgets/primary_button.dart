@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../theme/wallet_melt_theme.dart';
 
-/// Full-width primary action button. Use this for the main positive action in
-/// bottom sheets and dialogs (e.g. "Save", "Create", "Confirm").
-class PrimaryButton extends StatelessWidget {
+/// Full-width primary action button with tactile spring feedback.
+class PrimaryButton extends StatefulWidget {
   const PrimaryButton({
     required this.label,
     required this.onPressed,
@@ -19,39 +18,65 @@ class PrimaryButton extends StatelessWidget {
   final bool isLoading;
 
   @override
+  State<PrimaryButton> createState() => _PrimaryButtonState();
+}
+
+class _PrimaryButtonState extends State<PrimaryButton> {
+  double _scale = 1.0;
+
+  @override
   Widget build(BuildContext context) {
-    final Widget child = isLoading
+    final isEnabled = !widget.isLoading && widget.onPressed != null;
+
+    final Widget child = widget.isLoading
         ? const SizedBox.square(
             dimension: 18,
-            child: CircularProgressIndicator(strokeWidth: 2),
+            child: CircularProgressIndicator(strokeWidth: 2.2, color: Colors.white),
           )
-        : icon != null
+        : widget.icon != null
             ? Row(
                 mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(icon, size: 18),
+                  Icon(widget.icon, size: 18),
                   const SizedBox(width: AppSpacing.sm),
-                  Text(label),
+                  Text(
+                    widget.label,
+                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
+                  ),
                 ],
               )
-            : Text(label);
+            : Text(
+                widget.label,
+                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
+              );
 
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          minimumSize: const Size.fromHeight(52),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppSpacing.buttonRadius),
+    return AnimatedScale(
+      scale: isEnabled ? _scale : 1.0,
+      duration: AppMotion.fast,
+      curve: AppMotion.entrance,
+      child: SizedBox(
+        width: double.infinity,
+        child: Listener(
+          onPointerDown: isEnabled ? (_) => setState(() => _scale = AppMotion.buttonPressScale) : null,
+          onPointerUp: isEnabled ? (_) => setState(() => _scale = 1.0) : null,
+          onPointerCancel: isEnabled ? (_) => setState(() => _scale = 1.0) : null,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size.fromHeight(52),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.buttonRadius),
+              ),
+            ),
+            onPressed: isEnabled
+                ? () {
+                    WMHaptics.medium();
+                    widget.onPressed!();
+                  }
+                : null,
+            child: child,
           ),
         ),
-        onPressed: isLoading || onPressed == null
-            ? null
-            : () {
-                WMHaptics.light();
-                onPressed!();
-              },
-        child: child,
       ),
     );
   }

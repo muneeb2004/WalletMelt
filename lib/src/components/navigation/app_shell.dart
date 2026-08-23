@@ -30,20 +30,20 @@ class AppShell extends StatelessWidget {
                 height: 64,
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF161922) : Colors.white,
-                  borderRadius: BorderRadius.circular(999),
+                  color: isDark ? const Color(0xFF0C0E14) : Colors.white,
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
                   border: Border.all(
-                    color: isDark ? WalletMeltColors.darkBorder : const Color(0x0E000000),
+                    color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder,
                     width: 1.0,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
+                      color: Colors.black.withValues(alpha: isDark ? 0.40 : 0.08),
                       blurRadius: 24,
                       offset: const Offset(0, 8),
                     ),
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.03),
+                      color: Colors.black.withValues(alpha: isDark ? 0.20 : 0.03),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -385,7 +385,7 @@ class _NavItem extends StatelessWidget {
           ),
           decoration: BoxDecoration(
             color: active ? activeBgColor : Colors.transparent,
-            borderRadius: BorderRadius.circular(999),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -400,6 +400,7 @@ class _NavItem extends StatelessWidget {
                 Text(
                   label,
                   style: TextStyle(
+                    fontFamily: 'PlusJakartaSans',
                     fontSize: 12,
                     fontWeight: FontWeight.w800,
                     color: activeIconColor,
