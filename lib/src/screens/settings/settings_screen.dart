@@ -79,6 +79,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     final state = context.read<AppState>();
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final currency = context.select((AppState s) => s.settings.currency);
     final themePreference =
         context.select((AppState s) => s.settings.themePreference);
@@ -329,70 +330,160 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ],
                       if (isPinEnabled) ...[
-                        const SizedBox(height: 14),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                onPressed: () async {
-                                  final verified = await Navigator.push<bool>(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => const VerifyPinScreen(
-                                        title: 'Verify PIN',
-                                        instruction: 'Enter current PIN to change it',
-                                      ),
-                                    ),
-                                  );
-                                  if (verified == true) {
-                                    if (!context.mounted) return;
-                                    final wasChanged = await Navigator.push<bool>(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => const CreatePinScreen(),
-                                      ),
-                                    );
-                                    if (wasChanged == true) {
-                                      if (!context.mounted) return;
-                                      showSuccessSnackbar(context, 'PIN changed successfully.');
-                                    }
-                                  }
-                                },
-                                icon: const Icon(Icons.edit_rounded, size: 18),
-                                label: const Text('Change PIN'),
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: theme.colorScheme.error,
-                                  side: BorderSide(
-                                    color: theme.colorScheme.error.withValues(alpha: 0.28),
-                                    width: 1.2,
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8),
+                          child: Divider(height: 1, thickness: 0.5),
+                        ),
+                        // ── Change PIN Row ──────────────────────────────────
+                        Material(
+                          type: MaterialType.transparency,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(12),
+                            onTap: () async {
+                              final verified = await Navigator.push<bool>(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const VerifyPinScreen(
+                                    title: 'Verify PIN',
+                                    instruction: 'Enter current PIN to change it',
                                   ),
                                 ),
-                                onPressed: () async {
-                                  final verified = await Navigator.push<bool>(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => const VerifyPinScreen(
-                                        title: 'Disable PIN',
-                                        instruction: 'Enter your PIN to disable the lock',
-                                      ),
+                              );
+                              if (verified == true) {
+                                if (!context.mounted) return;
+                                final wasChanged = await Navigator.push<bool>(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const CreatePinScreen(),
+                                  ),
+                                );
+                                if (wasChanged == true) {
+                                  if (!context.mounted) return;
+                                  showSuccessSnackbar(context, 'PIN changed successfully.');
+                                }
+                              }
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 36,
+                                    height: 36,
+                                    decoration: BoxDecoration(
+                                      color: WalletMeltColors.brand.withValues(alpha: 0.12),
+                                      borderRadius: BorderRadius.circular(10),
                                     ),
-                                  );
-                                  if (verified == true) {
-                                    await pinController.disablePin();
-                                    if (!context.mounted) return;
-                                    showSuccessSnackbar(context, 'PIN Lock disabled.');
-                                  }
-                                },
-                                icon: const Icon(Icons.lock_open_rounded, size: 18),
-                                label: const Text('Disable PIN'),
+                                    child: const Icon(
+                                      Icons.pin_outlined,
+                                      size: 20,
+                                      color: WalletMeltColors.brand,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 14),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Change PIN',
+                                          style: theme.textTheme.bodyLarge?.copyWith(
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          'Update your 4-digit security code.',
+                                          style: theme.textTheme.bodySmall?.copyWith(
+                                            color: WalletMeltColors.textMuted,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Icon(
+                                    Icons.chevron_right_rounded,
+                                    size: 20,
+                                    color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                                  ),
+                                ],
                               ),
                             ),
-                          ],
+                          ),
+                        ),
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 4),
+                          child: Divider(height: 1, thickness: 0.5),
+                        ),
+                        // ── Disable PIN Lock Row ────────────────────────────
+                        Material(
+                          type: MaterialType.transparency,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(12),
+                            onTap: () async {
+                              final verified = await Navigator.push<bool>(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const VerifyPinScreen(
+                                    title: 'Disable PIN',
+                                    instruction: 'Enter your PIN to disable the lock',
+                                  ),
+                                ),
+                              );
+                              if (verified == true) {
+                                await pinController.disablePin();
+                                if (!context.mounted) return;
+                                showSuccessSnackbar(context, 'PIN Lock disabled.');
+                              }
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 36,
+                                    height: 36,
+                                    decoration: BoxDecoration(
+                                      color: theme.colorScheme.error.withValues(alpha: 0.12),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Icon(
+                                      Icons.lock_open_rounded,
+                                      size: 20,
+                                      color: theme.colorScheme.error,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 14),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Disable PIN Lock',
+                                          style: theme.textTheme.bodyLarge?.copyWith(
+                                            fontWeight: FontWeight.w700,
+                                            color: theme.colorScheme.error,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          'Turn off PIN and biometric protection.',
+                                          style: theme.textTheme.bodySmall?.copyWith(
+                                            color: WalletMeltColors.textMuted,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Icon(
+                                    Icons.chevron_right_rounded,
+                                    size: 20,
+                                    color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                         ),
                       ],
                     ],

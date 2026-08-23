@@ -1330,6 +1330,44 @@ void main() {
       await tester.pumpAndSettle();
     });
   });
+
+  group('SettingsScreen PIN Lock Security Rows', () {
+    testWidgets('renders full-width Change PIN and Disable PIN rows when PIN is enabled',
+        (tester) async {
+      tester.view.physicalSize = const Size(360 * 2, 800 * 2);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      final appState = _appState();
+      final pinController = FakePinLockController();
+      pinController.testIsPinEnabled = true;
+
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider.value(value: appState),
+            ChangeNotifierProvider<PinLockController>.value(value: pinController),
+          ],
+          child: MaterialApp(
+            home: SettingsScreen(
+              expenseCsvExportService: FakeExpenseCsvExportService(),
+              jsonBackupService: FakeWalletMeltJsonBackupService(),
+              exportShareService: FakeExportShareService(),
+              safetyBackupDirectory: Directory.systemTemp,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Change PIN'), findsOneWidget);
+      expect(find.text('Update your 4-digit security code.'), findsOneWidget);
+      expect(find.text('Disable PIN Lock'), findsOneWidget);
+      expect(find.text('Turn off PIN and biometric protection.'), findsOneWidget);
+      expect(find.byIcon(Icons.pin_outlined), findsOneWidget);
+      expect(find.byIcon(Icons.lock_open_rounded), findsOneWidget);
+    });
+  });
 }
 
 Widget _settingsHarness({
@@ -1829,11 +1867,13 @@ RestoreDryRunPlan _dryRunPlan({
 class FakePinLockController extends PinLockController {
   FakePinLockController() : super();
 
+  bool testIsPinEnabled = false;
+
   @override
   bool get isLocked => false;
 
   @override
-  bool get isPinEnabled => false;
+  bool get isPinEnabled => testIsPinEnabled;
 
   @override
   bool get isInitialized => true;
