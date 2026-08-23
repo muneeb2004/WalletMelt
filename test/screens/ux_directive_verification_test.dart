@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:wallet_melt/src/components/category/category_chip.dart';
+import 'package:wallet_melt/src/components/navigation/app_shell.dart';
 import 'package:wallet_melt/src/constants/categories.dart';
 import 'package:wallet_melt/src/data/repositories/drift/drift_budget_repository.dart';
 import 'package:wallet_melt/src/data/repositories/drift/drift_category_repository.dart';
@@ -463,6 +465,66 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('No allowance remaining'), findsOneWidget);
+    });
+
+    // ── Item 6: Floating Nav Bar Animation, Transitions & Sizing ───────────
+    testWidgets('Item 6: AppShell renders expanding pill with smooth transition at 360dp without overflow',
+        (tester) async {
+      tester.view.physicalSize = const Size(360 * 2, 800 * 2);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      final appState = createAppState();
+
+      final router = GoRouter(
+        initialLocation: '/',
+        routes: [
+          StatefulShellRoute.indexedStack(
+            builder: (context, state, navigationShell) =>
+                AppShell(navigationShell: navigationShell),
+            branches: [
+              StatefulShellBranch(routes: [
+                GoRoute(path: '/', builder: (context, state) => const Scaffold(body: Text('Home Page'))),
+              ]),
+              StatefulShellBranch(routes: [
+                GoRoute(path: '/history', builder: (context, state) => const Scaffold(body: Text('History Page'))),
+              ]),
+              StatefulShellBranch(routes: [
+                GoRoute(path: '/planning', builder: (context, state) => const Scaffold(body: Text('Planning Page'))),
+              ]),
+              StatefulShellBranch(routes: [
+                GoRoute(path: '/debt', builder: (context, state) => const Scaffold(body: Text('Debts Page'))),
+              ]),
+            ],
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        ChangeNotifierProvider<AppState>.value(
+          value: appState,
+          child: MaterialApp.router(
+            theme: WalletMeltTheme.light(),
+            routerConfig: router,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('Home'), findsOneWidget);
+      expect(find.text('Home Page'), findsOneWidget);
+
+      // Tap on Planning tab
+      await tester.tap(find.byIcon(Icons.account_balance_wallet_rounded));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 125)); // Mid-transition
+      expect(tester.takeException(), isNull);
+
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.text('Planning'), findsOneWidget);
+      expect(find.text('Planning Page'), findsOneWidget);
     });
   });
 }

@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -5,14 +6,61 @@ import '../../theme/wallet_melt_theme.dart';
 import '../../types/debt.dart';
 import '../../screens/debt/debt_screen.dart';
 
-class AppShell extends StatelessWidget {
+class AppShell extends StatefulWidget {
   const AppShell({required this.navigationShell, super.key});
 
   final StatefulNavigationShell navigationShell;
 
   @override
+  State<AppShell> createState() => _AppShellState();
+}
+
+class _AppShellState extends State<AppShell>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _transitionController;
+  late final Animation<double> _fadeAnimation;
+  late final Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _transitionController = AnimationController(
+      vsync: this,
+      duration: AppMotion.medium,
+    )..value = 1.0;
+
+    _fadeAnimation = CurvedAnimation(
+      parent: _transitionController,
+      curve: AppMotion.standard,
+    );
+
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0.0, 0.015),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _transitionController,
+      curve: AppMotion.standard,
+    ));
+  }
+
+  @override
+  void didUpdateWidget(AppShell oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.navigationShell.currentIndex !=
+        widget.navigationShell.currentIndex) {
+      _transitionController.forward(from: 0.0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _transitionController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final activeIndex = navigationShell.currentIndex;
+    final activeIndex = widget.navigationShell.currentIndex;
     final action = ScreenActionResolver.resolve(context, activeIndex);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -20,8 +68,16 @@ class AppShell extends StatelessWidget {
       extendBody: true,
       body: Stack(
         children: [
-          Positioned.fill(child: navigationShell),
-            Positioned(
+          Positioned.fill(
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: SlideTransition(
+                position: _slideAnimation,
+                child: widget.navigationShell,
+              ),
+            ),
+          ),
+          Positioned(
             left: 24,
             right: 24,
             bottom: 18,
@@ -33,17 +89,21 @@ class AppShell extends StatelessWidget {
                   color: isDark ? const Color(0xFF0C0E14) : Colors.white,
                   borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
                   border: Border.all(
-                    color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder,
+                    color: isDark
+                        ? WalletMeltColors.darkBorder
+                        : WalletMeltColors.lightBorder,
                     width: 1.0,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: isDark ? 0.40 : 0.08),
+                      color:
+                          Colors.black.withValues(alpha: isDark ? 0.40 : 0.08),
                       blurRadius: 24,
                       offset: const Offset(0, 8),
                     ),
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: isDark ? 0.20 : 0.03),
+                      color:
+                          Colors.black.withValues(alpha: isDark ? 0.20 : 0.03),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -56,25 +116,25 @@ class AppShell extends StatelessWidget {
                       icon: Icons.home_filled,
                       label: 'Home',
                       index: 0,
-                      shell: navigationShell,
+                      shell: widget.navigationShell,
                     ),
                     _NavItem(
                       icon: Icons.receipt_long_rounded,
                       label: 'History',
                       index: 1,
-                      shell: navigationShell,
+                      shell: widget.navigationShell,
                     ),
                     _NavItem(
                       icon: Icons.account_balance_wallet_rounded,
                       label: 'Planning',
                       index: 2,
-                      shell: navigationShell,
+                      shell: widget.navigationShell,
                     ),
                     _NavItem(
                       icon: Icons.handshake_rounded,
                       label: 'Debts',
                       index: 3,
-                      shell: navigationShell,
+                      shell: widget.navigationShell,
                     ),
                   ],
                 ),
@@ -376,6 +436,7 @@ class _NavItem extends StatelessWidget {
     final inactiveIconColor = isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8);
 
     return Expanded(
+      flex: active ? 4 : 2,
       child: Semantics(
         button: true,
         selected: active,
@@ -393,15 +454,17 @@ class _NavItem extends StatelessWidget {
               duration: AppMotion.medium,
               curve: AppMotion.standard,
               padding: EdgeInsets.symmetric(
-                horizontal: active ? 14 : 10,
+                horizontal: active ? 12 : 8,
                 vertical: 8,
               ),
               decoration: BoxDecoration(
                 color: active ? activeBgColor : Colors.transparent,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
               ),
+              clipBehavior: Clip.antiAlias,
               child: Row(
                 mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
                     icon,
@@ -410,14 +473,21 @@ class _NavItem extends StatelessWidget {
                   ),
                   if (active) ...[
                     const SizedBox(width: 6),
-                    Text(
-                      label,
-                      style: TextStyle(
-                        fontFamily: 'PlusJakartaSans',
-                        fontSize: 12,
-                        fontWeight: FontWeight.w800,
-                        color: activeIconColor,
-                        letterSpacing: 0.2,
+                    Flexible(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          label,
+                          maxLines: 1,
+                          softWrap: false,
+                          style: TextStyle(
+                            fontFamily: 'PlusJakartaSans',
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                            color: activeIconColor,
+                            letterSpacing: 0.2,
+                          ),
+                        ),
                       ),
                     ),
                   ],
