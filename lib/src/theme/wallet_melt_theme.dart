@@ -95,6 +95,7 @@ class WalletMeltTheme {
     final isDark = scheme.brightness == Brightness.dark;
     return ThemeData(
       useMaterial3: true,
+      brightness: scheme.brightness,
       colorScheme: scheme,
       fontFamily: 'PlusJakartaSans',
       pageTransitionsTheme: const PageTransitionsTheme(
@@ -667,39 +668,52 @@ class WMDarkHeroCard extends StatelessWidget {
     final cardContent = Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(radius),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            WalletMeltColors.darkSurface,
-            WalletMeltColors.darkBackgroundContainer,
-          ],
-        ),
+        gradient: isDark
+            ? const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF1E293B),
+                  Color(0xFF0F172A),
+                  Color(0xFF020617),
+                ],
+                stops: [0.0, 0.6, 1.0],
+              )
+            : const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFFFFFFFF),
+                  Color(0xFFF8FAFC),
+                  Color(0xFFF1F5F9),
+                ],
+                stops: [0.0, 0.5, 1.0],
+              ),
         border: Border.all(
-          color: const Color(0x28FFFFFF),
-          width: 1.0,
+          color: isDark ? const Color(0x28FFFFFF) : const Color(0xFFE2E8F0),
+          width: 1.2,
         ),
         boxShadow: isDark
             ? [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.40),
+                  color: Colors.black.withValues(alpha: 0.45),
                   blurRadius: 24,
                   offset: const Offset(0, 10),
                 ),
                 BoxShadow(
-                  color: WalletMeltColors.brand.withValues(alpha: 0.05),
+                  color: WalletMeltColors.brand.withValues(alpha: 0.06),
                   blurRadius: 32,
                   offset: const Offset(0, 4),
                 ),
               ]
             : [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.12),
-                  blurRadius: 18,
-                  offset: const Offset(0, 6),
+                  color: const Color(0xFF0F172A).withValues(alpha: 0.08),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
                 ),
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
+                  color: const Color(0xFF0F172A).withValues(alpha: 0.03),
                   blurRadius: 6,
                   offset: const Offset(0, 2),
                 ),

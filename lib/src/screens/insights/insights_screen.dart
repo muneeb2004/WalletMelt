@@ -339,13 +339,13 @@ class _InsightsScreenState extends State<InsightsScreen> {
                               ),
                             ),
                             const SizedBox(width: 8),
-                            const Text(
+                            Text(
                               'MONTHLY SPEND TREND',
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: 1.1,
-                                color: Color(0xFF94A3B8),
+                                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                               ),
                             ),
                           ],
@@ -391,10 +391,10 @@ class _InsightsScreenState extends State<InsightsScreen> {
                     const SizedBox(height: 12),
                     Text(
                       formatMoney(insights.total, currency),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 36,
                         fontWeight: FontWeight.w900,
-                        color: Colors.white,
+                        color: isDark ? Colors.white : WalletMeltColors.textPrimary,
                         letterSpacing: -0.6,
                         height: 1.05,
                       ),
@@ -404,9 +404,9 @@ class _InsightsScreenState extends State<InsightsScreen> {
                       insights.highestCategory == null
                           ? 'Add another month of expenses to compare trends.'
                           : 'Highest category: ${insights.highestCategory!.category.name} (${formatMoney(insights.highestCategory!.total, currency)})',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12.5,
-                        color: Color(0xFF94A3B8),
+                        color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                         fontWeight: FontWeight.w500,
                       ),
                     ),

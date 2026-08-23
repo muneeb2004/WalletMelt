@@ -860,6 +860,8 @@ class _DebtScreenState extends State<DebtScreen> {
       }
     }
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       body: AppBackground(
         padding: const EdgeInsets.fromLTRB(20, 18, 20, 94), // Extra bottom padding for floating navbar
@@ -945,13 +947,13 @@ class _DebtScreenState extends State<DebtScreen> {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          const Text(
+                          Text(
                             'NET OBLIGATION POSITION',
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w800,
                               letterSpacing: 1.1,
-                              color: Color(0xFF94A3B8),
+                              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                             ),
                           ),
                         ],
@@ -992,10 +994,14 @@ class _DebtScreenState extends State<DebtScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.05),
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.05)
+                          : const Color(0xFF0F172A).withValues(alpha: 0.04),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.08),
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.08)
+                            : const Color(0xFFE2E8F0),
                         width: 1.0,
                       ),
                     ),
@@ -1005,13 +1011,13 @@ class _DebtScreenState extends State<DebtScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
+                              Text(
                                 'OWED TO YOU',
                                 style: TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w800,
                                   letterSpacing: 0.8,
-                                  color: Color(0xFF94A3B8),
+                                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                                 ),
                               ),
                               const SizedBox(height: 3),
@@ -1029,20 +1035,22 @@ class _DebtScreenState extends State<DebtScreen> {
                         Container(
                           width: 1,
                           height: 28,
-                          color: Colors.white.withValues(alpha: 0.12),
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.12)
+                              : const Color(0xFFCBD5E1),
                         ),
                         const SizedBox(width: 16),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
+                              Text(
                                 'YOU OWE',
                                 style: TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w800,
                                   letterSpacing: 0.8,
-                                  color: Color(0xFF94A3B8),
+                                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                                 ),
                               ),
                               const SizedBox(height: 3),

@@ -250,7 +250,7 @@ class DashboardScreen extends StatelessWidget {
               ),
               const SizedBox(height: 18),
 
-              // ── Primary FinSight-Style Dark Financial Hero Card ──────────
+              // ── Primary Debit-Card Styled Theme-Aware Hero Card ──────────
               WMDarkHeroCard(
                 onTap: () {
                   BudgetScreen.showSetBudgetSheet(
@@ -263,20 +263,73 @@ class DashboardScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Card Top Meta Row
+                    // Card Top Meta & Debit Chip Row
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Expanded(
                           child: Row(
                             children: [
+                              // Stylized Metallic EMV Smart Chip
                               Container(
-                                width: 8,
-                                height: 8,
-                                decoration: const BoxDecoration(
-                                  color: WalletMeltColors.brand,
-                                  shape: BoxShape.circle,
+                                width: 30,
+                                height: 21,
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [Color(0xFFE5C058), Color(0xFFB89230)],
+                                  ),
+                                  borderRadius: BorderRadius.circular(4),
+                                  border: Border.all(
+                                    color: const Color(0x33000000),
+                                    width: 0.5,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(alpha: 0.12),
+                                      blurRadius: 2,
+                                      offset: const Offset(0, 1),
+                                    ),
+                                  ],
                                 ),
+                                child: Stack(
+                                  children: [
+                                    Positioned(
+                                      left: 9,
+                                      top: 0,
+                                      bottom: 0,
+                                      width: 0.5,
+                                      child: Container(color: const Color(0x45000000)),
+                                    ),
+                                    Positioned(
+                                      right: 9,
+                                      top: 0,
+                                      bottom: 0,
+                                      width: 0.5,
+                                      child: Container(color: const Color(0x45000000)),
+                                    ),
+                                    Center(
+                                      child: Container(
+                                        width: 11,
+                                        height: 8,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(1.5),
+                                          border: Border.all(
+                                            color: const Color(0x45000000),
+                                            width: 0.5,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Icon(
+                                Icons.contactless_rounded,
+                                size: 18,
+                                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                               ),
                               const SizedBox(width: 8),
                               Expanded(
@@ -284,11 +337,11 @@ class DashboardScreen extends StatelessWidget {
                                   '${readableMonth(selectedMonth).toUpperCase()} SPEND',
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w800,
                                     letterSpacing: 1.1,
-                                    color: Color(0xFF94A3B8),
+                                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                                   ),
                                 ),
                               ),
@@ -331,21 +384,33 @@ class DashboardScreen extends StatelessWidget {
                               ],
                             ),
                           ),
+                        ] else ...[
+                          Text(
+                            'WALLETMELT',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1.4,
+                              color: isDark
+                                  ? Colors.white.withValues(alpha: 0.35)
+                                  : const Color(0xFF0F172A).withValues(alpha: 0.30),
+                            ),
+                          ),
                         ],
                       ],
                     ),
                     const SizedBox(height: 12),
 
-                    // Big Confident Spend Typography
+                    // Big Confident Spend Typography (Theme-aware)
                     FittedBox(
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerLeft,
                       child: Text(
                         formatMoney(totalSpent, currency),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 38,
                           fontWeight: FontWeight.w900,
-                          color: Colors.white,
+                          color: isDark ? Colors.white : WalletMeltColors.textPrimary,
                           letterSpacing: -0.8,
                           height: 1.05,
                         ),
@@ -359,7 +424,9 @@ class DashboardScreen extends StatelessWidget {
                       LinearProgressIndicator(
                         value: ratio.clamp(0.0, 1.0),
                         minHeight: 6,
-                        backgroundColor: Colors.white.withValues(alpha: 0.12),
+                        backgroundColor: isDark
+                            ? Colors.white.withValues(alpha: 0.12)
+                            : const Color(0xFFE2E8F0),
                         valueColor: AlwaysStoppedAnimation<Color>(budgetColor),
                         borderRadius: BorderRadius.circular(999),
                       ),
@@ -380,7 +447,9 @@ class DashboardScreen extends StatelessWidget {
                                   fontWeight: FontWeight.w700,
                                   color: isOverBudget
                                       ? WalletMeltColors.danger
-                                      : Colors.white.withValues(alpha: 0.85),
+                                      : (isDark
+                                          ? Colors.white.withValues(alpha: 0.9)
+                                          : WalletMeltColors.textPrimary),
                                 ),
                               ),
                             ),
@@ -395,7 +464,9 @@ class DashboardScreen extends StatelessWidget {
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
-                                  color: Colors.white.withValues(alpha: 0.5),
+                                  color: isDark
+                                      ? const Color(0xFF94A3B8)
+                                      : const Color(0xFF64748B),
                                 ),
                               ),
                             ),
@@ -409,8 +480,16 @@ class DashboardScreen extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.07),
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.08)
+                                : const Color(0xFF0F172A).withValues(alpha: 0.04),
                             borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: isDark
+                                  ? Colors.white.withValues(alpha: 0.08)
+                                  : const Color(0xFFE2E8F0),
+                              width: 1.0,
+                            ),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -421,7 +500,9 @@ class DashboardScreen extends StatelessWidget {
                                   fontSize: 10.5,
                                   fontWeight: FontWeight.w800,
                                   letterSpacing: 0.6,
-                                  color: Colors.white.withValues(alpha: 0.6),
+                                  color: isDark
+                                      ? const Color(0xFF94A3B8)
+                                      : const Color(0xFF64748B),
                                 ),
                               ),
                               const SizedBox(width: 8),
@@ -438,7 +519,9 @@ class DashboardScreen extends StatelessWidget {
                                       fontWeight: FontWeight.w700,
                                       color: isOverBudget
                                           ? WalletMeltColors.danger
-                                          : Colors.white.withValues(alpha: 0.9),
+                                          : (isDark
+                                              ? Colors.white
+                                              : WalletMeltColors.textPrimary),
                                       fontFeatures: const [FontFeature.tabularFigures()],
                                     ),
                                   ),
@@ -462,7 +545,9 @@ class DashboardScreen extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w500,
-                                color: Colors.white.withValues(alpha: 0.6),
+                                color: isDark
+                                    ? const Color(0xFF94A3B8)
+                                    : const Color(0xFF64748B),
                               ),
                             ),
                           ),
@@ -475,14 +560,14 @@ class DashboardScreen extends StatelessWidget {
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w700,
-                                  color: WalletMeltColors.brand,
+                                  color: isDark ? WalletMeltColors.brand : WalletMeltColors.brandDeep,
                                 ),
                               ),
                               const SizedBox(width: 4),
                               Icon(
                                 Icons.arrow_forward_rounded,
                                 size: 12,
-                                color: WalletMeltColors.brand,
+                                color: isDark ? WalletMeltColors.brand : WalletMeltColors.brandDeep,
                               ),
                             ],
                           ),

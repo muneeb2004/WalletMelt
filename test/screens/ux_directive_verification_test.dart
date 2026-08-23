@@ -82,35 +82,62 @@ void main() {
 
   group('UX Directive Verification & Regression Suite', () {
     // ── Item 1: Hero Card Theming ──────────────────────────────────────────
-    testWidgets('Item 1: WMDarkHeroCard renders layered carbon gradient in light theme with shadow',
+    testWidgets('Item 1: WMDarkHeroCard renders theme-aware debit-card gradient with elevation',
         (tester) async {
+      // Light Mode Check
       await tester.pumpWidget(
         MaterialApp(
           theme: WalletMeltTheme.light(),
           home: const Scaffold(
             body: WMDarkHeroCard(
-              child: Text('Hero Card Content', style: TextStyle(color: Colors.white)),
+              child: Text('Hero Card Content'),
             ),
           ),
         ),
       );
 
-      final container = tester.widget<Container>(
+      final lightContainer = tester.widget<Container>(
         find.descendant(
           of: find.byType(WMDarkHeroCard),
           matching: find.byType(Container).first,
         ),
       );
 
-      final decoration = container.decoration as BoxDecoration;
-      expect(decoration.gradient, isA<LinearGradient>());
-      final gradient = decoration.gradient as LinearGradient;
-      expect(gradient.colors, [
-        WalletMeltColors.darkSurface,
-        WalletMeltColors.darkBackgroundContainer,
-      ]);
-      expect(decoration.boxShadow, isNotEmpty);
-      expect(decoration.border, isNotNull);
+      final lightDecoration = lightContainer.decoration as BoxDecoration;
+      expect(lightDecoration.gradient, isA<LinearGradient>());
+      final lightGradient = lightDecoration.gradient as LinearGradient;
+      expect(lightGradient.colors.first, const Color(0xFFFFFFFF));
+      expect(lightDecoration.boxShadow, isNotEmpty);
+      expect(lightDecoration.border, isNotNull);
+
+      // Dark Mode Check
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: WalletMeltTheme.light(),
+          home: Scaffold(
+            body: Theme(
+              data: WalletMeltTheme.dark(),
+              child: const WMDarkHeroCard(
+                child: Text('Hero Card Content'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final darkContainer = tester.widget<Container>(
+        find.descendant(
+          of: find.byType(WMDarkHeroCard),
+          matching: find.byType(Container).first,
+        ),
+      );
+
+      final darkDecoration = darkContainer.decoration as BoxDecoration;
+      expect(darkDecoration.gradient, isA<LinearGradient>());
+      final darkGradient = darkDecoration.gradient as LinearGradient;
+      expect(darkGradient.colors.first, const Color(0xFF1E293B));
+      expect(darkDecoration.boxShadow, isNotEmpty);
+      expect(darkDecoration.border, isNotNull);
     });
 
     // ── Item 2 & 0: Greeting Row at 360dp & Touch Targets ─────────────────
