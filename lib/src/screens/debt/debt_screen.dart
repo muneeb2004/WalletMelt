@@ -889,38 +889,62 @@ class _DebtScreenState extends State<DebtScreen> {
             Row(
               children: [
                 Expanded(
-                  child: OutlinedButton.icon(
+                  child: OutlinedButton(
                     style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
                       side: const BorderSide(color: WalletMeltColors.brand),
                     ),
-                    icon: const Icon(Icons.add_rounded, color: WalletMeltColors.brand),
-                    label: const Text(
-                      'Add Obligation',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                    ),
                     onPressed: () => DebtScreen.showAddDebtSheet(context),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.add_rounded, size: 18, color: WalletMeltColors.brand),
+                        SizedBox(width: 6),
+                        Flexible(
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              'Add Obligation',
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: OutlinedButton.icon(
+                  child: OutlinedButton(
                     style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
                       side: const BorderSide(color: WalletMeltColors.positive),
                     ),
-                    icon: const Icon(Icons.payment_rounded, color: WalletMeltColors.positive),
-                    label: const Text(
-                      'Record Repayment',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                    ),
                     onPressed: () => DebtScreen.showQuickRepaymentSelector(context),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.payment_rounded, size: 18, color: WalletMeltColors.positive),
+                        SizedBox(width: 6),
+                        Flexible(
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              'Record Repayment',
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
