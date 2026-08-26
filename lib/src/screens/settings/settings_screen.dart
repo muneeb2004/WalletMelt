@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../components/glass/app_background.dart';
-import '../../constants/categories.dart';
+import '../../constants/currencies.dart';
 import '../../services/export/expense_csv_export_service.dart';
 import '../../services/export/export_share_service.dart';
 import '../../services/export/file_picker_service.dart';
@@ -26,6 +26,9 @@ import '../../widgets/app_snackbar.dart';
 import '../security/create_pin_screen.dart';
 import '../security/verify_pin_screen.dart';
 import '../../security/pin_lock_controller.dart';
+import '../../security/root_detection_service.dart';
+
+
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({
@@ -64,16 +67,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _includeDeletedExpenses = false;
   bool _isValidatingBackup = false;
   bool _isRestoreInProgress = false;
+  RootDetectionResult _rootResult = const RootDetectionResult.clean();
 
   @override
   void initState() {
     super.initState();
+    const RootDetectionService().checkDeviceIntegrity().then((result) {
+      if (mounted) {
+        setState(() {
+          _rootResult = result;
+        });
+      }
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         context.read<AppState>().loadDeletedExpenses();
       }
     });
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -92,7 +104,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       body: AppBackground(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 120),
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 120),
           children: [
             // Top Bar
             Row(
@@ -110,13 +122,96 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.w900,
-                      fontSize: 26,
+                      fontSize: 24,
                     ),
                   ),
                 ),
               ],
             ),
+            const SizedBox(height: 16),
+
+            // Standout App Name & Brand Hero Card
+            WMGlassSurface.tier1(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              child: Row(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.asset(
+                      'assets/brand/optimized/walletmelt_icon_transparent.webp',
+                      width: 44,
+                      height: 44,
+                      fit: BoxFit.contain,
+                      filterQuality: FilterQuality.high,
+                      semanticLabel: 'WalletMelt logo',
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 8,
+                          children: [
+                            Text(
+                              'WalletMelt',
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.w900,
+                                fontSize: 19,
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: WalletMeltColors.brand.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(
+                                  color: WalletMeltColors.brand.withValues(alpha: 0.3),
+                                  width: 0.8,
+                                ),
+                              ),
+                              child: Text(
+                                'v1.0',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w800,
+                                  color: theme.brightness == Brightness.dark
+                                      ? WalletMeltColors.brand
+                                      : WalletMeltColors.textPrimary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Offline & Encrypted Financial Manager',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.brightness == Brightness.dark
+                                ? WalletMeltColors.darkTextSecondary
+                                : WalletMeltColors.textSecondary,
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
             const SizedBox(height: 24),
+
 
             // SECTION 1: PREFERENCES
             Text(
@@ -142,11 +237,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             ? WalletMeltColors.darkSurface
                             : Colors.white,
                     borderRadius: BorderRadius.circular(18),
+                    isExpanded: true,
                     items: [
-                      for (final currency in defaultCurrencyCodes)
+                      if (!supportedCurrencies.any((c) => c.code == currency) &&
+                          currency.isNotEmpty)
                         DropdownMenuItem(
-                            value: currency, child: Text(currency)),
+                          value: currency,
+                          child: Text(currency,
+                              overflow: TextOverflow.ellipsis),
+                        ),
+                      for (final c in supportedCurrencies)
+                        DropdownMenuItem(
+                          value: c.code,
+                          child: Text(c.displayLabel,
+                              overflow: TextOverflow.ellipsis),
+                        ),
                     ],
+                    selectedItemBuilder: (context) {
+                      return [
+                        if (!supportedCurrencies
+                                .any((c) => c.code == currency) &&
+                            currency.isNotEmpty)
+                          Text(currency,
+                              overflow: TextOverflow.ellipsis, maxLines: 1),
+                        for (final c in supportedCurrencies)
+                          Text(c.displayLabel,
+                              overflow: TextOverflow.ellipsis, maxLines: 1),
+                      ];
+                    },
                     onChanged: (value) {
                       if (value != null) state.updateCurrency(value);
                     },
@@ -200,6 +318,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      if (_rootResult.isCompromised) ...[
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 14),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.amber.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.amber.withValues(alpha: 0.4)),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Icon(Icons.warning_amber_rounded, color: Colors.amber, size: 20),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  'Device Security Notice: System modifications or su binaries were detected. On rooted devices, financial data is exposed to local root processes.',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: isDark ? Colors.amber.shade200 : Colors.amber.shade900,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+
                       Material(
                         type: MaterialType.transparency,
                         child: SwitchListTile(
@@ -210,6 +355,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               fontWeight: FontWeight.w700,
                             ),
                           ),
+
                           subtitle: Padding(
                             padding: const EdgeInsets.only(top: 4),
                             child: Text(
@@ -486,8 +632,53 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                         ),
                       ],
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 6),
+                        child: Divider(height: 1, thickness: 0.5),
+                      ),
+                      // ── Privacy Policy & Disclaimer Row ──────────────────
+                      Material(
+                        type: MaterialType.transparency,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          onTap: () => context.push('/privacy-policy'),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Privacy Policy & Legal Disclaimer',
+                                        style: theme.textTheme.bodyLarge?.copyWith(
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        'Review offline security terms and liability limitations.',
+                                        style: theme.textTheme.bodySmall?.copyWith(
+                                          color: WalletMeltColors.textMuted,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.chevron_right_rounded,
+                                  size: 20,
+                                  color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
+
                 );
               },
             ),
@@ -529,6 +720,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       onPressed: () => context.push('/payees'),
                       icon: const Icon(Icons.people_alt_rounded, size: 18),
                       label: const Text('Manage Payees & Contacts'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
+            WMGlassSurface.tier1(
+              padding: const EdgeInsets.all(18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Saved Merchants & Places',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Manage frequent shops, restaurants, and bill vendors for 1-tap category selection.',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: WalletMeltColors.textMuted,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () => context.push('/merchants'),
+                      icon: const Icon(Icons.storefront_rounded, size: 18),
+                      label: const Text('Manage Saved Merchants'),
                     ),
                   ),
                 ],

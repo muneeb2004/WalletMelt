@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
+import 'backup_encryption_service.dart';
 
 class _ZipDecoderArgs {
   final List<int> bytes;
@@ -45,27 +46,47 @@ Future<R> _runTask<Q, R>(ComputeCallback<Q, R> callback, Q message) {
   return compute(callback, message);
 }
 
+
 /// Represents a parsed backup from either a legacy JSON file or a modern ZIP package.
 class WalletMeltBackupFile {
   final String jsonText;
   final List<int>? zipBytes;
   final bool isZip;
+  final bool isEncrypted;
+  final List<int>? rawEncryptedBytes;
   final Map<String, dynamic>? metadataJson;
 
   const WalletMeltBackupFile({
     required this.jsonText,
     this.zipBytes,
     this.isZip = false,
+    this.isEncrypted = false,
+    this.rawEncryptedBytes,
     this.metadataJson,
   });
 
-  /// Loads and detects the backup type from a file path.
-  static Future<WalletMeltBackupFile> fromPath(String filePath) async {
+  /// Loads and detects the backup type from a file path, supporting optional passphrase decryption.
+  static Future<WalletMeltBackupFile> fromPath(String filePath, {String? passphrase}) async {
     final file = File(filePath);
     if (!await file.exists()) {
       throw FileSystemException('Backup file not found', filePath);
     }
-    final bytes = await file.readAsBytes();
+    var bytes = await file.readAsBytes();
+
+    const encryptionService = BackupEncryptionService();
+    if (encryptionService.isEncrypted(bytes)) {
+      if (passphrase == null || passphrase.isEmpty) {
+        return WalletMeltBackupFile(
+          jsonText: '',
+          isEncrypted: true,
+          rawEncryptedBytes: bytes,
+        );
+      }
+      bytes = encryptionService.decrypt(
+        encryptedBytes: bytes,
+        passphrase: passphrase,
+      );
+    }
 
     // Check ZIP file signature: PK\x03\x04
     if (bytes.length > 4 &&
@@ -79,6 +100,7 @@ class WalletMeltBackupFile {
         jsonText: decoded.jsonText,
         zipBytes: bytes,
         isZip: true,
+        isEncrypted: false,
         metadataJson: decoded.metadataJson,
       );
     } else {
@@ -87,10 +109,46 @@ class WalletMeltBackupFile {
       return WalletMeltBackupFile(
         jsonText: jsonText,
         isZip: false,
+        isEncrypted: false,
+      );
+    }
+  }
+
+  /// Decrypts an encrypted backup file using [passphrase].
+  Future<WalletMeltBackupFile> decryptWith(String passphrase) async {
+    if (!isEncrypted || rawEncryptedBytes == null) return this;
+    const encryptionService = BackupEncryptionService();
+    final decryptedBytes = encryptionService.decrypt(
+      encryptedBytes: rawEncryptedBytes!,
+      passphrase: passphrase,
+    );
+
+    // Check ZIP file signature
+    if (decryptedBytes.length > 4 &&
+        decryptedBytes[0] == 0x50 &&
+        decryptedBytes[1] == 0x4B &&
+        decryptedBytes[2] == 0x03 &&
+        decryptedBytes[3] == 0x04) {
+      final decoded = await _runTask(_decodeBackupZip, _ZipDecoderArgs(decryptedBytes));
+
+      return WalletMeltBackupFile(
+        jsonText: decoded.jsonText,
+        zipBytes: decryptedBytes,
+        isZip: true,
+        isEncrypted: false,
+        metadataJson: decoded.metadataJson,
+      );
+    } else {
+      final jsonText = utf8.decode(decryptedBytes);
+      return WalletMeltBackupFile(
+        jsonText: jsonText,
+        isZip: false,
+        isEncrypted: false,
       );
     }
   }
 }
+
 
 /// Result of backup JSON validation.
 class WalletMeltJsonBackupValidationResult {

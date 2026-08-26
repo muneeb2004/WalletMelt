@@ -1,6 +1,8 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -45,9 +47,17 @@ class LocalReceiptStorageService implements ReceiptStorageService {
   Future<void> delete(String uri) async {
     final file = File(Uri.parse(uri).toFilePath());
     if (await file.exists()) {
+      try {
+        final length = await file.length();
+        if (length > 0) {
+          // Physical zero-overwrite of flash memory blocks prior to unlinking
+          await file.writeAsBytes(Uint8List(length), flush: true);
+        }
+      } catch (_) {}
       await file.delete();
     }
   }
+
 
   Future<String> _persistPickedImage(XFile image) async {
     final dir = await _receiptDirectory();

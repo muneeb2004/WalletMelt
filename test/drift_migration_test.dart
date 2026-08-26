@@ -237,7 +237,8 @@ void main() {
 
     final raw = sqlite3.sqlite3.open(dbFile.path);
     try {
-      expect(raw.select('PRAGMA user_version;').first['user_version'], 6);
+      expect(raw.select('PRAGMA user_version;').first['user_version'],
+          WalletMeltDatabase.currentSchemaVersion);
     } finally {
       raw.close();
     }

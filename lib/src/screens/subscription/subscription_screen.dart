@@ -46,7 +46,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       children: [
         if (!widget.isEmbedded)
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 18, 20, 10),
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 10),
             child: Row(
               children: [
                 IconButton(
@@ -122,7 +122,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                   ),
                 )
               : ListView.builder(
-                  padding: EdgeInsets.fromLTRB(20, 10, 20, widget.isEmbedded ? 120 : 100),
+                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 120),
                   itemCount: filteredSubs.length,
                   itemBuilder: (context, index) {
                     final sub = filteredSubs[index];
@@ -557,95 +557,146 @@ class _AddSubscriptionSheetState extends State<_AddSubscriptionSheet> {
                 ),
                 const SizedBox(height: 16),
 
-                // Amounts Row
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      flex: 3,
-                      child: TextFormField(
-                        controller: _amountController,
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        decoration: InputDecoration(
-                          labelText: 'Amount ($currency)',
-                          hintText: '0.00',
-                        ),
-                        validator: (val) {
-                          if (val == null || val.trim().isEmpty) {
-                            return 'Required';
-                          }
-                          if (double.tryParse(val) == null) {
-                            return 'Invalid';
-                          }
-                          return null;
-                        },
-                        onChanged: (_) {
-                          _calculateTax();
-                          setState(() {});
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      flex: 2,
-                      child: TextFormField(
-                        controller: _taxController,
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        decoration: InputDecoration(
-                          labelText: 'Tax ($currency)',
-                          hintText: 'Optional',
-                        ),
-                        onChanged: (_) => setState(() {}),
-                      ),
-                    ),
-                  ],
+                // Base Amount Field
+                TextFormField(
+                  controller: _amountController,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  decoration: InputDecoration(
+                    labelText: 'Base Amount ($currency)*',
+                    hintText: '0.00',
+                    prefixIcon: const Icon(Icons.payments_outlined),
+                  ),
+                  validator: (val) {
+                    if (val == null || val.trim().isEmpty) {
+                      return 'Required';
+                    }
+                    if (double.tryParse(val) == null) {
+                      return 'Invalid';
+                    }
+                    return null;
+                  },
+                  onChanged: (_) {
+                    _calculateTax();
+                    setState(() {});
+                  },
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 14),
 
-                // Tax Helper & Grand Total
-                WMGlassSurface.tier1(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  child: Row(
+                // Cohesive Fintech Tax & Breakdown Card
+                WMGlassSurface.tier2(
+                  padding: const EdgeInsets.all(14),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Row(
-                          children: [
-                            const Text('Apply Tax ', style: TextStyle(fontSize: 12)),
-                            SizedBox(
-                              width: 48,
-                              height: 32,
-                              child: TextField(
-                                controller: _taxPercentageController,
-                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                                decoration: const InputDecoration(
-                                  contentPadding: EdgeInsets.symmetric(vertical: 4),
-                                  border: UnderlineInputBorder(),
-                                  enabledBorder: UnderlineInputBorder(),
-                                  focusedBorder: UnderlineInputBorder(),
-                                  hintText: '0',
-                                ),
-                                onChanged: (_) => _calculateTax(),
-                              ),
-                            ),
-                            const Text('%', style: TextStyle(fontSize: 12)),
-                          ],
-                        ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Grand Total: ${formatMoney(grandTotal, currency)}',
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                            'TAX & BILLING SUMMARY',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.8,
+                              color: WalletMeltColors.textMuted,
+                            ),
+                          ),
+                          if (parsedTax > 0)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: WalletMeltColors.brand.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                'Tax Applied',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                  color: isDark ? WalletMeltColors.brand : WalletMeltColors.brandDeep,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: _taxPercentageController,
+                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                              decoration: const InputDecoration(
+                                labelText: 'Rate (%)',
+                                hintText: '0',
+                                prefixIcon: Icon(Icons.percent_rounded, size: 16),
+                                contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                              ),
+                              onChanged: (_) {
+                                _calculateTax();
+                                setState(() {});
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: TextFormField(
+                              controller: _taxController,
+                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                              decoration: InputDecoration(
+                                labelText: 'Tax ($currency)',
+                                hintText: '0.00',
+                                prefixIcon: const Icon(Icons.receipt_outlined, size: 16),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                              ),
+                              onChanged: (val) {
+                                final taxVal = double.tryParse(val.trim());
+                                final amtVal = double.tryParse(_amountController.text.trim());
+                                if (taxVal != null && amtVal != null && amtVal > 0) {
+                                  final pct = (taxVal / amtVal) * 100.0;
+                                  _taxPercentageController.text = pct.toStringAsFixed(pct % 1 == 0 ? 0 : 1);
+                                } else if (val.trim().isEmpty) {
+                                  _taxPercentageController.clear();
+                                }
+                                setState(() {});
+                              },
+                            ),
                           ),
                         ],
+                      ),
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.03),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Total per cycle',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: isDark ? WalletMeltColors.darkTextPrimary : WalletMeltColors.textPrimary,
+                              ),
+                            ),
+                            Text(
+                              formatMoney(grandTotal, currency),
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w900,
+                                color: isDark ? WalletMeltColors.brand : WalletMeltColors.brandDeep,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 16),
+
 
                 // Billing Cycle Dropdown
                 DropdownButtonFormField<String>(
@@ -972,9 +1023,11 @@ class _SubscriptionActionsSheet extends StatelessWidget {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
+            final isDark = Theme.of(context).brightness == Brightness.dark;
             final amount = double.tryParse(amountController.text.trim()) ?? 0.0;
             final tax = double.tryParse(taxController.text.trim()) ?? 0.0;
             final total = amount + tax;
+
 
             void calculateTax() {
               final amountText = amountController.text.trim();
@@ -992,62 +1045,94 @@ class _SubscriptionActionsSheet extends StatelessWidget {
 
             return AlertDialog(
               title: const Text('Update Subscription Price'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  TextFormField(
-                    controller: amountController,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: InputDecoration(
-                      labelText: 'Amount ($currency)',
-                    ),
-                    onChanged: (_) {
-                      calculateTax();
-                      setState(() {});
-                    },
-                  ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: taxController,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: InputDecoration(
-                      labelText: 'Tax ($currency)',
-                    ),
-                    onChanged: (_) => setState(() {}),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      const Text('Apply Tax ', style: TextStyle(fontSize: 12)),
-                      SizedBox(
-                        width: 42,
-                        height: 28,
-                        child: TextField(
-                          controller: taxPercentageController,
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                          decoration: const InputDecoration(
-                            contentPadding: EdgeInsets.symmetric(vertical: 4),
-                            border: UnderlineInputBorder(),
-                            enabledBorder: UnderlineInputBorder(),
-                            focusedBorder: UnderlineInputBorder(),
-                            hintText: '0',
-                          ),
-                          onChanged: (_) => calculateTax(),
-                        ),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextFormField(
+                      controller: amountController,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      decoration: InputDecoration(
+                        labelText: 'Base Amount ($currency)',
+                        prefixIcon: const Icon(Icons.payments_outlined),
                       ),
-                      const Text('%', style: TextStyle(fontSize: 12)),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Grand Total: ${formatMoney(total, currency)}',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ],
+                      onChanged: (_) {
+                        calculateTax();
+                        setState(() {});
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            controller: taxPercentageController,
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            decoration: const InputDecoration(
+                              labelText: 'Rate (%)',
+                              hintText: '0',
+                              prefixIcon: Icon(Icons.percent_rounded, size: 16),
+                              contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                            ),
+                            onChanged: (_) => calculateTax(),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: TextFormField(
+                            controller: taxController,
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            decoration: InputDecoration(
+                              labelText: 'Tax ($currency)',
+                              hintText: '0.00',
+                              prefixIcon: const Icon(Icons.receipt_outlined, size: 16),
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                            ),
+                            onChanged: (val) {
+                              final taxVal = double.tryParse(val.trim());
+                              final amtVal = double.tryParse(amountController.text.trim());
+                              if (taxVal != null && amtVal != null && amtVal > 0) {
+                                final pct = (taxVal / amtVal) * 100.0;
+                                taxPercentageController.text = pct.toStringAsFixed(pct % 1 == 0 ? 0 : 1);
+                              } else if (val.trim().isEmpty) {
+                                taxPercentageController.clear();
+                              }
+                              setState(() {});
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.03),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Total per cycle:',
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                          ),
+                          Text(
+                            formatMoney(total, currency),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w900,
+                              color: isDark ? WalletMeltColors.brand : WalletMeltColors.brandDeep,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
+
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),

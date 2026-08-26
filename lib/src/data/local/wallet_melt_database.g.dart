@@ -408,10 +408,45 @@ class $StoresTable extends Stores with TableInfo<$StoresTable, Store> {
   late final GeneratedColumn<String> normalizedName = GeneratedColumn<String>(
       'normalizedName', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _defaultCategoryIdMeta =
+      const VerificationMeta('defaultCategoryId');
+  @override
+  late final GeneratedColumn<String> defaultCategoryId =
+      GeneratedColumn<String>('defaultCategoryId', aliasedName, true,
+          type: DriftSqlType.string,
+          requiredDuringInsert: false,
+          defaultConstraints:
+              GeneratedColumn.constraintIsAlways('REFERENCES categories (id)'));
   static const VerificationMeta _notesMeta = const VerificationMeta('notes');
   @override
   late final GeneratedColumn<String> notes = GeneratedColumn<String>(
       'notes', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _isSavedMeta =
+      const VerificationMeta('isSaved');
+  @override
+  late final GeneratedColumn<bool> isSaved = GeneratedColumn<bool>(
+      'isSaved', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("isSaved" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _isFavoriteMeta =
+      const VerificationMeta('isFavorite');
+  @override
+  late final GeneratedColumn<bool> isFavorite = GeneratedColumn<bool>(
+      'isFavorite', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("isFavorite" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _lastUsedAtMeta =
+      const VerificationMeta('lastUsedAt');
+  @override
+  late final GeneratedColumn<String> lastUsedAt = GeneratedColumn<String>(
+      'lastUsedAt', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
@@ -432,8 +467,19 @@ class $StoresTable extends Stores with TableInfo<$StoresTable, Store> {
       'archivedAt', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, name, normalizedName, notes, createdAt, updatedAt, archivedAt];
+  List<GeneratedColumn> get $columns => [
+        id,
+        name,
+        normalizedName,
+        defaultCategoryId,
+        notes,
+        isSaved,
+        isFavorite,
+        lastUsedAt,
+        createdAt,
+        updatedAt,
+        archivedAt
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -463,9 +509,31 @@ class $StoresTable extends Stores with TableInfo<$StoresTable, Store> {
     } else if (isInserting) {
       context.missing(_normalizedNameMeta);
     }
+    if (data.containsKey('defaultCategoryId')) {
+      context.handle(
+          _defaultCategoryIdMeta,
+          defaultCategoryId.isAcceptableOrUnknown(
+              data['defaultCategoryId']!, _defaultCategoryIdMeta));
+    }
     if (data.containsKey('notes')) {
       context.handle(
           _notesMeta, notes.isAcceptableOrUnknown(data['notes']!, _notesMeta));
+    }
+    if (data.containsKey('isSaved')) {
+      context.handle(_isSavedMeta,
+          isSaved.isAcceptableOrUnknown(data['isSaved']!, _isSavedMeta));
+    }
+    if (data.containsKey('isFavorite')) {
+      context.handle(
+          _isFavoriteMeta,
+          isFavorite.isAcceptableOrUnknown(
+              data['isFavorite']!, _isFavoriteMeta));
+    }
+    if (data.containsKey('lastUsedAt')) {
+      context.handle(
+          _lastUsedAtMeta,
+          lastUsedAt.isAcceptableOrUnknown(
+              data['lastUsedAt']!, _lastUsedAtMeta));
     }
     if (data.containsKey('createdAt')) {
       context.handle(_createdAtMeta,
@@ -504,8 +572,16 @@ class $StoresTable extends Stores with TableInfo<$StoresTable, Store> {
           .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
       normalizedName: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}normalizedName'])!,
+      defaultCategoryId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}defaultCategoryId']),
       notes: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}notes']),
+      isSaved: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}isSaved'])!,
+      isFavorite: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}isFavorite'])!,
+      lastUsedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}lastUsedAt']),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}createdAt'])!,
       updatedAt: attachedDatabase.typeMapping
@@ -525,7 +601,11 @@ class Store extends DataClass implements Insertable<Store> {
   final String id;
   final String name;
   final String normalizedName;
+  final String? defaultCategoryId;
   final String? notes;
+  final bool isSaved;
+  final bool isFavorite;
+  final String? lastUsedAt;
   final String createdAt;
   final String updatedAt;
   final String? archivedAt;
@@ -533,7 +613,11 @@ class Store extends DataClass implements Insertable<Store> {
       {required this.id,
       required this.name,
       required this.normalizedName,
+      this.defaultCategoryId,
       this.notes,
+      required this.isSaved,
+      required this.isFavorite,
+      this.lastUsedAt,
       required this.createdAt,
       required this.updatedAt,
       this.archivedAt});
@@ -543,8 +627,16 @@ class Store extends DataClass implements Insertable<Store> {
     map['id'] = Variable<String>(id);
     map['name'] = Variable<String>(name);
     map['normalizedName'] = Variable<String>(normalizedName);
+    if (!nullToAbsent || defaultCategoryId != null) {
+      map['defaultCategoryId'] = Variable<String>(defaultCategoryId);
+    }
     if (!nullToAbsent || notes != null) {
       map['notes'] = Variable<String>(notes);
+    }
+    map['isSaved'] = Variable<bool>(isSaved);
+    map['isFavorite'] = Variable<bool>(isFavorite);
+    if (!nullToAbsent || lastUsedAt != null) {
+      map['lastUsedAt'] = Variable<String>(lastUsedAt);
     }
     map['createdAt'] = Variable<String>(createdAt);
     map['updatedAt'] = Variable<String>(updatedAt);
@@ -559,8 +651,16 @@ class Store extends DataClass implements Insertable<Store> {
       id: Value(id),
       name: Value(name),
       normalizedName: Value(normalizedName),
+      defaultCategoryId: defaultCategoryId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(defaultCategoryId),
       notes:
           notes == null && nullToAbsent ? const Value.absent() : Value(notes),
+      isSaved: Value(isSaved),
+      isFavorite: Value(isFavorite),
+      lastUsedAt: lastUsedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastUsedAt),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
       archivedAt: archivedAt == null && nullToAbsent
@@ -576,7 +676,12 @@ class Store extends DataClass implements Insertable<Store> {
       id: serializer.fromJson<String>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       normalizedName: serializer.fromJson<String>(json['normalizedName']),
+      defaultCategoryId:
+          serializer.fromJson<String?>(json['defaultCategoryId']),
       notes: serializer.fromJson<String?>(json['notes']),
+      isSaved: serializer.fromJson<bool>(json['isSaved']),
+      isFavorite: serializer.fromJson<bool>(json['isFavorite']),
+      lastUsedAt: serializer.fromJson<String?>(json['lastUsedAt']),
       createdAt: serializer.fromJson<String>(json['createdAt']),
       updatedAt: serializer.fromJson<String>(json['updatedAt']),
       archivedAt: serializer.fromJson<String?>(json['archivedAt']),
@@ -589,7 +694,11 @@ class Store extends DataClass implements Insertable<Store> {
       'id': serializer.toJson<String>(id),
       'name': serializer.toJson<String>(name),
       'normalizedName': serializer.toJson<String>(normalizedName),
+      'defaultCategoryId': serializer.toJson<String?>(defaultCategoryId),
       'notes': serializer.toJson<String?>(notes),
+      'isSaved': serializer.toJson<bool>(isSaved),
+      'isFavorite': serializer.toJson<bool>(isFavorite),
+      'lastUsedAt': serializer.toJson<String?>(lastUsedAt),
       'createdAt': serializer.toJson<String>(createdAt),
       'updatedAt': serializer.toJson<String>(updatedAt),
       'archivedAt': serializer.toJson<String?>(archivedAt),
@@ -600,7 +709,11 @@ class Store extends DataClass implements Insertable<Store> {
           {String? id,
           String? name,
           String? normalizedName,
+          Value<String?> defaultCategoryId = const Value.absent(),
           Value<String?> notes = const Value.absent(),
+          bool? isSaved,
+          bool? isFavorite,
+          Value<String?> lastUsedAt = const Value.absent(),
           String? createdAt,
           String? updatedAt,
           Value<String?> archivedAt = const Value.absent()}) =>
@@ -608,7 +721,13 @@ class Store extends DataClass implements Insertable<Store> {
         id: id ?? this.id,
         name: name ?? this.name,
         normalizedName: normalizedName ?? this.normalizedName,
+        defaultCategoryId: defaultCategoryId.present
+            ? defaultCategoryId.value
+            : this.defaultCategoryId,
         notes: notes.present ? notes.value : this.notes,
+        isSaved: isSaved ?? this.isSaved,
+        isFavorite: isFavorite ?? this.isFavorite,
+        lastUsedAt: lastUsedAt.present ? lastUsedAt.value : this.lastUsedAt,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
         archivedAt: archivedAt.present ? archivedAt.value : this.archivedAt,
@@ -620,7 +739,15 @@ class Store extends DataClass implements Insertable<Store> {
       normalizedName: data.normalizedName.present
           ? data.normalizedName.value
           : this.normalizedName,
+      defaultCategoryId: data.defaultCategoryId.present
+          ? data.defaultCategoryId.value
+          : this.defaultCategoryId,
       notes: data.notes.present ? data.notes.value : this.notes,
+      isSaved: data.isSaved.present ? data.isSaved.value : this.isSaved,
+      isFavorite:
+          data.isFavorite.present ? data.isFavorite.value : this.isFavorite,
+      lastUsedAt:
+          data.lastUsedAt.present ? data.lastUsedAt.value : this.lastUsedAt,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       archivedAt:
@@ -634,7 +761,11 @@ class Store extends DataClass implements Insertable<Store> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('normalizedName: $normalizedName, ')
+          ..write('defaultCategoryId: $defaultCategoryId, ')
           ..write('notes: $notes, ')
+          ..write('isSaved: $isSaved, ')
+          ..write('isFavorite: $isFavorite, ')
+          ..write('lastUsedAt: $lastUsedAt, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('archivedAt: $archivedAt')
@@ -643,8 +774,8 @@ class Store extends DataClass implements Insertable<Store> {
   }
 
   @override
-  int get hashCode => Object.hash(
-      id, name, normalizedName, notes, createdAt, updatedAt, archivedAt);
+  int get hashCode => Object.hash(id, name, normalizedName, defaultCategoryId,
+      notes, isSaved, isFavorite, lastUsedAt, createdAt, updatedAt, archivedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -652,7 +783,11 @@ class Store extends DataClass implements Insertable<Store> {
           other.id == this.id &&
           other.name == this.name &&
           other.normalizedName == this.normalizedName &&
+          other.defaultCategoryId == this.defaultCategoryId &&
           other.notes == this.notes &&
+          other.isSaved == this.isSaved &&
+          other.isFavorite == this.isFavorite &&
+          other.lastUsedAt == this.lastUsedAt &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.archivedAt == this.archivedAt);
@@ -662,7 +797,11 @@ class StoresCompanion extends UpdateCompanion<Store> {
   final Value<String> id;
   final Value<String> name;
   final Value<String> normalizedName;
+  final Value<String?> defaultCategoryId;
   final Value<String?> notes;
+  final Value<bool> isSaved;
+  final Value<bool> isFavorite;
+  final Value<String?> lastUsedAt;
   final Value<String> createdAt;
   final Value<String> updatedAt;
   final Value<String?> archivedAt;
@@ -671,7 +810,11 @@ class StoresCompanion extends UpdateCompanion<Store> {
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.normalizedName = const Value.absent(),
+    this.defaultCategoryId = const Value.absent(),
     this.notes = const Value.absent(),
+    this.isSaved = const Value.absent(),
+    this.isFavorite = const Value.absent(),
+    this.lastUsedAt = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.archivedAt = const Value.absent(),
@@ -681,7 +824,11 @@ class StoresCompanion extends UpdateCompanion<Store> {
     required String id,
     required String name,
     required String normalizedName,
+    this.defaultCategoryId = const Value.absent(),
     this.notes = const Value.absent(),
+    this.isSaved = const Value.absent(),
+    this.isFavorite = const Value.absent(),
+    this.lastUsedAt = const Value.absent(),
     required String createdAt,
     required String updatedAt,
     this.archivedAt = const Value.absent(),
@@ -695,7 +842,11 @@ class StoresCompanion extends UpdateCompanion<Store> {
     Expression<String>? id,
     Expression<String>? name,
     Expression<String>? normalizedName,
+    Expression<String>? defaultCategoryId,
     Expression<String>? notes,
+    Expression<bool>? isSaved,
+    Expression<bool>? isFavorite,
+    Expression<String>? lastUsedAt,
     Expression<String>? createdAt,
     Expression<String>? updatedAt,
     Expression<String>? archivedAt,
@@ -705,7 +856,11 @@ class StoresCompanion extends UpdateCompanion<Store> {
       if (id != null) 'id': id,
       if (name != null) 'name': name,
       if (normalizedName != null) 'normalizedName': normalizedName,
+      if (defaultCategoryId != null) 'defaultCategoryId': defaultCategoryId,
       if (notes != null) 'notes': notes,
+      if (isSaved != null) 'isSaved': isSaved,
+      if (isFavorite != null) 'isFavorite': isFavorite,
+      if (lastUsedAt != null) 'lastUsedAt': lastUsedAt,
       if (createdAt != null) 'createdAt': createdAt,
       if (updatedAt != null) 'updatedAt': updatedAt,
       if (archivedAt != null) 'archivedAt': archivedAt,
@@ -717,7 +872,11 @@ class StoresCompanion extends UpdateCompanion<Store> {
       {Value<String>? id,
       Value<String>? name,
       Value<String>? normalizedName,
+      Value<String?>? defaultCategoryId,
       Value<String?>? notes,
+      Value<bool>? isSaved,
+      Value<bool>? isFavorite,
+      Value<String?>? lastUsedAt,
       Value<String>? createdAt,
       Value<String>? updatedAt,
       Value<String?>? archivedAt,
@@ -726,7 +885,11 @@ class StoresCompanion extends UpdateCompanion<Store> {
       id: id ?? this.id,
       name: name ?? this.name,
       normalizedName: normalizedName ?? this.normalizedName,
+      defaultCategoryId: defaultCategoryId ?? this.defaultCategoryId,
       notes: notes ?? this.notes,
+      isSaved: isSaved ?? this.isSaved,
+      isFavorite: isFavorite ?? this.isFavorite,
+      lastUsedAt: lastUsedAt ?? this.lastUsedAt,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       archivedAt: archivedAt ?? this.archivedAt,
@@ -746,8 +909,20 @@ class StoresCompanion extends UpdateCompanion<Store> {
     if (normalizedName.present) {
       map['normalizedName'] = Variable<String>(normalizedName.value);
     }
+    if (defaultCategoryId.present) {
+      map['defaultCategoryId'] = Variable<String>(defaultCategoryId.value);
+    }
     if (notes.present) {
       map['notes'] = Variable<String>(notes.value);
+    }
+    if (isSaved.present) {
+      map['isSaved'] = Variable<bool>(isSaved.value);
+    }
+    if (isFavorite.present) {
+      map['isFavorite'] = Variable<bool>(isFavorite.value);
+    }
+    if (lastUsedAt.present) {
+      map['lastUsedAt'] = Variable<String>(lastUsedAt.value);
     }
     if (createdAt.present) {
       map['createdAt'] = Variable<String>(createdAt.value);
@@ -770,7 +945,11 @@ class StoresCompanion extends UpdateCompanion<Store> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('normalizedName: $normalizedName, ')
+          ..write('defaultCategoryId: $defaultCategoryId, ')
           ..write('notes: $notes, ')
+          ..write('isSaved: $isSaved, ')
+          ..write('isFavorite: $isFavorite, ')
+          ..write('lastUsedAt: $lastUsedAt, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('archivedAt: $archivedAt, ')
@@ -10105,6 +10284,20 @@ final class $$CategoriesTableReferences
     extends BaseReferences<_$WalletMeltDatabase, $CategoriesTable, Category> {
   $$CategoriesTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
+  static MultiTypedResultKey<$StoresTable, List<Store>> _storesRefsTable(
+          _$WalletMeltDatabase db) =>
+      MultiTypedResultKey.fromTable(db.stores,
+          aliasName: 'categories__id__stores__defaultCategoryId');
+
+  $$StoresTableProcessedTableManager get storesRefs {
+    final manager = $$StoresTableTableManager($_db, $_db.stores).filter(
+        (f) => f.defaultCategoryId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_storesRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
   static MultiTypedResultKey<$ExpensesTable, List<Expense>> _expensesRefsTable(
           _$WalletMeltDatabase db) =>
       MultiTypedResultKey.fromTable(db.expenses,
@@ -10225,6 +10418,27 @@ class $$CategoriesTableFilterComposer
 
   ColumnFilters<String> get updatedAt => $composableBuilder(
       column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  Expression<bool> storesRefs(
+      Expression<bool> Function($$StoresTableFilterComposer f) f) {
+    final $$StoresTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.stores,
+        getReferencedColumn: (t) => t.defaultCategoryId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$StoresTableFilterComposer(
+              $db: $db,
+              $table: $db.stores,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 
   Expression<bool> expensesRefs(
       Expression<bool> Function($$ExpensesTableFilterComposer f) f) {
@@ -10417,6 +10631,27 @@ class $$CategoriesTableAnnotationComposer
   GeneratedColumn<String> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
+  Expression<T> storesRefs<T extends Object>(
+      Expression<T> Function($$StoresTableAnnotationComposer a) f) {
+    final $$StoresTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.stores,
+        getReferencedColumn: (t) => t.defaultCategoryId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$StoresTableAnnotationComposer(
+              $db: $db,
+              $table: $db.stores,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
   Expression<T> expensesRefs<T extends Object>(
       Expression<T> Function($$ExpensesTableAnnotationComposer a) f) {
     final $$ExpensesTableAnnotationComposer composer = $composerBuilder(
@@ -10559,7 +10794,8 @@ class $$CategoriesTableTableManager extends RootTableManager<
     (Category, $$CategoriesTableReferences),
     Category,
     PrefetchHooks Function(
-        {bool expensesRefs,
+        {bool storesRefs,
+        bool expensesRefs,
         bool categoryBudgetsRefs,
         bool itemsRefs,
         bool expenseItemsRefs,
@@ -10622,7 +10858,8 @@ class $$CategoriesTableTableManager extends RootTableManager<
                   ))
               .toList(),
           prefetchHooksCallback: (
-              {expensesRefs = false,
+              {storesRefs = false,
+              expensesRefs = false,
               categoryBudgetsRefs = false,
               itemsRefs = false,
               expenseItemsRefs = false,
@@ -10631,6 +10868,7 @@ class $$CategoriesTableTableManager extends RootTableManager<
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [
+                if (storesRefs) db.stores,
                 if (expensesRefs) db.expenses,
                 if (categoryBudgetsRefs) db.categoryBudgets,
                 if (itemsRefs) db.items,
@@ -10641,6 +10879,19 @@ class $$CategoriesTableTableManager extends RootTableManager<
               addJoins: null,
               getPrefetchedDataCallback: (items) async {
                 return [
+                  if (storesRefs)
+                    await $_getPrefetchedData<Category, $CategoriesTable,
+                            Store>(
+                        currentTable: table,
+                        referencedTable:
+                            $$CategoriesTableReferences._storesRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$CategoriesTableReferences(db, table, p0)
+                                .storesRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.defaultCategoryId == item.id),
+                        typedResults: items),
                   if (expensesRefs)
                     await $_getPrefetchedData<Category, $CategoriesTable,
                             Expense>(
@@ -10737,7 +10988,8 @@ typedef $$CategoriesTableProcessedTableManager = ProcessedTableManager<
     (Category, $$CategoriesTableReferences),
     Category,
     PrefetchHooks Function(
-        {bool expensesRefs,
+        {bool storesRefs,
+        bool expensesRefs,
         bool categoryBudgetsRefs,
         bool itemsRefs,
         bool expenseItemsRefs,
@@ -10747,7 +10999,11 @@ typedef $$StoresTableCreateCompanionBuilder = StoresCompanion Function({
   required String id,
   required String name,
   required String normalizedName,
+  Value<String?> defaultCategoryId,
   Value<String?> notes,
+  Value<bool> isSaved,
+  Value<bool> isFavorite,
+  Value<String?> lastUsedAt,
   required String createdAt,
   required String updatedAt,
   Value<String?> archivedAt,
@@ -10757,7 +11013,11 @@ typedef $$StoresTableUpdateCompanionBuilder = StoresCompanion Function({
   Value<String> id,
   Value<String> name,
   Value<String> normalizedName,
+  Value<String?> defaultCategoryId,
   Value<String?> notes,
+  Value<bool> isSaved,
+  Value<bool> isFavorite,
+  Value<String?> lastUsedAt,
   Value<String> createdAt,
   Value<String> updatedAt,
   Value<String?> archivedAt,
@@ -10767,6 +11027,20 @@ typedef $$StoresTableUpdateCompanionBuilder = StoresCompanion Function({
 final class $$StoresTableReferences
     extends BaseReferences<_$WalletMeltDatabase, $StoresTable, Store> {
   $$StoresTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $CategoriesTable _defaultCategoryIdTable(_$WalletMeltDatabase db) =>
+      db.categories.createAlias('stores__defaultCategoryId__categories__id');
+
+  $$CategoriesTableProcessedTableManager? get defaultCategoryId {
+    final $_column = $_itemColumn<String>('defaultCategoryId');
+    if ($_column == null) return null;
+    final manager = $$CategoriesTableTableManager($_db, $_db.categories)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_defaultCategoryIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
 
   static MultiTypedResultKey<$ExpensesTable, List<Expense>> _expensesRefsTable(
           _$WalletMeltDatabase db) =>
@@ -10819,6 +11093,15 @@ class $$StoresTableFilterComposer
   ColumnFilters<String> get notes => $composableBuilder(
       column: $table.notes, builder: (column) => ColumnFilters(column));
 
+  ColumnFilters<bool> get isSaved => $composableBuilder(
+      column: $table.isSaved, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isFavorite => $composableBuilder(
+      column: $table.isFavorite, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get lastUsedAt => $composableBuilder(
+      column: $table.lastUsedAt, builder: (column) => ColumnFilters(column));
+
   ColumnFilters<String> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
 
@@ -10827,6 +11110,26 @@ class $$StoresTableFilterComposer
 
   ColumnFilters<String> get archivedAt => $composableBuilder(
       column: $table.archivedAt, builder: (column) => ColumnFilters(column));
+
+  $$CategoriesTableFilterComposer get defaultCategoryId {
+    final $$CategoriesTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.defaultCategoryId,
+        referencedTable: $db.categories,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$CategoriesTableFilterComposer(
+              $db: $db,
+              $table: $db.categories,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
 
   Expression<bool> expensesRefs(
       Expression<bool> Function($$ExpensesTableFilterComposer f) f) {
@@ -10893,6 +11196,15 @@ class $$StoresTableOrderingComposer
   ColumnOrderings<String> get notes => $composableBuilder(
       column: $table.notes, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<bool> get isSaved => $composableBuilder(
+      column: $table.isSaved, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isFavorite => $composableBuilder(
+      column: $table.isFavorite, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get lastUsedAt => $composableBuilder(
+      column: $table.lastUsedAt, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 
@@ -10901,6 +11213,26 @@ class $$StoresTableOrderingComposer
 
   ColumnOrderings<String> get archivedAt => $composableBuilder(
       column: $table.archivedAt, builder: (column) => ColumnOrderings(column));
+
+  $$CategoriesTableOrderingComposer get defaultCategoryId {
+    final $$CategoriesTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.defaultCategoryId,
+        referencedTable: $db.categories,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$CategoriesTableOrderingComposer(
+              $db: $db,
+              $table: $db.categories,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
 }
 
 class $$StoresTableAnnotationComposer
@@ -10924,6 +11256,15 @@ class $$StoresTableAnnotationComposer
   GeneratedColumn<String> get notes =>
       $composableBuilder(column: $table.notes, builder: (column) => column);
 
+  GeneratedColumn<bool> get isSaved =>
+      $composableBuilder(column: $table.isSaved, builder: (column) => column);
+
+  GeneratedColumn<bool> get isFavorite => $composableBuilder(
+      column: $table.isFavorite, builder: (column) => column);
+
+  GeneratedColumn<String> get lastUsedAt => $composableBuilder(
+      column: $table.lastUsedAt, builder: (column) => column);
+
   GeneratedColumn<String> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
@@ -10932,6 +11273,26 @@ class $$StoresTableAnnotationComposer
 
   GeneratedColumn<String> get archivedAt => $composableBuilder(
       column: $table.archivedAt, builder: (column) => column);
+
+  $$CategoriesTableAnnotationComposer get defaultCategoryId {
+    final $$CategoriesTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.defaultCategoryId,
+        referencedTable: $db.categories,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$CategoriesTableAnnotationComposer(
+              $db: $db,
+              $table: $db.categories,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
 
   Expression<T> expensesRefs<T extends Object>(
       Expression<T> Function($$ExpensesTableAnnotationComposer a) f) {
@@ -10987,7 +11348,8 @@ class $$StoresTableTableManager extends RootTableManager<
     $$StoresTableUpdateCompanionBuilder,
     (Store, $$StoresTableReferences),
     Store,
-    PrefetchHooks Function({bool expensesRefs, bool expenseItemsRefs})> {
+    PrefetchHooks Function(
+        {bool defaultCategoryId, bool expensesRefs, bool expenseItemsRefs})> {
   $$StoresTableTableManager(_$WalletMeltDatabase db, $StoresTable table)
       : super(TableManagerState(
           db: db,
@@ -11002,7 +11364,11 @@ class $$StoresTableTableManager extends RootTableManager<
             Value<String> id = const Value.absent(),
             Value<String> name = const Value.absent(),
             Value<String> normalizedName = const Value.absent(),
+            Value<String?> defaultCategoryId = const Value.absent(),
             Value<String?> notes = const Value.absent(),
+            Value<bool> isSaved = const Value.absent(),
+            Value<bool> isFavorite = const Value.absent(),
+            Value<String?> lastUsedAt = const Value.absent(),
             Value<String> createdAt = const Value.absent(),
             Value<String> updatedAt = const Value.absent(),
             Value<String?> archivedAt = const Value.absent(),
@@ -11012,7 +11378,11 @@ class $$StoresTableTableManager extends RootTableManager<
             id: id,
             name: name,
             normalizedName: normalizedName,
+            defaultCategoryId: defaultCategoryId,
             notes: notes,
+            isSaved: isSaved,
+            isFavorite: isFavorite,
+            lastUsedAt: lastUsedAt,
             createdAt: createdAt,
             updatedAt: updatedAt,
             archivedAt: archivedAt,
@@ -11022,7 +11392,11 @@ class $$StoresTableTableManager extends RootTableManager<
             required String id,
             required String name,
             required String normalizedName,
+            Value<String?> defaultCategoryId = const Value.absent(),
             Value<String?> notes = const Value.absent(),
+            Value<bool> isSaved = const Value.absent(),
+            Value<bool> isFavorite = const Value.absent(),
+            Value<String?> lastUsedAt = const Value.absent(),
             required String createdAt,
             required String updatedAt,
             Value<String?> archivedAt = const Value.absent(),
@@ -11032,7 +11406,11 @@ class $$StoresTableTableManager extends RootTableManager<
             id: id,
             name: name,
             normalizedName: normalizedName,
+            defaultCategoryId: defaultCategoryId,
             notes: notes,
+            isSaved: isSaved,
+            isFavorite: isFavorite,
+            lastUsedAt: lastUsedAt,
             createdAt: createdAt,
             updatedAt: updatedAt,
             archivedAt: archivedAt,
@@ -11043,14 +11421,41 @@ class $$StoresTableTableManager extends RootTableManager<
                   (e.readTable(table), $$StoresTableReferences(db, table, e)))
               .toList(),
           prefetchHooksCallback: (
-              {expensesRefs = false, expenseItemsRefs = false}) {
+              {defaultCategoryId = false,
+              expensesRefs = false,
+              expenseItemsRefs = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [
                 if (expensesRefs) db.expenses,
                 if (expenseItemsRefs) db.expenseItems
               ],
-              addJoins: null,
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (defaultCategoryId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.defaultCategoryId,
+                    referencedTable:
+                        $$StoresTableReferences._defaultCategoryIdTable(db),
+                    referencedColumn:
+                        $$StoresTableReferences._defaultCategoryIdTable(db).id,
+                  ) as T;
+                }
+
+                return state;
+              },
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (expensesRefs)
@@ -11094,7 +11499,8 @@ typedef $$StoresTableProcessedTableManager = ProcessedTableManager<
     $$StoresTableUpdateCompanionBuilder,
     (Store, $$StoresTableReferences),
     Store,
-    PrefetchHooks Function({bool expensesRefs, bool expenseItemsRefs})>;
+    PrefetchHooks Function(
+        {bool defaultCategoryId, bool expensesRefs, bool expenseItemsRefs})>;
 typedef $$ExpensesTableCreateCompanionBuilder = ExpensesCompanion Function({
   required String id,
   required double amount,

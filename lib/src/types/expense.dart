@@ -15,6 +15,7 @@ class Expense {
     required this.createdAt,
     required this.updatedAt,
     this.vendor,
+    this.storeId,
     this.notes,
     this.receiptImageUri,
     this.recurrenceFrequency,
@@ -29,6 +30,7 @@ class Expense {
   final String categoryId;
   final String title;
   final String? vendor;
+  final String? storeId;
   final String date;
   final String? notes;
   final String? receiptImageUri;
@@ -49,6 +51,8 @@ class Expense {
     String? categoryId,
     String? title,
     String? vendor,
+    String? storeId,
+    bool clearStoreId = false,
     String? date,
     String? notes,
     String? receiptImageUri,
@@ -71,6 +75,7 @@ class Expense {
       categoryId: categoryId ?? this.categoryId,
       title: title ?? this.title,
       vendor: vendor ?? this.vendor,
+      storeId: clearStoreId ? null : storeId ?? this.storeId,
       date: date ?? this.date,
       notes: notes ?? this.notes,
       receiptImageUri:
@@ -93,6 +98,7 @@ class Expense {
       'categoryId': categoryId,
       'title': title,
       'vendor': vendor,
+      'storeId': storeId,
       'date': date,
       'notes': notes,
       'receiptImageUri': receiptImageUri,
@@ -114,6 +120,7 @@ class Expense {
       categoryId: map['categoryId']! as String,
       title: map['title']! as String,
       vendor: map['vendor'] as String?,
+      storeId: map['storeId'] as String?,
       date: map['date']! as String,
       notes: map['notes'] as String?,
       receiptImageUri: map['receiptImageUri'] as String?,

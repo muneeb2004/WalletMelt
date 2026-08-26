@@ -263,7 +263,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
     final budgetColor = budgetProgressColor(ratio);
 
     final content = ListView(
-      padding: EdgeInsets.fromLTRB(20, widget.isEmbedded ? 0 : 18, 20, 120),
+      padding: EdgeInsets.fromLTRB(20, widget.isEmbedded ? 0 : 16, 20, 120),
       children: [
         if (!widget.isEmbedded) ...[
           Row(

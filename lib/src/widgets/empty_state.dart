@@ -75,12 +75,7 @@ class EmptyState extends StatelessWidget {
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-                  gradient: const LinearGradient(
-                    colors: [
-                      WalletMeltColors.brandSoft,
-                      WalletMeltColors.brand,
-                    ],
-                  ),
+                  color: WalletMeltColors.brand,
                   boxShadow: [
                     BoxShadow(
                       color: WalletMeltColors.brand.withValues(alpha: 0.25),
@@ -92,7 +87,7 @@ class EmptyState extends StatelessWidget {
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(180, 46),
-                    backgroundColor: Colors.transparent,
+                    backgroundColor: WalletMeltColors.brand,
                     foregroundColor: WalletMeltColors.textPrimary,
                     shadowColor: Colors.transparent,
                     shape: RoundedRectangleBorder(

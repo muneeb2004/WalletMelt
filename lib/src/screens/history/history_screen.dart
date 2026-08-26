@@ -248,13 +248,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             height: 40,
                             decoration: BoxDecoration(
                               color: _showRecycleBin
-                                  ? WalletMeltColors.danger.withValues(alpha: 0.15)
-                                  : (isDark ? WalletMeltColors.darkSurface : Colors.white),
+                                  ? (isDark ? WalletMeltColors.darkSurface : Colors.white)
+                                  : WalletMeltColors.danger.withValues(alpha: 0.12),
                               shape: BoxShape.circle,
                               border: Border.all(
                                 color: _showRecycleBin
-                                    ? WalletMeltColors.danger
-                                    : (isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder),
+                                    ? (isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder)
+                                    : WalletMeltColors.danger.withValues(alpha: 0.35),
                                 width: 1.0,
                               ),
                             ),
@@ -275,11 +275,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                     : Icons.delete_outline_rounded,
                                 size: 18,
                                 color: _showRecycleBin
-                                    ? WalletMeltColors.danger
-                                    : (isDark ? Colors.white : WalletMeltColors.textPrimary),
+                                    ? (isDark ? Colors.white : WalletMeltColors.textPrimary)
+                                    : WalletMeltColors.danger,
                               ),
                             ),
                           ),
+
                         ],
                       ),
                       const SizedBox(height: 16),

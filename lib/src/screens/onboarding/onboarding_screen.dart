@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../components/glass/app_background.dart';
-import '../../constants/categories.dart';
+import '../../constants/currencies.dart';
 import '../../state/app_state.dart';
 import '../../theme/wallet_melt_theme.dart';
 
@@ -124,12 +124,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(999),
-                gradient: const LinearGradient(
-                  colors: [
-                    WalletMeltColors.brandSoft,
-                    WalletMeltColors.brand,
-                  ],
-                ),
+                color: WalletMeltColors.brand,
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.16),
@@ -146,7 +141,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size.fromHeight(54),
-                  backgroundColor: Colors.transparent,
+                  backgroundColor: WalletMeltColors.brand,
                   foregroundColor: WalletMeltColors.textPrimary,
                   shadowColor: Colors.transparent,
                   shape: RoundedRectangleBorder(
@@ -580,23 +575,55 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 DropdownButtonFormField<String>(
                   initialValue: _currency,
                   decoration: const InputDecoration(
-                    labelText: 'Currency Code',
+                    labelText: 'Currency',
                     contentPadding:
                         EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                   ),
                   dropdownColor:
                       isDark ? WalletMeltColors.darkSurface : Colors.white,
                   borderRadius: BorderRadius.circular(20),
+                  isExpanded: true,
                   items: [
-                    for (final currency in defaultCurrencyCodes)
+                    if (!supportedCurrencies.any((c) => c.code == _currency) &&
+                        _currency.isNotEmpty)
                       DropdownMenuItem(
-                        value: currency,
+                        value: _currency,
                         child: Text(
-                          currency,
-                          style: const TextStyle(fontWeight: FontWeight.w800),
+                          _currency,
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    for (final currency in supportedCurrencies)
+                      DropdownMenuItem(
+                        value: currency.code,
+                        child: Text(
+                          currency.displayLabel,
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                   ],
+                  selectedItemBuilder: (context) {
+                    return [
+                      if (!supportedCurrencies
+                              .any((c) => c.code == _currency) &&
+                          _currency.isNotEmpty)
+                        Text(
+                          _currency,
+                          style: const TextStyle(fontWeight: FontWeight.w800),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      for (final currency in supportedCurrencies)
+                        Text(
+                          currency.displayLabel,
+                          style: const TextStyle(fontWeight: FontWeight.w800),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                    ];
+                  },
                   onChanged: (value) =>
                       setState(() => _currency = value ?? _currency),
                 ),

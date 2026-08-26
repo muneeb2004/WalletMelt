@@ -161,41 +161,95 @@ class _FuelEditorState extends State<FuelEditor> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Odometer Optional Input
+        // Odometer Optional Input (Spacious Fintech Entry Field)
         WMGlassSurface.tier1(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Icon(Icons.speed_rounded,
-                  size: 20, color: WalletMeltColors.brand),
-              const SizedBox(width: 10),
-              Expanded(
-                child: TextField(
-                  controller: _odometerController,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
-                  decoration: const InputDecoration(
-                    labelText: 'Odometer Reading (Optional)',
-                    hintText: 'e.g. 45200',
-                    border: InputBorder.none,
-                    isDense: true,
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                  onChanged: (_) {
-                    setState(() {});
-                    _notifyParent();
-                  },
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: WalletMeltColors.brand.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.speed_rounded,
+                  size: 20,
+                  color: WalletMeltColors.brand,
                 ),
               ),
-              const Text('km',
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'ODOMETER READING (OPTIONAL)',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.8,
+                        color: WalletMeltColors.textMuted,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    TextField(
+                      controller: _odometerController,
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: isDark ? Colors.white : WalletMeltColors.textPrimary,
+                      ),
+                      decoration: const InputDecoration(
+                        hintText: 'e.g. 45200',
+                        hintStyle: TextStyle(
+                          fontSize: 14,
+                          color: WalletMeltColors.textMuted,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        isDense: true,
+                        contentPadding: EdgeInsets.symmetric(vertical: 4),
+                      ),
+                      onChanged: (_) {
+                        setState(() {});
+                        _notifyParent();
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.08)
+                      : Colors.black.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  'km',
                   style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: WalletMeltColors.textMuted)),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    color: isDark ? WalletMeltColors.darkTextPrimary : WalletMeltColors.textPrimary,
+                  ),
+                ),
+              ),
             ],
           ),
         ),
-        const SizedBox(height: 14),
+
+        const SizedBox(height: 16),
+
 
         // Section Title & Add Component Button
         Row(

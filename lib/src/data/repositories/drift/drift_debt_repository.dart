@@ -102,7 +102,10 @@ class DriftDebtRepository {
       id: row.id,
       personName: row.personName,
       payeeId: row.payeeId,
-      type: domain.DebtType.values.firstWhere((e) => e.name == row.type),
+      type: domain.DebtType.values.firstWhere(
+        (e) => e.name == row.type,
+        orElse: () => row.type == 'lent' ? domain.DebtType.owedToMe : domain.DebtType.iOwe,
+      ),
       principalAmount: row.principalAmount,
       remainingAmount: row.remainingAmount,
       currency: row.currency,
@@ -110,7 +113,10 @@ class DriftDebtRepository {
       createdAt: row.createdAt,
       dueDate: row.dueDate,
       settledAt: row.settledAt,
-      status: domain.DebtStatus.values.firstWhere((e) => e.name == row.status),
+      status: domain.DebtStatus.values.firstWhere(
+        (e) => e.name == row.status,
+        orElse: () => domain.DebtStatus.active,
+      ),
       notes: row.notes,
     );
   }

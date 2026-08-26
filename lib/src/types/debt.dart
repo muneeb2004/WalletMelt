@@ -1,6 +1,39 @@
 enum DebtType { owedToMe, iOwe, loanGiven, loanTaken }
 
+extension DebtTypeFormatting on DebtType {
+  String get displayName => switch (this) {
+        DebtType.owedToMe => 'Owed to you',
+        DebtType.iOwe => 'You owe',
+        DebtType.loanGiven => 'Loan Given',
+        DebtType.loanTaken => 'Loan Taken',
+      };
+
+  String get displayUpper => switch (this) {
+        DebtType.owedToMe => 'OWED TO YOU',
+        DebtType.iOwe => 'YOU OWE',
+        DebtType.loanGiven => 'LOAN GIVEN',
+        DebtType.loanTaken => 'LOAN TAKEN',
+      };
+}
+
 enum DebtStatus { active, partiallyPaid, settled, overdue }
+
+extension DebtStatusFormatting on DebtStatus {
+  String get displayName => switch (this) {
+        DebtStatus.active => 'Active',
+        DebtStatus.partiallyPaid => 'Partially Paid',
+        DebtStatus.settled => 'Settled',
+        DebtStatus.overdue => 'Overdue',
+      };
+
+  String get displayUpper => switch (this) {
+        DebtStatus.active => 'ACTIVE',
+        DebtStatus.partiallyPaid => 'PARTIALLY PAID',
+        DebtStatus.settled => 'SETTLED',
+        DebtStatus.overdue => 'OVERDUE',
+      };
+}
+
 
 class DebtRecord {
   const DebtRecord({

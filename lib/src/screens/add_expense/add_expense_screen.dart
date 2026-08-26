@@ -10,6 +10,8 @@ import '../../components/glass/app_background.dart';
 import '../../types/expense.dart';
 import '../../types/fuel.dart';
 import '../../types/grocery_item.dart';
+import '../../types/merchant.dart';
+import '../../utils/merchant_normalizer.dart';
 import '../../state/app_state.dart';
 import '../../theme/wallet_melt_theme.dart';
 import '../../utils/expense_validation.dart';
@@ -35,12 +37,15 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   final _titleController = TextEditingController();
   final _vendorController = TextEditingController();
   final _notesController = TextEditingController();
+  final _vendorFocusNode = FocusNode();
   final List<GroceryItemDraft> _groceryItems = [];
   FuelTransactionDraft? _fuelTransactionDraft;
 
   String? _categoryId;
   String? _pendingInitialCategoryId;
   bool _initialCategoryResolved = false;
+  bool _categoryManuallySelected = false;
+  List<Merchant> _merchantSuggestions = [];
   DateTime _date = DateTime.now();
   String? _receiptUri;
   ExpenseValidationResult? _validation;
@@ -54,6 +59,71 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     if (widget.initialCategoryId != null) {
       _pendingInitialCategoryId = widget.initialCategoryId;
       _categoryId = widget.initialCategoryId;
+    }
+    _vendorFocusNode.addListener(_onVendorFocusChanged);
+    _vendorController.addListener(_onVendorTextChanged);
+  }
+
+  void _onVendorFocusChanged() {
+    if (_vendorFocusNode.hasFocus) {
+      _fetchMerchantSuggestions();
+    } else {
+      setState(() {
+        _merchantSuggestions = [];
+      });
+    }
+  }
+
+  void _onVendorTextChanged() {
+    if (_vendorFocusNode.hasFocus) {
+      _fetchMerchantSuggestions();
+    }
+  }
+
+  Future<void> _fetchMerchantSuggestions() async {
+    if (!mounted) return;
+    final state = context.read<AppState>();
+    final query = _vendorController.text;
+    final suggestions = await state.getMerchantSuggestions(query: query, limit: 8);
+    if (mounted) {
+      setState(() {
+        _merchantSuggestions = suggestions;
+      });
+    }
+  }
+
+  void _selectMerchant(Merchant merchant, AppState state) {
+    _vendorController.text = merchant.name;
+    if (merchant.defaultCategoryId != null && !_categoryManuallySelected) {
+      final categoryExists = state.categoryById(merchant.defaultCategoryId!) != null;
+      if (categoryExists) {
+        _categoryId = merchant.defaultCategoryId;
+      }
+    }
+    _vendorFocusNode.unfocus();
+    setState(() {
+      _merchantSuggestions = [];
+    });
+  }
+
+  Future<void> _toggleSaveCurrentMerchant(AppState state) async {
+    final name = _vendorController.text.trim();
+    if (name.isEmpty) return;
+
+    final normalized = normalizeMerchantName(name);
+    final existing = state.savedMerchants.where((m) => m.normalizedName == normalized).firstOrNull;
+
+    if (existing != null) {
+      await state.toggleMerchantFavorite(existing.id);
+    } else {
+      await state.saveMerchant(
+        name: name,
+        defaultCategoryId: _categoryId,
+        isFavorite: true,
+      );
+    }
+    if (mounted) {
+      _fetchMerchantSuggestions();
     }
   }
 
@@ -108,6 +178,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       _vendorController.text = expense.vendor ?? '';
       _notesController.text = expense.notes ?? '';
       _categoryId = expense.categoryId;
+      _categoryManuallySelected = true;
       _date = DateTime.parse(expense.date);
       _receiptUri = expense.receiptImageUri;
       if ((expense.vendor != null && expense.vendor!.isNotEmpty) ||
@@ -124,6 +195,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 
   @override
   void dispose() {
+    _vendorFocusNode.removeListener(_onVendorFocusChanged);
+    _vendorFocusNode.dispose();
+    _vendorController.removeListener(_onVendorTextChanged);
     _amountController.dispose();
     _taxController.dispose();
     _taxPercentageController.dispose();
@@ -192,7 +266,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
         child: ListView(
           padding: EdgeInsets.fromLTRB(
             16.0 /* AppSpacing.md */,
-            18.0,
+            16.0,
             16.0 /* AppSpacing.md */,
             (isGroceryMode || isFuelMode) ? 140.0 : 24.0 /* AppSpacing.lg */,
           ),
@@ -237,6 +311,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                     onTap: () {
                       setState(() {
                         _categoryId = category.id;
+                        _categoryManuallySelected = true;
                       });
                     },
                   ),
@@ -305,12 +380,12 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                     ),
                     if (_showAdditionalDetails) ...[
                       const SizedBox(height: 14),
-                      TextField(
-                        controller: _vendorController,
-                        decoration: const InputDecoration(
-                          labelText: 'Vendor or store',
-                          hintText: 'e.g., Imtiaz, Metro',
-                        ),
+                      _buildMerchantFieldWithSuggestions(
+                        context: context,
+                        state: state,
+                        isDark: isDark,
+                        labelText: 'Vendor or store',
+                        hintText: 'e.g., Imtiaz, Metro',
                       ),
                       const SizedBox(height: 12),
                       WMGlassSurface.tier1(
@@ -411,12 +486,12 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      TextField(
-                        controller: _vendorController,
-                        decoration: const InputDecoration(
-                          labelText: 'Station / Vendor',
-                          hintText: 'e.g., Total Parco, PSO, Shell',
-                        ),
+                      _buildMerchantFieldWithSuggestions(
+                        context: context,
+                        state: state,
+                        isDark: isDark,
+                        labelText: 'Station / Vendor',
+                        hintText: 'e.g., Total Parco, PSO, Shell',
                       ),
                       const SizedBox(height: 12),
                       WMGlassSurface.tier1(
@@ -590,12 +665,12 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                   ),
                 ),
                 const SizedBox(height: 14),
-                TextField(
-                  controller: _vendorController,
-                  decoration: const InputDecoration(
-                    labelText: 'Vendor or merchant (optional)',
-                    hintText: 'e.g., Amazon, Uber, Local Cafe',
-                  ),
+                _buildMerchantFieldWithSuggestions(
+                  context: context,
+                  state: state,
+                  isDark: isDark,
+                  labelText: 'Vendor or merchant (optional)',
+                  hintText: 'e.g., Amazon, Uber, Local Cafe',
                 ),
                 const SizedBox(height: 14),
                 _buildTaxSection(context, double.tryParse(_amountController.text.trim()) ?? 0.0),
@@ -994,6 +1069,162 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       sum += item.amount;
     }
     return sum;
+  }
+
+  Widget _buildMerchantFieldWithSuggestions({
+    required BuildContext context,
+    required AppState state,
+    required bool isDark,
+    String labelText = 'Vendor or merchant (optional)',
+    String hintText = 'e.g., Amazon, Uber, Local Cafe',
+  }) {
+    final text = _vendorController.text.trim();
+    final normalized = normalizeMerchantName(text);
+    final isSaved = state.savedMerchants.any((m) => m.normalizedName == normalized && m.isSaved);
+    final isFavorite = state.savedMerchants.any((m) => m.normalizedName == normalized && m.isFavorite);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        TextField(
+          controller: _vendorController,
+          focusNode: _vendorFocusNode,
+          decoration: InputDecoration(
+            labelText: labelText,
+            hintText: hintText,
+            prefixIcon: const Icon(Icons.storefront_rounded, size: 20),
+            suffixIcon: text.isNotEmpty
+                ? IconButton(
+                    tooltip: isFavorite
+                        ? 'Favorite merchant'
+                        : (isSaved ? 'Saved merchant' : 'Save to favorite merchants'),
+                    icon: Icon(
+                      isFavorite
+                          ? Icons.star_rounded
+                          : (isSaved ? Icons.bookmark_added_rounded : Icons.star_outline_rounded),
+                      color: isFavorite
+                          ? Colors.amber
+                          : (isSaved ? WalletMeltColors.brand : WalletMeltColors.textMuted),
+                    ),
+                    onPressed: () => _toggleSaveCurrentMerchant(state),
+                  )
+                : null,
+          ),
+        ),
+        if (_vendorFocusNode.hasFocus && _merchantSuggestions.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Container(
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: isDark ? Colors.white12 : Colors.black12,
+              ),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.lightbulb_outline_rounded,
+                      size: 14,
+                      color: isDark ? WalletMeltColors.brandSoft : WalletMeltColors.brandDeep,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Suggested Merchants',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.5,
+                        color: isDark ? WalletMeltColors.brandSoft : WalletMeltColors.brandDeep,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: _merchantSuggestions.map((m) {
+                      final category = m.defaultCategoryId != null
+                          ? state.categoryById(m.defaultCategoryId!)
+                          : null;
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 6),
+                        child: ActionChip(
+                          avatar: Icon(
+                            m.isFavorite
+                                ? Icons.star_rounded
+                                : (m.isSaved ? Icons.storefront_rounded : Icons.history_rounded),
+                            size: 14,
+                            color: m.isFavorite
+                                ? Colors.amber
+                                : (m.isSaved ? WalletMeltColors.brand : WalletMeltColors.textMuted),
+                          ),
+                          label: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                m.name,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w600, fontSize: 12),
+                              ),
+                              if (category != null) ...[
+                                const SizedBox(width: 4),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 5, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: WalletMeltColors.brand
+                                        .withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    category.name,
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                      color: isDark
+                                          ? WalletMeltColors.brandSoft
+                                          : WalletMeltColors.brandDeep,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                          backgroundColor:
+                              isDark ? const Color(0xFF0F172A) : Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            side: BorderSide(
+                              color: m.isFavorite
+                                  ? Colors.amber.withValues(alpha: 0.4)
+                                  : (m.isSaved
+                                      ? WalletMeltColors.brand
+                                          .withValues(alpha: 0.3)
+                                      : (isDark
+                                          ? Colors.white10
+                                          : Colors.black12)),
+                            ),
+                          ),
+                          onPressed: () => _selectMerchant(m, state),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ],
+    );
   }
 
   Widget _buildTaxSection(BuildContext context, double subtotal) {

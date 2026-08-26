@@ -9,6 +9,7 @@ class SettingsService {
   static const _currencyKey = 'settings.currency';
   static const _themeKey = 'settings.themePreference';
   static const _onboardingKey = 'settings.hasCompletedOnboarding';
+  static const _privacyPolicyKey = 'settings.hasAcceptedPrivacyPolicy';
   static const _lastExportKey = 'settings.lastExportedAt';
   static const _monthlyBudgetAmountKey = 'settings.monthlyBudgetAmount';
 
@@ -64,6 +65,7 @@ class SettingsService {
           prefs.getString(_currencyKey) ?? WalletMeltSettings.defaults.currency,
       themePreference: _themeFromName(prefs.getString(_themeKey)),
       hasCompletedOnboarding: prefs.getBool(_onboardingKey) ?? false,
+      hasAcceptedPrivacyPolicy: prefs.getBool(_privacyPolicyKey) ?? false,
       lastExportedAt: prefs.getString(_lastExportKey),
       monthlyBudgetAmount: monthlyBudget,
     );
@@ -74,11 +76,13 @@ class SettingsService {
     await prefs.setString(_currencyKey, settings.currency);
     await prefs.setString(_themeKey, settings.themePreference.name);
     await prefs.setBool(_onboardingKey, settings.hasCompletedOnboarding);
+    await prefs.setBool(_privacyPolicyKey, settings.hasAcceptedPrivacyPolicy);
     
     final lastExportedAt = settings.lastExportedAt;
     if (lastExportedAt != null) {
       await prefs.setString(_lastExportKey, lastExportedAt);
     }
+
     
     final monthlyBudget = settings.monthlyBudgetAmount;
     if (monthlyBudget != null) {

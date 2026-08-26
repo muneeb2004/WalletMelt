@@ -49,7 +49,7 @@ class _PayeesScreenState extends State<PayeesScreen> {
       builder: (sheetContext) {
         return SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -243,7 +243,7 @@ class _PayeesScreenState extends State<PayeesScreen> {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
               child: Row(
                 children: [
                   IconButton(

@@ -1572,6 +1572,7 @@ class FakeWalletMeltJsonBackupService extends WalletMeltJsonBackupService {
     DateTime? exportedAt,
     Directory? directory,
     bool packageReceipts = true,
+    String? passphrase,
   }) async {
     backupCalled = true;
     lastExpenses = expenses.toList();
@@ -1579,6 +1580,7 @@ class FakeWalletMeltJsonBackupService extends WalletMeltJsonBackupService {
     lastCategories = categories.toList();
     lastBudgets = budgets.toList();
     lastSettings = settings;
+
     return ExportFileResult(
       path: 'D:/tmp/walletmelt-backup-20260614-090807.json',
       fileName: 'walletmelt-backup-20260614-090807.json',
@@ -1601,10 +1603,12 @@ class FailingWalletMeltJsonBackupService
     DateTime? exportedAt,
     Directory? directory,
     bool packageReceipts = true,
+    String? passphrase,
   }) async {
     throw Exception('disk full\n#0 FakeStack');
   }
 }
+
 
 class FakeExportShareService implements ExportShareService {
   bool shareCalled = false;

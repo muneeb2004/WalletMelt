@@ -115,6 +115,8 @@ class PinLockController extends ChangeNotifier with WidgetsBindingObserver {
         await _biometricService.isBiometricHardwareAvailable();
     _isBiometricsEnrolled = await _biometricService.isBiometricsEnrolled();
     _biometricLabel = await _biometricService.getBiometricLabel();
+    _failedAttempts = await _pinService.storage.getFailedAttempts();
+    _lockoutUntil = await _pinService.storage.getLockoutUntil();
   }
 
   /// Re-syncs status with secure storage and hardware checks.
@@ -129,6 +131,8 @@ class PinLockController extends ChangeNotifier with WidgetsBindingObserver {
       isPinScreenOpen = false;
       _failedAttempts = 0;
       _lockoutUntil = null;
+      await _pinService.storage.setFailedAttempts(0);
+      await _pinService.storage.setLockoutUntil(null);
     }
     notifyListeners();
   }
@@ -139,6 +143,8 @@ class PinLockController extends ChangeNotifier with WidgetsBindingObserver {
     isPinScreenOpen = false;
     _failedAttempts = 0;
     _lockoutUntil = null;
+    _pinService.storage.setFailedAttempts(0);
+    _pinService.storage.setLockoutUntil(null);
     notifyListeners();
   }
 
@@ -158,6 +164,8 @@ class PinLockController extends ChangeNotifier with WidgetsBindingObserver {
     isPinScreenOpen = false;
     _failedAttempts = 0;
     _lockoutUntil = null;
+    await _pinService.storage.setFailedAttempts(0);
+    await _pinService.storage.setLockoutUntil(null);
     await _loadStatus();
     notifyListeners();
   }
@@ -215,6 +223,8 @@ class PinLockController extends ChangeNotifier with WidgetsBindingObserver {
     if (_failedAttempts >= 5) {
       _lockoutUntil = DateTime.now().add(const Duration(seconds: 30));
     }
+    _pinService.storage.setFailedAttempts(_failedAttempts);
+    _pinService.storage.setLockoutUntil(_lockoutUntil);
     notifyListeners();
   }
 
@@ -222,8 +232,11 @@ class PinLockController extends ChangeNotifier with WidgetsBindingObserver {
   void resetFailedAttempts() {
     _failedAttempts = 0;
     _lockoutUntil = null;
+    _pinService.storage.setFailedAttempts(0);
+    _pinService.storage.setLockoutUntil(null);
     notifyListeners();
   }
+
 
   @override
   void dispose() {

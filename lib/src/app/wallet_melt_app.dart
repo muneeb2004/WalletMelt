@@ -14,7 +14,9 @@ import '../screens/settings/settings_screen.dart';
 import '../screens/debt/debt_screen.dart';
 import '../screens/planning/planning_screen.dart';
 import '../screens/payee/payees_screen.dart';
+import '../screens/merchant/merchants_screen.dart';
 import '../screens/security/pin_lock_screen.dart';
+import '../screens/privacy/privacy_policy_screen.dart';
 import '../components/navigation/app_shell.dart';
 import '../state/app_state.dart';
 import '../theme/wallet_melt_theme.dart';
@@ -99,19 +101,82 @@ class _WalletMeltAppState extends State<WalletMeltApp> {
     _pinLockController.addListener(_onPinLockChanged);
 
     _router = GoRouter(
-      initialLocation: _pinLockController.isPinEnabled && _pinLockController.isLocked
+      initialLocation: (_pinLockController.isPinEnabled && _pinLockController.isLocked)
           ? '/pin-lock?from=%2F'
-          : '/',
+          : (!appState.settings.hasAcceptedPrivacyPolicy
+              ? '/privacy-consent'
+              : (appState.settings.hasCompletedOnboarding ? '/' : '/onboarding')),
       redirect: (context, state) {
         if (appState.isLoading) return null;
-        final onboarding = appState.settings.hasCompletedOnboarding;
-        final isOnboarding = state.matchedLocation == '/onboarding';
-        if (!onboarding && !isOnboarding) return '/onboarding';
-        if (onboarding && isOnboarding) return '/';
+
+        final loc = state.matchedLocation;
+
+        // 1. PIN Lock guard takes absolute priority when app is locked
+        final isPinLocked =
+            _pinLockController.isPinEnabled && _pinLockController.isLocked;
+        if (isPinLocked) {
+          if (loc != '/pin-lock') {
+            final from = Uri.encodeComponent(state.uri.toString());
+            return '/pin-lock?from=$from';
+          }
+          return null;
+        }
+
+        // When at /pin-lock but unlocked, route to target or initial destination
+        if (loc == '/pin-lock') {
+          final from = state.uri.queryParameters['from'];
+          if (from != null && from.isNotEmpty && from != '/pin-lock') {
+            return from;
+          }
+          if (!appState.settings.hasAcceptedPrivacyPolicy) {
+            return '/privacy-consent';
+          }
+          return appState.settings.hasCompletedOnboarding ? '/' : '/onboarding';
+        }
+
+        // 2. Mandatory Privacy Policy Consent gating
+        final hasAcceptedPrivacy = appState.settings.hasAcceptedPrivacyPolicy;
+        if (!hasAcceptedPrivacy) {
+          if (loc == '/privacy-consent' || loc == '/privacy-policy') {
+            return null;
+          }
+          return '/privacy-consent';
+        }
+
+        // If user has accepted privacy, they should not stay on the consent gateway
+        if (loc == '/privacy-consent') {
+          return appState.settings.hasCompletedOnboarding ? '/' : '/onboarding';
+        }
+
+        // 3. Mandatory Onboarding gating
+        final hasCompletedOnboarding = appState.settings.hasCompletedOnboarding;
+        if (!hasCompletedOnboarding) {
+          if (loc == '/onboarding' || loc == '/privacy-policy') {
+            return null;
+          }
+          return '/onboarding';
+        }
+
+        // If user has completed onboarding, they should not stay on the onboarding screen
+        if (loc == '/onboarding') {
+          return '/';
+        }
+
         return null;
       },
-      refreshListenable: appState,
+
+      refreshListenable: Listenable.merge([appState, _pinLockController]),
       routes: [
+        GoRoute(
+          path: '/privacy-consent',
+          builder: (context, state) =>
+              const PrivacyPolicyScreen(isConsentMode: true),
+        ),
+        GoRoute(
+          path: '/privacy-policy',
+          builder: (context, state) =>
+              const PrivacyPolicyScreen(isConsentMode: false),
+        ),
         GoRoute(
           path: '/pin-lock',
           builder: (context, state) {
@@ -122,6 +187,8 @@ class _WalletMeltAppState extends State<WalletMeltApp> {
         GoRoute(
             path: '/onboarding',
             builder: (context, state) => const OnboardingScreen()),
+
+
         StatefulShellRoute.indexedStack(
           builder: (context, state, navigationShell) =>
               AppShell(navigationShell: navigationShell),
@@ -163,6 +230,9 @@ class _WalletMeltAppState extends State<WalletMeltApp> {
         GoRoute(
             path: '/payees',
             builder: (context, state) => const PayeesScreen()),
+        GoRoute(
+            path: '/merchants',
+            builder: (context, state) => const MerchantsScreen()),
         GoRoute(
             path: '/insights',
             builder: (context, state) => const InsightsScreen()),

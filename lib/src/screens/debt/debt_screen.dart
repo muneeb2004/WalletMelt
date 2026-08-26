@@ -22,7 +22,7 @@ class DebtScreen extends StatefulWidget {
       context,
       builder: (sheetContext) {
         return Container(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -81,9 +81,10 @@ class DebtScreen extends StatefulWidget {
                                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                                     ),
                                     Text(
-                                      debt.type.name.toUpperCase(),
+                                      debt.type.displayUpper,
                                       style: TextStyle(fontSize: 9, color: typeColor, fontWeight: FontWeight.bold),
                                     ),
+
                                   ],
                                 ),
                               ),
@@ -123,7 +124,7 @@ class DebtScreen extends StatefulWidget {
           builder: (builderContext, setSheetState) {
             return SingleChildScrollView(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -419,10 +420,11 @@ class DebtScreen extends StatefulWidget {
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
-                                      debt.type.name.toUpperCase(),
+                                      debt.type.displayUpper,
                                       style: TextStyle(
                                         fontSize: 10,
                                         fontWeight: FontWeight.bold,
+                                        letterSpacing: 0.5,
                                         color: isReceivable
                                             ? WalletMeltColors.positive
                                             : WalletMeltColors.danger,
@@ -439,16 +441,18 @@ class DebtScreen extends StatefulWidget {
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Text(
-                                    debt.status.name.toUpperCase(),
+                                    debt.status.displayUpper,
                                     style: TextStyle(
                                       fontSize: 10,
                                       fontWeight: FontWeight.bold,
+                                      letterSpacing: 0.5,
                                       color: debt.isSettled
                                           ? WalletMeltColors.positive
                                           : WalletMeltColors.brand,
                                     ),
                                   ),
                                 ),
+
                               ],
                             ),
                             const SizedBox(height: 18),
@@ -780,10 +784,17 @@ class DebtScreen extends StatefulWidget {
 }
 
 class _DebtScreenState extends State<DebtScreen> {
+  final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   final List<DebtType> _selectedTypesFilter = [];
   final List<String> _selectedStatusesFilter = [];
   bool _isFiltersExpanded = false;
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -861,11 +872,13 @@ class _DebtScreenState extends State<DebtScreen> {
     }
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isKeyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
 
     return Scaffold(
       body: AppBackground(
-        padding: const EdgeInsets.fromLTRB(20, 18, 20, 94), // Extra bottom padding for floating navbar
+        padding: EdgeInsets.fromLTRB(20, 16, 20, isKeyboardOpen ? 16 : 120),
         child: ListView(
+
           physics: const BouncingScrollPhysics(),
           children: [
             Row(
@@ -960,28 +973,35 @@ class _DebtScreenState extends State<DebtScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: 8,
-                            height: 8,
-                            decoration: const BoxDecoration(
-                              color: WalletMeltColors.brand,
-                              shape: BoxShape.circle,
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 8,
+                              height: 8,
+                              decoration: const BoxDecoration(
+                                color: WalletMeltColors.brand,
+                                shape: BoxShape.circle,
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'NET OBLIGATION POSITION',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 1.1,
-                              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: Text(
+                                'NET OBLIGATION POSITION',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 1.1,
+                                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
+                      const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                         decoration: BoxDecoration(
@@ -1101,42 +1121,83 @@ class _DebtScreenState extends State<DebtScreen> {
             Row(
               children: [
                 Expanded(
-                  child: TextField(
-                    onChanged: (val) => setState(() => _searchQuery = val),
-                    decoration: InputDecoration(
-                      hintText: 'Search by person, notes...',
-                      prefixIcon: const Icon(Icons.search_rounded, size: 20),
-                      contentPadding: const EdgeInsets.symmetric(vertical: 8),
-                      suffixIcon: _searchQuery.isNotEmpty
-                          ? IconButton(
-                              icon: const Icon(Icons.clear_rounded, size: 18),
-                              onPressed: () {
-                                FocusScope.of(context).unfocus();
-                                setState(() => _searchQuery = '');
-                              },
-                            )
-                          : null,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF0C0E14) : Colors.white,
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                      border: Border.all(
+                        color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder,
+                        width: 1.0,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: isDark ? 0.20 : 0.03),
+                          blurRadius: 10,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: TextField(
+                      controller: _searchController,
+                      onChanged: (val) => setState(() => _searchQuery = val.trim()),
+                      decoration: InputDecoration(
+                        hintText: 'Search by person, notes...',
+                        hintStyle: const TextStyle(
+                          fontSize: 13.5,
+                          color: WalletMeltColors.textMuted,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        prefixIcon: const Icon(Icons.search_rounded, size: 20),
+                        suffixIcon: _searchController.text.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(Icons.clear_rounded, size: 18),
+                                onPressed: () {
+                                  _searchController.clear();
+                                  setState(() => _searchQuery = '');
+                                },
+                              )
+                            : null,
+                        filled: false,
+                        border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      ),
                     ),
                   ),
                 ),
                 const SizedBox(width: 8),
-                IconButton(
-                  tooltip: 'Filters',
-                  style: IconButton.styleFrom(
-                    backgroundColor: _selectedTypesFilter.isNotEmpty || _selectedStatusesFilter.isNotEmpty
-                        ? WalletMeltColors.brand.withValues(alpha: 0.16)
-                        : Colors.transparent,
-                  ),
-                  icon: Icon(
-                    Icons.filter_list_rounded,
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
                     color: _selectedTypesFilter.isNotEmpty || _selectedStatusesFilter.isNotEmpty
-                        ? WalletMeltColors.brand
-                        : WalletMeltColors.textSecondary,
+                        ? WalletMeltColors.brand.withValues(alpha: 0.16)
+                        : (isDark ? const Color(0xFF0C0E14) : Colors.white),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                    border: Border.all(
+                      color: _selectedTypesFilter.isNotEmpty || _selectedStatusesFilter.isNotEmpty
+                          ? WalletMeltColors.brand
+                          : (isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder),
+                      width: 1.0,
+                    ),
                   ),
-                  onPressed: () => setState(() => _isFiltersExpanded = !_isFiltersExpanded),
+                  child: IconButton(
+                    tooltip: 'Filters',
+                    padding: EdgeInsets.zero,
+                    icon: Icon(
+                      Icons.filter_list_rounded,
+                      size: 20,
+                      color: _selectedTypesFilter.isNotEmpty || _selectedStatusesFilter.isNotEmpty
+                          ? WalletMeltColors.brand
+                          : (isDark ? Colors.white : WalletMeltColors.textPrimary),
+                    ),
+                    onPressed: () => setState(() => _isFiltersExpanded = !_isFiltersExpanded),
+                  ),
                 ),
               ],
             ),
+
 
             if (_isFiltersExpanded) ...[
               const SizedBox(height: 10),
@@ -1455,12 +1516,16 @@ class _DebtScreenState extends State<DebtScreen> {
                         const SizedBox(width: 6),
                         Container(width: 3, height: 3, color: WalletMeltColors.textMuted),
                         const SizedBox(width: 6),
-                        Text(
-                          'Due: ${debt.dueDate}',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: isOverdue ? WalletMeltColors.danger : WalletMeltColors.textMuted,
-                            fontWeight: FontWeight.w600,
+                        Flexible(
+                          child: Text(
+                            'Due: ${debt.dueDate}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: isOverdue ? WalletMeltColors.danger : WalletMeltColors.textMuted,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       ],

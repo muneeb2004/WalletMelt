@@ -313,6 +313,21 @@ class WalletMeltTheme {
           color: secondary,
           letterSpacing: 0.4,
           fontFeatures: tabular),
+      labelSmall: TextStyle(
+          fontFamily: 'PlusJakartaSans',
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          fontVariations: const [FontVariation('wght', 700)],
+          color: secondary,
+          letterSpacing: 0.5,
+          fontFeatures: tabular),
+      titleSmall: TextStyle(
+          fontFamily: 'PlusJakartaSans',
+          fontSize: 13.5,
+          fontWeight: FontWeight.w700,
+          fontVariations: const [FontVariation('wght', 700)],
+          color: primary,
+          fontFeatures: tabular),
       bodySmall: TextStyle(
           fontFamily: 'PlusJakartaSans',
           fontSize: 11.5,
@@ -781,7 +796,7 @@ class _WMQuickActionButtonState extends State<WMQuickActionButton> {
           duration: AppMotion.fast,
           curve: AppMotion.entrance,
           child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 2),
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
             decoration: BoxDecoration(
               color: widget.isPrimary
                   ? (isDark ? WalletMeltColors.brand : WalletMeltColors.textPrimary)
@@ -805,8 +820,8 @@ class _WMQuickActionButtonState extends State<WMQuickActionButton> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  width: 36,
-                  height: 36,
+                  width: 34,
+                  height: 34,
                   decoration: BoxDecoration(
                     color: widget.isPrimary
                         ? (isDark ? Colors.black.withValues(alpha: 0.15) : Colors.white.withValues(alpha: 0.15))
@@ -815,13 +830,13 @@ class _WMQuickActionButtonState extends State<WMQuickActionButton> {
                   ),
                   child: Icon(
                     widget.icon,
-                    size: 18,
+                    size: 17,
                     color: widget.isPrimary
                         ? (isDark ? Colors.black : Colors.white)
                         : (isDark ? Colors.white : WalletMeltColors.textPrimary),
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 5),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 2),
                   child: FittedBox(
@@ -830,8 +845,9 @@ class _WMQuickActionButtonState extends State<WMQuickActionButton> {
                       widget.label,
                       style: TextStyle(
                         fontFamily: 'PlusJakartaSans',
-                        fontSize: 11,
+                        fontSize: 10.5,
                         fontWeight: FontWeight.w700,
+                        letterSpacing: -0.2,
                         color: widget.isPrimary
                             ? (isDark ? Colors.black : Colors.white)
                             : (isDark ? WalletMeltColors.darkTextPrimary : WalletMeltColors.textPrimary),
@@ -843,6 +859,7 @@ class _WMQuickActionButtonState extends State<WMQuickActionButton> {
               ],
             ),
           ),
+
         ),
       ),
     );

@@ -17,9 +17,15 @@ import '../types/budget.dart';
 import '../types/category.dart' as wm;
 import '../types/expense.dart';
 import '../types/grocery_item.dart';
+import '../types/insight_card.dart';
 import '../types/settings.dart';
+import '../types/spending_summaries.dart';
 import '../utils/date_utils.dart';
 import '../utils/insights.dart';
+import '../analytics/analytics_snapshot.dart';
+import '../analytics/insight_engine.dart';
+import '../analytics/spending_analytics.dart';
+import '../analytics/summary_builder.dart';
 
 import 'package:uuid/uuid.dart';
 import '../types/debt.dart' as wm_debt;
@@ -35,6 +41,8 @@ import '../types/payee.dart';
 import '../data/repositories/drift/drift_payee_repository.dart';
 import '../data/repositories/drift/drift_essential_expense_repository.dart';
 import '../data/repositories/drift/drift_fuel_repository.dart';
+import '../types/merchant.dart';
+import '../data/repositories/drift/drift_store_repository.dart';
 
 class AppState extends ChangeNotifier {
   AppState({
@@ -47,6 +55,7 @@ class AppState extends ChangeNotifier {
     DriftPayeeRepository? driftPayeeRepository,
     DriftEssentialExpenseRepository? driftEssentialExpenseRepository,
     DriftFuelRepository? driftFuelRepository,
+    DriftStoreRepository? driftStoreRepository,
     local.WalletMeltDatabase? driftDatabase,
     SettingsService? settingsService,
     ReceiptStorageService? receiptStorageService,
@@ -63,6 +72,7 @@ class AppState extends ChangeNotifier {
     _driftPayeeRepository = driftPayeeRepository ?? _FakeDriftPayeeRepository();
     _driftEssentialExpenseRepository = driftEssentialExpenseRepository ?? _FakeDriftEssentialExpenseRepository();
     _driftFuelRepository = driftFuelRepository ?? _FakeDriftFuelRepository();
+    _driftStoreRepository = driftStoreRepository ?? (driftDatabase != null ? DriftStoreRepository(driftDatabase) : _FakeDriftStoreRepository());
   }
 
   AppState.test({
@@ -75,13 +85,21 @@ class AppState extends ChangeNotifier {
     DriftPayeeRepository? driftPayeeRepository,
     DriftEssentialExpenseRepository? driftEssentialExpenseRepository,
     DriftFuelRepository? driftFuelRepository,
+    DriftStoreRepository? driftStoreRepository,
     SettingsService? settingsService,
     ReceiptStorageService? receiptStorageService,
+    WalletMeltSettings? settings,
     bool requiresDriftRestoreRuntime = false,
   })  : _settingsService = settingsService ?? SettingsService(),
         _requiresDriftRestoreRuntime = requiresDriftRestoreRuntime,
         receiptStorage = receiptStorageService ?? LocalReceiptStorageService() {
+    this.settings = settings ??
+        WalletMeltSettings.defaults.copyWith(
+          hasAcceptedPrivacyPolicy: true,
+          hasCompletedOnboarding: true,
+        );
     _driftCategoryRepository = driftCategoryRepository ?? _FakeDriftCategoryRepository();
+
     _driftBudgetRepository = driftBudgetRepository ?? _FakeDriftBudgetRepository();
     _driftExpenseRepository = driftExpenseRepository ?? _FakeDriftExpenseRepository();
     _driftDebtRepository = driftDebtRepository ?? _FakeDriftDebtRepository();
@@ -90,6 +108,7 @@ class AppState extends ChangeNotifier {
     _driftPayeeRepository = driftPayeeRepository ?? _FakeDriftPayeeRepository();
     _driftEssentialExpenseRepository = driftEssentialExpenseRepository ?? _FakeDriftEssentialExpenseRepository();
     _driftFuelRepository = driftFuelRepository ?? _FakeDriftFuelRepository();
+    _driftStoreRepository = driftStoreRepository ?? _FakeDriftStoreRepository();
     isLoading = false;
   }
 
@@ -107,12 +126,14 @@ class AppState extends ChangeNotifier {
   late DriftPayeeRepository _driftPayeeRepository;
   late DriftEssentialExpenseRepository _driftEssentialExpenseRepository;
   late DriftFuelRepository _driftFuelRepository;
+  late DriftStoreRepository _driftStoreRepository;
 
   List<wm_debt.DebtRecord> debts = const [];
   List<wm_template.GroceryTemplate> groceryTemplates = const [];
   List<wm_sub.Subscription> subscriptions = const [];
   List<Payee> payees = const [];
   List<wm_essential.EssentialExpenseTemplate> essentialTemplates = const [];
+  List<Merchant> savedMerchants = const [];
 
   WalletMeltSettings settings = WalletMeltSettings.defaults;
   List<wm.Category> categories = const [];
@@ -153,6 +174,17 @@ class AppState extends ChangeNotifier {
   double? _cachedTotalSpent;
   MonthlyInsights? _cachedInsights;
 
+  SpendingAnalyticsSnapshot? _cachedSnapshot;
+  DateTime? _cachedSnapshotDay;
+  int _analyticsGeneration = 0;
+  int? _cachedSnapshotGeneration;
+
+  List<InsightCard>? _cachedInsightCards;
+  int? _cachedInsightCardsGeneration;
+
+  SpendingSummaries? _cachedSummaries;
+  int? _cachedSummariesGeneration;
+
   List<Expense> _currentMonthExpenses = const [];
   List<Expense> get currentMonthExpenses {
     if (_currentMonthExpenses.isEmpty && expenses.isNotEmpty) {
@@ -163,15 +195,26 @@ class AppState extends ChangeNotifier {
 
   Map<String, wm.Category>? _categoryMap;
 
+  void _clearAnalyticsCache() {
+    _analyticsGeneration++;
+    _cachedSnapshot = null;
+    _cachedSnapshotDay = null;
+    _cachedSnapshotGeneration = null;
+    _cachedInsightCards = null;
+    _cachedInsightCardsGeneration = null;
+    _cachedSummaries = null;
+    _cachedSummariesGeneration = null;
+  }
+
   void _clearCache() {
     _cachedTotalSpent = null;
     _cachedInsights = null;
     _categoryMap = null;
+    _clearAnalyticsCache();
   }
 
   void _updateCurrentMonthExpenses() {
-    _cachedTotalSpent = null;
-    _cachedInsights = null;
+    _clearCache();
     _currentMonthExpenses = expenses.where((e) {
       if (e.deletedAt != null) return false;
       try {
@@ -184,13 +227,69 @@ class AppState extends ChangeNotifier {
 
   String get currentMonthKey => monthKey(selectedMonth);
 
-  MonthlyInsights get monthlyInsights {
-    if (_cachedInsights != null) return _cachedInsights!;
-    _cachedInsights = buildMonthlyInsights(
+  /// Single source of truth analytics snapshot for the selected month.
+  SpendingAnalyticsSnapshot get spendingSnapshot {
+    final now = DateTime.now();
+    if (_cachedSnapshot != null &&
+        _cachedSnapshotGeneration == _analyticsGeneration &&
+        _cachedSnapshotDay != null &&
+        _cachedSnapshotDay!.year == now.year &&
+        _cachedSnapshotDay!.month == now.month &&
+        _cachedSnapshotDay!.day == now.day) {
+      return _cachedSnapshot!;
+    }
+    _clearAnalyticsCache();
+    _cachedSnapshotDay = now;
+    _cachedSnapshotGeneration = _analyticsGeneration;
+    _cachedSnapshot = SpendingAnalytics.buildSnapshot(
       expenses: expenses,
+      selectedMonth: selectedMonth,
+      now: now,
+      currency: settings.currency,
+    );
+    return _cachedSnapshot!;
+  }
+
+  /// Ranked actionable insight cards for the selected month.
+  List<InsightCard> get insightCards {
+    final snap = spendingSnapshot;
+    if (_cachedInsightCards != null &&
+        _cachedInsightCardsGeneration == _analyticsGeneration) {
+      return _cachedInsightCards!;
+    }
+    _cachedInsightCardsGeneration = _analyticsGeneration;
+    _cachedInsightCards = InsightEngine.generate(
+      snapshot: snap,
       categories: categories,
       budgets: currentBudgets,
-      month: selectedMonth,
+      essentialTemplates: essentialTemplates,
+      subscriptions: subscriptions,
+      monthlyBudgetAmount: settings.monthlyBudgetAmount,
+    );
+    return _cachedInsightCards!;
+  }
+
+  /// Dedicated analytical spending summaries for the selected month.
+  SpendingSummaries get spendingSummaries {
+    final snap = spendingSnapshot;
+    if (_cachedSummaries != null &&
+        _cachedSummariesGeneration == _analyticsGeneration) {
+      return _cachedSummaries!;
+    }
+    _cachedSummariesGeneration = _analyticsGeneration;
+    _cachedSummaries = SummaryBuilder.build(
+      snapshot: snap,
+      categories: categories,
+    );
+    return _cachedSummaries!;
+  }
+
+  MonthlyInsights get monthlyInsights {
+    if (_cachedInsights != null) return _cachedInsights!;
+    _cachedInsights = buildMonthlyInsightsFromSnapshot(
+      snapshot: spendingSnapshot,
+      categories: categories,
+      budgets: currentBudgets,
     );
     return _cachedInsights!;
   }
@@ -201,7 +300,8 @@ class AppState extends ChangeNotifier {
       notifyListeners();
       settings = await _settingsService.load();
       await refresh();
-    } catch (error) {
+    } catch (error, stack) {
+      debugPrint('AppState.initialize error: $error\n$stack');
       errorMessage = 'WalletMelt could not load local data.';
     } finally {
       isLoading = false;
@@ -231,7 +331,14 @@ class AppState extends ChangeNotifier {
     groceryTemplates = await _driftGroceryTemplateRepository.listAll();
     payees = await _driftPayeeRepository.listAll();
     essentialTemplates = await _driftEssentialExpenseRepository.listAll();
+    savedMerchants = await _driftStoreRepository.listSavedMerchants();
 
+    notifyListeners();
+  }
+
+  Future<void> acceptPrivacyPolicy() async {
+    settings = settings.copyWith(hasAcceptedPrivacyPolicy: true);
+    await _settingsService.save(settings);
     notifyListeners();
   }
 
@@ -241,6 +348,7 @@ class AppState extends ChangeNotifier {
     await _settingsService.save(settings);
     notifyListeners();
   }
+
 
   Future<void> updateCurrency(String currency) async {
     _clearCache();
@@ -521,6 +629,47 @@ class AppState extends ChangeNotifier {
     await refresh();
   }
 
+  Future<List<Merchant>> getMerchantSuggestions({String? query, int limit = 8}) async {
+    return _driftStoreRepository.getSuggestions(query: query, limit: limit);
+  }
+
+  Future<Merchant> saveMerchant({
+    required String name,
+    String? defaultCategoryId,
+    String? notes,
+    bool isFavorite = false,
+  }) async {
+    final result = await _driftStoreRepository.saveMerchant(
+      name: name,
+      defaultCategoryId: defaultCategoryId,
+      notes: notes,
+      isFavorite: isFavorite,
+    );
+    await refresh();
+    return result;
+  }
+
+  Future<Merchant> updateMerchant(Merchant merchant) async {
+    final result = await _driftStoreRepository.updateMerchant(merchant);
+    await refresh();
+    return result;
+  }
+
+  Future<void> archiveMerchant(String id) async {
+    await _driftStoreRepository.archiveMerchant(id);
+    await refresh();
+  }
+
+  Future<void> restoreMerchant(String id) async {
+    await _driftStoreRepository.restoreMerchant(id);
+    await refresh();
+  }
+
+  Future<void> toggleMerchantFavorite(String id) async {
+    await _driftStoreRepository.toggleFavorite(id);
+    await refresh();
+  }
+
   Future<void> processSubscriptionRenewals() async {
     final subs = await _driftSubscriptionRepository.listAll();
     final todayStr = DateTime.now().toIso8601String().substring(0, 10);
@@ -607,8 +756,13 @@ class AppState extends ChangeNotifier {
     if (receipt != null) {
       await receiptStorage.delete(receipt);
     }
+    try {
+      await _driftDatabase?.customStatement('VACUUM;');
+    } catch (_) {}
     await refresh();
   }
+
+
 
   Future<void> setBudget(String categoryId, double amount) async {
     await _driftBudgetRepository.upsert(
@@ -754,6 +908,16 @@ class _FakeDriftFuelRepository extends DriftFuelRepository {
   Future<wm_fuel.FuelTransaction?> getByExpenseId(String expenseId) async => null;
   @override
   Future<List<wm_fuel.FuelTransaction>> listAll() async => [];
+}
+
+class _FakeDriftStoreRepository extends DriftStoreRepository {
+  _FakeDriftStoreRepository() : super(_dummyDb);
+  @override
+  Future<List<Merchant>> listSavedMerchants() async => [];
+  @override
+  Future<List<Merchant>> getSuggestions({String? query, int limit = 8}) async => [];
+  @override
+  Future<String?> recordMerchantHistory(String merchantName) async => null;
 }
 
 final _dummyDb = local.WalletMeltDatabase(NativeDatabase.memory());

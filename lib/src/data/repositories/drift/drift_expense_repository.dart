@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../local/wallet_melt_database.dart' as local;
+import 'drift_store_repository.dart';
 import '../../../types/expense.dart' as domain;
 import '../../../types/fuel.dart' as domain;
 import '../../../types/grocery_item.dart' as domain;
@@ -70,8 +71,14 @@ class DriftExpenseRepository {
       taxAmount: draft.taxAmount,
     );
 
+    String? storeId;
+    if (expense.vendor != null) {
+      final storeRepo = DriftStoreRepository(_db);
+      storeId = await storeRepo.recordMerchantHistory(expense.vendor!);
+    }
+
     await _db.transaction(() async {
-      await _db.into(_db.expenses).insert(_expenseInsertCompanion(expense));
+      await _db.into(_db.expenses).insert(_expenseInsertCompanion(expense, storeId: storeId));
       await _replaceGroceryItems(expense.id, draft.groceryItems, now,
           expense.currency, expense.categoryId);
       if (draft.fuelTransaction != null) {
@@ -90,10 +97,25 @@ class DriftExpenseRepository {
       domain.FuelTransactionDraft? fuelTransaction}) async {
     final updatedAt = DateTime.now().toIso8601String();
     final updated = expense.copyWith(updatedAt: updatedAt);
+
+    String? storeId;
+    if (expense.vendor != null) {
+      final storeRepo = DriftStoreRepository(_db);
+      final old = await (_db.select(_db.expenses)
+            ..where((row) => row.id.equals(expense.id)))
+          .getSingleOrNull();
+      final oldVendor = old?.vendor ?? '';
+      if (_normalizeName(expense.vendor!) != _normalizeName(oldVendor)) {
+        storeId = await storeRepo.recordMerchantHistory(expense.vendor!);
+      } else {
+        storeId = old?.storeId;
+      }
+    }
+
     await _db.transaction(() async {
       await (_db.update(_db.expenses)
             ..where((row) => row.id.equals(expense.id)))
-          .write(_expenseUpdateCompanion(updated));
+          .write(_expenseUpdateCompanion(updated, storeId: storeId));
       if (groceryItems != null) {
         await _replaceGroceryItems(expense.id, groceryItems, updatedAt,
             expense.currency, expense.categoryId);
@@ -179,10 +201,11 @@ class DriftExpenseRepository {
     return (_db.select(_db.expenseItems)
           ..where((item) => item.expenseId.equals(expenseId))
           ..orderBy([
-            (item) => OrderingTerm(expression: item.createdAt),
+            (item) => OrderingTerm(expression: item.rowId),
           ]))
         .get();
   }
+
 
   Future<void> _replaceGroceryItems(
     String expenseId,
@@ -279,7 +302,8 @@ class DriftExpenseRepository {
         );
   }
 
-  local.ExpensesCompanion _expenseInsertCompanion(domain.Expense expense) {
+  local.ExpensesCompanion _expenseInsertCompanion(domain.Expense expense,
+      {String? storeId}) {
     return local.ExpensesCompanion.insert(
       id: expense.id,
       amount: expense.amount,
@@ -287,6 +311,7 @@ class DriftExpenseRepository {
       categoryId: expense.categoryId,
       title: expense.title,
       vendor: Value(expense.vendor),
+      storeId: Value(storeId),
       date: expense.date,
       notes: Value(expense.notes),
       receiptImageUri: Value(expense.receiptImageUri),
@@ -300,7 +325,8 @@ class DriftExpenseRepository {
     );
   }
 
-  local.ExpensesCompanion _expenseUpdateCompanion(domain.Expense expense) {
+  local.ExpensesCompanion _expenseUpdateCompanion(domain.Expense expense,
+      {String? storeId}) {
     return local.ExpensesCompanion(
       id: Value(expense.id),
       amount: Value(expense.amount),
@@ -308,6 +334,7 @@ class DriftExpenseRepository {
       categoryId: Value(expense.categoryId),
       title: Value(expense.title),
       vendor: Value(expense.vendor),
+      storeId: Value(storeId),
       date: Value(expense.date),
       notes: Value(expense.notes),
       receiptImageUri: Value(expense.receiptImageUri),
@@ -329,6 +356,7 @@ class DriftExpenseRepository {
       categoryId: row.categoryId,
       title: row.title,
       vendor: row.vendor,
+      storeId: row.storeId,
       date: row.date,
       notes: row.notes,
       receiptImageUri: row.receiptImageUri,

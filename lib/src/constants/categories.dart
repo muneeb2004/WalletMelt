@@ -1,6 +1,6 @@
 import '../types/category.dart';
 
-const defaultCurrencyCodes = ['PKR', 'USD', 'EUR', 'GBP', 'AED', 'SAR', 'INR'];
+export 'currencies.dart' show defaultCurrencyCodes;
 
 const categoryColors = {
   'electricity': '#F4B740',

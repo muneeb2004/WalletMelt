@@ -23,14 +23,24 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "app.walletmelt.wallet_melt"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
         targetSdk = 35
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    flavorDimensions += "default"
+    productFlavors {
+        create("production") {
+            dimension = "default"
+            applicationId = "app.walletmelt.wallet_melt"
+        }
+        create("screenshots") {
+            dimension = "default"
+            applicationId = "app.walletmelt.wallet_melt.screenshots"
+        }
     }
 
     signingConfigs {

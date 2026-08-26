@@ -2,6 +2,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wallet_melt/src/state/app_state.dart';
 import 'package:wallet_melt/src/providers/repository_providers.dart';
 import 'package:wallet_melt/src/providers/database_providers.dart';
+import '../services/settings/settings_service.dart';
+import '../utils/security_utils.dart';
+import '../../dev/seed_screenshot_data.dart';
 import 'security_providers.dart';
 
 final appStateProvider = FutureProvider<AppState>((ref) async {
@@ -28,6 +31,15 @@ final appStateProvider = FutureProvider<AppState>((ref) async {
     driftFuelRepository: fuelRepo,
     driftDatabase: database,
   );
+
+  if (SecurityUtils.isScreenshotMode) {
+    try {
+      await seedScreenshotData(database, SettingsService());
+    } catch (e, s) {
+      // ignore: avoid_print
+      print('seedScreenshotData error: $e\n$s');
+    }
+  }
 
   await appState.initialize();
 

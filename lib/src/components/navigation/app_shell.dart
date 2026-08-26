@@ -63,8 +63,11 @@ class _AppShellState extends State<AppShell>
     final action = ScreenActionResolver.resolve(context, activeIndex);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    final isKeyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
+
     return Scaffold(
       extendBody: true,
+      resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
           Positioned.fill(
@@ -81,34 +84,44 @@ class _AppShellState extends State<AppShell>
             right: 24,
             bottom: 18,
             child: SafeArea(
-              child: Container(
-                height: 70,
-                padding: const EdgeInsets.all(5),
-                decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF0C0E14) : Colors.white,
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-                  border: Border.all(
-                    color: isDark
-                        ? WalletMeltColors.darkBorder
-                        : WalletMeltColors.lightBorder,
-                    width: 1.0,
+              child: AnimatedSlide(
+                offset: isKeyboardOpen ? const Offset(0.0, 1.4) : Offset.zero,
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeInOutCubic,
+                child: AnimatedOpacity(
+                  opacity: isKeyboardOpen ? 0.0 : 1.0,
+                  duration: const Duration(milliseconds: 180),
+                  child: IgnorePointer(
+                    ignoring: isKeyboardOpen,
+                    child: Container(
+                      height: 70,
+                      padding: const EdgeInsets.all(5),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF0C0E14) : Colors.white,
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+                        border: Border.all(
+                          color: isDark
+                              ? WalletMeltColors.darkBorder
+                              : WalletMeltColors.lightBorder,
+                          width: 1.0,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: isDark ? 0.40 : 0.08),
+                            blurRadius: 24,
+                            offset: const Offset(0, 8),
+                          ),
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: isDark ? 0.20 : 0.03),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: _FluidBlobNavBar(shell: widget.navigationShell),
+                    ),
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color:
-                          Colors.black.withValues(alpha: isDark ? 0.40 : 0.08),
-                      blurRadius: 24,
-                      offset: const Offset(0, 8),
-                    ),
-                    BoxShadow(
-                      color:
-                          Colors.black.withValues(alpha: isDark ? 0.20 : 0.03),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
                 ),
-                child: _FluidBlobNavBar(shell: widget.navigationShell),
               ),
             ),
           ),
@@ -118,6 +131,7 @@ class _AppShellState extends State<AppShell>
     );
   }
 }
+
 
 class ScreenAction {
   final IconData icon;
@@ -307,21 +321,23 @@ class _AppFloatingActionButtonState extends State<_AppFloatingActionButton> {
 
   @override
   Widget build(BuildContext context) {
-    final hasAction = widget.action != null;
+    final isKeyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
+    final isVisible = widget.action != null && !isKeyboardOpen;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AnimatedOpacity(
-      opacity: hasAction ? 1.0 : 0.0,
+      opacity: isVisible ? 1.0 : 0.0,
       duration: AppMotion.medium,
       child: AnimatedScale(
-        scale: hasAction ? _scale : 0.0,
+        scale: isVisible ? _scale : 0.0,
         duration: AppMotion.medium,
         curve: AppMotion.entrance,
         child: Padding(
           padding: const EdgeInsets.only(bottom: 84),
           child: IgnorePointer(
-            ignoring: !hasAction,
+            ignoring: !isVisible,
             child: GestureDetector(
+
               onTapDown: (_) => setState(() => _scale = 0.94),
               onTapUp: (_) => setState(() => _scale = 1.0),
               onTapCancel: () => setState(() => _scale = 1.0),
@@ -330,19 +346,9 @@ class _AppFloatingActionButtonState extends State<_AppFloatingActionButton> {
                 height: 56,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: isDark
-                        ? const [
-                            WalletMeltColors.brand,
-                            WalletMeltColors.brandDeep,
-                          ]
-                        : const [
-                            WalletMeltColors.textPrimary,
-                            Color(0xFF1E293B),
-                          ],
-                  ),
+                  color: isDark
+                      ? WalletMeltColors.brand
+                      : WalletMeltColors.textPrimary,
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.16),

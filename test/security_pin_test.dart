@@ -17,20 +17,31 @@ import 'package:wallet_melt/src/widgets/security/pin_indicator.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  group('PinHash Tests', () {
-    test('Hashing should be deterministic and output valid SHA-256', () {
+  group('PinHash / PinKdf Tests', () {
+    test('Hashing should be deterministic and output valid 256-bit hex with same salt', () {
       const pin = '1234';
-      final hash1 = PinHash.hashPin(pin);
-      final hash2 = PinHash.hashPin(pin);
+      final salt = [1, 2, 3, 4, 5, 6, 7, 8];
+      final hash1 = PinKdf.hashPin(pin: pin, salt: salt, iterations: 100);
+      final hash2 = PinKdf.hashPin(pin: pin, salt: salt, iterations: 100);
       expect(hash1, hash2);
       expect(hash1, isNot(pin));
-      expect(hash1.length, 64); // SHA-256 hex length is 64 chars
+      expect(hash1.length, 64); // 256-bit hex length is 64 chars
     });
 
-    test('Different PINs should produce different hashes', () {
-      final hash1 = PinHash.hashPin('1234');
-      final hash2 = PinHash.hashPin('5678');
+    test('Different PINs or salts should produce different hashes', () {
+      final salt1 = [1, 2, 3, 4];
+      final salt2 = [5, 6, 7, 8];
+      final hash1 = PinKdf.hashPin(pin: '1234', salt: salt1, iterations: 100);
+      final hash2 = PinKdf.hashPin(pin: '5678', salt: salt1, iterations: 100);
+      final hash3 = PinKdf.hashPin(pin: '1234', salt: salt2, iterations: 100);
       expect(hash1, isNot(hash2));
+      expect(hash1, isNot(hash3));
+    });
+
+    test('Constant-time equality verifies matching strings and rejects mismatches', () {
+      expect(PinKdf.fixedTimeEquals('abcdef0123456789', 'abcdef0123456789'), isTrue);
+      expect(PinKdf.fixedTimeEquals('abcdef0123456789', 'abcdef0123456780'), isFalse);
+      expect(PinKdf.fixedTimeEquals('short', 'longer_string'), isFalse);
     });
   });
 
@@ -57,8 +68,15 @@ void main() {
       expect(await service.isPinEnabled(), isTrue);
 
       final storedHash = await storage.getPinHash();
-      expect(storedHash, PinHash.hashPin('1234'));
+      final salt = await storage.getOrCreateSalt();
+      final expectedHash = PinKdf.hashPin(
+        pin: '1234',
+        salt: salt,
+        iterations: PinKdf.testIterations,
+      );
+      expect(storedHash, expectedHash);
     });
+
 
     test('Verifying PIN works correctly', () async {
       await service.setPin('1234');
@@ -420,8 +438,9 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('WalletMelt is locked'), findsOneWidget);
+      expect(find.text('WalletMelt'), findsOneWidget);
       expect(find.byType(PinIndicator), findsOneWidget);
+
       expect(find.byType(NumberPad), findsOneWidget);
 
       // Enter 1 2 3 4
@@ -601,7 +620,7 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        expect(find.text('WalletMelt is locked'), findsOneWidget);
+        expect(find.text('WalletMelt'), findsOneWidget);
         expect(find.byType(PinIndicator), findsOneWidget);
         expect(find.byType(NumberPad), findsOneWidget);
         expect(tester.takeException(), isNull);
@@ -641,11 +660,11 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.byType(WMBiometricButton), findsOneWidget);
+      expect(find.byIcon(Icons.fingerprint_rounded), findsOneWidget);
 
-      // Set auth result to success and tap biometric button
+      // Set auth result to success and tap biometric button in NumberPad
       BiometricService.testAuthResult = const BiometricAuthResult.success();
-      await tester.tap(find.byType(WMBiometricButton));
+      await tester.tap(find.byIcon(Icons.fingerprint_rounded));
       await tester.pump();
       await tester.pumpAndSettle();
 
@@ -654,5 +673,6 @@ void main() {
       await storage.clearPinData();
       controller.dispose();
     });
+
   });
 }

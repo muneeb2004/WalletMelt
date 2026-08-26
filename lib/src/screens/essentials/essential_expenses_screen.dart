@@ -48,7 +48,7 @@ class _EssentialExpensesScreenState extends State<EssentialExpensesScreen> {
       children: [
         if (!widget.isEmbedded) ...[
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 18, 20, 10),
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 10),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -160,7 +160,7 @@ class _EssentialExpensesScreenState extends State<EssentialExpensesScreen> {
         // ── Active Recurring Essentials List ─────────────────────────
         Expanded(
           child: ListView(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 120),
             children: [
               if (activeTemplates.isEmpty && inactiveTemplates.isEmpty) ...[
                 const SizedBox(height: 32),

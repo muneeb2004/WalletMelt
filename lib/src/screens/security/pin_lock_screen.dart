@@ -8,10 +8,10 @@ import '../../security/biometric_service.dart';
 import '../../security/pin_lock_controller.dart';
 import '../../security/pin_service.dart';
 import '../../theme/wallet_melt_theme.dart';
-import '../../widgets/security/biometric_button.dart';
 import '../../widgets/security/number_pad.dart';
 import '../../widgets/security/pin_indicator.dart';
 import '../../widgets/security/shake_animation.dart';
+
 
 /// Premium PIN & Biometric Lock Screen for WalletMelt.
 class PinLockScreen extends StatefulWidget {
@@ -51,19 +51,11 @@ class _PinLockScreenState extends State<PinLockScreen> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    precacheImage(
-      const AssetImage('assets/brand/optimized/walletmelt_icon_transparent.webp'),
-      context,
-    );
-  }
-
-  @override
   void dispose() {
     _lockoutTimer?.cancel();
     super.dispose();
   }
+
 
   String _getGreeting() {
     final hour = DateTime.now().hour;
@@ -291,36 +283,28 @@ class _PinLockScreenState extends State<PinLockScreen> {
                           Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              SizedBox(height: isCompact ? 8 : 20),
-                              // Brand Icon
-                              Image.asset(
-                                'assets/brand/optimized/walletmelt_icon_transparent.webp',
-                                height: isCompact ? 44 : 54,
-                                fit: BoxFit.contain,
-                                filterQuality: FilterQuality.high,
-                                semanticLabel: 'WalletMelt logo',
-                              ),
-                              const SizedBox(height: 8),
-                              // Greeting & Status
+                              SizedBox(height: isCompact ? 16 : 32),
+                              // App Name Header
                               Text(
-                                _getGreeting(),
+                                'WalletMelt',
                                 style: theme.textTheme.headlineMedium?.copyWith(
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: isCompact ? 20 : 23,
-                                  letterSpacing: -0.5,
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: isCompact ? 26 : 30,
+                                  letterSpacing: -0.8,
                                   color: isDark
                                       ? WalletMeltColors.darkTextPrimary
                                       : WalletMeltColors.textPrimary,
                                 ),
                               ),
-                              const SizedBox(height: 2),
+                              const SizedBox(height: 6),
+                              // Greeting & Status Subtitle
                               Text(
-                                'WalletMelt is locked',
+                                '${_getGreeting()} • Enter your PIN',
                                 style: theme.textTheme.bodyMedium?.copyWith(
                                   color: isDark
                                       ? WalletMeltColors.darkTextSecondary
                                       : WalletMeltColors.textSecondary,
-                                  fontSize: 12.5,
+                                  fontSize: 13,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -394,16 +378,9 @@ class _PinLockScreenState extends State<PinLockScreen> {
                                 biometricLabel: pinController.biometricLabel,
                                 disabled: isLockedOut || _isVerifying,
                               ),
-                              if (isBiometricsEnabled) ...[
-                                const SizedBox(height: 8),
-                                WMBiometricButton(
-                                  onTap: () => _triggerBiometrics(),
-                                  label: pinController.biometricLabel,
-                                  disabled: isLockedOut || _isVerifying,
-                                ),
-                              ],
                             ],
                           ),
+
 
                           // Minimal Footer Note
                           Padding(

@@ -64,10 +64,12 @@ class _PrimaryButtonState extends State<PrimaryButton> {
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
               minimumSize: const Size.fromHeight(52),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppSpacing.buttonRadius),
               ),
             ),
+
             onPressed: isEnabled
                 ? () {
                     WMHaptics.medium();

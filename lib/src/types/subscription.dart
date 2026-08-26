@@ -42,6 +42,7 @@ class Subscription {
   bool get isActive => status == SubscriptionStatus.active;
   bool get isPaused => status == SubscriptionStatus.paused;
   bool get isCancelled => status == SubscriptionStatus.cancelled;
+  bool get isDeleted => deletedAt != null;
 
   DateTime calculateNextRenewalDate(DateTime current) {
     final cycle = billingCycle.toLowerCase().trim();

@@ -9,6 +9,7 @@ import '../../types/category.dart';
 import '../../types/expense.dart';
 import '../../types/grocery_item.dart';
 import '../../types/settings.dart';
+import 'backup_encryption_service.dart';
 import 'export_file_writer.dart';
 import 'wallet_melt_json_backup_encoder.dart';
 
@@ -16,13 +17,16 @@ class WalletMeltJsonBackupService {
   const WalletMeltJsonBackupService({
     WalletMeltJsonBackupEncoder encoder = const WalletMeltJsonBackupEncoder(),
     ExportFileWriter fileWriter = const ExportFileWriter(),
+    BackupEncryptionService encryptionService = const BackupEncryptionService(),
     String? appVersion,
   })  : _encoder = encoder,
         _fileWriter = fileWriter,
+        _encryptionService = encryptionService,
         _appVersion = appVersion;
 
   final WalletMeltJsonBackupEncoder _encoder;
   final ExportFileWriter _fileWriter;
+  final BackupEncryptionService _encryptionService;
   final String? _appVersion;
 
   Future<ExportFileResult> createBackup({
@@ -34,6 +38,7 @@ class WalletMeltJsonBackupService {
     DateTime? exportedAt,
     Directory? directory,
     bool packageReceipts = true,
+    String? passphrase,
   }) async {
     final timestamp = exportedAt ?? DateTime.now();
     final json = _encoder.encode(
@@ -47,6 +52,19 @@ class WalletMeltJsonBackupService {
     );
 
     if (!packageReceipts) {
+      if (passphrase != null && passphrase.isNotEmpty) {
+        final encrypted = _encryptionService.encrypt(
+          plaintext: utf8.encode(json),
+          passphrase: passphrase,
+        );
+        return _fileWriter.writeZip(
+          zipBytes: encrypted,
+          exportKind: 'backup',
+          createdAt: timestamp,
+          directory: directory,
+        );
+      }
+
       return _fileWriter.writeJson(
         jsonText: json,
         exportKind: 'backup',
@@ -109,6 +127,7 @@ class WalletMeltJsonBackupService {
           : (Platform.isIOS ? 'iOS' : 'Desktop'),
       'receipt_file_count': receiptFiles.length,
       'database_file_name': 'wallet_melt.db',
+      'is_encrypted': passphrase != null && passphrase.isNotEmpty,
     });
     final metadataBytes = utf8.encode(metadataJson);
     archive.addFile(
@@ -121,8 +140,14 @@ class WalletMeltJsonBackupService {
       archive.addFile(ArchiveFile('receipts/$name', bytes.length, bytes));
     }
 
-    final zipBytes = ZipEncoder().encode(archive);
+    var zipBytes = ZipEncoder().encode(archive);
 
+    if (passphrase != null && passphrase.isNotEmpty) {
+      zipBytes = _encryptionService.encrypt(
+        plaintext: zipBytes,
+        passphrase: passphrase,
+      );
+    }
 
     return _fileWriter.writeZip(
       zipBytes: zipBytes,
@@ -132,4 +157,5 @@ class WalletMeltJsonBackupService {
     );
   }
 }
+
 

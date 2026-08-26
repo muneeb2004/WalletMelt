@@ -18,5 +18,6 @@ Future<void> main() async {
   _registerFontLicenses();
   GoogleFonts.config.allowRuntimeFetching = false;
   await prewarmAppShaders();
+
   runApp(const WalletMeltBootstrap());
 }

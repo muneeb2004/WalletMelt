@@ -134,7 +134,14 @@ class Stores extends Table {
   TextColumn get id => text()();
   TextColumn get name => text()();
   TextColumn get normalizedName => text().named('normalizedName')();
+  TextColumn get defaultCategoryId =>
+      text().named('defaultCategoryId').nullable().references(Categories, #id)();
   TextColumn get notes => text().nullable()();
+  BoolColumn get isSaved =>
+      boolean().named('isSaved').withDefault(const Constant(false))();
+  BoolColumn get isFavorite =>
+      boolean().named('isFavorite').withDefault(const Constant(false))();
+  TextColumn get lastUsedAt => text().named('lastUsedAt').nullable()();
   TextColumn get createdAt => text().named('createdAt')();
   TextColumn get updatedAt => text().named('updatedAt')();
   TextColumn get archivedAt => text().named('archivedAt').nullable()();
@@ -483,7 +490,7 @@ class V1MigrationMetrics {
 class WalletMeltDatabase extends _$WalletMeltDatabase {
   WalletMeltDatabase(super.executor, {this.preMigrationBackupPath});
 
-  static const currentSchemaVersion = 6;
+  static const currentSchemaVersion = 8;
 
   final String? preMigrationBackupPath;
 
@@ -585,19 +592,197 @@ class WalletMeltDatabase extends _$WalletMeltDatabase {
           if (from < 6 && to >= 6) {
             await _upgradeFromV5ToV6(m, from, to);
           }
+          if (from < 7 && to >= 7) {
+            await _upgradeFromV6ToV7(m, from, to);
+          }
+          if (from < 8 && to >= 8) {
+            await _upgradeFromV7ToV8(m, from, to);
+          }
         },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON;');
-          await customStatement('CREATE INDEX IF NOT EXISTS expenses_categoryId_idx ON expenses (categoryId);');
-          await customStatement('CREATE INDEX IF NOT EXISTS expenses_date_idx ON expenses (date);');
-          await customStatement('CREATE INDEX IF NOT EXISTS expenses_deletedAt_idx ON expenses (deletedAt);');
-          await customStatement('CREATE INDEX IF NOT EXISTS grocery_items_expenseId_idx ON grocery_items (expenseId);');
-          await customStatement('CREATE INDEX IF NOT EXISTS fuel_transactions_expenseId_idx ON fuel_transactions (expenseId);');
-          await customStatement('CREATE INDEX IF NOT EXISTS fuel_components_fuelTransactionId_idx ON fuel_components (fuelTransactionId);');
-          await customStatement('CREATE INDEX IF NOT EXISTS fuel_template_components_templateId_idx ON fuel_template_components (templateId);');
-          await customStatement('CREATE INDEX IF NOT EXISTS essential_templates_categoryId_idx ON essential_expense_templates (categoryId);');
+          await customStatement('PRAGMA secure_delete = ON;');
+          for (final sql in const [
+            'CREATE INDEX IF NOT EXISTS expenses_categoryId_idx ON expenses (categoryId);',
+            'CREATE INDEX IF NOT EXISTS expenses_date_idx ON expenses (date);',
+            'CREATE INDEX IF NOT EXISTS expenses_deletedAt_idx ON expenses (deletedAt);',
+            'CREATE INDEX IF NOT EXISTS expenses_date_deletedAt_idx ON expenses (date, deletedAt);',
+            'CREATE INDEX IF NOT EXISTS grocery_items_expenseId_idx ON grocery_items (expenseId);',
+            'CREATE INDEX IF NOT EXISTS expense_items_expenseId_itemId_idx ON expense_items (expenseId, itemId);',
+            'CREATE INDEX IF NOT EXISTS debt_records_payeeId_idx ON debt_records (payeeId);',
+            'CREATE INDEX IF NOT EXISTS subscriptions_status_idx ON subscriptions (status, nextOccurrenceDate);',
+            'CREATE INDEX IF NOT EXISTS category_budgets_month_idx ON category_budgets (month);',
+            'CREATE INDEX IF NOT EXISTS fuel_transactions_expenseId_idx ON fuel_transactions (expenseId);',
+            'CREATE INDEX IF NOT EXISTS fuel_components_fuelTransactionId_idx ON fuel_components (fuelTransactionId);',
+            'CREATE INDEX IF NOT EXISTS fuel_template_components_templateId_idx ON fuel_template_components (templateId);',
+            'CREATE INDEX IF NOT EXISTS essential_templates_categoryId_idx ON essential_expense_templates (categoryId);',
+            'CREATE INDEX IF NOT EXISTS stores_isSaved_idx ON stores (isSaved);',
+            'CREATE INDEX IF NOT EXISTS stores_lastUsedAt_idx ON stores (lastUsedAt);',
+          ]) {
+            try {
+              await customStatement(sql);
+            } catch (_) {}
+          }
         },
       );
+
+
+  Future<void> _upgradeFromV7ToV8(Migrator m, int from, int to) async {
+    final hasAudit = await _tableExists('migration_audit');
+    final auditId = 'audit_v7_v8_${DateTime.now().millisecondsSinceEpoch}';
+    final startedAt = DateTime.now().toIso8601String();
+    if (hasAudit && from >= 7) {
+      await customStatement(
+        'INSERT INTO migration_audit (id, fromVersion, toVersion, startedAt, status, preMigrationBackupPath) VALUES (?, ?, ?, ?, ?, ?);',
+        [auditId, from, to, startedAt, 'in_progress', preMigrationBackupPath],
+      );
+    }
+
+    try {
+      // 1. Expenses: amountMinorUnits, subtotalAmountMinorUnits, taxAmountMinorUnits
+      if (await _tableExists('expenses')) {
+        if (!await _columnExists('expenses', 'amountMinorUnits')) {
+          await customStatement('ALTER TABLE expenses ADD COLUMN amountMinorUnits INTEGER;');
+        }
+        await customStatement('UPDATE expenses SET amountMinorUnits = CAST(ROUND(amount * 100) AS INTEGER) WHERE amountMinorUnits IS NULL;');
+
+        if (!await _columnExists('expenses', 'subtotalAmountMinorUnits')) {
+          await customStatement('ALTER TABLE expenses ADD COLUMN subtotalAmountMinorUnits INTEGER;');
+        }
+        if (await _columnExists('expenses', 'subtotalAmount')) {
+          await customStatement('UPDATE expenses SET subtotalAmountMinorUnits = CAST(ROUND(subtotalAmount * 100) AS INTEGER) WHERE subtotalAmount IS NOT NULL AND subtotalAmountMinorUnits IS NULL;');
+        }
+
+        if (!await _columnExists('expenses', 'taxAmountMinorUnits')) {
+          await customStatement('ALTER TABLE expenses ADD COLUMN taxAmountMinorUnits INTEGER;');
+        }
+        if (await _columnExists('expenses', 'taxAmount')) {
+          await customStatement('UPDATE expenses SET taxAmountMinorUnits = CAST(ROUND(taxAmount * 100) AS INTEGER) WHERE taxAmount IS NOT NULL AND taxAmountMinorUnits IS NULL;');
+        }
+
+        // Strict per-row zero-mismatch assertion query
+        final mismatchRows = await customSelect(
+          'SELECT count(*) as count FROM expenses WHERE amountMinorUnits != CAST(ROUND(amount * 100) AS INTEGER);',
+        ).getSingle();
+        final mismatchCount = mismatchRows.read<int>('count');
+        if (mismatchCount > 0) {
+          throw StateError('Monetary migration validation failed for expenses: $mismatchCount mismatched rows detected.');
+        }
+      }
+
+      // 2. CategoryBudgets: amountMinorUnits
+      if (await _tableExists('category_budgets')) {
+        if (!await _columnExists('category_budgets', 'amountMinorUnits')) {
+          await customStatement('ALTER TABLE category_budgets ADD COLUMN amountMinorUnits INTEGER;');
+        }
+        await customStatement('UPDATE category_budgets SET amountMinorUnits = CAST(ROUND(amount * 100) AS INTEGER) WHERE amountMinorUnits IS NULL;');
+
+        final mismatchRows = await customSelect(
+          'SELECT count(*) as count FROM category_budgets WHERE amountMinorUnits != CAST(ROUND(amount * 100) AS INTEGER);',
+        ).getSingle();
+        final mismatchCount = mismatchRows.read<int>('count');
+        if (mismatchCount > 0) {
+          throw StateError('Monetary migration validation failed for category_budgets: $mismatchCount mismatched rows detected.');
+        }
+      }
+
+      // 3. DebtRecords: principalAmountMinorUnits, remainingAmountMinorUnits
+      if (await _tableExists('debt_records')) {
+        if (!await _columnExists('debt_records', 'principalAmountMinorUnits')) {
+          await customStatement('ALTER TABLE debt_records ADD COLUMN principalAmountMinorUnits INTEGER;');
+        }
+        await customStatement('UPDATE debt_records SET principalAmountMinorUnits = CAST(ROUND(principalAmount * 100) AS INTEGER) WHERE principalAmountMinorUnits IS NULL;');
+
+        if (!await _columnExists('debt_records', 'remainingAmountMinorUnits')) {
+          await customStatement('ALTER TABLE debt_records ADD COLUMN remainingAmountMinorUnits INTEGER;');
+        }
+        await customStatement('UPDATE debt_records SET remainingAmountMinorUnits = CAST(ROUND(remainingAmount * 100) AS INTEGER) WHERE remainingAmountMinorUnits IS NULL;');
+
+        final mismatchRows = await customSelect(
+          'SELECT count(*) as count FROM debt_records WHERE principalAmountMinorUnits != CAST(ROUND(principalAmount * 100) AS INTEGER) OR remainingAmountMinorUnits != CAST(ROUND(remainingAmount * 100) AS INTEGER);',
+        ).getSingle();
+        final mismatchCount = mismatchRows.read<int>('count');
+        if (mismatchCount > 0) {
+          throw StateError('Monetary migration validation failed for debt_records: $mismatchCount mismatched rows detected.');
+        }
+      }
+
+      // 4. Subscriptions: amountMinorUnits, taxAmountMinorUnits
+      if (await _tableExists('subscriptions')) {
+        if (!await _columnExists('subscriptions', 'amountMinorUnits')) {
+          await customStatement('ALTER TABLE subscriptions ADD COLUMN amountMinorUnits INTEGER;');
+        }
+        await customStatement('UPDATE subscriptions SET amountMinorUnits = CAST(ROUND(amount * 100) AS INTEGER) WHERE amountMinorUnits IS NULL;');
+
+        if (!await _columnExists('subscriptions', 'taxAmountMinorUnits')) {
+          await customStatement('ALTER TABLE subscriptions ADD COLUMN taxAmountMinorUnits INTEGER;');
+        }
+        if (await _columnExists('subscriptions', 'taxAmount')) {
+          await customStatement('UPDATE subscriptions SET taxAmountMinorUnits = CAST(ROUND(taxAmount * 100) AS INTEGER) WHERE taxAmount IS NOT NULL AND taxAmountMinorUnits IS NULL;');
+        }
+
+        final mismatchRows = await customSelect(
+          'SELECT count(*) as count FROM subscriptions WHERE amountMinorUnits != CAST(ROUND(amount * 100) AS INTEGER);',
+        ).getSingle();
+        final mismatchCount = mismatchRows.read<int>('count');
+        if (mismatchCount > 0) {
+          throw StateError('Monetary migration validation failed for subscriptions: $mismatchCount mismatched rows detected.');
+        }
+      }
+
+      // 5. GroceryItems: amountMinorUnits
+      if (await _tableExists('grocery_items')) {
+        if (!await _columnExists('grocery_items', 'amountMinorUnits')) {
+          await customStatement('ALTER TABLE grocery_items ADD COLUMN amountMinorUnits INTEGER;');
+        }
+        await customStatement('UPDATE grocery_items SET amountMinorUnits = CAST(ROUND(amount * 100) AS INTEGER) WHERE amountMinorUnits IS NULL;');
+
+        final mismatchRows = await customSelect(
+          'SELECT count(*) as count FROM grocery_items WHERE amountMinorUnits != CAST(ROUND(amount * 100) AS INTEGER);',
+        ).getSingle();
+        final mismatchCount = mismatchRows.read<int>('count');
+        if (mismatchCount > 0) {
+          throw StateError('Monetary migration validation failed for grocery_items: $mismatchCount mismatched rows detected.');
+        }
+      }
+
+      if (hasAudit && from >= 7) {
+        await customStatement(
+          'UPDATE migration_audit SET status = ?, completedAt = ? WHERE id = ?;',
+          ['success', DateTime.now().toIso8601String(), auditId],
+        );
+      }
+    } catch (e) {
+      if (hasAudit && from >= 7) {
+        await customStatement(
+          'UPDATE migration_audit SET status = ?, completedAt = ?, errorMessage = ? WHERE id = ?;',
+          ['failed', DateTime.now().toIso8601String(), e.toString(), auditId],
+        );
+      }
+      rethrow;
+    }
+  }
+
+
+
+  Future<void> _upgradeFromV6ToV7(Migrator m, int from, int to) async {
+    if (!await _tableExists('stores')) {
+      await m.createTable(stores);
+      return;
+    }
+    if (!await _columnExists('stores', 'defaultCategoryId')) {
+      await m.addColumn(stores, stores.defaultCategoryId);
+    }
+    if (!await _columnExists('stores', 'isSaved')) {
+      await m.addColumn(stores, stores.isSaved);
+    }
+    if (!await _columnExists('stores', 'isFavorite')) {
+      await m.addColumn(stores, stores.isFavorite);
+    }
+    if (!await _columnExists('stores', 'lastUsedAt')) {
+      await m.addColumn(stores, stores.lastUsedAt);
+    }
+  }
 
   Future<void> _upgradeFromV3ToV4(Migrator m, int from, int to) async {
     if (!await _tableExists('subscriptions')) await m.createTable(subscriptions);
