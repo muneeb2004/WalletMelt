@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -18,6 +16,7 @@ import '../../utils/expense_validation.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/state_views.dart';
+import '../../widgets/receipt_image.dart';
 import '../../types/grocery_template.dart';
 
 class AddExpenseScreen extends StatefulWidget {
@@ -1395,17 +1394,20 @@ class _ReceiptCard extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(20),
-                  child: Image.file(File(Uri.parse(uri).toFilePath()),
-                      height: 180,
-                      width: double.infinity,
-                      fit: BoxFit.cover, errorBuilder: (_, __, ___) {
-                    return Container(
-                      height: 150,
-                      alignment: Alignment.center,
-                      color: Colors.black.withValues(alpha: 0.08),
-                      child: const Text('Receipt file is unavailable'),
-                    );
-                  }),
+                  child: ReceiptImage(
+                    receiptUri: uri,
+                    height: 180,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) {
+                      return Container(
+                        height: 150,
+                        alignment: Alignment.center,
+                        color: Colors.black.withValues(alpha: 0.08),
+                        child: const Text('Receipt file is unavailable'),
+                      );
+                    },
+                  ),
                 ),
                 const SizedBox(height: 12),
                 Row(

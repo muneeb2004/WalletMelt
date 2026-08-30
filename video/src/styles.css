@@ -1,0 +1,36 @@
+@font-face {
+  font-family: 'PlusJakartaSans';
+  src: url('../public/fonts/PlusJakartaSans-Variable.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+:root {
+  --wm-brand: #6366f1;
+  --wm-brand-soft: #eef2ff;
+  --wm-brand-deep: #4338ca;
+  --wm-positive: #10b981;
+  --wm-warning: #f59e0b;
+  --wm-danger: #ef4444;
+  --wm-dark-bg: #000000;
+  --wm-dark-surface: #0c0e14;
+  --wm-dark-container: #141722;
+  --wm-text-primary: #f8fafc;
+  --wm-text-secondary: #94a3b8;
+}
+
+body {
+  background-color: #000000;
+  font-family: 'PlusJakartaSans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: var(--wm-text-primary);
+  overflow: hidden;
+}

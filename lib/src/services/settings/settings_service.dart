@@ -1,9 +1,8 @@
-import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../types/settings.dart';
+import '../../utils/platform_info.dart';
 
 class SettingsService {
   static const _currencyKey = 'settings.currency';
@@ -19,7 +18,7 @@ class SettingsService {
   static final Map<String, String> _testStorage = {};
 
   Future<void> _writeSecure(String key, String value) async {
-    if (kIsWeb || Platform.environment.containsKey('FLUTTER_TEST')) {
+    if (PlatformInfo.isWeb || PlatformInfo.isFlutterTest) {
       _testStorage[key] = value;
       return;
     }
@@ -27,14 +26,14 @@ class SettingsService {
   }
 
   Future<String?> _readSecure(String key) async {
-    if (kIsWeb || Platform.environment.containsKey('FLUTTER_TEST')) {
+    if (PlatformInfo.isWeb || PlatformInfo.isFlutterTest) {
       return _testStorage[key];
     }
     return await _secureStorage.read(key: key);
   }
 
   Future<void> _deleteSecure(String key) async {
-    if (kIsWeb || Platform.environment.containsKey('FLUTTER_TEST')) {
+    if (PlatformInfo.isWeb || PlatformInfo.isFlutterTest) {
       _testStorage.remove(key);
       return;
     }

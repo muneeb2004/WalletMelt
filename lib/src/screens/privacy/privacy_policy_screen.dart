@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:io' as io;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../../components/glass/app_background.dart';
 import '../../state/app_state.dart';
 import '../../theme/wallet_melt_theme.dart';
+import '../../utils/platform_info.dart';
 
 
 /// Screen presenting WalletMelt's Privacy Policy & Legal Disclaimer.
@@ -64,10 +65,12 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
             ),
             onPressed: () {
               Navigator.pop(dialogContext);
-              if (Platform.isAndroid || Platform.isIOS) {
+              if (PlatformInfo.isWeb) {
+                SystemNavigator.pop();
+              } else if (PlatformInfo.isMobile) {
                 SystemNavigator.pop();
               } else {
-                exit(0);
+                io.exit(0);
               }
             },
             child: const Text('Exit App'),

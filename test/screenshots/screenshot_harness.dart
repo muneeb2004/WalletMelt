@@ -116,10 +116,6 @@ class ScreenshotHarness {
       // Immediate In-Line Validation
       validatePngFile(outputFile, relativePath, expectedWidth: 1080, expectedHeight: 2400);
 
-      // Cleanly unmount and drain transient frame callbacks
-      await tester.pumpWidget(Container());
-      await tester.pump(const Duration(milliseconds: 500));
-
       // ignore: avoid_print
       print('  ✓ [Validated 1080x2400] $relativePath (${bytes.length} bytes)');
       return outputFile;

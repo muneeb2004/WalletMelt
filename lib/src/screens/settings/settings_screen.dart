@@ -27,6 +27,7 @@ import '../security/create_pin_screen.dart';
 import '../security/verify_pin_screen.dart';
 import '../../security/pin_lock_controller.dart';
 import '../../security/root_detection_service.dart';
+import '../../utils/platform_info.dart';
 
 
 
@@ -1056,13 +1057,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
         return;
       }
 
-      final result = Platform.environment.containsKey('FLUTTER_TEST')
+      final result = (PlatformInfo.isFlutterTest || PlatformInfo.isWeb)
           ? widget.importValidationService.validateBackup(backupFile.jsonText)
           : await compute(_validateBackupIsolate, backupFile.jsonText);
       if (!mounted) return;
 
       if (result.isValid) {
-        final preview = Platform.environment.containsKey('FLUTTER_TEST')
+        final preview = (PlatformInfo.isFlutterTest || PlatformInfo.isWeb)
             ? widget.previewService.generatePreview(backupFile.jsonText)
             : await compute(_generatePreviewIsolate, backupFile.jsonText);
         if (!mounted) return;
@@ -1085,7 +1086,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           BackupConflictSummary? conflictSummary;
           RestoreDryRunPlan? dryRunPlan;
           try {
-            if (Platform.environment.containsKey('FLUTTER_TEST')) {
+            if (PlatformInfo.isFlutterTest || PlatformInfo.isWeb) {
               conflictSummary = widget.conflictService.detect(
                 jsonText: backupFile.jsonText,
                 localSnapshot: snapshot,

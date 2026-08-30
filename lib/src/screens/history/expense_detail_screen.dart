@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -13,6 +11,7 @@ import '../../types/grocery_item.dart';
 import '../../utils/currency_format.dart';
 import '../../utils/date_utils.dart';
 import '../../widgets/section_header.dart';
+import '../../widgets/receipt_image.dart';
 
 class ExpenseDetailScreen extends StatelessWidget {
   const ExpenseDetailScreen({required this.expenseId, super.key});
@@ -159,13 +158,11 @@ class ExpenseDetailScreen extends StatelessWidget {
                           tag: expense.receiptImageUri!,
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(22),
-                            child: Image.file(
-                              File(
-                                  Uri.parse(expense.receiptImageUri!).toFilePath()),
+                            child: ReceiptImage(
+                              receiptUri: expense.receiptImageUri,
                               height: 320,
                               width: double.infinity,
                               fit: BoxFit.cover,
-                              cacheHeight: (320 * MediaQuery.devicePixelRatioOf(context)).round(),
                               errorBuilder: (_, __, ___) => Container(
                                 height: 180,
                                 alignment: Alignment.center,

@@ -1,14 +1,11 @@
-import 'dart:io';
-
 import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
-import 'package:flutter/foundation.dart' show visibleForTesting;
+import 'package:flutter/foundation.dart' show kIsWeb, visibleForTesting;
 import 'package:path/path.dart' as p;
 import 'package:sqflite/sqflite.dart' show getDatabasesPath;
-import 'package:sqlite3/sqlite3.dart' as sqlite3;
 
 import '../../constants/categories.dart';
 import '../schema/database_schema.dart';
+import 'connection/open_connection.dart';
 
 part 'wallet_melt_database.g.dart';
 
@@ -489,6 +486,7 @@ class V1MigrationMetrics {
 )
 class WalletMeltDatabase extends _$WalletMeltDatabase {
   WalletMeltDatabase(super.executor, {this.preMigrationBackupPath});
+  WalletMeltDatabase.memory() : this(openInMemoryConnection());
 
   static const currentSchemaVersion = 8;
 
@@ -510,6 +508,9 @@ class WalletMeltDatabase extends _$WalletMeltDatabase {
   }
 
   static Future<WalletMeltDatabase> _openImpl() async {
+    if (kIsWeb) {
+      return WalletMeltDatabase(openConnection(name: 'wallet_melt'));
+    }
     final dbPath = await getDatabasesPath();
     final path = p.join(dbPath, DatabaseSchema.databaseName);
     return openAtPath(path);
@@ -523,48 +524,15 @@ class WalletMeltDatabase extends _$WalletMeltDatabase {
   }
 
   static Future<WalletMeltDatabase> openAtPath(String path) async {
-    final backupPath = await createPreV2BackupIfNeeded(path);
+    final backupPath = await createPreV2Backup(path);
     return WalletMeltDatabase(
-      NativeDatabase.createInBackground(File(path)),
+      openConnection(name: 'wallet_melt', path: path),
       preMigrationBackupPath: backupPath,
     );
   }
 
-  static Future<String?> createPreV2BackupIfNeeded(String path) async {
-    final dbFile = File(path);
-    if (!await dbFile.exists()) return null;
-
-    final existingVersion = _readUserVersion(path);
-    if (existingVersion <= 0 || existingVersion >= currentSchemaVersion) {
-      return null;
-    }
-
-    final timestamp = DateTime.now().toIso8601String().replaceAll(':', '-');
-    final backupPath = p.join(
-      dbFile.parent.path,
-      'wallet_melt.pre_v2_$timestamp.db',
-    );
-    await dbFile.copy(backupPath);
-
-    for (final suffix in ['-wal', '-shm']) {
-      final sidecar = File('$path$suffix');
-      if (await sidecar.exists()) {
-        await sidecar.copy('$backupPath$suffix');
-      }
-    }
-
-    return backupPath;
-  }
-
-  static int _readUserVersion(String path) {
-    final db = sqlite3.sqlite3.open(path);
-    try {
-      final result = db.select('PRAGMA user_version;');
-      return result.first['user_version'] as int;
-    } finally {
-      db.close();
-    }
-  }
+  static Future<String?> createPreV2BackupIfNeeded(String path) =>
+      createPreV2Backup(path);
 
   @override
   int get schemaVersion => currentSchemaVersion;

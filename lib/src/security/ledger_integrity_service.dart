@@ -1,14 +1,12 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:crypto/crypto.dart';
-import 'package:flutter/foundation.dart';
-
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../types/budget.dart';
 import '../types/debt.dart';
 import '../types/expense.dart';
 import '../types/subscription.dart';
+import '../utils/platform_info.dart';
 
 /// Represents a cryptographic ledger anchor $(N, \text{Block}_N)$.
 class LedgerAnchor {
@@ -93,7 +91,7 @@ class LedgerIntegrityService {
     KeystoreMacProvider? macProvider,
     FlutterSecureStorage? storage,
   })  : _macProvider = macProvider ??
-            (Platform.isAndroid && !Platform.environment.containsKey('FLUTTER_TEST')
+            (PlatformInfo.isAndroid && !PlatformInfo.isFlutterTest
                 ? AndroidKeystoreMacProvider()
                 : FallbackSoftwareMacProvider()),
         _storage = storage ?? const FlutterSecureStorage();
@@ -109,8 +107,7 @@ class LedgerIntegrityService {
 
   /// Canonical serialization of [CategoryBudget].
   String serializeBudget(CategoryBudget b) {
-    return 'BUDGET:${b.id}|${b.categoryId}|${b.amount}|${b.currency}|'
-        '${b.month}|${b.createdAt}|${b.updatedAt}';
+    return 'BUDGET:${b.id}|${b.categoryId}|${b.amount}|${b.currency}|${b.month}|${b.createdAt}|${b.updatedAt}';
   }
 
   /// Canonical serialization of [DebtRecord].
@@ -140,7 +137,6 @@ class LedgerIntegrityService {
         blockHashHex: '0000000000000000000000000000000000000000000000000000000000000000',
       );
     }
-
 
     var prevBlockBytes = utf8.encode('GENESIS');
 
@@ -176,7 +172,7 @@ class LedgerIntegrityService {
   /// Atomically saves the ledger anchor in secure storage.
   Future<void> persistAnchor(LedgerAnchor anchor) async {
     final jsonStr = jsonEncode(anchor.toJson());
-    if (kIsWeb || Platform.environment.containsKey('FLUTTER_TEST')) {
+    if (PlatformInfo.isWeb || PlatformInfo.isFlutterTest) {
       _testStorage[_anchorKey] = jsonStr;
       return;
     }
@@ -186,7 +182,7 @@ class LedgerIntegrityService {
   /// Retrieves the saved ledger anchor from secure storage.
   Future<LedgerAnchor?> getPersistedAnchor() async {
     String? raw;
-    if (kIsWeb || Platform.environment.containsKey('FLUTTER_TEST')) {
+    if (PlatformInfo.isWeb || PlatformInfo.isFlutterTest) {
       raw = _testStorage[_anchorKey];
     } else {
       raw = await _storage.read(key: _anchorKey);
@@ -202,7 +198,7 @@ class LedgerIntegrityService {
 
   /// Clears stored anchor (for test reset).
   Future<void> clearAnchor() async {
-    if (kIsWeb || Platform.environment.containsKey('FLUTTER_TEST')) {
+    if (PlatformInfo.isWeb || PlatformInfo.isFlutterTest) {
       _testStorage.remove(_anchorKey);
       return;
     }

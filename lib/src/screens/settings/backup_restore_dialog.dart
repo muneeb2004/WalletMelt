@@ -18,6 +18,7 @@ import '../../services/export/wallet_melt_json_restore_plan.dart';
 import '../../services/export/wallet_melt_json_restore_service.dart';
 import '../../state/app_state.dart';
 import '../../widgets/app_snackbar.dart';
+import '../../utils/platform_info.dart';
 import 'conflict_resolution_screen.dart';
 
 class BackupRestoreDialog extends StatefulWidget {
@@ -191,7 +192,7 @@ class _BackupRestoreDialogState extends State<BackupRestoreDialog> {
       );
 
       // Overwrite exact file path for consistency
-      if (!Platform.environment.containsKey('FLUTTER_TEST')) {
+      if (!PlatformInfo.isFlutterTest) {
         if (await safetyBackupFile.exists()) {
           await safetyBackupFile.delete();
         }
@@ -795,7 +796,7 @@ void _extractZipInBackground(_ZipExtractorArgs args) {
 }
 
 Future<R> _runTask<Q, R>(ComputeCallback<Q, R> callback, Q message) {
-  if (Platform.environment.containsKey('FLUTTER_TEST')) {
+  if (PlatformInfo.isFlutterTest || PlatformInfo.isWeb) {
     try {
       return Future.value(callback(message));
     } catch (e, s) {

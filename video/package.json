@@ -1,0 +1,30 @@
+{
+  "name": "walletmelt-promo-video",
+  "version": "1.0.0",
+  "description": "Deterministic promotional intro video for WalletMelt built with Remotion",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "remotion studio src/index.ts",
+    "preview": "remotion studio src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc",
+    "render": "node scripts/render-all.mjs",
+    "render:video": "node scripts/render-all.mjs",
+    "render:qa": "node scripts/render-qa.mjs"
+  },
+  "dependencies": {
+    "@remotion/bundler": "^4.0.230",
+    "@remotion/cli": "^4.0.230",
+    "@remotion/renderer": "^4.0.230",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "^4.0.230"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.4",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "typescript": "^5.7.3"
+  }
+}

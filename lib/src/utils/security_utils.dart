@@ -1,7 +1,7 @@
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 
 import '../services/platform/window_security_channel.dart';
+import 'platform_info.dart';
 
 class SecurityUtils {
   /// Compile-time constant for screenshot generation & test automation.
@@ -22,7 +22,7 @@ class SecurityUtils {
   ///   pipelines to capture publication assets.
   /// - Web and non-Android platforms safely early-exit without error.
   static Future<void> enableSecureScreen() async {
-    if (kIsWeb || !Platform.isAndroid) return;
+    if (PlatformInfo.isWeb || !PlatformInfo.isAndroid) return;
 
     // Security Gate: In release or profile builds, NEVER bypass security.
     if (kReleaseMode || kProfileMode) {
@@ -43,7 +43,7 @@ class SecurityUtils {
   }
 
   static Future<void> disableSecureScreen() async {
-    if (kIsWeb || !Platform.isAndroid) return;
+    if (PlatformInfo.isWeb || !PlatformInfo.isAndroid) return;
     try {
       await WindowSecurityChannel.setSecureScreenEnabled(false);
     } catch (_) {}

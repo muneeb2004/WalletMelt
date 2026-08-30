@@ -18,3 +18,7 @@ ios/Pods/
 ios/.symlinks/
 ios/Runner.xcworkspace/
 ios/Runner/GeneratedPluginRegistrant.*
+
+# Dependencies & Build Outputs
+node_modules/
+out/

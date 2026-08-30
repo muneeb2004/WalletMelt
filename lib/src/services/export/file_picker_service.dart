@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' as io;
 
 import 'package:file_picker/file_picker.dart';
 import 'wallet_melt_json_backup_validator.dart';
@@ -12,18 +12,23 @@ class FilePickerService {
   /// Returns null if the user cancels or the file cannot be read.
   Future<String?> pickJsonFileContent() async {
     try {
-      final result = await FilePicker.pickFiles(
+      final files = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['json'],
       );
-      if (result == null || result.files.isEmpty) {
+      if (files.isEmpty) {
         return null;
       }
-      final file = result.files.first;
+      final file = files.first;
+
+      final bytes = await file.readAsBytes();
+      if (bytes.isNotEmpty) {
+        return utf8.decode(bytes);
+      }
 
       final path = file.path;
       if (path != null) {
-        return File(path).readAsString();
+        return io.File(path).readAsString();
       }
 
       final chunks = await file.readAsByteStream().toList();
@@ -37,19 +42,28 @@ class FilePickerService {
   /// Prompts the user to pick a backup file (either JSON or ZIP) and returns a WalletMeltBackupFile.
   Future<WalletMeltBackupFile?> pickBackupFile() async {
     try {
-      final result = await FilePicker.pickFiles(
+      final files = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['json', 'zip'],
       );
-      if (result == null || result.files.isEmpty) {
+      if (files.isEmpty) {
         return null;
       }
-      final file = result.files.first;
+      final file = files.first;
+
+      final bytes = await file.readAsBytes();
+      if (bytes.isNotEmpty) {
+        return await WalletMeltBackupFile.fromBytes(bytes);
+      }
+
       final path = file.path;
-      if (path == null) {
-        return null;
+      if (path != null) {
+        return await WalletMeltBackupFile.fromPath(path);
       }
-      return await WalletMeltBackupFile.fromPath(path);
+
+      final chunks = await file.readAsByteStream().toList();
+      final streamBytes = chunks.expand((chunk) => chunk).toList();
+      return await WalletMeltBackupFile.fromBytes(streamBytes);
     } catch (_) {
       // Return null on failure or user cancellation.
     }

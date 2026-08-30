@@ -1,8 +1,8 @@
-import 'dart:io';
 import 'dart:math';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+import '../utils/platform_info.dart';
 
 /// Secure storage layer for storing PIN, cryptographic salt, lockout state, and biometric configuration.
 ///
@@ -24,7 +24,7 @@ class PinStorage {
       : _secureStorage = secureStorage ?? const FlutterSecureStorage();
 
   Future<void> _write(String key, String value) async {
-    if (kIsWeb || Platform.environment.containsKey('FLUTTER_TEST')) {
+    if (PlatformInfo.isWeb || PlatformInfo.isFlutterTest) {
       _testStorage[key] = value;
       return;
     }
@@ -41,7 +41,7 @@ class PinStorage {
   }
 
   Future<String?> _read(String key) async {
-    if (kIsWeb || Platform.environment.containsKey('FLUTTER_TEST')) {
+    if (PlatformInfo.isWeb || PlatformInfo.isFlutterTest) {
       return _testStorage[key];
     }
     try {
@@ -56,7 +56,7 @@ class PinStorage {
   }
 
   Future<void> _delete(String key) async {
-    if (kIsWeb || Platform.environment.containsKey('FLUTTER_TEST')) {
+    if (PlatformInfo.isWeb || PlatformInfo.isFlutterTest) {
       _testStorage.remove(key);
       return;
     }

@@ -1,7 +1,7 @@
-import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
+
+import '../utils/platform_info.dart';
 
 /// Status of a biometric authentication attempt.
 enum BiometricAuthStatus {
@@ -78,8 +78,8 @@ class BiometricService {
 
   /// Determines if the device hardware supports biometric authentication.
   Future<bool> isBiometricHardwareAvailable() async {
-    if (kIsWeb) return false;
-    if (Platform.environment.containsKey('FLUTTER_TEST')) {
+    if (PlatformInfo.isWeb) return false;
+    if (PlatformInfo.isFlutterTest) {
       return testHardwareAvailable ?? false;
     }
 
@@ -96,8 +96,8 @@ class BiometricService {
 
   /// Retrieves list of enrolled and available biometric sensor types on the device.
   Future<List<BiometricType>> getAvailableBiometrics() async {
-    if (kIsWeb) return const [];
-    if (Platform.environment.containsKey('FLUTTER_TEST')) {
+    if (PlatformInfo.isWeb) return const [];
+    if (PlatformInfo.isFlutterTest) {
       return testBiometrics ?? const [];
     }
 
@@ -112,8 +112,8 @@ class BiometricService {
 
   /// Checks if any biometrics are enrolled on the device.
   Future<bool> isBiometricsEnrolled() async {
-    if (kIsWeb) return false;
-    if (Platform.environment.containsKey('FLUTTER_TEST')) {
+    if (PlatformInfo.isWeb) return false;
+    if (PlatformInfo.isFlutterTest) {
       return testEnrolled ?? false;
     }
 
@@ -127,17 +127,17 @@ class BiometricService {
 
   /// Returns a platform-adaptive user-facing label for biometrics (e.g. "Face ID", "Touch ID", "Fingerprint", "Face Unlock", "Biometrics").
   Future<String> getBiometricLabel() async {
-    if (kIsWeb) return 'Biometrics';
+    if (PlatformInfo.isWeb) return 'Biometrics';
 
     try {
       final biometrics = await getAvailableBiometrics();
-      if (Platform.isIOS || Platform.isMacOS) {
+      if (PlatformInfo.isIOS || PlatformInfo.isMacOS) {
         if (biometrics.contains(BiometricType.face)) {
           return 'Face ID';
         } else if (biometrics.contains(BiometricType.fingerprint)) {
           return 'Touch ID';
         }
-      } else if (Platform.isAndroid) {
+      } else if (PlatformInfo.isAndroid) {
         if (biometrics.contains(BiometricType.fingerprint)) {
           return 'Fingerprint';
         } else if (biometrics.contains(BiometricType.face)) {
@@ -155,7 +155,7 @@ class BiometricService {
   Future<BiometricAuthResult> authenticate({
     String localizedReason = 'Unlock WalletMelt to access your financial records',
   }) async {
-    if (kIsWeb) {
+    if (PlatformInfo.isWeb) {
       return const BiometricAuthResult.notAvailable('Biometrics not supported on Web');
     }
 
@@ -166,7 +166,7 @@ class BiometricService {
     _isAuthenticating = true;
 
     try {
-      if (Platform.environment.containsKey('FLUTTER_TEST')) {
+      if (PlatformInfo.isFlutterTest) {
         if (testAuthDelay != null) {
           await Future.delayed(testAuthDelay!);
         }
@@ -230,7 +230,7 @@ class BiometricService {
 
   /// Cancels any active authentication prompt.
   Future<void> stopAuthentication() async {
-    if (kIsWeb || Platform.environment.containsKey('FLUTTER_TEST')) {
+    if (PlatformInfo.isWeb || PlatformInfo.isFlutterTest) {
       _isAuthenticating = false;
       return;
     }

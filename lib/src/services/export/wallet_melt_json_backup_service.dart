@@ -9,6 +9,7 @@ import '../../types/category.dart';
 import '../../types/expense.dart';
 import '../../types/grocery_item.dart';
 import '../../types/settings.dart';
+import '../../utils/platform_info.dart';
 import 'backup_encryption_service.dart';
 import 'export_file_writer.dart';
 import 'wallet_melt_json_backup_encoder.dart';
@@ -122,9 +123,11 @@ class WalletMeltJsonBackupService {
       'app_version': _appVersion ?? '1.0.0+3',
       'schema_version': 2,
       'export_timestamp': timestamp.toIso8601String(),
-      'platform': Platform.isAndroid
-          ? 'Android'
-          : (Platform.isIOS ? 'iOS' : 'Desktop'),
+      'platform': PlatformInfo.isWeb
+          ? 'Web'
+          : (PlatformInfo.isAndroid
+              ? 'Android'
+              : (PlatformInfo.isIOS ? 'iOS' : 'Desktop')),
       'receipt_file_count': receiptFiles.length,
       'database_file_name': 'wallet_melt.db',
       'is_encrypted': passphrase != null && passphrase.isNotEmpty,

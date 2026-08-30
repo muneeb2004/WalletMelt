@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
+import '../../utils/platform_info.dart';
 import 'backup_encryption_service.dart';
 
 class _ZipDecoderArgs {
@@ -36,7 +37,7 @@ _ZipDecoderResult _decodeBackupZip(_ZipDecoderArgs args) {
 }
 
 Future<R> _runTask<Q, R>(ComputeCallback<Q, R> callback, Q message) {
-  if (Platform.environment.containsKey('FLUTTER_TEST')) {
+  if (PlatformInfo.isFlutterTest || PlatformInfo.isWeb) {
     try {
       return Future.value(callback(message));
     } catch (e, s) {
@@ -65,13 +66,9 @@ class WalletMeltBackupFile {
     this.metadataJson,
   });
 
-  /// Loads and detects the backup type from a file path, supporting optional passphrase decryption.
-  static Future<WalletMeltBackupFile> fromPath(String filePath, {String? passphrase}) async {
-    final file = File(filePath);
-    if (!await file.exists()) {
-      throw FileSystemException('Backup file not found', filePath);
-    }
-    var bytes = await file.readAsBytes();
+  /// Loads and detects the backup type from raw bytes, supporting optional passphrase decryption.
+  static Future<WalletMeltBackupFile> fromBytes(List<int> rawBytes, {String? passphrase}) async {
+    var bytes = rawBytes;
 
     const encryptionService = BackupEncryptionService();
     if (encryptionService.isEncrypted(bytes)) {
@@ -112,6 +109,16 @@ class WalletMeltBackupFile {
         isEncrypted: false,
       );
     }
+  }
+
+  /// Loads and detects the backup type from a file path, supporting optional passphrase decryption.
+  static Future<WalletMeltBackupFile> fromPath(String filePath, {String? passphrase}) async {
+    final file = File(filePath);
+    if (!await file.exists()) {
+      throw FileSystemException('Backup file not found', filePath);
+    }
+    final bytes = await file.readAsBytes();
+    return fromBytes(bytes, passphrase: passphrase);
   }
 
   /// Decrypts an encrypted backup file using [passphrase].

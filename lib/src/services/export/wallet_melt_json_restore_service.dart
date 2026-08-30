@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' as io;
 
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
@@ -101,7 +101,7 @@ class WalletMeltJsonRestoreService {
     required WalletMeltJsonRestoreOptions options,
     required ExportFileResult safetyBackup,
     local.WalletMeltDatabase? database,
-    Directory? zipExtractDir,
+    io.Directory? zipExtractDir,
   }) async {
     final preflightFailure = await _preflightFailure(
       jsonText: jsonText,
@@ -219,7 +219,7 @@ class WalletMeltJsonRestoreService {
     required WalletMeltJsonRestoreOptions options,
     required ExportFileResult safetyBackup,
     local.WalletMeltDatabase? database,
-    Directory? zipExtractDir,
+    io.Directory? zipExtractDir,
   }) async {
     final preflightFailure = await _preflightFailure(
       jsonText: jsonText,
@@ -354,7 +354,7 @@ class WalletMeltJsonRestoreService {
     } catch (error) {
       // Rollback database from safety backup file to satisfy Phase 2 recovery safety
       try {
-        final safetyJson = await File(safetyBackup.path).readAsString();
+        final safetyJson = await io.File(safetyBackup.path).readAsString();
         await _executeRawReplaceRestore(db, safetyJson);
       } catch (recoveryError) {
         return WalletMeltJsonRestoreResult.failure(
@@ -446,7 +446,7 @@ class WalletMeltJsonRestoreService {
       );
     }
 
-    final safetyFile = File(safetyBackup.path);
+    final safetyFile = io.File(safetyBackup.path);
     if (safetyBackup.byteCount <= 0 || !await safetyFile.exists()) {
       return WalletMeltJsonRestoreResult.failure(
         'Pre-restore safety backup was not created.',
@@ -499,7 +499,7 @@ class WalletMeltJsonRestoreService {
     Map<String, String> categoryMaps,
     Map<String, String> expenseMaps,
     _RestoreMutationState state, {
-    Directory? zipExtractDir,
+    io.Directory? zipExtractDir,
     required WalletMeltJsonRestoreOptions options,
   }) async {
     var inserted = 0;
@@ -543,16 +543,16 @@ class WalletMeltJsonRestoreService {
       var receiptUri = _nullableString(expense['receipt_image_uri']);
       if (receiptUri != null && zipExtractDir != null) {
         final fileName = p.basename(Uri.parse(receiptUri).path);
-        final srcFile = File(p.join(zipExtractDir.path, 'receipts', fileName));
+        final srcFile = io.File(p.join(zipExtractDir.path, 'receipts', fileName));
         if (srcFile.existsSync()) {
           try {
             final docDir = await getApplicationDocumentsDirectory();
-            final localReceiptsDir = Directory(p.join(docDir.path, 'receipts'));
+            final localReceiptsDir = io.Directory(p.join(docDir.path, 'receipts'));
             if (!localReceiptsDir.existsSync()) {
               localReceiptsDir.createSync(recursive: true);
             }
             final newFileName = '${const Uuid().v4()}${p.extension(fileName)}';
-            final destFile = File(p.join(localReceiptsDir.path, newFileName));
+            final destFile = io.File(p.join(localReceiptsDir.path, newFileName));
             srcFile.copySync(destFile.path);
             receiptUri = destFile.uri.toString();
           } catch (e) {
@@ -610,7 +610,7 @@ class WalletMeltJsonRestoreService {
     Map<String, Object?> expense,
     Map<String, String> categoryMaps,
     _RestoreMutationState state,
-    Directory? zipExtractDir,
+    io.Directory? zipExtractDir,
   ) async {
     final sourceCategoryId = _requiredString(expense, 'category_id');
     final targetCategoryId = categoryMaps[sourceCategoryId] ?? sourceCategoryId;
@@ -618,16 +618,16 @@ class WalletMeltJsonRestoreService {
     var receiptUri = _nullableString(expense['receipt_image_uri']);
     if (receiptUri != null && zipExtractDir != null) {
       final fileName = p.basename(Uri.parse(receiptUri).path);
-      final srcFile = File(p.join(zipExtractDir.path, 'receipts', fileName));
+      final srcFile = io.File(p.join(zipExtractDir.path, 'receipts', fileName));
       if (srcFile.existsSync()) {
         try {
           final docDir = await getApplicationDocumentsDirectory();
-          final localReceiptsDir = Directory(p.join(docDir.path, 'receipts'));
+          final localReceiptsDir = io.Directory(p.join(docDir.path, 'receipts'));
           if (!localReceiptsDir.existsSync()) {
             localReceiptsDir.createSync(recursive: true);
           }
           final newFileName = '${const Uuid().v4()}${p.extension(fileName)}';
-          final destFile = File(p.join(localReceiptsDir.path, newFileName));
+          final destFile = io.File(p.join(localReceiptsDir.path, newFileName));
           srcFile.copySync(destFile.path);
           receiptUri = destFile.uri.toString();
         } catch (_) {}
@@ -672,7 +672,7 @@ class WalletMeltJsonRestoreService {
     Map<String, Object?> expense,
     Map<String, String> categoryMaps,
     _RestoreMutationState state,
-    Directory? zipExtractDir,
+    io.Directory? zipExtractDir,
   ) async {
     final existing = await (db.select(db.expenses)
           ..where((row) => row.id.equals(targetId)))
@@ -685,16 +685,16 @@ class WalletMeltJsonRestoreService {
     var receiptUri = _nullableString(expense['receipt_image_uri']) ?? existing.receiptImageUri;
     if (receiptUri != existing.receiptImageUri && zipExtractDir != null && receiptUri != null) {
       final fileName = p.basename(Uri.parse(receiptUri).path);
-      final srcFile = File(p.join(zipExtractDir.path, 'receipts', fileName));
+      final srcFile = io.File(p.join(zipExtractDir.path, 'receipts', fileName));
       if (srcFile.existsSync()) {
         try {
           final docDir = await getApplicationDocumentsDirectory();
-          final localReceiptsDir = Directory(p.join(docDir.path, 'receipts'));
+          final localReceiptsDir = io.Directory(p.join(docDir.path, 'receipts'));
           if (!localReceiptsDir.existsSync()) {
             localReceiptsDir.createSync(recursive: true);
           }
           final newFileName = '${const Uuid().v4()}${p.extension(fileName)}';
-          final destFile = File(p.join(localReceiptsDir.path, newFileName));
+          final destFile = io.File(p.join(localReceiptsDir.path, newFileName));
           srcFile.copySync(destFile.path);
           receiptUri = destFile.uri.toString();
         } catch (_) {}

@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' as io;
 
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -32,7 +32,7 @@ class ExportFileWriter {
     required String csvText,
     required String exportKind,
     DateTime? createdAt,
-    Directory? directory,
+    io.Directory? directory,
   }) async {
     final timestamp = createdAt ?? DateTime.now();
     final targetDirectory = directory ?? await getTemporaryDirectory();
@@ -62,7 +62,7 @@ class ExportFileWriter {
     required String jsonText,
     required String exportKind,
     DateTime? createdAt,
-    Directory? directory,
+    io.Directory? directory,
   }) async {
     final timestamp = createdAt ?? DateTime.now();
     final targetDirectory = directory ?? await getTemporaryDirectory();
@@ -95,7 +95,7 @@ class ExportFileWriter {
     required List<int> zipBytes,
     required String exportKind,
     DateTime? createdAt,
-    Directory? directory,
+    io.Directory? directory,
   }) async {
     final timestamp = createdAt ?? DateTime.now();
     final targetDirectory = directory ?? await getTemporaryDirectory();
@@ -121,8 +121,8 @@ class ExportFileWriter {
     );
   }
 
-  Future<File> _unusedFile(Directory directory, String fileName) async {
-    final firstFile = File(p.join(directory.path, fileName));
+  Future<io.File> _unusedFile(io.Directory directory, String fileName) async {
+    final firstFile = io.File(p.join(directory.path, fileName));
     if (!await firstFile.exists()) return firstFile;
 
     final extension = p.extension(fileName);
@@ -130,7 +130,7 @@ class ExportFileWriter {
     var counter = 2;
     while (true) {
       final candidate =
-          File(p.join(directory.path, '$baseName-$counter$extension'));
+          io.File(p.join(directory.path, '$baseName-$counter$extension'));
       if (!await candidate.exists()) return candidate;
       counter += 1;
     }

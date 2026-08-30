@@ -1,5 +1,6 @@
 import 'dart:io';
-import 'package:flutter/foundation.dart';
+
+import '../utils/platform_info.dart';
 
 /// Result of offline heuristic root and platform compromise checks.
 class RootDetectionResult {
@@ -40,7 +41,7 @@ class RootDetectionService {
 
   /// Executes multi-vector heuristic compromise checks.
   Future<RootDetectionResult> checkDeviceIntegrity() async {
-    if (kIsWeb || !Platform.isAndroid || Platform.environment.containsKey('FLUTTER_TEST')) {
+    if (PlatformInfo.isWeb || !PlatformInfo.isAndroid || PlatformInfo.isFlutterTest) {
       return const RootDetectionResult.clean();
     }
 

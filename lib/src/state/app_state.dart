@@ -1,7 +1,6 @@
-import 'dart:io';
+import 'dart:io' as io;
 import 'package:flutter/foundation.dart';
 import 'package:collection/collection.dart';
-import 'package:drift/native.dart';
 import '../data/local/wallet_melt_database.dart' as local;
 import '../data/repositories/drift/drift_budget_repository.dart';
 import '../data/repositories/drift/drift_category_repository.dart';
@@ -427,7 +426,7 @@ class AppState extends ChangeNotifier {
     required ExportFileResult safetyBackup,
     required WalletMeltJsonRestoreService restoreService,
     required WalletMeltJsonRestoreOptions options,
-    Directory? zipExtractDir,
+    io.Directory? zipExtractDir,
   }) async {
     if (_driftDatabase == null && _requiresDriftRestoreRuntime) {
       return WalletMeltJsonRestoreResult.failure(
@@ -920,4 +919,4 @@ class _FakeDriftStoreRepository extends DriftStoreRepository {
   Future<String?> recordMerchantHistory(String merchantName) async => null;
 }
 
-final _dummyDb = local.WalletMeltDatabase(NativeDatabase.memory());
+final _dummyDb = local.WalletMeltDatabase.memory();

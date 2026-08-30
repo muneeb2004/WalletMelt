@@ -1,5 +1,6 @@
 import 'dart:async';
-import 'dart:io';
+import 'dart:convert';
+import 'dart:io' as io;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -14,7 +15,9 @@ import '../../types/category.dart';
 import '../../types/expense.dart';
 import '../../utils/currency_format.dart';
 import '../../utils/date_utils.dart';
+import '../../utils/platform_info.dart';
 import '../../widgets/app_snackbar.dart';
+import '../../widgets/receipt_image.dart';
 
 abstract class ReceiptExportService {
   Future<String?> saveReceipt(String uri, String fileName);
@@ -26,13 +29,27 @@ class FilePickerReceiptExportService implements ReceiptExportService {
   @override
   Future<String?> saveReceipt(String uri, String fileName) async {
     try {
-      final file = File(Uri.parse(uri).toFilePath());
+      if (PlatformInfo.isWeb) {
+        if (uri.startsWith('data:image')) {
+          final base64Content = uri.split(',').last;
+          final bytes = base64Decode(base64Content);
+          final savedUri = await FilePicker.saveFile(
+            fileName: fileName,
+            bytes: bytes,
+          );
+          return savedUri?.toString();
+        }
+        return null;
+      }
+      final filePath = uri.startsWith('file://') ? Uri.parse(uri).toFilePath() : uri;
+      final file = io.File(filePath);
       if (!await file.exists()) return null;
       final bytes = await file.readAsBytes();
-      return await FilePicker.saveFile(
+      final savedUri = await FilePicker.saveFile(
         fileName: fileName,
         bytes: bytes,
       );
+      return savedUri?.path ?? savedUri?.toString();
     } catch (_) {
       return null;
     }
@@ -109,9 +126,19 @@ class _ReceiptViewerScreenState extends State<ReceiptViewerScreen>
       return;
     }
 
+    if (PlatformInfo.isWeb) {
+      if (mounted) {
+        setState(() {
+          _fileNotFound = false;
+          _isLoading = false;
+        });
+      }
+      return;
+    }
+
     try {
       final path = Uri.parse(expense.receiptImageUri!).toFilePath();
-      final file = File(path);
+      final file = io.File(path);
       final exists = file.existsSync();
       if (mounted) {
         setState(() {
@@ -206,7 +233,14 @@ class _ReceiptViewerScreenState extends State<ReceiptViewerScreen>
   Future<void> _shareReceipt(String uri) async {
     _cancelHideTimer();
     try {
-      final file = File(Uri.parse(uri).toFilePath());
+      if (PlatformInfo.isWeb) {
+        if (mounted) {
+          showErrorSnackbar(context, 'Receipt sharing is not supported on web. Use the download button.');
+        }
+        return;
+      }
+      final filePath = uri.startsWith('file://') ? Uri.parse(uri).toFilePath() : uri;
+      final file = io.File(filePath);
       final byteCount = file.lengthSync();
       final exportFile = ExportFileResult(
         path: file.path,
@@ -422,8 +456,8 @@ class _ReceiptViewerScreenState extends State<ReceiptViewerScreen>
                   child: Center(
                     child: Hero(
                       tag: expense.receiptImageUri!,
-                      child: Image.file(
-                        File(Uri.parse(expense.receiptImageUri!).toFilePath()),
+                      child: ReceiptImage(
+                        receiptUri: expense.receiptImageUri,
                         fit: BoxFit.contain,
                         errorBuilder: (context, error, stackTrace) {
                           return _buildErrorState('The file is corrupted or could not be decoded.');
