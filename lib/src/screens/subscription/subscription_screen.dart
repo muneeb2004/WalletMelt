@@ -11,6 +11,7 @@ import '../../types/subscription.dart' as wm_sub;
 import '../../types/subscription.dart' show SubscriptionStatus;
 import '../../types/category.dart' as wm_cat;
 import '../../utils/currency_format.dart';
+import '../../utils/number_parser.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/app_snackbar.dart';
@@ -451,8 +452,8 @@ class _AddSubscriptionSheetState extends State<_AddSubscriptionSheet> {
     final pctText = _taxPercentageController.text.trim();
     if (amountText.isEmpty || pctText.isEmpty) return;
 
-    final amount = double.tryParse(amountText);
-    final pct = double.tryParse(pctText);
+    final amount = parseTolerantNumber(amountText);
+    final pct = parseTolerantNumber(pctText);
     if (amount != null && pct != null) {
       final tax = amount * (pct / 100.0);
       setState(() {
@@ -469,8 +470,8 @@ class _AddSubscriptionSheetState extends State<_AddSubscriptionSheet> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final parsedAmount = double.tryParse(_amountController.text.trim()) ?? 0.0;
-    final parsedTax = double.tryParse(_taxController.text.trim()) ?? 0.0;
+    final parsedAmount = parseTolerantNumber(_amountController.text) ?? 0.0;
+    final parsedTax = parseTolerantNumber(_taxController.text) ?? 0.0;
     final grandTotal = parsedAmount + parsedTax;
 
     return Padding(
@@ -570,7 +571,7 @@ class _AddSubscriptionSheetState extends State<_AddSubscriptionSheet> {
                     if (val == null || val.trim().isEmpty) {
                       return 'Required';
                     }
-                    if (double.tryParse(val) == null) {
+                    if (parseTolerantNumber(val) == null) {
                       return 'Invalid';
                     }
                     return null;
@@ -649,8 +650,8 @@ class _AddSubscriptionSheetState extends State<_AddSubscriptionSheet> {
                                 contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                               ),
                               onChanged: (val) {
-                                final taxVal = double.tryParse(val.trim());
-                                final amtVal = double.tryParse(_amountController.text.trim());
+                                final taxVal = parseTolerantNumber(val);
+                                final amtVal = parseTolerantNumber(_amountController.text);
                                 if (taxVal != null && amtVal != null && amtVal > 0) {
                                   final pct = (taxVal / amtVal) * 100.0;
                                   _taxPercentageController.text = pct.toStringAsFixed(pct % 1 == 0 ? 0 : 1);
@@ -829,8 +830,8 @@ class _AddSubscriptionSheetState extends State<_AddSubscriptionSheet> {
                             }
 
                             final name = _nameController.text.trim();
-                            final amount = double.parse(_amountController.text.trim());
-                            final tax = double.tryParse(_taxController.text.trim());
+                            final amount = parseTolerantNumber(_amountController.text) ?? 0.0;
+                            final tax = parseTolerantNumber(_taxController.text);
                             final desc = _descriptionController.text.trim();
 
                             String cycleValue = _billingCycle;
@@ -1024,8 +1025,8 @@ class _SubscriptionActionsSheet extends StatelessWidget {
         return StatefulBuilder(
           builder: (context, setState) {
             final isDark = Theme.of(context).brightness == Brightness.dark;
-            final amount = double.tryParse(amountController.text.trim()) ?? 0.0;
-            final tax = double.tryParse(taxController.text.trim()) ?? 0.0;
+            final amount = parseTolerantNumber(amountController.text) ?? 0.0;
+            final tax = parseTolerantNumber(taxController.text) ?? 0.0;
             final total = amount + tax;
 
 
@@ -1034,8 +1035,8 @@ class _SubscriptionActionsSheet extends StatelessWidget {
               final pctText = taxPercentageController.text.trim();
               if (amountText.isEmpty || pctText.isEmpty) return;
 
-              final amt = double.tryParse(amountText);
-              final pct = double.tryParse(pctText);
+              final amt = parseTolerantNumber(amountText);
+              final pct = parseTolerantNumber(pctText);
               if (amt != null && pct != null) {
                 final tx = amt * (pct / 100.0);
                 taxController.text = tx.toStringAsFixed(tx % 1 == 0 ? 0 : 2);
@@ -1090,8 +1091,8 @@ class _SubscriptionActionsSheet extends StatelessWidget {
                               contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                             ),
                             onChanged: (val) {
-                              final taxVal = double.tryParse(val.trim());
-                              final amtVal = double.tryParse(amountController.text.trim());
+                              final taxVal = parseTolerantNumber(val);
+                              final amtVal = parseTolerantNumber(amountController.text);
                               if (taxVal != null && amtVal != null && amtVal > 0) {
                                 final pct = (taxVal / amtVal) * 100.0;
                                 taxPercentageController.text = pct.toStringAsFixed(pct % 1 == 0 ? 0 : 1);
@@ -1140,8 +1141,8 @@ class _SubscriptionActionsSheet extends StatelessWidget {
                 ),
                 TextButton(
                   onPressed: () async {
-                    final newAmount = double.tryParse(amountController.text.trim());
-                    final newTax = double.tryParse(taxController.text.trim());
+                    final newAmount = parseTolerantNumber(amountController.text);
+                    final newTax = parseTolerantNumber(taxController.text);
                     if (newAmount != null && newAmount >= 0) {
                       final updated = subscription.copyWith(
                         amount: newAmount,

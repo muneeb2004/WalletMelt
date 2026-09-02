@@ -1,3 +1,5 @@
+import 'number_parser.dart';
+
 class ExpenseValidationResult {
   const ExpenseValidationResult(
       {required this.isValid,
@@ -16,7 +18,7 @@ ExpenseValidationResult validateExpenseInput({
   required String? categoryId,
   required DateTime? date,
 }) {
-  final parsed = double.tryParse(amount.trim());
+  final parsed = parseTolerantNumber(amount);
   final amountError =
       parsed == null || parsed <= 0 ? 'Enter a positive amount.' : null;
   final categoryError =

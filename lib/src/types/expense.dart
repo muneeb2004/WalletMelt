@@ -142,6 +142,50 @@ class Expense {
     }
     return null;
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Expense &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          amount == other.amount &&
+          currency == other.currency &&
+          categoryId == other.categoryId &&
+          title == other.title &&
+          vendor == other.vendor &&
+          storeId == other.storeId &&
+          date == other.date &&
+          notes == other.notes &&
+          receiptImageUri == other.receiptImageUri &&
+          isRecurring == other.isRecurring &&
+          recurrenceFrequency == other.recurrenceFrequency &&
+          createdAt == other.createdAt &&
+          updatedAt == other.updatedAt &&
+          deletedAt == other.deletedAt &&
+          subtotalAmount == other.subtotalAmount &&
+          taxAmount == other.taxAmount;
+
+  @override
+  int get hashCode => Object.hashAll([
+        id,
+        amount,
+        currency,
+        categoryId,
+        title,
+        vendor,
+        storeId,
+        date,
+        notes,
+        receiptImageUri,
+        isRecurring,
+        recurrenceFrequency,
+        createdAt,
+        updatedAt,
+        deletedAt,
+        subtotalAmount,
+        taxAmount,
+      ]);
 }
 
 class ExpenseDraft {

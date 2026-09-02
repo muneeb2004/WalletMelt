@@ -340,9 +340,30 @@ class WalletMeltTheme {
   }
 }
 
-Color colorFromHex(String value) {
-  final hex = value.replaceFirst('#', '');
-  return Color(int.parse('FF$hex', radix: 16));
+Color colorFromHex(String value, {Color fallback = const Color(0xFF64748B)}) {
+  final clean = value.replaceAll('#', '').replaceAll(' ', '').trim();
+  if (clean.length == 6) {
+    final parsed = int.tryParse('FF$clean', radix: 16);
+    if (parsed != null) return Color(parsed);
+  } else if (clean.length == 8) {
+    final parsed = int.tryParse(clean, radix: 16);
+    if (parsed != null) return Color(parsed);
+  } else if (clean.length == 3) {
+    final r = clean[0];
+    final g = clean[1];
+    final b = clean[2];
+    final parsed = int.tryParse('FF$r$r$g$g$b$b', radix: 16);
+    if (parsed != null) return Color(parsed);
+  }
+  return fallback;
+}
+
+String hexFromColor(Color color, {bool includeHash = true}) {
+  final r = ((color.r * 255.0).round() & 0xff).toRadixString(16).padLeft(2, '0');
+  final g = ((color.g * 255.0).round() & 0xff).toRadixString(16).padLeft(2, '0');
+  final b = ((color.b * 255.0).round() & 0xff).toRadixString(16).padLeft(2, '0');
+  final prefix = includeHash ? '#' : '';
+  return '$prefix$r$g$b'.toUpperCase();
 }
 
 /// Shared budget progress color based on spend ratio thresholds.

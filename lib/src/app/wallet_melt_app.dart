@@ -75,6 +75,8 @@ class WalletMeltApp extends StatefulWidget {
 }
 
 class _WalletMeltAppState extends State<WalletMeltApp> {
+  final GlobalKey<NavigatorState> _rootNavigatorKey =
+      GlobalKey<NavigatorState>();
   late final GoRouter _router;
   late final PinLockController _pinLockController;
 
@@ -101,6 +103,7 @@ class _WalletMeltAppState extends State<WalletMeltApp> {
     _pinLockController.addListener(_onPinLockChanged);
 
     _router = GoRouter(
+      navigatorKey: _rootNavigatorKey,
       initialLocation: (_pinLockController.isPinEnabled && _pinLockController.isLocked)
           ? '/pin-lock?from=%2F'
           : (!appState.settings.hasAcceptedPrivacyPolicy
@@ -238,6 +241,7 @@ class _WalletMeltAppState extends State<WalletMeltApp> {
             builder: (context, state) => const InsightsScreen()),
         GoRoute(
             path: '/expense/new',
+            parentNavigatorKey: _rootNavigatorKey,
             builder: (context, state) {
               final catId = state.uri.queryParameters['categoryId'];
               return AddExpenseScreen(initialCategoryId: catId);
@@ -250,6 +254,7 @@ class _WalletMeltAppState extends State<WalletMeltApp> {
             redirect: (context, state) => '/planning?tab=essentials'),
         GoRoute(
           path: '/expense/:id',
+          parentNavigatorKey: _rootNavigatorKey,
           redirect: (context, state) {
             final id = state.pathParameters['id'];
             if (!_isValidUuid(id)) return '/';
@@ -260,6 +265,7 @@ class _WalletMeltAppState extends State<WalletMeltApp> {
         ),
         GoRoute(
           path: '/receipt/:id',
+          parentNavigatorKey: _rootNavigatorKey,
           redirect: (context, state) {
             final id = state.pathParameters['id'];
             if (!_isValidUuid(id)) return '/';
@@ -270,6 +276,7 @@ class _WalletMeltAppState extends State<WalletMeltApp> {
         ),
         GoRoute(
           path: '/expense/:id/edit',
+          parentNavigatorKey: _rootNavigatorKey,
           redirect: (context, state) {
             final id = state.pathParameters['id'];
             if (!_isValidUuid(id)) return '/';

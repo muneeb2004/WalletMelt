@@ -347,52 +347,67 @@ class _ReceiptViewerScreenState extends State<ReceiptViewerScreen>
     );
   }
 
+  void _handleBack(BuildContext context) {
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go('/expense/${widget.expenseId}');
+    }
+  }
+
   Widget _buildErrorState(String message) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
-          onPressed: () => context.pop(),
-          tooltip: 'Back',
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        _handleBack(context);
+      },
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+            onPressed: () => _handleBack(context),
+            tooltip: 'Back',
+          ),
         ),
-      ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.broken_image_rounded,
-                color: WalletMeltColors.danger,
-                size: 64,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Failed to load receipt',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: Colors.white,
-                    ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                message,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.white70,
-                    ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton.icon(
-                onPressed: () => context.pop(),
-                icon: const Icon(Icons.arrow_back_rounded),
-                label: const Text('Go Back'),
-              ),
-            ],
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.broken_image_rounded,
+                  color: WalletMeltColors.danger,
+                  size: 64,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Failed to load receipt',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: Colors.white,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  message,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Colors.white70,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton.icon(
+                  onPressed: () => _handleBack(context),
+                  icon: const Icon(Icons.arrow_back_rounded),
+                  label: const Text('Go Back'),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -432,8 +447,14 @@ class _ReceiptViewerScreenState extends State<ReceiptViewerScreen>
     final isZoomed = _transformationController.value.getMaxScaleOnAxis() > 1.05;
     final mediaQueryPadding = MediaQuery.of(context).padding;
 
-    return Scaffold(
-      backgroundColor: Colors.black,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        _handleBack(context);
+      },
+      child: Scaffold(
+        backgroundColor: Colors.black,
       body: Stack(
         children: [
           // Immersive Zoomable Image Container
@@ -493,15 +514,15 @@ class _ReceiptViewerScreenState extends State<ReceiptViewerScreen>
               ),
               child: Row(
                 children: [
-                  Semantics(
-                    button: true,
-                    label: 'Close viewer',
-                    child: IconButton(
-                      icon: const Icon(Icons.close_rounded, color: Colors.white, size: 28),
-                      onPressed: () => context.pop(),
-                      tooltip: 'Close',
+                    Semantics(
+                      button: true,
+                      label: 'Close viewer',
+                      child: IconButton(
+                        icon: const Icon(Icons.close_rounded, color: Colors.white, size: 28),
+                        onPressed: () => _handleBack(context),
+                        tooltip: 'Close',
+                      ),
                     ),
-                  ),
                   if (isZoomed) ...[
                     const SizedBox(width: 8),
                     Semantics(
@@ -617,6 +638,7 @@ class _ReceiptViewerScreenState extends State<ReceiptViewerScreen>
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 }

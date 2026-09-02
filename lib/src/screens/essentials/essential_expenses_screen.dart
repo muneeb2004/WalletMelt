@@ -10,6 +10,7 @@ import '../../types/essential_expense.dart';
 import '../../types/fuel.dart';
 import '../../utils/currency_format.dart';
 import '../../utils/date_utils.dart';
+import '../../utils/number_parser.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/primary_button.dart';
 
@@ -710,7 +711,7 @@ class _AddEditEssentialSheetState extends State<_AddEditEssentialSheet> {
                                   suffixText: 'L',
                                 ),
                                 onChanged: (val) {
-                                  final l = double.tryParse(val.trim()) ?? 0.0;
+                                  final l = parseTolerantNumber(val) ?? 0.0;
                                   setState(() {
                                     _fuelComponents[i] = _fuelComponents[i].copyWith(expectedLitres: l);
                                   });
@@ -730,7 +731,7 @@ class _AddEditEssentialSheetState extends State<_AddEditEssentialSheet> {
                                   suffixText: currency,
                                 ),
                                 onChanged: (val) {
-                                  final p = double.tryParse(val.trim()) ?? 0.0;
+                                  final p = parseTolerantNumber(val) ?? 0.0;
                                   setState(() {
                                     _fuelComponents[i] = _fuelComponents[i].copyWith(expectedPricePerLitre: p);
                                   });
@@ -800,7 +801,7 @@ class _AddEditEssentialSheetState extends State<_AddEditEssentialSheet> {
 
     final double expectedAmt = _isFuel
         ? _computedFuelTotal
-        : (double.tryParse(_amountController.text.trim()) ?? 0.0);
+        : (parseTolerantNumber(_amountController.text) ?? 0.0);
 
     if (expectedAmt <= 0 && !_isFuel) {
       showErrorSnackbar(context, 'Please enter a valid expected amount');

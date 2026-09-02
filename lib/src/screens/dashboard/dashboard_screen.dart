@@ -191,21 +191,26 @@ class DashboardScreen extends StatelessWidget {
                       children: [
                         IconButton(
                           padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(minWidth: 36, minHeight: 38),
+                          visualDensity: VisualDensity.compact,
+                          constraints: const BoxConstraints.tightFor(width: 30, height: 38),
                           tooltip: 'Previous month',
                           onPressed: context.read<AppState>().previousMonth,
                           icon: const Icon(Icons.chevron_left_rounded, size: 20),
                         ),
-                        Text(
-                          readableMonth(selectedMonth),
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 2),
+                          child: Text(
+                            readableMonth(selectedMonth),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
                         IconButton(
                           padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(minWidth: 36, minHeight: 38),
+                          visualDensity: VisualDensity.compact,
+                          constraints: const BoxConstraints.tightFor(width: 30, height: 38),
                           tooltip: 'Next month',
                           onPressed: context.read<AppState>().nextMonth,
                           icon: const Icon(Icons.chevron_right_rounded, size: 20),

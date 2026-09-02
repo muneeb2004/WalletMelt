@@ -112,7 +112,7 @@ class WalletMeltJsonBackupService {
     final metadataJson = jsonEncode({
       'backupVersion': 1,
       'createdAt': timestamp.toIso8601String(),
-      'walletMeltVersion': _appVersion ?? '1.0.0+3',
+      'walletMeltVersion': _appVersion ?? '1.1.0+4',
       'recordCounts': {
         'expenses': expenses.length,
         'categories': categories.length,
@@ -120,7 +120,7 @@ class WalletMeltJsonBackupService {
         'budgets': budgets.length,
         'receipts': receiptFiles.length,
       },
-      'app_version': _appVersion ?? '1.0.0+3',
+      'app_version': _appVersion ?? '1.1.0+4',
       'schema_version': 2,
       'export_timestamp': timestamp.toIso8601String(),
       'platform': PlatformInfo.isWeb

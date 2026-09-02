@@ -18,6 +18,14 @@ class ExpenseDetailScreen extends StatelessWidget {
 
   final String expenseId;
 
+  void _handleBack(BuildContext context) {
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go('/history');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = context.read<AppState>();
@@ -29,19 +37,25 @@ class ExpenseDetailScreen extends StatelessWidget {
       return const Scaffold(body: Center(child: Text('Expense not found')));
     }
     final category = context.select((AppState s) => s.categoryById(expense.categoryId));
-    return Scaffold(
-      body: AppBackground(
-        padding: const EdgeInsets.fromLTRB(
-            AppSpacing.md, AppSpacing.md + 2, AppSpacing.md, AppSpacing.lg),
-        child: ListView(
-          children: [
-            // ── Title row ─────────────────────────────────────────────
-            Row(
-              children: [
-                IconButton(
-                    tooltip: 'Back',
-                    onPressed: () => context.pop(),
-                    icon: const Icon(Icons.arrow_back_rounded)),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        _handleBack(context);
+      },
+      child: Scaffold(
+        body: AppBackground(
+          padding: const EdgeInsets.fromLTRB(
+              AppSpacing.md, AppSpacing.md + 2, AppSpacing.md, AppSpacing.lg),
+          child: ListView(
+            children: [
+              // ── Title row ─────────────────────────────────────────────
+              Row(
+                children: [
+                  IconButton(
+                      tooltip: 'Back',
+                      onPressed: () => _handleBack(context),
+                      icon: const Icon(Icons.arrow_back_rounded)),
                 Expanded(
                     child: Text(expense.title,
                         style: Theme.of(context).textTheme.headlineMedium,
@@ -231,7 +245,8 @@ class ExpenseDetailScreen extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ),
+  );
   }
 
   Widget _buildReceiptRow(String label, String value, {bool isTax = false}) {

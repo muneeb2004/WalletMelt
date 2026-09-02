@@ -2,6 +2,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../types/settings.dart';
+import '../../utils/number_parser.dart';
 import '../../utils/platform_info.dart';
 
 class SettingsService {
@@ -11,6 +12,7 @@ class SettingsService {
   static const _privacyPolicyKey = 'settings.hasAcceptedPrivacyPolicy';
   static const _lastExportKey = 'settings.lastExportedAt';
   static const _monthlyBudgetAmountKey = 'settings.monthlyBudgetAmount';
+  static const _whatsNewKey = 'settings.lastSeenWhatsNewVersion';
 
   final _secureStorage = const FlutterSecureStorage();
 
@@ -55,7 +57,7 @@ class SettingsService {
     } else {
       final secureVal = await _readSecure(_monthlyBudgetAmountKey);
       if (secureVal != null) {
-        monthlyBudget = double.tryParse(secureVal);
+        monthlyBudget = parseTolerantNumber(secureVal);
       }
     }
 
@@ -67,6 +69,7 @@ class SettingsService {
       hasAcceptedPrivacyPolicy: prefs.getBool(_privacyPolicyKey) ?? false,
       lastExportedAt: prefs.getString(_lastExportKey),
       monthlyBudgetAmount: monthlyBudget,
+      lastSeenWhatsNewVersion: prefs.getString(_whatsNewKey) ?? '',
     );
   }
 
@@ -76,6 +79,7 @@ class SettingsService {
     await prefs.setString(_themeKey, settings.themePreference.name);
     await prefs.setBool(_onboardingKey, settings.hasCompletedOnboarding);
     await prefs.setBool(_privacyPolicyKey, settings.hasAcceptedPrivacyPolicy);
+    await prefs.setString(_whatsNewKey, settings.lastSeenWhatsNewVersion);
     
     final lastExportedAt = settings.lastExportedAt;
     if (lastExportedAt != null) {

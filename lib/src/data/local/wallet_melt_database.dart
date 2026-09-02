@@ -50,6 +50,9 @@ class Expenses extends Table {
   TextColumn get deletedAt => text().named('deletedAt').nullable()();
   RealColumn get subtotalAmount => real().named('subtotalAmount').nullable()();
   RealColumn get taxAmount => real().named('taxAmount').nullable()();
+  IntColumn get amountMinorUnits => integer().named('amountMinorUnits').nullable()();
+  IntColumn get subtotalAmountMinorUnits => integer().named('subtotalAmountMinorUnits').nullable()();
+  IntColumn get taxAmountMinorUnits => integer().named('taxAmountMinorUnits').nullable()();
 
   @override
   Set<Column<Object>> get primaryKey => {id};
@@ -65,6 +68,7 @@ class GroceryItems extends Table {
       .references(Expenses, #id, onDelete: KeyAction.cascade)();
   TextColumn get name => text()();
   RealColumn get amount => real()();
+  IntColumn get amountMinorUnits => integer().named('amountMinorUnits').nullable()();
   TextColumn get createdAt => text().named('createdAt')();
 
   @override
@@ -79,6 +83,7 @@ class CategoryBudgets extends Table {
   TextColumn get categoryId =>
       text().named('categoryId').references(Categories, #id)();
   RealColumn get amount => real()();
+  IntColumn get amountMinorUnits => integer().named('amountMinorUnits').nullable()();
   TextColumn get currency => text()();
   TextColumn get month => text()();
   TextColumn get createdAt => text().named('createdAt')();
@@ -291,6 +296,8 @@ class DebtRecords extends Table {
   TextColumn get type => text()(); // 'owedToMe', 'iOwe', 'loanGiven', 'loanTaken'
   RealColumn get principalAmount => real().named('principalAmount')();
   RealColumn get remainingAmount => real().named('remainingAmount')();
+  IntColumn get principalAmountMinorUnits => integer().named('principalAmountMinorUnits').nullable()();
+  IntColumn get remainingAmountMinorUnits => integer().named('remainingAmountMinorUnits').nullable()();
   TextColumn get currency => text()();
   TextColumn get description => text().nullable()();
   TextColumn get createdAt => text().named('createdAt')();
@@ -342,6 +349,8 @@ class Subscriptions extends Table {
       text().named('categoryId').references(Categories, #id)();
   RealColumn get amount => real()();
   RealColumn get taxAmount => real().named('taxAmount').nullable()();
+  IntColumn get amountMinorUnits => integer().named('amountMinorUnits').nullable()();
+  IntColumn get taxAmountMinorUnits => integer().named('taxAmountMinorUnits').nullable()();
   TextColumn get currency => text()();
   TextColumn get description => text().nullable()();
   TextColumn get startDate => text().named('startDate')();
@@ -521,6 +530,15 @@ class WalletMeltDatabase extends _$WalletMeltDatabase {
   static void resetSingletonForTesting() {
     _singleton = null;
     _singletonFuture = null;
+  }
+
+  @override
+  Future<void> close() async {
+    if (_singleton == this) {
+      _singleton = null;
+      _singletonFuture = null;
+    }
+    await super.close();
   }
 
   static Future<WalletMeltDatabase> openAtPath(String path) async {

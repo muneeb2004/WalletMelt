@@ -13,7 +13,9 @@ import '../../utils/merchant_normalizer.dart';
 import '../../state/app_state.dart';
 import '../../theme/wallet_melt_theme.dart';
 import '../../utils/expense_validation.dart';
+import '../../utils/number_parser.dart';
 import '../../widgets/app_snackbar.dart';
+import '../../widgets/color_picker_sheet.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/state_views.dart';
 import '../../widgets/receipt_image.dart';
@@ -672,7 +674,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                   hintText: 'e.g., Amazon, Uber, Local Cafe',
                 ),
                 const SizedBox(height: 14),
-                _buildTaxSection(context, double.tryParse(_amountController.text.trim()) ?? 0.0),
+                _buildTaxSection(context, parseTolerantNumber(_amountController.text) ?? 0.0),
                 const SizedBox(height: 14),
                 TextField(
                   controller: _notesController,
@@ -776,7 +778,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   }
 
   double _getFuelSubtotal() {
-    return _fuelTransactionDraft?.totalAmount ?? double.tryParse(_amountController.text.trim()) ?? 0.0;
+    return _fuelTransactionDraft?.totalAmount ?? parseTolerantNumber(_amountController.text) ?? 0.0;
   }
 
   double _getFuelGrandTotal() {
@@ -784,7 +786,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   }
 
   double _getTaxAmount() {
-    return double.tryParse(_taxController.text.trim()) ?? 0.0;
+    return parseTolerantNumber(_taxController.text) ?? 0.0;
   }
 
   double _getGroceryGrandTotal() {
@@ -888,8 +890,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 
     setState(() => _saving = true);
     final router = GoRouter.of(context);
-    final subtotalVal = double.tryParse(_amountController.text.trim()) ?? 0.0;
-    final taxVal = _taxController.text.trim().isEmpty ? null : double.tryParse(_taxController.text.trim());
+    final subtotalVal = parseTolerantNumber(_amountController.text) ?? 0.0;
+    final taxVal = _taxController.text.trim().isEmpty ? null : parseTolerantNumber(_taxController.text);
     final totalAmount = subtotalVal + (taxVal ?? 0.0);
 
     final isGroceryMode = _categoryId == 'grocery';
@@ -985,56 +987,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                         autofocus: true,
                         decoration: const InputDecoration(labelText: 'Name')),
                     const SizedBox(height: 12),
-                    Wrap(
-                      spacing: 12,
-                      runSpacing: 12,
-                      children: [
-                        for (final color in colors)
-                          GestureDetector(
-                            onTap: () => setSheetState(() => selectedColor = color),
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
-                              curve: Curves.easeOutBack,
-                              width: 44,
-                              height: 44,
-                              decoration: BoxDecoration(
-                                color: colorFromHex(color),
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: selectedColor == color
-                                      ? (Theme.of(context).brightness == Brightness.dark
-                                          ? Colors.white
-                                          : Colors.black)
-                                      : Colors.transparent,
-                                  width: 2.5,
-                                ),
-                                boxShadow: selectedColor == color
-                                    ? [
-                                        BoxShadow(
-                                          color: colorFromHex(color).withValues(alpha: 0.4),
-                                          blurRadius: 8,
-                                          offset: const Offset(0, 4),
-                                        ),
-                                      ]
-                                    : [],
-                              ),
-                              child: selectedColor == color
-                                  ? Icon(
-                                      Icons.check_rounded,
-                                      color: Colors.white,
-                                      size: 20,
-                                      shadows: [
-                                        Shadow(
-                                          color: Colors.black.withValues(alpha: 0.5),
-                                          offset: const Offset(0, 1),
-                                          blurRadius: 2,
-                                        ),
-                                      ],
-                                    )
-                                  : null,
-                            ),
-                          ),
-                      ],
+                    WMColorPicker(
+                      selectedColor: selectedColor,
+                      presetColors: colors,
+                      onColorChanged: (c) => setSheetState(() => selectedColor = c),
                     ),
                     const SizedBox(height: 18),
                     PrimaryButton(
@@ -1229,7 +1185,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   Widget _buildTaxSection(BuildContext context, double subtotal) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final currency = context.read<AppState>().settings.currency;
-    final tax = double.tryParse(_taxController.text.trim()) ?? 0.0;
+    final tax = parseTolerantNumber(_taxController.text) ?? 0.0;
     final grandTotal = subtotal + tax;
 
     return WMGlassSurface.tier1(
@@ -1272,7 +1228,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             ),
             onChanged: (val) {
-              final pct = double.tryParse(val.trim());
+              final pct = parseTolerantNumber(val);
               if (pct != null && pct >= 0) {
                 final calculatedTax = subtotal * (pct / 100.0);
                 setState(() {
@@ -1528,8 +1484,8 @@ class _BulkGroceryEditorState extends State<BulkGroceryEditor> {
     final drafts = <GroceryItemDraft>[];
     for (final row in _rows) {
       final name = row.nameController.text.trim();
-      final qty = double.tryParse(row.qtyController.text.trim()) ?? 1.0;
-      final price = double.tryParse(row.priceController.text.trim()) ?? 0.0;
+      final qty = parseTolerantNumber(row.qtyController.text) ?? 1.0;
+      final price = parseTolerantNumber(row.priceController.text) ?? 0.0;
       final total = qty * price;
       if (name.isNotEmpty) {
         drafts.add(
@@ -1852,8 +1808,8 @@ class _BulkGroceryEditorState extends State<BulkGroceryEditor> {
 
   Widget _buildMobileCard(int idx, _BulkGroceryRowData row) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final qty = double.tryParse(row.qtyController.text.trim()) ?? 1.0;
-    final price = double.tryParse(row.priceController.text.trim()) ?? 0.0;
+    final qty = parseTolerantNumber(row.qtyController.text) ?? 1.0;
+    final price = parseTolerantNumber(row.priceController.text) ?? 0.0;
     final total = qty * price;
 
     return Padding(

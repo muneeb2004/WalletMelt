@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../theme/wallet_melt_theme.dart';
 import '../../types/fuel.dart';
 import '../../utils/currency_format.dart';
+import '../../utils/number_parser.dart';
 
 class FuelEditor extends StatefulWidget {
   const FuelEditor({
@@ -35,8 +36,8 @@ class _FuelRowData {
   final FocusNode litresFocusNode;
   final FocusNode priceFocusNode;
 
-  double get litres => double.tryParse(litresController.text.trim()) ?? 0.0;
-  double get price => double.tryParse(priceController.text.trim()) ?? 0.0;
+  double get litres => parseTolerantNumber(litresController.text) ?? 0.0;
+  double get price => parseTolerantNumber(priceController.text) ?? 0.0;
   double get subtotal => roundToTwoDecimals(litres * price);
 
   void dispose() {
@@ -129,7 +130,7 @@ class _FuelEditorState extends State<FuelEditor> {
       );
     }).toList();
 
-    final odo = double.tryParse(_odometerController.text.trim());
+    final odo = parseTolerantNumber(_odometerController.text);
 
     final draft = FuelTransactionDraft(
       odometerReading: odo,

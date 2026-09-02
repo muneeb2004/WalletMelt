@@ -40,4 +40,28 @@ class CategoryBudget {
       updatedAt: map['updatedAt']! as String,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CategoryBudget &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          categoryId == other.categoryId &&
+          amount == other.amount &&
+          currency == other.currency &&
+          month == other.month &&
+          createdAt == other.createdAt &&
+          updatedAt == other.updatedAt;
+
+  @override
+  int get hashCode => Object.hash(
+        id,
+        categoryId,
+        amount,
+        currency,
+        month,
+        createdAt,
+        updatedAt,
+      );
 }

@@ -23,6 +23,7 @@ import '../../state/app_state.dart';
 import '../../theme/wallet_melt_theme.dart';
 import '../../types/settings.dart';
 import '../../widgets/app_snackbar.dart';
+import '../../widgets/whats_new_dialog.dart';
 import '../security/create_pin_screen.dart';
 import '../security/verify_pin_screen.dart';
 import '../../security/pin_lock_controller.dart';
@@ -165,31 +166,52 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 letterSpacing: -0.5,
                               ),
                             ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: WalletMeltColors.brand.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(6),
-                                border: Border.all(
-                                  color: WalletMeltColors.brand.withValues(alpha: 0.3),
-                                  width: 0.8,
+                            InkWell(
+                              onTap: () => showWhatsNewModal(context),
+                              borderRadius: BorderRadius.circular(6),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: WalletMeltColors.brand
+                                        .withValues(alpha: 0.15),
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(
+                                      color: WalletMeltColors.brand
+                                          .withValues(alpha: 0.3),
+                                      width: 0.8,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        'v1.1',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w800,
+                                          color:
+                                              theme.brightness == Brightness.dark
+                                                  ? WalletMeltColors.brand
+                                                  : WalletMeltColors.textPrimary,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 3),
+                                      Icon(
+                                        Icons.auto_awesome_rounded,
+                                        size: 10,
+                                        color:
+                                            theme.brightness == Brightness.dark
+                                                ? WalletMeltColors.brand
+                                                : WalletMeltColors.textPrimary,
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
-                              child: Text(
-                                'v1.0',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w800,
-                                  color: theme.brightness == Brightness.dark
-                                      ? WalletMeltColors.brand
-                                      : WalletMeltColors.textPrimary,
-                                ),
-                              ),
-                            ),
-                          ],
+                            ],
                         ),
                         const SizedBox(height: 2),
                         Text(
@@ -212,7 +234,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
 
             const SizedBox(height: 24),
-
 
             // SECTION 1: PREFERENCES
             Text(
@@ -954,12 +975,151 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ),
                       Text(
-                        'v1.0.0',
+                        'v1.1.0',
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: WalletMeltColors.textMuted,
                         ),
                       ),
                     ],
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 28),
+
+            // SECTION 6: WHAT'S NEW (Persistent)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "WHAT'S NEW",
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.0,
+                    color: WalletMeltColors.textMuted,
+                  ),
+                ),
+                TextButton.icon(
+                  style: TextButton.styleFrom(
+                    visualDensity: VisualDensity.compact,
+                    padding: EdgeInsets.zero,
+                  ),
+                  onPressed: () => showWhatsNewModal(context),
+                  icon: const Icon(Icons.open_in_new_rounded, size: 14),
+                  label: const Text('Full Story',
+                      style: TextStyle(
+                          fontSize: 11, fontWeight: FontWeight.w700)),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            WMGlassSurface.tier1(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color:
+                              WalletMeltColors.brand.withValues(alpha: 0.16),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.auto_awesome_rounded,
+                          color: WalletMeltColors.brand,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Version 1.1 Highlights',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 15,
+                              ),
+                            ),
+                            Text(
+                              'Back navigation fix, current month history & custom colors',
+                              style: TextStyle(
+                                fontSize: 11.5,
+                                color: WalletMeltColors.textMuted,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  const Divider(height: 1),
+                  const SizedBox(height: 12),
+                  _buildSettingsWhatsNewBullet(
+                    context,
+                    title: 'Current Month History',
+                    subtitle:
+                        'Past spending now focuses on the active month, with Show All on demand.',
+                  ),
+                  _buildSettingsWhatsNewBullet(
+                    context,
+                    title: 'Escape Room Bug Squashed',
+                    subtitle:
+                        'Opening an expense no longer traps you; the back button returns smoothly.',
+                  ),
+                  _buildSettingsWhatsNewBullet(
+                    context,
+                    title: 'Custom Category Colors',
+                    subtitle:
+                        'Choose any color via interactive rainbow slider or paste direct Hex codes.',
+                  ),
+                  _buildSettingsWhatsNewBullet(
+                    context,
+                    title: 'Forgiving Number Inputs',
+                    subtitle:
+                        'Type with commas, decimals, spaces, or currency symbols without math errors.',
+                  ),
+                  const SizedBox(height: 10),
+                  // Sneak Peek at v1.2 Card
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF6C5CE7).withValues(alpha: 0.10),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: const Color(0xFF6C5CE7).withValues(alpha: 0.25),
+                      ),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.lightbulb_outline_rounded,
+                            size: 16, color: Color(0xFF6C5CE7)),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Sneak peek at v1.2: We are designing a dedicated workflow to link budgets directly to bank balances and carry forward unspent savings. Coming soon!',
+                            style: TextStyle(
+                              fontSize: 11,
+                              height: 1.35,
+                              color: isDark
+                                  ? const Color(0xFFA29BFE)
+                                  : const Color(0xFF5A49D8),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -1260,6 +1420,53 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final local = parsed.toLocal();
     return '${local.year}-${_twoDigits(local.month)}-${_twoDigits(local.day)} '
         '${_twoDigits(local.hour)}:${_twoDigits(local.minute)}';
+  }
+
+  Widget _buildSettingsWhatsNewBullet(BuildContext context,
+      {required String title, required String subtitle}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 6,
+            height: 6,
+            margin: const EdgeInsets.only(top: 6, right: 10),
+            decoration: const BoxDecoration(
+              color: WalletMeltColors.brand,
+              shape: BoxShape.circle,
+            ),
+          ),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                style: TextStyle(
+                  fontSize: 12,
+                  fontFamily: 'PlusJakartaSans',
+                  color: isDark
+                      ? WalletMeltColors.darkTextSecondary
+                      : WalletMeltColors.textSecondary,
+                ),
+                children: [
+                  TextSpan(
+                    text: '$title: ',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: isDark
+                          ? Colors.white
+                          : WalletMeltColors.textPrimary,
+                    ),
+                  ),
+                  TextSpan(text: subtitle),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   String _twoDigits(int value) => value.toString().padLeft(2, '0');

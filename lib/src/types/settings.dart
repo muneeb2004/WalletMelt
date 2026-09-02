@@ -8,6 +8,7 @@ class WalletMeltSettings {
     this.hasAcceptedPrivacyPolicy = false,
     this.lastExportedAt,
     this.monthlyBudgetAmount,
+    this.lastSeenWhatsNewVersion = '',
   });
 
   final String currency;
@@ -16,6 +17,7 @@ class WalletMeltSettings {
   final bool hasAcceptedPrivacyPolicy;
   final String? lastExportedAt;
   final double? monthlyBudgetAmount;
+  final String lastSeenWhatsNewVersion;
 
   WalletMeltSettings copyWith({
     String? currency,
@@ -25,6 +27,7 @@ class WalletMeltSettings {
     String? lastExportedAt,
     double? monthlyBudgetAmount,
     bool clearMonthlyBudget = false,
+    String? lastSeenWhatsNewVersion,
   }) {
     return WalletMeltSettings(
       currency: currency ?? this.currency,
@@ -37,6 +40,8 @@ class WalletMeltSettings {
       monthlyBudgetAmount: clearMonthlyBudget
           ? null
           : (monthlyBudgetAmount ?? this.monthlyBudgetAmount),
+      lastSeenWhatsNewVersion:
+          lastSeenWhatsNewVersion ?? this.lastSeenWhatsNewVersion,
     );
   }
 
@@ -46,6 +51,7 @@ class WalletMeltSettings {
     hasCompletedOnboarding: false,
     hasAcceptedPrivacyPolicy: false,
     monthlyBudgetAmount: null,
+    lastSeenWhatsNewVersion: '',
   );
 }
 

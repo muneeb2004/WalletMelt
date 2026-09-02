@@ -32,6 +32,26 @@ class GroceryItem {
       createdAt: map['createdAt']! as String,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is GroceryItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          expenseId == other.expenseId &&
+          name == other.name &&
+          amount == other.amount &&
+          createdAt == other.createdAt;
+
+  @override
+  int get hashCode => Object.hash(
+        id,
+        expenseId,
+        name,
+        amount,
+        createdAt,
+      );
 }
 
 class GroceryItemDraft {

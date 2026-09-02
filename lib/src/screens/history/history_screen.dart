@@ -32,6 +32,12 @@ final class _ExpenseItem extends _ListItem {
   final Expense expense;
 }
 
+final class _ToggleHistoryItem extends _ListItem {
+  _ToggleHistoryItem({required this.showAll, required this.hiddenCount});
+  final bool showAll;
+  final int hiddenCount;
+}
+
 // ── Screen ───────────────────────────────────────────────────────────────────
 
 class HistoryScreen extends StatefulWidget {
@@ -49,6 +55,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
   ExpenseSort _sort = ExpenseSort.newest;
   bool _showRecycleBin = false;
   String _taxFilter = 'all';
+  bool _showAllHistory = false;
+  int _hiddenOlderCount = 0;
 
   Timer? _debounceTimer;
   String _searchQuery = '';
@@ -59,6 +67,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   String? _cachedCategoryId;
   ExpenseSort? _cachedSort;
   String? _cachedTaxFilter;
+  bool? _cachedShowAllHistory;
   List<_ListItem>? _cachedItems;
   List<Expense>? _cachedFilteredList;
 
@@ -104,6 +113,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         _cachedCategoryId == _categoryId &&
         _cachedSort == _sort &&
         _cachedTaxFilter == _taxFilter &&
+        _cachedShowAllHistory == _showAllHistory &&
         _cachedItems != null) {
       return _cachedItems!;
     }
@@ -137,7 +147,19 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
     _cachedFilteredList = filtered;
 
-    final grouped = groupExpensesByMonth(filtered);
+    final now = DateTime.now();
+    final currentMonthKey = '${now.year}-${now.month.toString().padLeft(2, '0')}';
+
+    List<Expense> displayExpenses;
+    if (!_showAllHistory && _searchQuery.isEmpty && !_showRecycleBin) {
+      displayExpenses = filtered.where((e) => e.date.startsWith(currentMonthKey)).toList();
+      _hiddenOlderCount = filtered.length - displayExpenses.length;
+    } else {
+      displayExpenses = filtered;
+      _hiddenOlderCount = 0;
+    }
+
+    final grouped = groupExpensesByMonth(displayExpenses);
     final items = <_ListItem>[];
     for (final entry in grouped.entries) {
       items.add(_HeaderItem(entry.key));
@@ -146,11 +168,18 @@ class _HistoryScreenState extends State<HistoryScreen> {
       }
     }
 
+    if (_hiddenOlderCount > 0 && !_showAllHistory && _searchQuery.isEmpty && !_showRecycleBin) {
+      items.add(_ToggleHistoryItem(showAll: false, hiddenCount: _hiddenOlderCount));
+    } else if (_showAllHistory && !_showRecycleBin && filtered.any((e) => !e.date.startsWith(currentMonthKey))) {
+      items.add(_ToggleHistoryItem(showAll: true, hiddenCount: 0));
+    }
+
     _cachedRawExpenses = rawExpenses;
     _cachedSearchQuery = _searchQuery;
     _cachedCategoryId = _categoryId;
     _cachedSort = _sort;
     _cachedTaxFilter = _taxFilter;
+    _cachedShowAllHistory = _showAllHistory;
     _cachedItems = items;
 
     return items;
@@ -431,17 +460,45 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
                   sliver: SliverToBoxAdapter(
-                    child: EmptyState(
-                      icon: _showRecycleBin
-                          ? Icons.delete_sweep_outlined
-                          : Icons.search_off_rounded,
-                      title: _showRecycleBin
-                          ? 'Recycle bin is empty'
-                          : 'No expenses found',
-                      subtitle: _showRecycleBin
-                          ? 'Deleted expenses will appear here.'
-                          : 'Try a different search term or category filter.',
-                    ),
+                    child: _hiddenOlderCount > 0 && !_showAllHistory
+                        ? Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 32),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.calendar_today_outlined,
+                                    size: 48, color: WalletMeltColors.textMuted),
+                                const SizedBox(height: 14),
+                                const Text('No expenses this month',
+                                    style: TextStyle(
+                                        fontSize: 16, fontWeight: FontWeight.w700)),
+                                const SizedBox(height: 6),
+                                Text(
+                                    'You have $_hiddenOlderCount older expenses saved.',
+                                    style: const TextStyle(
+                                        fontSize: 13,
+                                        color: WalletMeltColors.textMuted)),
+                                const SizedBox(height: 16),
+                                ElevatedButton.icon(
+                                  onPressed: () =>
+                                      setState(() => _showAllHistory = true),
+                                  icon: const Icon(Icons.history_rounded, size: 18),
+                                  label: const Text('Show All History'),
+                                ),
+                              ],
+                            ),
+                          )
+                        : EmptyState(
+                            icon: _showRecycleBin
+                                ? Icons.delete_sweep_outlined
+                                : Icons.search_off_rounded,
+                            title: _showRecycleBin
+                                ? 'Recycle bin is empty'
+                                : 'No expenses found',
+                            subtitle: _showRecycleBin
+                                ? 'Deleted expenses will appear here.'
+                                : 'Try a different search term or category filter.',
+                          ),
                   ),
                 )
               else
@@ -466,6 +523,85 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             ),
                           ),
                         );
+                      }
+                      if (item is _ToggleHistoryItem) {
+                        if (!item.showAll) {
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 16, bottom: 8),
+                            child: WMGlassSurface.tier2(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 14),
+                              onTap: () => setState(() => _showAllHistory = true),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 38,
+                                    height: 38,
+                                    decoration: BoxDecoration(
+                                      color: WalletMeltColors.brand
+                                          .withValues(alpha: 0.15),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(Icons.history_rounded,
+                                        size: 20,
+                                        color: WalletMeltColors.brand),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Showing Current Month',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w800,
+                                            fontSize: 13,
+                                            color: isDark
+                                                ? Colors.white
+                                                : WalletMeltColors.textPrimary,
+                                          ),
+                                        ),
+                                        Text(
+                                          '${item.hiddenCount} older expense${item.hiddenCount == 1 ? '' : 's'} hidden',
+                                          style: const TextStyle(
+                                            fontSize: 11,
+                                            color: WalletMeltColors.textMuted,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 14, vertical: 8),
+                                      visualDensity: VisualDensity.compact,
+                                    ),
+                                    onPressed: () =>
+                                        setState(() => _showAllHistory = true),
+                                    child: const Text('Show All',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.w800)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        } else {
+                          return Center(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              child: OutlinedButton.icon(
+                                icon: const Icon(Icons.calendar_today_rounded,
+                                    size: 16),
+                                label: const Text('Show Current Month Only'),
+                                onPressed: () =>
+                                    setState(() => _showAllHistory = false),
+                              ),
+                            ),
+                          );
+                        }
                       }
                       final expItem = item as _ExpenseItem;
                       return ExpenseListTile(

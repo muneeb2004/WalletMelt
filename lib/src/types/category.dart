@@ -60,4 +60,28 @@ class Category {
       updatedAt: map['updatedAt']! as String,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Category &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          name == other.name &&
+          icon == other.icon &&
+          color == other.color &&
+          isDefault == other.isDefault &&
+          createdAt == other.createdAt &&
+          updatedAt == other.updatedAt;
+
+  @override
+  int get hashCode => Object.hash(
+        id,
+        name,
+        icon,
+        color,
+        isDefault,
+        createdAt,
+        updatedAt,
+      );
 }

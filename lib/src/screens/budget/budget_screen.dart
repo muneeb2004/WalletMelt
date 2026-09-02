@@ -7,6 +7,7 @@ import '../../state/app_state.dart';
 import '../../theme/wallet_melt_theme.dart';
 import '../../utils/currency_format.dart';
 import '../../utils/date_utils.dart';
+import '../../utils/number_parser.dart';
 import '../../types/budget.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/empty_state.dart';
@@ -62,7 +63,7 @@ class BudgetScreen extends StatefulWidget {
                     ),
                     const SizedBox(height: AppSpacing.md),
                     Builder(builder: (context) {
-                      final parsed = double.tryParse(controller.text.trim()) ?? 0.0;
+                      final parsed = parseTolerantNumber(controller.text) ?? 0.0;
                       final remaining = parsed - totalSpent;
                       final isOver = remaining < 0;
                       return WMGlassSurface.tier1(
@@ -167,7 +168,7 @@ class BudgetScreen extends StatefulWidget {
                           child: ElevatedButton(
                             onPressed: () async {
                               final parsed =
-                                  double.tryParse(controller.text.trim());
+                                  parseTolerantNumber(controller.text);
                               if (parsed == null || parsed <= 0) {
                                 showErrorSnackbar(sheetContext,
                                     'Please enter a valid amount greater than 0.');
@@ -925,7 +926,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                             ),
                             onPressed: () async {
                               final parsed =
-                                  double.tryParse(amountController.text.trim());
+                                  parseTolerantNumber(amountController.text);
                               if (categoryId == null ||
                                   parsed == null ||
                                   parsed <= 0) {

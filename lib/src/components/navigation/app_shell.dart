@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:provider/provider.dart';
+
+import '../../state/app_state.dart';
 import '../../theme/wallet_melt_theme.dart';
 import '../../types/debt.dart';
 import '../../screens/debt/debt_screen.dart';
+import '../../widgets/whats_new_dialog.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({required this.navigationShell, super.key});
@@ -40,6 +44,21 @@ class _AppShellState extends State<AppShell>
       parent: _transitionController,
       curve: AppMotion.standard,
     ));
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkWhatsNewPrompt();
+    });
+  }
+
+  void _checkWhatsNewPrompt() {
+    if (!mounted) return;
+    final state = context.read<AppState>();
+    if (state.settings.hasCompletedOnboarding &&
+        state.settings.hasAcceptedPrivacyPolicy &&
+        state.settings.lastSeenWhatsNewVersion != '1.1') {
+      state.updateLastSeenWhatsNewVersion('1.1');
+      showWhatsNewModal(context);
+    }
   }
 
   @override

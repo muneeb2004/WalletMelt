@@ -10,6 +10,7 @@ import '../../types/debt.dart';
 import '../../types/payee.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/app_snackbar.dart';
+import '../../utils/number_parser.dart';
 
 class DebtScreen extends StatefulWidget {
   const DebtScreen({super.key});
@@ -313,7 +314,7 @@ class DebtScreen extends StatefulWidget {
                               return;
                             }
                             
-                            final amount = double.tryParse(amountText);
+                            final amount = parseTolerantNumber(amountText);
                             if (amount == null || amount <= 0) {
                               showErrorSnackbar(context, 'Please enter a valid amount greater than 0');
                               return;
@@ -625,7 +626,7 @@ class DebtScreen extends StatefulWidget {
                                         showErrorSnackbar(context, 'Please enter a repayment amount');
                                         return;
                                       }
-                                      final amount = double.tryParse(amountText);
+                                      final amount = parseTolerantNumber(amountText);
                                       if (amount == null || amount <= 0) {
                                         showErrorSnackbar(context, 'Please enter a valid repayment amount');
                                         return;

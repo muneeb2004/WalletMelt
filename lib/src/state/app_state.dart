@@ -1,6 +1,7 @@
 import 'dart:io' as io;
 import 'package:flutter/foundation.dart';
 import 'package:collection/collection.dart';
+import 'package:drift/drift.dart' show driftRuntimeOptions;
 import '../data/local/wallet_melt_database.dart' as local;
 import '../data/repositories/drift/drift_budget_repository.dart';
 import '../data/repositories/drift/drift_category_repository.dart';
@@ -364,6 +365,12 @@ class AppState extends ChangeNotifier {
 
   Future<void> recordExportedAt(DateTime exportedAt) async {
     settings = settings.copyWith(lastExportedAt: exportedAt.toIso8601String());
+    await _settingsService.save(settings);
+    notifyListeners();
+  }
+
+  Future<void> updateLastSeenWhatsNewVersion(String version) async {
+    settings = settings.copyWith(lastSeenWhatsNewVersion: version);
     await _settingsService.save(settings);
     notifyListeners();
   }
@@ -919,4 +926,11 @@ class _FakeDriftStoreRepository extends DriftStoreRepository {
   Future<String?> recordMerchantHistory(String merchantName) async => null;
 }
 
-final _dummyDb = local.WalletMeltDatabase.memory();
+local.WalletMeltDatabase? _lazyDummyDb;
+local.WalletMeltDatabase get _dummyDb {
+  if (_lazyDummyDb == null) {
+    driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
+    _lazyDummyDb = local.WalletMeltDatabase.memory();
+  }
+  return _lazyDummyDb!;
+}

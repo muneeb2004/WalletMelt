@@ -132,6 +132,10 @@ $stack
 ================================================================================
 ''');
       rethrow;
+    } finally {
+      try {
+        await tester.pumpWidget(const SizedBox.shrink());
+      } catch (_) {}
     }
   }
 

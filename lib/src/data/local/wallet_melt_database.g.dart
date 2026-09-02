@@ -1086,6 +1086,24 @@ class $ExpensesTable extends Expenses with TableInfo<$ExpensesTable, Expense> {
   late final GeneratedColumn<double> taxAmount = GeneratedColumn<double>(
       'taxAmount', aliasedName, true,
       type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _amountMinorUnitsMeta =
+      const VerificationMeta('amountMinorUnits');
+  @override
+  late final GeneratedColumn<int> amountMinorUnits = GeneratedColumn<int>(
+      'amountMinorUnits', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _subtotalAmountMinorUnitsMeta =
+      const VerificationMeta('subtotalAmountMinorUnits');
+  @override
+  late final GeneratedColumn<int> subtotalAmountMinorUnits =
+      GeneratedColumn<int>('subtotalAmountMinorUnits', aliasedName, true,
+          type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _taxAmountMinorUnitsMeta =
+      const VerificationMeta('taxAmountMinorUnits');
+  @override
+  late final GeneratedColumn<int> taxAmountMinorUnits = GeneratedColumn<int>(
+      'taxAmountMinorUnits', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -1106,7 +1124,10 @@ class $ExpensesTable extends Expenses with TableInfo<$ExpensesTable, Expense> {
         updatedAt,
         deletedAt,
         subtotalAmount,
-        taxAmount
+        taxAmount,
+        amountMinorUnits,
+        subtotalAmountMinorUnits,
+        taxAmountMinorUnits
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1224,6 +1245,25 @@ class $ExpensesTable extends Expenses with TableInfo<$ExpensesTable, Expense> {
       context.handle(_taxAmountMeta,
           taxAmount.isAcceptableOrUnknown(data['taxAmount']!, _taxAmountMeta));
     }
+    if (data.containsKey('amountMinorUnits')) {
+      context.handle(
+          _amountMinorUnitsMeta,
+          amountMinorUnits.isAcceptableOrUnknown(
+              data['amountMinorUnits']!, _amountMinorUnitsMeta));
+    }
+    if (data.containsKey('subtotalAmountMinorUnits')) {
+      context.handle(
+          _subtotalAmountMinorUnitsMeta,
+          subtotalAmountMinorUnits.isAcceptableOrUnknown(
+              data['subtotalAmountMinorUnits']!,
+              _subtotalAmountMinorUnitsMeta));
+    }
+    if (data.containsKey('taxAmountMinorUnits')) {
+      context.handle(
+          _taxAmountMinorUnitsMeta,
+          taxAmountMinorUnits.isAcceptableOrUnknown(
+              data['taxAmountMinorUnits']!, _taxAmountMinorUnitsMeta));
+    }
     return context;
   }
 
@@ -1272,6 +1312,12 @@ class $ExpensesTable extends Expenses with TableInfo<$ExpensesTable, Expense> {
           .read(DriftSqlType.double, data['${effectivePrefix}subtotalAmount']),
       taxAmount: attachedDatabase.typeMapping
           .read(DriftSqlType.double, data['${effectivePrefix}taxAmount']),
+      amountMinorUnits: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}amountMinorUnits']),
+      subtotalAmountMinorUnits: attachedDatabase.typeMapping.read(
+          DriftSqlType.int, data['${effectivePrefix}subtotalAmountMinorUnits']),
+      taxAmountMinorUnits: attachedDatabase.typeMapping.read(
+          DriftSqlType.int, data['${effectivePrefix}taxAmountMinorUnits']),
     );
   }
 
@@ -1301,6 +1347,9 @@ class Expense extends DataClass implements Insertable<Expense> {
   final String? deletedAt;
   final double? subtotalAmount;
   final double? taxAmount;
+  final int? amountMinorUnits;
+  final int? subtotalAmountMinorUnits;
+  final int? taxAmountMinorUnits;
   const Expense(
       {required this.id,
       required this.amount,
@@ -1320,7 +1369,10 @@ class Expense extends DataClass implements Insertable<Expense> {
       required this.updatedAt,
       this.deletedAt,
       this.subtotalAmount,
-      this.taxAmount});
+      this.taxAmount,
+      this.amountMinorUnits,
+      this.subtotalAmountMinorUnits,
+      this.taxAmountMinorUnits});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1362,6 +1414,15 @@ class Expense extends DataClass implements Insertable<Expense> {
     if (!nullToAbsent || taxAmount != null) {
       map['taxAmount'] = Variable<double>(taxAmount);
     }
+    if (!nullToAbsent || amountMinorUnits != null) {
+      map['amountMinorUnits'] = Variable<int>(amountMinorUnits);
+    }
+    if (!nullToAbsent || subtotalAmountMinorUnits != null) {
+      map['subtotalAmountMinorUnits'] = Variable<int>(subtotalAmountMinorUnits);
+    }
+    if (!nullToAbsent || taxAmountMinorUnits != null) {
+      map['taxAmountMinorUnits'] = Variable<int>(taxAmountMinorUnits);
+    }
     return map;
   }
 
@@ -1402,6 +1463,15 @@ class Expense extends DataClass implements Insertable<Expense> {
       taxAmount: taxAmount == null && nullToAbsent
           ? const Value.absent()
           : Value(taxAmount),
+      amountMinorUnits: amountMinorUnits == null && nullToAbsent
+          ? const Value.absent()
+          : Value(amountMinorUnits),
+      subtotalAmountMinorUnits: subtotalAmountMinorUnits == null && nullToAbsent
+          ? const Value.absent()
+          : Value(subtotalAmountMinorUnits),
+      taxAmountMinorUnits: taxAmountMinorUnits == null && nullToAbsent
+          ? const Value.absent()
+          : Value(taxAmountMinorUnits),
     );
   }
 
@@ -1431,6 +1501,11 @@ class Expense extends DataClass implements Insertable<Expense> {
       deletedAt: serializer.fromJson<String?>(json['deletedAt']),
       subtotalAmount: serializer.fromJson<double?>(json['subtotalAmount']),
       taxAmount: serializer.fromJson<double?>(json['taxAmount']),
+      amountMinorUnits: serializer.fromJson<int?>(json['amountMinorUnits']),
+      subtotalAmountMinorUnits:
+          serializer.fromJson<int?>(json['subtotalAmountMinorUnits']),
+      taxAmountMinorUnits:
+          serializer.fromJson<int?>(json['taxAmountMinorUnits']),
     );
   }
   @override
@@ -1457,6 +1532,10 @@ class Expense extends DataClass implements Insertable<Expense> {
       'deletedAt': serializer.toJson<String?>(deletedAt),
       'subtotalAmount': serializer.toJson<double?>(subtotalAmount),
       'taxAmount': serializer.toJson<double?>(taxAmount),
+      'amountMinorUnits': serializer.toJson<int?>(amountMinorUnits),
+      'subtotalAmountMinorUnits':
+          serializer.toJson<int?>(subtotalAmountMinorUnits),
+      'taxAmountMinorUnits': serializer.toJson<int?>(taxAmountMinorUnits),
     };
   }
 
@@ -1479,7 +1558,10 @@ class Expense extends DataClass implements Insertable<Expense> {
           String? updatedAt,
           Value<String?> deletedAt = const Value.absent(),
           Value<double?> subtotalAmount = const Value.absent(),
-          Value<double?> taxAmount = const Value.absent()}) =>
+          Value<double?> taxAmount = const Value.absent(),
+          Value<int?> amountMinorUnits = const Value.absent(),
+          Value<int?> subtotalAmountMinorUnits = const Value.absent(),
+          Value<int?> taxAmountMinorUnits = const Value.absent()}) =>
       Expense(
         id: id ?? this.id,
         amount: amount ?? this.amount,
@@ -1508,6 +1590,15 @@ class Expense extends DataClass implements Insertable<Expense> {
         subtotalAmount:
             subtotalAmount.present ? subtotalAmount.value : this.subtotalAmount,
         taxAmount: taxAmount.present ? taxAmount.value : this.taxAmount,
+        amountMinorUnits: amountMinorUnits.present
+            ? amountMinorUnits.value
+            : this.amountMinorUnits,
+        subtotalAmountMinorUnits: subtotalAmountMinorUnits.present
+            ? subtotalAmountMinorUnits.value
+            : this.subtotalAmountMinorUnits,
+        taxAmountMinorUnits: taxAmountMinorUnits.present
+            ? taxAmountMinorUnits.value
+            : this.taxAmountMinorUnits,
       );
   Expense copyWithCompanion(ExpensesCompanion data) {
     return Expense(
@@ -1542,6 +1633,15 @@ class Expense extends DataClass implements Insertable<Expense> {
           ? data.subtotalAmount.value
           : this.subtotalAmount,
       taxAmount: data.taxAmount.present ? data.taxAmount.value : this.taxAmount,
+      amountMinorUnits: data.amountMinorUnits.present
+          ? data.amountMinorUnits.value
+          : this.amountMinorUnits,
+      subtotalAmountMinorUnits: data.subtotalAmountMinorUnits.present
+          ? data.subtotalAmountMinorUnits.value
+          : this.subtotalAmountMinorUnits,
+      taxAmountMinorUnits: data.taxAmountMinorUnits.present
+          ? data.taxAmountMinorUnits.value
+          : this.taxAmountMinorUnits,
     );
   }
 
@@ -1566,32 +1666,39 @@ class Expense extends DataClass implements Insertable<Expense> {
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('subtotalAmount: $subtotalAmount, ')
-          ..write('taxAmount: $taxAmount')
+          ..write('taxAmount: $taxAmount, ')
+          ..write('amountMinorUnits: $amountMinorUnits, ')
+          ..write('subtotalAmountMinorUnits: $subtotalAmountMinorUnits, ')
+          ..write('taxAmountMinorUnits: $taxAmountMinorUnits')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
-      id,
-      amount,
-      currency,
-      categoryId,
-      title,
-      vendor,
-      storeId,
-      date,
-      notes,
-      receiptImageUri,
-      isRecurring,
-      recurrenceFrequency,
-      itemizationStatus,
-      itemTotalMismatchApproved,
-      createdAt,
-      updatedAt,
-      deletedAt,
-      subtotalAmount,
-      taxAmount);
+  int get hashCode => Object.hashAll([
+        id,
+        amount,
+        currency,
+        categoryId,
+        title,
+        vendor,
+        storeId,
+        date,
+        notes,
+        receiptImageUri,
+        isRecurring,
+        recurrenceFrequency,
+        itemizationStatus,
+        itemTotalMismatchApproved,
+        createdAt,
+        updatedAt,
+        deletedAt,
+        subtotalAmount,
+        taxAmount,
+        amountMinorUnits,
+        subtotalAmountMinorUnits,
+        taxAmountMinorUnits
+      ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1614,7 +1721,10 @@ class Expense extends DataClass implements Insertable<Expense> {
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
           other.subtotalAmount == this.subtotalAmount &&
-          other.taxAmount == this.taxAmount);
+          other.taxAmount == this.taxAmount &&
+          other.amountMinorUnits == this.amountMinorUnits &&
+          other.subtotalAmountMinorUnits == this.subtotalAmountMinorUnits &&
+          other.taxAmountMinorUnits == this.taxAmountMinorUnits);
 }
 
 class ExpensesCompanion extends UpdateCompanion<Expense> {
@@ -1637,6 +1747,9 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
   final Value<String?> deletedAt;
   final Value<double?> subtotalAmount;
   final Value<double?> taxAmount;
+  final Value<int?> amountMinorUnits;
+  final Value<int?> subtotalAmountMinorUnits;
+  final Value<int?> taxAmountMinorUnits;
   final Value<int> rowid;
   const ExpensesCompanion({
     this.id = const Value.absent(),
@@ -1658,6 +1771,9 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
     this.deletedAt = const Value.absent(),
     this.subtotalAmount = const Value.absent(),
     this.taxAmount = const Value.absent(),
+    this.amountMinorUnits = const Value.absent(),
+    this.subtotalAmountMinorUnits = const Value.absent(),
+    this.taxAmountMinorUnits = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ExpensesCompanion.insert({
@@ -1680,6 +1796,9 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
     this.deletedAt = const Value.absent(),
     this.subtotalAmount = const Value.absent(),
     this.taxAmount = const Value.absent(),
+    this.amountMinorUnits = const Value.absent(),
+    this.subtotalAmountMinorUnits = const Value.absent(),
+    this.taxAmountMinorUnits = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         amount = Value(amount),
@@ -1709,6 +1828,9 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
     Expression<String>? deletedAt,
     Expression<double>? subtotalAmount,
     Expression<double>? taxAmount,
+    Expression<int>? amountMinorUnits,
+    Expression<int>? subtotalAmountMinorUnits,
+    Expression<int>? taxAmountMinorUnits,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1733,6 +1855,11 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
       if (deletedAt != null) 'deletedAt': deletedAt,
       if (subtotalAmount != null) 'subtotalAmount': subtotalAmount,
       if (taxAmount != null) 'taxAmount': taxAmount,
+      if (amountMinorUnits != null) 'amountMinorUnits': amountMinorUnits,
+      if (subtotalAmountMinorUnits != null)
+        'subtotalAmountMinorUnits': subtotalAmountMinorUnits,
+      if (taxAmountMinorUnits != null)
+        'taxAmountMinorUnits': taxAmountMinorUnits,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1757,6 +1884,9 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
       Value<String?>? deletedAt,
       Value<double?>? subtotalAmount,
       Value<double?>? taxAmount,
+      Value<int?>? amountMinorUnits,
+      Value<int?>? subtotalAmountMinorUnits,
+      Value<int?>? taxAmountMinorUnits,
       Value<int>? rowid}) {
     return ExpensesCompanion(
       id: id ?? this.id,
@@ -1779,6 +1909,10 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
       deletedAt: deletedAt ?? this.deletedAt,
       subtotalAmount: subtotalAmount ?? this.subtotalAmount,
       taxAmount: taxAmount ?? this.taxAmount,
+      amountMinorUnits: amountMinorUnits ?? this.amountMinorUnits,
+      subtotalAmountMinorUnits:
+          subtotalAmountMinorUnits ?? this.subtotalAmountMinorUnits,
+      taxAmountMinorUnits: taxAmountMinorUnits ?? this.taxAmountMinorUnits,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1844,6 +1978,16 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
     if (taxAmount.present) {
       map['taxAmount'] = Variable<double>(taxAmount.value);
     }
+    if (amountMinorUnits.present) {
+      map['amountMinorUnits'] = Variable<int>(amountMinorUnits.value);
+    }
+    if (subtotalAmountMinorUnits.present) {
+      map['subtotalAmountMinorUnits'] =
+          Variable<int>(subtotalAmountMinorUnits.value);
+    }
+    if (taxAmountMinorUnits.present) {
+      map['taxAmountMinorUnits'] = Variable<int>(taxAmountMinorUnits.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1872,6 +2016,9 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
           ..write('deletedAt: $deletedAt, ')
           ..write('subtotalAmount: $subtotalAmount, ')
           ..write('taxAmount: $taxAmount, ')
+          ..write('amountMinorUnits: $amountMinorUnits, ')
+          ..write('subtotalAmountMinorUnits: $subtotalAmountMinorUnits, ')
+          ..write('taxAmountMinorUnits: $taxAmountMinorUnits, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1908,6 +2055,12 @@ class $GroceryItemsTable extends GroceryItems
   late final GeneratedColumn<double> amount = GeneratedColumn<double>(
       'amount', aliasedName, false,
       type: DriftSqlType.double, requiredDuringInsert: true);
+  static const VerificationMeta _amountMinorUnitsMeta =
+      const VerificationMeta('amountMinorUnits');
+  @override
+  late final GeneratedColumn<int> amountMinorUnits = GeneratedColumn<int>(
+      'amountMinorUnits', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -1916,7 +2069,7 @@ class $GroceryItemsTable extends GroceryItems
       type: DriftSqlType.string, requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns =>
-      [id, expenseId, name, amount, createdAt];
+      [id, expenseId, name, amount, amountMinorUnits, createdAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1950,6 +2103,12 @@ class $GroceryItemsTable extends GroceryItems
     } else if (isInserting) {
       context.missing(_amountMeta);
     }
+    if (data.containsKey('amountMinorUnits')) {
+      context.handle(
+          _amountMinorUnitsMeta,
+          amountMinorUnits.isAcceptableOrUnknown(
+              data['amountMinorUnits']!, _amountMinorUnitsMeta));
+    }
     if (data.containsKey('createdAt')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['createdAt']!, _createdAtMeta));
@@ -1973,6 +2132,8 @@ class $GroceryItemsTable extends GroceryItems
           .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
       amount: attachedDatabase.typeMapping
           .read(DriftSqlType.double, data['${effectivePrefix}amount'])!,
+      amountMinorUnits: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}amountMinorUnits']),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}createdAt'])!,
     );
@@ -1989,12 +2150,14 @@ class GroceryItem extends DataClass implements Insertable<GroceryItem> {
   final String expenseId;
   final String name;
   final double amount;
+  final int? amountMinorUnits;
   final String createdAt;
   const GroceryItem(
       {required this.id,
       required this.expenseId,
       required this.name,
       required this.amount,
+      this.amountMinorUnits,
       required this.createdAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2003,6 +2166,9 @@ class GroceryItem extends DataClass implements Insertable<GroceryItem> {
     map['expenseId'] = Variable<String>(expenseId);
     map['name'] = Variable<String>(name);
     map['amount'] = Variable<double>(amount);
+    if (!nullToAbsent || amountMinorUnits != null) {
+      map['amountMinorUnits'] = Variable<int>(amountMinorUnits);
+    }
     map['createdAt'] = Variable<String>(createdAt);
     return map;
   }
@@ -2013,6 +2179,9 @@ class GroceryItem extends DataClass implements Insertable<GroceryItem> {
       expenseId: Value(expenseId),
       name: Value(name),
       amount: Value(amount),
+      amountMinorUnits: amountMinorUnits == null && nullToAbsent
+          ? const Value.absent()
+          : Value(amountMinorUnits),
       createdAt: Value(createdAt),
     );
   }
@@ -2025,6 +2194,7 @@ class GroceryItem extends DataClass implements Insertable<GroceryItem> {
       expenseId: serializer.fromJson<String>(json['expenseId']),
       name: serializer.fromJson<String>(json['name']),
       amount: serializer.fromJson<double>(json['amount']),
+      amountMinorUnits: serializer.fromJson<int?>(json['amountMinorUnits']),
       createdAt: serializer.fromJson<String>(json['createdAt']),
     );
   }
@@ -2036,6 +2206,7 @@ class GroceryItem extends DataClass implements Insertable<GroceryItem> {
       'expenseId': serializer.toJson<String>(expenseId),
       'name': serializer.toJson<String>(name),
       'amount': serializer.toJson<double>(amount),
+      'amountMinorUnits': serializer.toJson<int?>(amountMinorUnits),
       'createdAt': serializer.toJson<String>(createdAt),
     };
   }
@@ -2045,12 +2216,16 @@ class GroceryItem extends DataClass implements Insertable<GroceryItem> {
           String? expenseId,
           String? name,
           double? amount,
+          Value<int?> amountMinorUnits = const Value.absent(),
           String? createdAt}) =>
       GroceryItem(
         id: id ?? this.id,
         expenseId: expenseId ?? this.expenseId,
         name: name ?? this.name,
         amount: amount ?? this.amount,
+        amountMinorUnits: amountMinorUnits.present
+            ? amountMinorUnits.value
+            : this.amountMinorUnits,
         createdAt: createdAt ?? this.createdAt,
       );
   GroceryItem copyWithCompanion(GroceryItemsCompanion data) {
@@ -2059,6 +2234,9 @@ class GroceryItem extends DataClass implements Insertable<GroceryItem> {
       expenseId: data.expenseId.present ? data.expenseId.value : this.expenseId,
       name: data.name.present ? data.name.value : this.name,
       amount: data.amount.present ? data.amount.value : this.amount,
+      amountMinorUnits: data.amountMinorUnits.present
+          ? data.amountMinorUnits.value
+          : this.amountMinorUnits,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -2070,13 +2248,15 @@ class GroceryItem extends DataClass implements Insertable<GroceryItem> {
           ..write('expenseId: $expenseId, ')
           ..write('name: $name, ')
           ..write('amount: $amount, ')
+          ..write('amountMinorUnits: $amountMinorUnits, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, expenseId, name, amount, createdAt);
+  int get hashCode =>
+      Object.hash(id, expenseId, name, amount, amountMinorUnits, createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2085,6 +2265,7 @@ class GroceryItem extends DataClass implements Insertable<GroceryItem> {
           other.expenseId == this.expenseId &&
           other.name == this.name &&
           other.amount == this.amount &&
+          other.amountMinorUnits == this.amountMinorUnits &&
           other.createdAt == this.createdAt);
 }
 
@@ -2093,6 +2274,7 @@ class GroceryItemsCompanion extends UpdateCompanion<GroceryItem> {
   final Value<String> expenseId;
   final Value<String> name;
   final Value<double> amount;
+  final Value<int?> amountMinorUnits;
   final Value<String> createdAt;
   final Value<int> rowid;
   const GroceryItemsCompanion({
@@ -2100,6 +2282,7 @@ class GroceryItemsCompanion extends UpdateCompanion<GroceryItem> {
     this.expenseId = const Value.absent(),
     this.name = const Value.absent(),
     this.amount = const Value.absent(),
+    this.amountMinorUnits = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -2108,6 +2291,7 @@ class GroceryItemsCompanion extends UpdateCompanion<GroceryItem> {
     required String expenseId,
     required String name,
     required double amount,
+    this.amountMinorUnits = const Value.absent(),
     required String createdAt,
     this.rowid = const Value.absent(),
   })  : id = Value(id),
@@ -2120,6 +2304,7 @@ class GroceryItemsCompanion extends UpdateCompanion<GroceryItem> {
     Expression<String>? expenseId,
     Expression<String>? name,
     Expression<double>? amount,
+    Expression<int>? amountMinorUnits,
     Expression<String>? createdAt,
     Expression<int>? rowid,
   }) {
@@ -2128,6 +2313,7 @@ class GroceryItemsCompanion extends UpdateCompanion<GroceryItem> {
       if (expenseId != null) 'expenseId': expenseId,
       if (name != null) 'name': name,
       if (amount != null) 'amount': amount,
+      if (amountMinorUnits != null) 'amountMinorUnits': amountMinorUnits,
       if (createdAt != null) 'createdAt': createdAt,
       if (rowid != null) 'rowid': rowid,
     });
@@ -2138,6 +2324,7 @@ class GroceryItemsCompanion extends UpdateCompanion<GroceryItem> {
       Value<String>? expenseId,
       Value<String>? name,
       Value<double>? amount,
+      Value<int?>? amountMinorUnits,
       Value<String>? createdAt,
       Value<int>? rowid}) {
     return GroceryItemsCompanion(
@@ -2145,6 +2332,7 @@ class GroceryItemsCompanion extends UpdateCompanion<GroceryItem> {
       expenseId: expenseId ?? this.expenseId,
       name: name ?? this.name,
       amount: amount ?? this.amount,
+      amountMinorUnits: amountMinorUnits ?? this.amountMinorUnits,
       createdAt: createdAt ?? this.createdAt,
       rowid: rowid ?? this.rowid,
     );
@@ -2165,6 +2353,9 @@ class GroceryItemsCompanion extends UpdateCompanion<GroceryItem> {
     if (amount.present) {
       map['amount'] = Variable<double>(amount.value);
     }
+    if (amountMinorUnits.present) {
+      map['amountMinorUnits'] = Variable<int>(amountMinorUnits.value);
+    }
     if (createdAt.present) {
       map['createdAt'] = Variable<String>(createdAt.value);
     }
@@ -2181,6 +2372,7 @@ class GroceryItemsCompanion extends UpdateCompanion<GroceryItem> {
           ..write('expenseId: $expenseId, ')
           ..write('name: $name, ')
           ..write('amount: $amount, ')
+          ..write('amountMinorUnits: $amountMinorUnits, ')
           ..write('createdAt: $createdAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -2213,6 +2405,12 @@ class $CategoryBudgetsTable extends CategoryBudgets
   late final GeneratedColumn<double> amount = GeneratedColumn<double>(
       'amount', aliasedName, false,
       type: DriftSqlType.double, requiredDuringInsert: true);
+  static const VerificationMeta _amountMinorUnitsMeta =
+      const VerificationMeta('amountMinorUnits');
+  @override
+  late final GeneratedColumn<int> amountMinorUnits = GeneratedColumn<int>(
+      'amountMinorUnits', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
   static const VerificationMeta _currencyMeta =
       const VerificationMeta('currency');
   @override
@@ -2237,8 +2435,16 @@ class $CategoryBudgetsTable extends CategoryBudgets
       'updatedAt', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, categoryId, amount, currency, month, createdAt, updatedAt];
+  List<GeneratedColumn> get $columns => [
+        id,
+        categoryId,
+        amount,
+        amountMinorUnits,
+        currency,
+        month,
+        createdAt,
+        updatedAt
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -2267,6 +2473,12 @@ class $CategoryBudgetsTable extends CategoryBudgets
           amount.isAcceptableOrUnknown(data['amount']!, _amountMeta));
     } else if (isInserting) {
       context.missing(_amountMeta);
+    }
+    if (data.containsKey('amountMinorUnits')) {
+      context.handle(
+          _amountMinorUnitsMeta,
+          amountMinorUnits.isAcceptableOrUnknown(
+              data['amountMinorUnits']!, _amountMinorUnitsMeta));
     }
     if (data.containsKey('currency')) {
       context.handle(_currencyMeta,
@@ -2311,6 +2523,8 @@ class $CategoryBudgetsTable extends CategoryBudgets
           .read(DriftSqlType.string, data['${effectivePrefix}categoryId'])!,
       amount: attachedDatabase.typeMapping
           .read(DriftSqlType.double, data['${effectivePrefix}amount'])!,
+      amountMinorUnits: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}amountMinorUnits']),
       currency: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}currency'])!,
       month: attachedDatabase.typeMapping
@@ -2332,6 +2546,7 @@ class CategoryBudget extends DataClass implements Insertable<CategoryBudget> {
   final String id;
   final String categoryId;
   final double amount;
+  final int? amountMinorUnits;
   final String currency;
   final String month;
   final String createdAt;
@@ -2340,6 +2555,7 @@ class CategoryBudget extends DataClass implements Insertable<CategoryBudget> {
       {required this.id,
       required this.categoryId,
       required this.amount,
+      this.amountMinorUnits,
       required this.currency,
       required this.month,
       required this.createdAt,
@@ -2350,6 +2566,9 @@ class CategoryBudget extends DataClass implements Insertable<CategoryBudget> {
     map['id'] = Variable<String>(id);
     map['categoryId'] = Variable<String>(categoryId);
     map['amount'] = Variable<double>(amount);
+    if (!nullToAbsent || amountMinorUnits != null) {
+      map['amountMinorUnits'] = Variable<int>(amountMinorUnits);
+    }
     map['currency'] = Variable<String>(currency);
     map['month'] = Variable<String>(month);
     map['createdAt'] = Variable<String>(createdAt);
@@ -2362,6 +2581,9 @@ class CategoryBudget extends DataClass implements Insertable<CategoryBudget> {
       id: Value(id),
       categoryId: Value(categoryId),
       amount: Value(amount),
+      amountMinorUnits: amountMinorUnits == null && nullToAbsent
+          ? const Value.absent()
+          : Value(amountMinorUnits),
       currency: Value(currency),
       month: Value(month),
       createdAt: Value(createdAt),
@@ -2376,6 +2598,7 @@ class CategoryBudget extends DataClass implements Insertable<CategoryBudget> {
       id: serializer.fromJson<String>(json['id']),
       categoryId: serializer.fromJson<String>(json['categoryId']),
       amount: serializer.fromJson<double>(json['amount']),
+      amountMinorUnits: serializer.fromJson<int?>(json['amountMinorUnits']),
       currency: serializer.fromJson<String>(json['currency']),
       month: serializer.fromJson<String>(json['month']),
       createdAt: serializer.fromJson<String>(json['createdAt']),
@@ -2389,6 +2612,7 @@ class CategoryBudget extends DataClass implements Insertable<CategoryBudget> {
       'id': serializer.toJson<String>(id),
       'categoryId': serializer.toJson<String>(categoryId),
       'amount': serializer.toJson<double>(amount),
+      'amountMinorUnits': serializer.toJson<int?>(amountMinorUnits),
       'currency': serializer.toJson<String>(currency),
       'month': serializer.toJson<String>(month),
       'createdAt': serializer.toJson<String>(createdAt),
@@ -2400,6 +2624,7 @@ class CategoryBudget extends DataClass implements Insertable<CategoryBudget> {
           {String? id,
           String? categoryId,
           double? amount,
+          Value<int?> amountMinorUnits = const Value.absent(),
           String? currency,
           String? month,
           String? createdAt,
@@ -2408,6 +2633,9 @@ class CategoryBudget extends DataClass implements Insertable<CategoryBudget> {
         id: id ?? this.id,
         categoryId: categoryId ?? this.categoryId,
         amount: amount ?? this.amount,
+        amountMinorUnits: amountMinorUnits.present
+            ? amountMinorUnits.value
+            : this.amountMinorUnits,
         currency: currency ?? this.currency,
         month: month ?? this.month,
         createdAt: createdAt ?? this.createdAt,
@@ -2419,6 +2647,9 @@ class CategoryBudget extends DataClass implements Insertable<CategoryBudget> {
       categoryId:
           data.categoryId.present ? data.categoryId.value : this.categoryId,
       amount: data.amount.present ? data.amount.value : this.amount,
+      amountMinorUnits: data.amountMinorUnits.present
+          ? data.amountMinorUnits.value
+          : this.amountMinorUnits,
       currency: data.currency.present ? data.currency.value : this.currency,
       month: data.month.present ? data.month.value : this.month,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
@@ -2432,6 +2663,7 @@ class CategoryBudget extends DataClass implements Insertable<CategoryBudget> {
           ..write('id: $id, ')
           ..write('categoryId: $categoryId, ')
           ..write('amount: $amount, ')
+          ..write('amountMinorUnits: $amountMinorUnits, ')
           ..write('currency: $currency, ')
           ..write('month: $month, ')
           ..write('createdAt: $createdAt, ')
@@ -2441,8 +2673,8 @@ class CategoryBudget extends DataClass implements Insertable<CategoryBudget> {
   }
 
   @override
-  int get hashCode => Object.hash(
-      id, categoryId, amount, currency, month, createdAt, updatedAt);
+  int get hashCode => Object.hash(id, categoryId, amount, amountMinorUnits,
+      currency, month, createdAt, updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2450,6 +2682,7 @@ class CategoryBudget extends DataClass implements Insertable<CategoryBudget> {
           other.id == this.id &&
           other.categoryId == this.categoryId &&
           other.amount == this.amount &&
+          other.amountMinorUnits == this.amountMinorUnits &&
           other.currency == this.currency &&
           other.month == this.month &&
           other.createdAt == this.createdAt &&
@@ -2460,6 +2693,7 @@ class CategoryBudgetsCompanion extends UpdateCompanion<CategoryBudget> {
   final Value<String> id;
   final Value<String> categoryId;
   final Value<double> amount;
+  final Value<int?> amountMinorUnits;
   final Value<String> currency;
   final Value<String> month;
   final Value<String> createdAt;
@@ -2469,6 +2703,7 @@ class CategoryBudgetsCompanion extends UpdateCompanion<CategoryBudget> {
     this.id = const Value.absent(),
     this.categoryId = const Value.absent(),
     this.amount = const Value.absent(),
+    this.amountMinorUnits = const Value.absent(),
     this.currency = const Value.absent(),
     this.month = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -2479,6 +2714,7 @@ class CategoryBudgetsCompanion extends UpdateCompanion<CategoryBudget> {
     required String id,
     required String categoryId,
     required double amount,
+    this.amountMinorUnits = const Value.absent(),
     required String currency,
     required String month,
     required String createdAt,
@@ -2495,6 +2731,7 @@ class CategoryBudgetsCompanion extends UpdateCompanion<CategoryBudget> {
     Expression<String>? id,
     Expression<String>? categoryId,
     Expression<double>? amount,
+    Expression<int>? amountMinorUnits,
     Expression<String>? currency,
     Expression<String>? month,
     Expression<String>? createdAt,
@@ -2505,6 +2742,7 @@ class CategoryBudgetsCompanion extends UpdateCompanion<CategoryBudget> {
       if (id != null) 'id': id,
       if (categoryId != null) 'categoryId': categoryId,
       if (amount != null) 'amount': amount,
+      if (amountMinorUnits != null) 'amountMinorUnits': amountMinorUnits,
       if (currency != null) 'currency': currency,
       if (month != null) 'month': month,
       if (createdAt != null) 'createdAt': createdAt,
@@ -2517,6 +2755,7 @@ class CategoryBudgetsCompanion extends UpdateCompanion<CategoryBudget> {
       {Value<String>? id,
       Value<String>? categoryId,
       Value<double>? amount,
+      Value<int?>? amountMinorUnits,
       Value<String>? currency,
       Value<String>? month,
       Value<String>? createdAt,
@@ -2526,6 +2765,7 @@ class CategoryBudgetsCompanion extends UpdateCompanion<CategoryBudget> {
       id: id ?? this.id,
       categoryId: categoryId ?? this.categoryId,
       amount: amount ?? this.amount,
+      amountMinorUnits: amountMinorUnits ?? this.amountMinorUnits,
       currency: currency ?? this.currency,
       month: month ?? this.month,
       createdAt: createdAt ?? this.createdAt,
@@ -2545,6 +2785,9 @@ class CategoryBudgetsCompanion extends UpdateCompanion<CategoryBudget> {
     }
     if (amount.present) {
       map['amount'] = Variable<double>(amount.value);
+    }
+    if (amountMinorUnits.present) {
+      map['amountMinorUnits'] = Variable<int>(amountMinorUnits.value);
     }
     if (currency.present) {
       map['currency'] = Variable<String>(currency.value);
@@ -2570,6 +2813,7 @@ class CategoryBudgetsCompanion extends UpdateCompanion<CategoryBudget> {
           ..write('id: $id, ')
           ..write('categoryId: $categoryId, ')
           ..write('amount: $amount, ')
+          ..write('amountMinorUnits: $amountMinorUnits, ')
           ..write('currency: $currency, ')
           ..write('month: $month, ')
           ..write('createdAt: $createdAt, ')
@@ -6425,6 +6669,18 @@ class $DebtRecordsTable extends DebtRecords
   late final GeneratedColumn<double> remainingAmount = GeneratedColumn<double>(
       'remainingAmount', aliasedName, false,
       type: DriftSqlType.double, requiredDuringInsert: true);
+  static const VerificationMeta _principalAmountMinorUnitsMeta =
+      const VerificationMeta('principalAmountMinorUnits');
+  @override
+  late final GeneratedColumn<int> principalAmountMinorUnits =
+      GeneratedColumn<int>('principalAmountMinorUnits', aliasedName, true,
+          type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _remainingAmountMinorUnitsMeta =
+      const VerificationMeta('remainingAmountMinorUnits');
+  @override
+  late final GeneratedColumn<int> remainingAmountMinorUnits =
+      GeneratedColumn<int>('remainingAmountMinorUnits', aliasedName, true,
+          type: DriftSqlType.int, requiredDuringInsert: false);
   static const VerificationMeta _currencyMeta =
       const VerificationMeta('currency');
   @override
@@ -6473,6 +6729,8 @@ class $DebtRecordsTable extends DebtRecords
         type,
         principalAmount,
         remainingAmount,
+        principalAmountMinorUnits,
+        remainingAmountMinorUnits,
         currency,
         description,
         createdAt,
@@ -6529,6 +6787,20 @@ class $DebtRecordsTable extends DebtRecords
               data['remainingAmount']!, _remainingAmountMeta));
     } else if (isInserting) {
       context.missing(_remainingAmountMeta);
+    }
+    if (data.containsKey('principalAmountMinorUnits')) {
+      context.handle(
+          _principalAmountMinorUnitsMeta,
+          principalAmountMinorUnits.isAcceptableOrUnknown(
+              data['principalAmountMinorUnits']!,
+              _principalAmountMinorUnitsMeta));
+    }
+    if (data.containsKey('remainingAmountMinorUnits')) {
+      context.handle(
+          _remainingAmountMinorUnitsMeta,
+          remainingAmountMinorUnits.isAcceptableOrUnknown(
+              data['remainingAmountMinorUnits']!,
+              _remainingAmountMinorUnitsMeta));
     }
     if (data.containsKey('currency')) {
       context.handle(_currencyMeta,
@@ -6587,6 +6859,12 @@ class $DebtRecordsTable extends DebtRecords
           DriftSqlType.double, data['${effectivePrefix}principalAmount'])!,
       remainingAmount: attachedDatabase.typeMapping.read(
           DriftSqlType.double, data['${effectivePrefix}remainingAmount'])!,
+      principalAmountMinorUnits: attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}principalAmountMinorUnits']),
+      remainingAmountMinorUnits: attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}remainingAmountMinorUnits']),
       currency: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}currency'])!,
       description: attachedDatabase.typeMapping
@@ -6617,6 +6895,8 @@ class DebtRecord extends DataClass implements Insertable<DebtRecord> {
   final String type;
   final double principalAmount;
   final double remainingAmount;
+  final int? principalAmountMinorUnits;
+  final int? remainingAmountMinorUnits;
   final String currency;
   final String? description;
   final String createdAt;
@@ -6631,6 +6911,8 @@ class DebtRecord extends DataClass implements Insertable<DebtRecord> {
       required this.type,
       required this.principalAmount,
       required this.remainingAmount,
+      this.principalAmountMinorUnits,
+      this.remainingAmountMinorUnits,
       required this.currency,
       this.description,
       required this.createdAt,
@@ -6649,6 +6931,14 @@ class DebtRecord extends DataClass implements Insertable<DebtRecord> {
     map['type'] = Variable<String>(type);
     map['principalAmount'] = Variable<double>(principalAmount);
     map['remainingAmount'] = Variable<double>(remainingAmount);
+    if (!nullToAbsent || principalAmountMinorUnits != null) {
+      map['principalAmountMinorUnits'] =
+          Variable<int>(principalAmountMinorUnits);
+    }
+    if (!nullToAbsent || remainingAmountMinorUnits != null) {
+      map['remainingAmountMinorUnits'] =
+          Variable<int>(remainingAmountMinorUnits);
+    }
     map['currency'] = Variable<String>(currency);
     if (!nullToAbsent || description != null) {
       map['description'] = Variable<String>(description);
@@ -6677,6 +6967,14 @@ class DebtRecord extends DataClass implements Insertable<DebtRecord> {
       type: Value(type),
       principalAmount: Value(principalAmount),
       remainingAmount: Value(remainingAmount),
+      principalAmountMinorUnits:
+          principalAmountMinorUnits == null && nullToAbsent
+              ? const Value.absent()
+              : Value(principalAmountMinorUnits),
+      remainingAmountMinorUnits:
+          remainingAmountMinorUnits == null && nullToAbsent
+              ? const Value.absent()
+              : Value(remainingAmountMinorUnits),
       currency: Value(currency),
       description: description == null && nullToAbsent
           ? const Value.absent()
@@ -6704,6 +7002,10 @@ class DebtRecord extends DataClass implements Insertable<DebtRecord> {
       type: serializer.fromJson<String>(json['type']),
       principalAmount: serializer.fromJson<double>(json['principalAmount']),
       remainingAmount: serializer.fromJson<double>(json['remainingAmount']),
+      principalAmountMinorUnits:
+          serializer.fromJson<int?>(json['principalAmountMinorUnits']),
+      remainingAmountMinorUnits:
+          serializer.fromJson<int?>(json['remainingAmountMinorUnits']),
       currency: serializer.fromJson<String>(json['currency']),
       description: serializer.fromJson<String?>(json['description']),
       createdAt: serializer.fromJson<String>(json['createdAt']),
@@ -6723,6 +7025,10 @@ class DebtRecord extends DataClass implements Insertable<DebtRecord> {
       'type': serializer.toJson<String>(type),
       'principalAmount': serializer.toJson<double>(principalAmount),
       'remainingAmount': serializer.toJson<double>(remainingAmount),
+      'principalAmountMinorUnits':
+          serializer.toJson<int?>(principalAmountMinorUnits),
+      'remainingAmountMinorUnits':
+          serializer.toJson<int?>(remainingAmountMinorUnits),
       'currency': serializer.toJson<String>(currency),
       'description': serializer.toJson<String?>(description),
       'createdAt': serializer.toJson<String>(createdAt),
@@ -6740,6 +7046,8 @@ class DebtRecord extends DataClass implements Insertable<DebtRecord> {
           String? type,
           double? principalAmount,
           double? remainingAmount,
+          Value<int?> principalAmountMinorUnits = const Value.absent(),
+          Value<int?> remainingAmountMinorUnits = const Value.absent(),
           String? currency,
           Value<String?> description = const Value.absent(),
           String? createdAt,
@@ -6754,6 +7062,12 @@ class DebtRecord extends DataClass implements Insertable<DebtRecord> {
         type: type ?? this.type,
         principalAmount: principalAmount ?? this.principalAmount,
         remainingAmount: remainingAmount ?? this.remainingAmount,
+        principalAmountMinorUnits: principalAmountMinorUnits.present
+            ? principalAmountMinorUnits.value
+            : this.principalAmountMinorUnits,
+        remainingAmountMinorUnits: remainingAmountMinorUnits.present
+            ? remainingAmountMinorUnits.value
+            : this.remainingAmountMinorUnits,
         currency: currency ?? this.currency,
         description: description.present ? description.value : this.description,
         createdAt: createdAt ?? this.createdAt,
@@ -6775,6 +7089,12 @@ class DebtRecord extends DataClass implements Insertable<DebtRecord> {
       remainingAmount: data.remainingAmount.present
           ? data.remainingAmount.value
           : this.remainingAmount,
+      principalAmountMinorUnits: data.principalAmountMinorUnits.present
+          ? data.principalAmountMinorUnits.value
+          : this.principalAmountMinorUnits,
+      remainingAmountMinorUnits: data.remainingAmountMinorUnits.present
+          ? data.remainingAmountMinorUnits.value
+          : this.remainingAmountMinorUnits,
       currency: data.currency.present ? data.currency.value : this.currency,
       description:
           data.description.present ? data.description.value : this.description,
@@ -6795,6 +7115,8 @@ class DebtRecord extends DataClass implements Insertable<DebtRecord> {
           ..write('type: $type, ')
           ..write('principalAmount: $principalAmount, ')
           ..write('remainingAmount: $remainingAmount, ')
+          ..write('principalAmountMinorUnits: $principalAmountMinorUnits, ')
+          ..write('remainingAmountMinorUnits: $remainingAmountMinorUnits, ')
           ..write('currency: $currency, ')
           ..write('description: $description, ')
           ..write('createdAt: $createdAt, ')
@@ -6814,6 +7136,8 @@ class DebtRecord extends DataClass implements Insertable<DebtRecord> {
       type,
       principalAmount,
       remainingAmount,
+      principalAmountMinorUnits,
+      remainingAmountMinorUnits,
       currency,
       description,
       createdAt,
@@ -6831,6 +7155,8 @@ class DebtRecord extends DataClass implements Insertable<DebtRecord> {
           other.type == this.type &&
           other.principalAmount == this.principalAmount &&
           other.remainingAmount == this.remainingAmount &&
+          other.principalAmountMinorUnits == this.principalAmountMinorUnits &&
+          other.remainingAmountMinorUnits == this.remainingAmountMinorUnits &&
           other.currency == this.currency &&
           other.description == this.description &&
           other.createdAt == this.createdAt &&
@@ -6847,6 +7173,8 @@ class DebtRecordsCompanion extends UpdateCompanion<DebtRecord> {
   final Value<String> type;
   final Value<double> principalAmount;
   final Value<double> remainingAmount;
+  final Value<int?> principalAmountMinorUnits;
+  final Value<int?> remainingAmountMinorUnits;
   final Value<String> currency;
   final Value<String?> description;
   final Value<String> createdAt;
@@ -6862,6 +7190,8 @@ class DebtRecordsCompanion extends UpdateCompanion<DebtRecord> {
     this.type = const Value.absent(),
     this.principalAmount = const Value.absent(),
     this.remainingAmount = const Value.absent(),
+    this.principalAmountMinorUnits = const Value.absent(),
+    this.remainingAmountMinorUnits = const Value.absent(),
     this.currency = const Value.absent(),
     this.description = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -6878,6 +7208,8 @@ class DebtRecordsCompanion extends UpdateCompanion<DebtRecord> {
     required String type,
     required double principalAmount,
     required double remainingAmount,
+    this.principalAmountMinorUnits = const Value.absent(),
+    this.remainingAmountMinorUnits = const Value.absent(),
     required String currency,
     this.description = const Value.absent(),
     required String createdAt,
@@ -6901,6 +7233,8 @@ class DebtRecordsCompanion extends UpdateCompanion<DebtRecord> {
     Expression<String>? type,
     Expression<double>? principalAmount,
     Expression<double>? remainingAmount,
+    Expression<int>? principalAmountMinorUnits,
+    Expression<int>? remainingAmountMinorUnits,
     Expression<String>? currency,
     Expression<String>? description,
     Expression<String>? createdAt,
@@ -6917,6 +7251,10 @@ class DebtRecordsCompanion extends UpdateCompanion<DebtRecord> {
       if (type != null) 'type': type,
       if (principalAmount != null) 'principalAmount': principalAmount,
       if (remainingAmount != null) 'remainingAmount': remainingAmount,
+      if (principalAmountMinorUnits != null)
+        'principalAmountMinorUnits': principalAmountMinorUnits,
+      if (remainingAmountMinorUnits != null)
+        'remainingAmountMinorUnits': remainingAmountMinorUnits,
       if (currency != null) 'currency': currency,
       if (description != null) 'description': description,
       if (createdAt != null) 'createdAt': createdAt,
@@ -6935,6 +7273,8 @@ class DebtRecordsCompanion extends UpdateCompanion<DebtRecord> {
       Value<String>? type,
       Value<double>? principalAmount,
       Value<double>? remainingAmount,
+      Value<int?>? principalAmountMinorUnits,
+      Value<int?>? remainingAmountMinorUnits,
       Value<String>? currency,
       Value<String?>? description,
       Value<String>? createdAt,
@@ -6950,6 +7290,10 @@ class DebtRecordsCompanion extends UpdateCompanion<DebtRecord> {
       type: type ?? this.type,
       principalAmount: principalAmount ?? this.principalAmount,
       remainingAmount: remainingAmount ?? this.remainingAmount,
+      principalAmountMinorUnits:
+          principalAmountMinorUnits ?? this.principalAmountMinorUnits,
+      remainingAmountMinorUnits:
+          remainingAmountMinorUnits ?? this.remainingAmountMinorUnits,
       currency: currency ?? this.currency,
       description: description ?? this.description,
       createdAt: createdAt ?? this.createdAt,
@@ -6981,6 +7325,14 @@ class DebtRecordsCompanion extends UpdateCompanion<DebtRecord> {
     }
     if (remainingAmount.present) {
       map['remainingAmount'] = Variable<double>(remainingAmount.value);
+    }
+    if (principalAmountMinorUnits.present) {
+      map['principalAmountMinorUnits'] =
+          Variable<int>(principalAmountMinorUnits.value);
+    }
+    if (remainingAmountMinorUnits.present) {
+      map['remainingAmountMinorUnits'] =
+          Variable<int>(remainingAmountMinorUnits.value);
     }
     if (currency.present) {
       map['currency'] = Variable<String>(currency.value);
@@ -7018,6 +7370,8 @@ class DebtRecordsCompanion extends UpdateCompanion<DebtRecord> {
           ..write('type: $type, ')
           ..write('principalAmount: $principalAmount, ')
           ..write('remainingAmount: $remainingAmount, ')
+          ..write('principalAmountMinorUnits: $principalAmountMinorUnits, ')
+          ..write('remainingAmountMinorUnits: $remainingAmountMinorUnits, ')
           ..write('currency: $currency, ')
           ..write('description: $description, ')
           ..write('createdAt: $createdAt, ')
@@ -7641,6 +7995,18 @@ class $SubscriptionsTable extends Subscriptions
   late final GeneratedColumn<double> taxAmount = GeneratedColumn<double>(
       'taxAmount', aliasedName, true,
       type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _amountMinorUnitsMeta =
+      const VerificationMeta('amountMinorUnits');
+  @override
+  late final GeneratedColumn<int> amountMinorUnits = GeneratedColumn<int>(
+      'amountMinorUnits', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _taxAmountMinorUnitsMeta =
+      const VerificationMeta('taxAmountMinorUnits');
+  @override
+  late final GeneratedColumn<int> taxAmountMinorUnits = GeneratedColumn<int>(
+      'taxAmountMinorUnits', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
   static const VerificationMeta _currencyMeta =
       const VerificationMeta('currency');
   @override
@@ -7721,6 +8087,8 @@ class $SubscriptionsTable extends Subscriptions
         categoryId,
         amount,
         taxAmount,
+        amountMinorUnits,
+        taxAmountMinorUnits,
         currency,
         description,
         startDate,
@@ -7772,6 +8140,18 @@ class $SubscriptionsTable extends Subscriptions
     if (data.containsKey('taxAmount')) {
       context.handle(_taxAmountMeta,
           taxAmount.isAcceptableOrUnknown(data['taxAmount']!, _taxAmountMeta));
+    }
+    if (data.containsKey('amountMinorUnits')) {
+      context.handle(
+          _amountMinorUnitsMeta,
+          amountMinorUnits.isAcceptableOrUnknown(
+              data['amountMinorUnits']!, _amountMinorUnitsMeta));
+    }
+    if (data.containsKey('taxAmountMinorUnits')) {
+      context.handle(
+          _taxAmountMinorUnitsMeta,
+          taxAmountMinorUnits.isAcceptableOrUnknown(
+              data['taxAmountMinorUnits']!, _taxAmountMinorUnitsMeta));
     }
     if (data.containsKey('currency')) {
       context.handle(_currencyMeta,
@@ -7864,6 +8244,10 @@ class $SubscriptionsTable extends Subscriptions
           .read(DriftSqlType.double, data['${effectivePrefix}amount'])!,
       taxAmount: attachedDatabase.typeMapping
           .read(DriftSqlType.double, data['${effectivePrefix}taxAmount']),
+      amountMinorUnits: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}amountMinorUnits']),
+      taxAmountMinorUnits: attachedDatabase.typeMapping.read(
+          DriftSqlType.int, data['${effectivePrefix}taxAmountMinorUnits']),
       currency: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}currency'])!,
       description: attachedDatabase.typeMapping
@@ -7903,6 +8287,8 @@ class Subscription extends DataClass implements Insertable<Subscription> {
   final String categoryId;
   final double amount;
   final double? taxAmount;
+  final int? amountMinorUnits;
+  final int? taxAmountMinorUnits;
   final String currency;
   final String? description;
   final String startDate;
@@ -7921,6 +8307,8 @@ class Subscription extends DataClass implements Insertable<Subscription> {
       required this.categoryId,
       required this.amount,
       this.taxAmount,
+      this.amountMinorUnits,
+      this.taxAmountMinorUnits,
       required this.currency,
       this.description,
       required this.startDate,
@@ -7942,6 +8330,12 @@ class Subscription extends DataClass implements Insertable<Subscription> {
     map['amount'] = Variable<double>(amount);
     if (!nullToAbsent || taxAmount != null) {
       map['taxAmount'] = Variable<double>(taxAmount);
+    }
+    if (!nullToAbsent || amountMinorUnits != null) {
+      map['amountMinorUnits'] = Variable<int>(amountMinorUnits);
+    }
+    if (!nullToAbsent || taxAmountMinorUnits != null) {
+      map['taxAmountMinorUnits'] = Variable<int>(taxAmountMinorUnits);
     }
     map['currency'] = Variable<String>(currency);
     if (!nullToAbsent || description != null) {
@@ -7975,6 +8369,12 @@ class Subscription extends DataClass implements Insertable<Subscription> {
       taxAmount: taxAmount == null && nullToAbsent
           ? const Value.absent()
           : Value(taxAmount),
+      amountMinorUnits: amountMinorUnits == null && nullToAbsent
+          ? const Value.absent()
+          : Value(amountMinorUnits),
+      taxAmountMinorUnits: taxAmountMinorUnits == null && nullToAbsent
+          ? const Value.absent()
+          : Value(taxAmountMinorUnits),
       currency: Value(currency),
       description: description == null && nullToAbsent
           ? const Value.absent()
@@ -8007,6 +8407,9 @@ class Subscription extends DataClass implements Insertable<Subscription> {
       categoryId: serializer.fromJson<String>(json['categoryId']),
       amount: serializer.fromJson<double>(json['amount']),
       taxAmount: serializer.fromJson<double?>(json['taxAmount']),
+      amountMinorUnits: serializer.fromJson<int?>(json['amountMinorUnits']),
+      taxAmountMinorUnits:
+          serializer.fromJson<int?>(json['taxAmountMinorUnits']),
       currency: serializer.fromJson<String>(json['currency']),
       description: serializer.fromJson<String?>(json['description']),
       startDate: serializer.fromJson<String>(json['startDate']),
@@ -8031,6 +8434,8 @@ class Subscription extends DataClass implements Insertable<Subscription> {
       'categoryId': serializer.toJson<String>(categoryId),
       'amount': serializer.toJson<double>(amount),
       'taxAmount': serializer.toJson<double?>(taxAmount),
+      'amountMinorUnits': serializer.toJson<int?>(amountMinorUnits),
+      'taxAmountMinorUnits': serializer.toJson<int?>(taxAmountMinorUnits),
       'currency': serializer.toJson<String>(currency),
       'description': serializer.toJson<String?>(description),
       'startDate': serializer.toJson<String>(startDate),
@@ -8052,6 +8457,8 @@ class Subscription extends DataClass implements Insertable<Subscription> {
           String? categoryId,
           double? amount,
           Value<double?> taxAmount = const Value.absent(),
+          Value<int?> amountMinorUnits = const Value.absent(),
+          Value<int?> taxAmountMinorUnits = const Value.absent(),
           String? currency,
           Value<String?> description = const Value.absent(),
           String? startDate,
@@ -8070,6 +8477,12 @@ class Subscription extends DataClass implements Insertable<Subscription> {
         categoryId: categoryId ?? this.categoryId,
         amount: amount ?? this.amount,
         taxAmount: taxAmount.present ? taxAmount.value : this.taxAmount,
+        amountMinorUnits: amountMinorUnits.present
+            ? amountMinorUnits.value
+            : this.amountMinorUnits,
+        taxAmountMinorUnits: taxAmountMinorUnits.present
+            ? taxAmountMinorUnits.value
+            : this.taxAmountMinorUnits,
         currency: currency ?? this.currency,
         description: description.present ? description.value : this.description,
         startDate: startDate ?? this.startDate,
@@ -8093,6 +8506,12 @@ class Subscription extends DataClass implements Insertable<Subscription> {
           data.categoryId.present ? data.categoryId.value : this.categoryId,
       amount: data.amount.present ? data.amount.value : this.amount,
       taxAmount: data.taxAmount.present ? data.taxAmount.value : this.taxAmount,
+      amountMinorUnits: data.amountMinorUnits.present
+          ? data.amountMinorUnits.value
+          : this.amountMinorUnits,
+      taxAmountMinorUnits: data.taxAmountMinorUnits.present
+          ? data.taxAmountMinorUnits.value
+          : this.taxAmountMinorUnits,
       currency: data.currency.present ? data.currency.value : this.currency,
       description:
           data.description.present ? data.description.value : this.description,
@@ -8124,6 +8543,8 @@ class Subscription extends DataClass implements Insertable<Subscription> {
           ..write('categoryId: $categoryId, ')
           ..write('amount: $amount, ')
           ..write('taxAmount: $taxAmount, ')
+          ..write('amountMinorUnits: $amountMinorUnits, ')
+          ..write('taxAmountMinorUnits: $taxAmountMinorUnits, ')
           ..write('currency: $currency, ')
           ..write('description: $description, ')
           ..write('startDate: $startDate, ')
@@ -8147,6 +8568,8 @@ class Subscription extends DataClass implements Insertable<Subscription> {
       categoryId,
       amount,
       taxAmount,
+      amountMinorUnits,
+      taxAmountMinorUnits,
       currency,
       description,
       startDate,
@@ -8168,6 +8591,8 @@ class Subscription extends DataClass implements Insertable<Subscription> {
           other.categoryId == this.categoryId &&
           other.amount == this.amount &&
           other.taxAmount == this.taxAmount &&
+          other.amountMinorUnits == this.amountMinorUnits &&
+          other.taxAmountMinorUnits == this.taxAmountMinorUnits &&
           other.currency == this.currency &&
           other.description == this.description &&
           other.startDate == this.startDate &&
@@ -8188,6 +8613,8 @@ class SubscriptionsCompanion extends UpdateCompanion<Subscription> {
   final Value<String> categoryId;
   final Value<double> amount;
   final Value<double?> taxAmount;
+  final Value<int?> amountMinorUnits;
+  final Value<int?> taxAmountMinorUnits;
   final Value<String> currency;
   final Value<String?> description;
   final Value<String> startDate;
@@ -8207,6 +8634,8 @@ class SubscriptionsCompanion extends UpdateCompanion<Subscription> {
     this.categoryId = const Value.absent(),
     this.amount = const Value.absent(),
     this.taxAmount = const Value.absent(),
+    this.amountMinorUnits = const Value.absent(),
+    this.taxAmountMinorUnits = const Value.absent(),
     this.currency = const Value.absent(),
     this.description = const Value.absent(),
     this.startDate = const Value.absent(),
@@ -8227,6 +8656,8 @@ class SubscriptionsCompanion extends UpdateCompanion<Subscription> {
     required String categoryId,
     required double amount,
     this.taxAmount = const Value.absent(),
+    this.amountMinorUnits = const Value.absent(),
+    this.taxAmountMinorUnits = const Value.absent(),
     required String currency,
     this.description = const Value.absent(),
     required String startDate,
@@ -8257,6 +8688,8 @@ class SubscriptionsCompanion extends UpdateCompanion<Subscription> {
     Expression<String>? categoryId,
     Expression<double>? amount,
     Expression<double>? taxAmount,
+    Expression<int>? amountMinorUnits,
+    Expression<int>? taxAmountMinorUnits,
     Expression<String>? currency,
     Expression<String>? description,
     Expression<String>? startDate,
@@ -8277,6 +8710,9 @@ class SubscriptionsCompanion extends UpdateCompanion<Subscription> {
       if (categoryId != null) 'categoryId': categoryId,
       if (amount != null) 'amount': amount,
       if (taxAmount != null) 'taxAmount': taxAmount,
+      if (amountMinorUnits != null) 'amountMinorUnits': amountMinorUnits,
+      if (taxAmountMinorUnits != null)
+        'taxAmountMinorUnits': taxAmountMinorUnits,
       if (currency != null) 'currency': currency,
       if (description != null) 'description': description,
       if (startDate != null) 'startDate': startDate,
@@ -8299,6 +8735,8 @@ class SubscriptionsCompanion extends UpdateCompanion<Subscription> {
       Value<String>? categoryId,
       Value<double>? amount,
       Value<double?>? taxAmount,
+      Value<int?>? amountMinorUnits,
+      Value<int?>? taxAmountMinorUnits,
       Value<String>? currency,
       Value<String?>? description,
       Value<String>? startDate,
@@ -8318,6 +8756,8 @@ class SubscriptionsCompanion extends UpdateCompanion<Subscription> {
       categoryId: categoryId ?? this.categoryId,
       amount: amount ?? this.amount,
       taxAmount: taxAmount ?? this.taxAmount,
+      amountMinorUnits: amountMinorUnits ?? this.amountMinorUnits,
+      taxAmountMinorUnits: taxAmountMinorUnits ?? this.taxAmountMinorUnits,
       currency: currency ?? this.currency,
       description: description ?? this.description,
       startDate: startDate ?? this.startDate,
@@ -8351,6 +8791,12 @@ class SubscriptionsCompanion extends UpdateCompanion<Subscription> {
     }
     if (taxAmount.present) {
       map['taxAmount'] = Variable<double>(taxAmount.value);
+    }
+    if (amountMinorUnits.present) {
+      map['amountMinorUnits'] = Variable<int>(amountMinorUnits.value);
+    }
+    if (taxAmountMinorUnits.present) {
+      map['taxAmountMinorUnits'] = Variable<int>(taxAmountMinorUnits.value);
     }
     if (currency.present) {
       map['currency'] = Variable<String>(currency.value);
@@ -8402,6 +8848,8 @@ class SubscriptionsCompanion extends UpdateCompanion<Subscription> {
           ..write('categoryId: $categoryId, ')
           ..write('amount: $amount, ')
           ..write('taxAmount: $taxAmount, ')
+          ..write('amountMinorUnits: $amountMinorUnits, ')
+          ..write('taxAmountMinorUnits: $taxAmountMinorUnits, ')
           ..write('currency: $currency, ')
           ..write('description: $description, ')
           ..write('startDate: $startDate, ')
@@ -11521,6 +11969,9 @@ typedef $$ExpensesTableCreateCompanionBuilder = ExpensesCompanion Function({
   Value<String?> deletedAt,
   Value<double?> subtotalAmount,
   Value<double?> taxAmount,
+  Value<int?> amountMinorUnits,
+  Value<int?> subtotalAmountMinorUnits,
+  Value<int?> taxAmountMinorUnits,
   Value<int> rowid,
 });
 typedef $$ExpensesTableUpdateCompanionBuilder = ExpensesCompanion Function({
@@ -11543,6 +11994,9 @@ typedef $$ExpensesTableUpdateCompanionBuilder = ExpensesCompanion Function({
   Value<String?> deletedAt,
   Value<double?> subtotalAmount,
   Value<double?> taxAmount,
+  Value<int?> amountMinorUnits,
+  Value<int?> subtotalAmountMinorUnits,
+  Value<int?> taxAmountMinorUnits,
   Value<int> rowid,
 });
 
@@ -11701,6 +12155,18 @@ class $$ExpensesTableFilterComposer
 
   ColumnFilters<double> get taxAmount => $composableBuilder(
       column: $table.taxAmount, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get amountMinorUnits => $composableBuilder(
+      column: $table.amountMinorUnits,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get subtotalAmountMinorUnits => $composableBuilder(
+      column: $table.subtotalAmountMinorUnits,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get taxAmountMinorUnits => $composableBuilder(
+      column: $table.taxAmountMinorUnits,
+      builder: (column) => ColumnFilters(column));
 
   $$CategoriesTableFilterComposer get categoryId {
     final $$CategoriesTableFilterComposer composer = $composerBuilder(
@@ -11892,6 +12358,18 @@ class $$ExpensesTableOrderingComposer
   ColumnOrderings<double> get taxAmount => $composableBuilder(
       column: $table.taxAmount, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<int> get amountMinorUnits => $composableBuilder(
+      column: $table.amountMinorUnits,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get subtotalAmountMinorUnits => $composableBuilder(
+      column: $table.subtotalAmountMinorUnits,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get taxAmountMinorUnits => $composableBuilder(
+      column: $table.taxAmountMinorUnits,
+      builder: (column) => ColumnOrderings(column));
+
   $$CategoriesTableOrderingComposer get categoryId {
     final $$CategoriesTableOrderingComposer composer = $composerBuilder(
         composer: this,
@@ -11992,6 +12470,15 @@ class $$ExpensesTableAnnotationComposer
 
   GeneratedColumn<double> get taxAmount =>
       $composableBuilder(column: $table.taxAmount, builder: (column) => column);
+
+  GeneratedColumn<int> get amountMinorUnits => $composableBuilder(
+      column: $table.amountMinorUnits, builder: (column) => column);
+
+  GeneratedColumn<int> get subtotalAmountMinorUnits => $composableBuilder(
+      column: $table.subtotalAmountMinorUnits, builder: (column) => column);
+
+  GeneratedColumn<int> get taxAmountMinorUnits => $composableBuilder(
+      column: $table.taxAmountMinorUnits, builder: (column) => column);
 
   $$CategoriesTableAnnotationComposer get categoryId {
     final $$CategoriesTableAnnotationComposer composer = $composerBuilder(
@@ -12166,6 +12653,9 @@ class $$ExpensesTableTableManager extends RootTableManager<
             Value<String?> deletedAt = const Value.absent(),
             Value<double?> subtotalAmount = const Value.absent(),
             Value<double?> taxAmount = const Value.absent(),
+            Value<int?> amountMinorUnits = const Value.absent(),
+            Value<int?> subtotalAmountMinorUnits = const Value.absent(),
+            Value<int?> taxAmountMinorUnits = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               ExpensesCompanion(
@@ -12188,6 +12678,9 @@ class $$ExpensesTableTableManager extends RootTableManager<
             deletedAt: deletedAt,
             subtotalAmount: subtotalAmount,
             taxAmount: taxAmount,
+            amountMinorUnits: amountMinorUnits,
+            subtotalAmountMinorUnits: subtotalAmountMinorUnits,
+            taxAmountMinorUnits: taxAmountMinorUnits,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -12210,6 +12703,9 @@ class $$ExpensesTableTableManager extends RootTableManager<
             Value<String?> deletedAt = const Value.absent(),
             Value<double?> subtotalAmount = const Value.absent(),
             Value<double?> taxAmount = const Value.absent(),
+            Value<int?> amountMinorUnits = const Value.absent(),
+            Value<int?> subtotalAmountMinorUnits = const Value.absent(),
+            Value<int?> taxAmountMinorUnits = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               ExpensesCompanion.insert(
@@ -12232,6 +12728,9 @@ class $$ExpensesTableTableManager extends RootTableManager<
             deletedAt: deletedAt,
             subtotalAmount: subtotalAmount,
             taxAmount: taxAmount,
+            amountMinorUnits: amountMinorUnits,
+            subtotalAmountMinorUnits: subtotalAmountMinorUnits,
+            taxAmountMinorUnits: taxAmountMinorUnits,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
@@ -12373,6 +12872,7 @@ typedef $$GroceryItemsTableCreateCompanionBuilder = GroceryItemsCompanion
   required String expenseId,
   required String name,
   required double amount,
+  Value<int?> amountMinorUnits,
   required String createdAt,
   Value<int> rowid,
 });
@@ -12382,6 +12882,7 @@ typedef $$GroceryItemsTableUpdateCompanionBuilder = GroceryItemsCompanion
   Value<String> expenseId,
   Value<String> name,
   Value<double> amount,
+  Value<int?> amountMinorUnits,
   Value<String> createdAt,
   Value<int> rowid,
 });
@@ -12422,6 +12923,10 @@ class $$GroceryItemsTableFilterComposer
 
   ColumnFilters<double> get amount => $composableBuilder(
       column: $table.amount, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get amountMinorUnits => $composableBuilder(
+      column: $table.amountMinorUnits,
+      builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
@@ -12465,6 +12970,10 @@ class $$GroceryItemsTableOrderingComposer
   ColumnOrderings<double> get amount => $composableBuilder(
       column: $table.amount, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<int> get amountMinorUnits => $composableBuilder(
+      column: $table.amountMinorUnits,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 
@@ -12506,6 +13015,9 @@ class $$GroceryItemsTableAnnotationComposer
 
   GeneratedColumn<double> get amount =>
       $composableBuilder(column: $table.amount, builder: (column) => column);
+
+  GeneratedColumn<int> get amountMinorUnits => $composableBuilder(
+      column: $table.amountMinorUnits, builder: (column) => column);
 
   GeneratedColumn<String> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -12559,6 +13071,7 @@ class $$GroceryItemsTableTableManager extends RootTableManager<
             Value<String> expenseId = const Value.absent(),
             Value<String> name = const Value.absent(),
             Value<double> amount = const Value.absent(),
+            Value<int?> amountMinorUnits = const Value.absent(),
             Value<String> createdAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -12567,6 +13080,7 @@ class $$GroceryItemsTableTableManager extends RootTableManager<
             expenseId: expenseId,
             name: name,
             amount: amount,
+            amountMinorUnits: amountMinorUnits,
             createdAt: createdAt,
             rowid: rowid,
           ),
@@ -12575,6 +13089,7 @@ class $$GroceryItemsTableTableManager extends RootTableManager<
             required String expenseId,
             required String name,
             required double amount,
+            Value<int?> amountMinorUnits = const Value.absent(),
             required String createdAt,
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -12583,6 +13098,7 @@ class $$GroceryItemsTableTableManager extends RootTableManager<
             expenseId: expenseId,
             name: name,
             amount: amount,
+            amountMinorUnits: amountMinorUnits,
             createdAt: createdAt,
             rowid: rowid,
           ),
@@ -12647,6 +13163,7 @@ typedef $$CategoryBudgetsTableCreateCompanionBuilder = CategoryBudgetsCompanion
   required String id,
   required String categoryId,
   required double amount,
+  Value<int?> amountMinorUnits,
   required String currency,
   required String month,
   required String createdAt,
@@ -12658,6 +13175,7 @@ typedef $$CategoryBudgetsTableUpdateCompanionBuilder = CategoryBudgetsCompanion
   Value<String> id,
   Value<String> categoryId,
   Value<double> amount,
+  Value<int?> amountMinorUnits,
   Value<String> currency,
   Value<String> month,
   Value<String> createdAt,
@@ -12699,6 +13217,10 @@ class $$CategoryBudgetsTableFilterComposer
 
   ColumnFilters<double> get amount => $composableBuilder(
       column: $table.amount, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get amountMinorUnits => $composableBuilder(
+      column: $table.amountMinorUnits,
+      builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get currency => $composableBuilder(
       column: $table.currency, builder: (column) => ColumnFilters(column));
@@ -12748,6 +13270,10 @@ class $$CategoryBudgetsTableOrderingComposer
   ColumnOrderings<double> get amount => $composableBuilder(
       column: $table.amount, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<int> get amountMinorUnits => $composableBuilder(
+      column: $table.amountMinorUnits,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get currency => $composableBuilder(
       column: $table.currency, builder: (column) => ColumnOrderings(column));
 
@@ -12795,6 +13321,9 @@ class $$CategoryBudgetsTableAnnotationComposer
 
   GeneratedColumn<double> get amount =>
       $composableBuilder(column: $table.amount, builder: (column) => column);
+
+  GeneratedColumn<int> get amountMinorUnits => $composableBuilder(
+      column: $table.amountMinorUnits, builder: (column) => column);
 
   GeneratedColumn<String> get currency =>
       $composableBuilder(column: $table.currency, builder: (column) => column);
@@ -12856,6 +13385,7 @@ class $$CategoryBudgetsTableTableManager extends RootTableManager<
             Value<String> id = const Value.absent(),
             Value<String> categoryId = const Value.absent(),
             Value<double> amount = const Value.absent(),
+            Value<int?> amountMinorUnits = const Value.absent(),
             Value<String> currency = const Value.absent(),
             Value<String> month = const Value.absent(),
             Value<String> createdAt = const Value.absent(),
@@ -12866,6 +13396,7 @@ class $$CategoryBudgetsTableTableManager extends RootTableManager<
             id: id,
             categoryId: categoryId,
             amount: amount,
+            amountMinorUnits: amountMinorUnits,
             currency: currency,
             month: month,
             createdAt: createdAt,
@@ -12876,6 +13407,7 @@ class $$CategoryBudgetsTableTableManager extends RootTableManager<
             required String id,
             required String categoryId,
             required double amount,
+            Value<int?> amountMinorUnits = const Value.absent(),
             required String currency,
             required String month,
             required String createdAt,
@@ -12886,6 +13418,7 @@ class $$CategoryBudgetsTableTableManager extends RootTableManager<
             id: id,
             categoryId: categoryId,
             amount: amount,
+            amountMinorUnits: amountMinorUnits,
             currency: currency,
             month: month,
             createdAt: createdAt,
@@ -16068,6 +16601,8 @@ typedef $$DebtRecordsTableCreateCompanionBuilder = DebtRecordsCompanion
   required String type,
   required double principalAmount,
   required double remainingAmount,
+  Value<int?> principalAmountMinorUnits,
+  Value<int?> remainingAmountMinorUnits,
   required String currency,
   Value<String?> description,
   required String createdAt,
@@ -16085,6 +16620,8 @@ typedef $$DebtRecordsTableUpdateCompanionBuilder = DebtRecordsCompanion
   Value<String> type,
   Value<double> principalAmount,
   Value<double> remainingAmount,
+  Value<int?> principalAmountMinorUnits,
+  Value<int?> remainingAmountMinorUnits,
   Value<String> currency,
   Value<String?> description,
   Value<String> createdAt,
@@ -16152,6 +16689,14 @@ class $$DebtRecordsTableFilterComposer
 
   ColumnFilters<double> get remainingAmount => $composableBuilder(
       column: $table.remainingAmount,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get principalAmountMinorUnits => $composableBuilder(
+      column: $table.principalAmountMinorUnits,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get remainingAmountMinorUnits => $composableBuilder(
+      column: $table.remainingAmountMinorUnits,
       builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get currency => $composableBuilder(
@@ -16243,6 +16788,14 @@ class $$DebtRecordsTableOrderingComposer
       column: $table.remainingAmount,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<int> get principalAmountMinorUnits => $composableBuilder(
+      column: $table.principalAmountMinorUnits,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get remainingAmountMinorUnits => $composableBuilder(
+      column: $table.remainingAmountMinorUnits,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get currency => $composableBuilder(
       column: $table.currency, builder: (column) => ColumnOrderings(column));
 
@@ -16308,6 +16861,12 @@ class $$DebtRecordsTableAnnotationComposer
 
   GeneratedColumn<double> get remainingAmount => $composableBuilder(
       column: $table.remainingAmount, builder: (column) => column);
+
+  GeneratedColumn<int> get principalAmountMinorUnits => $composableBuilder(
+      column: $table.principalAmountMinorUnits, builder: (column) => column);
+
+  GeneratedColumn<int> get remainingAmountMinorUnits => $composableBuilder(
+      column: $table.remainingAmountMinorUnits, builder: (column) => column);
 
   GeneratedColumn<String> get currency =>
       $composableBuilder(column: $table.currency, builder: (column) => column);
@@ -16402,6 +16961,8 @@ class $$DebtRecordsTableTableManager extends RootTableManager<
             Value<String> type = const Value.absent(),
             Value<double> principalAmount = const Value.absent(),
             Value<double> remainingAmount = const Value.absent(),
+            Value<int?> principalAmountMinorUnits = const Value.absent(),
+            Value<int?> remainingAmountMinorUnits = const Value.absent(),
             Value<String> currency = const Value.absent(),
             Value<String?> description = const Value.absent(),
             Value<String> createdAt = const Value.absent(),
@@ -16418,6 +16979,8 @@ class $$DebtRecordsTableTableManager extends RootTableManager<
             type: type,
             principalAmount: principalAmount,
             remainingAmount: remainingAmount,
+            principalAmountMinorUnits: principalAmountMinorUnits,
+            remainingAmountMinorUnits: remainingAmountMinorUnits,
             currency: currency,
             description: description,
             createdAt: createdAt,
@@ -16434,6 +16997,8 @@ class $$DebtRecordsTableTableManager extends RootTableManager<
             required String type,
             required double principalAmount,
             required double remainingAmount,
+            Value<int?> principalAmountMinorUnits = const Value.absent(),
+            Value<int?> remainingAmountMinorUnits = const Value.absent(),
             required String currency,
             Value<String?> description = const Value.absent(),
             required String createdAt,
@@ -16450,6 +17015,8 @@ class $$DebtRecordsTableTableManager extends RootTableManager<
             type: type,
             principalAmount: principalAmount,
             remainingAmount: remainingAmount,
+            principalAmountMinorUnits: principalAmountMinorUnits,
+            remainingAmountMinorUnits: remainingAmountMinorUnits,
             currency: currency,
             description: description,
             createdAt: createdAt,
@@ -16976,6 +17543,8 @@ typedef $$SubscriptionsTableCreateCompanionBuilder = SubscriptionsCompanion
   required String categoryId,
   required double amount,
   Value<double?> taxAmount,
+  Value<int?> amountMinorUnits,
+  Value<int?> taxAmountMinorUnits,
   required String currency,
   Value<String?> description,
   required String startDate,
@@ -16997,6 +17566,8 @@ typedef $$SubscriptionsTableUpdateCompanionBuilder = SubscriptionsCompanion
   Value<String> categoryId,
   Value<double> amount,
   Value<double?> taxAmount,
+  Value<int?> amountMinorUnits,
+  Value<int?> taxAmountMinorUnits,
   Value<String> currency,
   Value<String?> description,
   Value<String> startDate,
@@ -17052,6 +17623,14 @@ class $$SubscriptionsTableFilterComposer
 
   ColumnFilters<double> get taxAmount => $composableBuilder(
       column: $table.taxAmount, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get amountMinorUnits => $composableBuilder(
+      column: $table.amountMinorUnits,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get taxAmountMinorUnits => $composableBuilder(
+      column: $table.taxAmountMinorUnits,
+      builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get currency => $composableBuilder(
       column: $table.currency, builder: (column) => ColumnFilters(column));
@@ -17133,6 +17712,14 @@ class $$SubscriptionsTableOrderingComposer
   ColumnOrderings<double> get taxAmount => $composableBuilder(
       column: $table.taxAmount, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<int> get amountMinorUnits => $composableBuilder(
+      column: $table.amountMinorUnits,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get taxAmountMinorUnits => $composableBuilder(
+      column: $table.taxAmountMinorUnits,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get currency => $composableBuilder(
       column: $table.currency, builder: (column) => ColumnOrderings(column));
 
@@ -17213,6 +17800,12 @@ class $$SubscriptionsTableAnnotationComposer
 
   GeneratedColumn<double> get taxAmount =>
       $composableBuilder(column: $table.taxAmount, builder: (column) => column);
+
+  GeneratedColumn<int> get amountMinorUnits => $composableBuilder(
+      column: $table.amountMinorUnits, builder: (column) => column);
+
+  GeneratedColumn<int> get taxAmountMinorUnits => $composableBuilder(
+      column: $table.taxAmountMinorUnits, builder: (column) => column);
 
   GeneratedColumn<String> get currency =>
       $composableBuilder(column: $table.currency, builder: (column) => column);
@@ -17300,6 +17893,8 @@ class $$SubscriptionsTableTableManager extends RootTableManager<
             Value<String> categoryId = const Value.absent(),
             Value<double> amount = const Value.absent(),
             Value<double?> taxAmount = const Value.absent(),
+            Value<int?> amountMinorUnits = const Value.absent(),
+            Value<int?> taxAmountMinorUnits = const Value.absent(),
             Value<String> currency = const Value.absent(),
             Value<String?> description = const Value.absent(),
             Value<String> startDate = const Value.absent(),
@@ -17320,6 +17915,8 @@ class $$SubscriptionsTableTableManager extends RootTableManager<
             categoryId: categoryId,
             amount: amount,
             taxAmount: taxAmount,
+            amountMinorUnits: amountMinorUnits,
+            taxAmountMinorUnits: taxAmountMinorUnits,
             currency: currency,
             description: description,
             startDate: startDate,
@@ -17340,6 +17937,8 @@ class $$SubscriptionsTableTableManager extends RootTableManager<
             required String categoryId,
             required double amount,
             Value<double?> taxAmount = const Value.absent(),
+            Value<int?> amountMinorUnits = const Value.absent(),
+            Value<int?> taxAmountMinorUnits = const Value.absent(),
             required String currency,
             Value<String?> description = const Value.absent(),
             required String startDate,
@@ -17360,6 +17959,8 @@ class $$SubscriptionsTableTableManager extends RootTableManager<
             categoryId: categoryId,
             amount: amount,
             taxAmount: taxAmount,
+            amountMinorUnits: amountMinorUnits,
+            taxAmountMinorUnits: taxAmountMinorUnits,
             currency: currency,
             description: description,
             startDate: startDate,
