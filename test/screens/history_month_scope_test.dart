@@ -74,18 +74,21 @@ void main() {
     // Older expense should be hidden
     expect(find.text('Older Secret Expense'), findsNothing);
 
-    // Show All button should be visible with 1 older expense hidden
-    expect(find.text('Show All'), findsOneWidget);
-    expect(find.text('1 older expense hidden'), findsOneWidget);
+    // Show All button should be visible and centered
+    final showAllFinder = find.text('Show All');
+    expect(showAllFinder, findsOneWidget);
+    expect(find.ancestor(of: showAllFinder, matching: find.byType(Center)), findsWidgets);
 
     // Tap Show All
-    await tester.tap(find.text('Show All'));
+    await tester.tap(showAllFinder);
     await tester.pumpAndSettle();
 
     // Now both should be visible
     expect(find.text('Current Month Grocery'), findsOneWidget);
     expect(find.text('Older Secret Expense'), findsOneWidget);
-    expect(find.text('Show Current Month Only'), findsOneWidget);
+    final showMonthFinder = find.text('Show Current Month Only');
+    expect(showMonthFinder, findsOneWidget);
+    expect(find.ancestor(of: showMonthFinder, matching: find.byType(Center)), findsWidgets);
 
     // Tap Show Current Month Only
     await tester.tap(find.text('Show Current Month Only'));

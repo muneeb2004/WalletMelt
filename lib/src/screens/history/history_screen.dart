@@ -479,11 +479,35 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                         fontSize: 13,
                                         color: WalletMeltColors.textMuted)),
                                 const SizedBox(height: 16),
-                                ElevatedButton.icon(
-                                  onPressed: () =>
-                                      setState(() => _showAllHistory = true),
+                                FilledButton.icon(
+                                  style: FilledButton.styleFrom(
+                                    backgroundColor: WalletMeltColors.brand,
+                                    foregroundColor: Colors.white,
+                                    minimumSize: const Size(0, 48),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 24, vertical: 12),
+                                    elevation: 2,
+                                    shadowColor: WalletMeltColors.brand
+                                        .withValues(alpha: isDark ? 0.40 : 0.25),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(
+                                          AppSpacing.radiusPill),
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    WMHaptics.light();
+                                    setState(() => _showAllHistory = true);
+                                  },
                                   icon: const Icon(Icons.history_rounded, size: 18),
-                                  label: const Text('Show All History'),
+                                  label: const Text(
+                                    'Show All History',
+                                    style: TextStyle(
+                                      fontFamily: 'PlusJakartaSans',
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 14,
+                                      letterSpacing: 0.2,
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
@@ -526,78 +550,75 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       }
                       if (item is _ToggleHistoryItem) {
                         if (!item.showAll) {
-                          return Padding(
-                            padding: const EdgeInsets.only(top: 16, bottom: 8),
-                            child: WMGlassSurface.tier2(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 14),
-                              onTap: () => setState(() => _showAllHistory = true),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 38,
-                                    height: 38,
-                                    decoration: BoxDecoration(
-                                      color: WalletMeltColors.brand
-                                          .withValues(alpha: 0.15),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(Icons.history_rounded,
-                                        size: 20,
-                                        color: WalletMeltColors.brand),
+                          return Center(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 20),
+                              child: FilledButton.icon(
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: WalletMeltColors.brand,
+                                  foregroundColor: Colors.white,
+                                  minimumSize: const Size(0, 48),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 24, vertical: 12),
+                                  elevation: 2,
+                                  shadowColor: WalletMeltColors.brand
+                                      .withValues(alpha: isDark ? 0.40 : 0.25),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                        AppSpacing.radiusPill),
                                   ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'Showing Current Month',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.w800,
-                                            fontSize: 13,
-                                            color: isDark
-                                                ? Colors.white
-                                                : WalletMeltColors.textPrimary,
-                                          ),
-                                        ),
-                                        Text(
-                                          '${item.hiddenCount} older expense${item.hiddenCount == 1 ? '' : 's'} hidden',
-                                          style: const TextStyle(
-                                            fontSize: 11,
-                                            color: WalletMeltColors.textMuted,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                ),
+                                onPressed: () {
+                                  WMHaptics.light();
+                                  setState(() => _showAllHistory = true);
+                                },
+                                icon: const Icon(Icons.history_rounded, size: 18),
+                                label: const Text(
+                                  'Show All',
+                                  style: TextStyle(
+                                    fontFamily: 'PlusJakartaSans',
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 14,
+                                    letterSpacing: 0.2,
                                   ),
-                                  ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 14, vertical: 8),
-                                      visualDensity: VisualDensity.compact,
-                                    ),
-                                    onPressed: () =>
-                                        setState(() => _showAllHistory = true),
-                                    child: const Text('Show All',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.w800)),
-                                  ),
-                                ],
+                                ),
                               ),
                             ),
                           );
                         } else {
                           return Center(
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              padding: const EdgeInsets.symmetric(vertical: 20),
                               child: OutlinedButton.icon(
+                                style: OutlinedButton.styleFrom(
+                                  minimumSize: const Size(0, 48),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 24, vertical: 12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                        AppSpacing.radiusPill),
+                                  ),
+                                  side: BorderSide(
+                                    color: isDark
+                                        ? WalletMeltColors.darkBorder
+                                        : WalletMeltColors.lightBorder,
+                                    width: 1.2,
+                                  ),
+                                ),
                                 icon: const Icon(Icons.calendar_today_rounded,
                                     size: 16),
-                                label: const Text('Show Current Month Only'),
-                                onPressed: () =>
-                                    setState(() => _showAllHistory = false),
+                                label: const Text(
+                                  'Show Current Month Only',
+                                  style: TextStyle(
+                                    fontFamily: 'PlusJakartaSans',
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                onPressed: () {
+                                  WMHaptics.light();
+                                  setState(() => _showAllHistory = false);
+                                },
                               ),
                             ),
                           );
