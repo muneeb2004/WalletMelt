@@ -19,11 +19,11 @@ import '../../widgets/triple_metric_row.dart';
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
 
-  String _greeting() {
+  String _timeOfDay() {
     final hour = DateTime.now().hour;
-    if (hour < 12) return 'Good Morning';
-    if (hour < 17) return 'Good Afternoon';
-    return 'Good Evening';
+    if (hour < 12) return 'Morning';
+    if (hour < 17) return 'Afternoon';
+    return 'Evening';
   }
 
   @override
@@ -88,25 +88,43 @@ class DashboardScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Expanded(
-                          child: Text(
-                            'Good Morning',
-                            style: textTheme.headlineMedium?.copyWith(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w900,
-                            ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Good',
+                                style: textTheme.headlineMedium?.copyWith(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: -0.3,
+                                  height: 1.1,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Morning',
+                                style: textTheme.headlineMedium?.copyWith(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: -0.5,
+                                  height: 1.15,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 18),
+                    const SizedBox(height: 20),
                     const WMDarkHeroCard(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('MONTHLY SPEND'),
-                          SizedBox(height: 12),
+                          Text('TOTAL SPEND'),
+                          SizedBox(height: 16),
                           Text('0.00', style: TextStyle(fontSize: 38)),
-                          SizedBox(height: 14),
+                          SizedBox(height: 16),
                           Text('Loading financial metrics...'),
                         ],
                       ),
@@ -150,14 +168,36 @@ class DashboardScreen extends StatelessWidget {
                     child: FittedBox(
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerLeft,
-                      child: Text(
-                        _greeting(),
-                        maxLines: 1,
-                        style: textTheme.headlineMedium?.copyWith(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -0.4,
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Good',
+                            maxLines: 1,
+                            style: textTheme.headlineMedium?.copyWith(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.3,
+                              height: 1.1,
+                              color: isDark
+                                  ? const Color(0xFF94A3B8)
+                                  : const Color(0xFF64748B),
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            _timeOfDay(),
+                            maxLines: 1,
+                            style: textTheme.headlineMedium?.copyWith(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: -0.5,
+                              height: 1.15,
+                              color: isDark ? Colors.white : WalletMeltColors.textPrimary,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -253,7 +293,7 @@ class DashboardScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 18),
+               const SizedBox(height: 20),
 
               // ── Primary Debit-Card Styled Theme-Aware Hero Card ──────────
               WMDarkHeroCard(
@@ -338,15 +378,18 @@ class DashboardScreen extends StatelessWidget {
                               ),
                               const SizedBox(width: 8),
                               Expanded(
-                                child: Text(
-                                  '${readableMonth(selectedMonth).toUpperCase()} SPEND',
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: 1.1,
-                                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    'TOTAL SPEND',
+                                    maxLines: 1,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: 1.2,
+                                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -404,7 +447,7 @@ class DashboardScreen extends StatelessWidget {
                         ],
                       ],
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 16),
 
                     // Big Confident Spend Typography (Theme-aware)
                     FittedBox(
@@ -421,7 +464,7 @@ class DashboardScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 16),
 
                     // Budget Progress & Remaining Amount Context
                     if (hasBudget) ...[

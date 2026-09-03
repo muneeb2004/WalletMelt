@@ -13,6 +13,7 @@ import '../../utils/date_utils.dart';
 import '../../utils/number_parser.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/primary_button.dart';
+import '../../components/category/category_icon.dart';
 
 class EssentialExpensesScreen extends StatefulWidget {
   final bool isEmbedded;
@@ -326,14 +327,17 @@ class _EssentialTemplateTile extends StatelessWidget {
                         : WalletMeltColors.brand.withValues(alpha: 0.16),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Icon(
-                    template.isFuel
-                        ? Icons.local_gas_station_rounded
-                        : _iconForCategory(category?.icon),
-                    size: 20,
-                    color: category != null
-                        ? parseHexColor(category.color)
-                        : WalletMeltColors.brand,
+                  child: Center(
+                    child: CategoryIcon(
+                      icon: template.isFuel ? 'fuel' : category?.icon,
+                      size: 20,
+                      color: category != null
+                          ? parseHexColor(category.color)
+                          : WalletMeltColors.brand,
+                      defaultIcon: template.isFuel
+                          ? Icons.local_gas_station_rounded
+                          : Icons.category_rounded,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -451,21 +455,8 @@ class _EssentialTemplateTile extends StatelessWidget {
       _ => '${day}th',
     };
   }
-
-  IconData _iconForCategory(String? name) {
-    return switch (name) {
-      'bolt' => Icons.bolt_rounded,
-      'local_fire_department' => Icons.local_fire_department_rounded,
-      'shopping_basket' => Icons.shopping_basket_rounded,
-      'wifi' => Icons.wifi_rounded,
-      'water_drop' => Icons.water_drop_rounded,
-      'home' => Icons.home_rounded,
-      'build' => Icons.build_rounded,
-      'local_gas_station' => Icons.local_gas_station_rounded,
-      _ => Icons.category_rounded,
-    };
-  }
 }
+
 
 class _AddEditEssentialSheet extends StatefulWidget {
   final EssentialExpenseTemplate? existing;

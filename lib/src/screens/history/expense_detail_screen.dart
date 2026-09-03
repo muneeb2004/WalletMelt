@@ -12,6 +12,7 @@ import '../../utils/currency_format.dart';
 import '../../utils/date_utils.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/receipt_image.dart';
+import '../../components/category/category_icon.dart';
 
 class ExpenseDetailScreen extends StatelessWidget {
   const ExpenseDetailScreen({required this.expenseId, super.key});
@@ -97,13 +98,26 @@ class ExpenseDetailScreen extends StatelessWidget {
                               : const Color(0xFFF1F3F7),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: Text(
-                          category?.name ?? 'Expense',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800,
-                            color: category != null ? colorFromHex(category.color) : null,
-                          ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (category != null) ...[
+                              CategoryIcon(
+                                icon: category.icon,
+                                size: 14,
+                                color: colorFromHex(category.color),
+                              ),
+                              const SizedBox(width: 5),
+                            ],
+                            Text(
+                              category?.name ?? 'Expense',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                color: category != null ? colorFromHex(category.color) : null,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],

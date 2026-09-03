@@ -6,6 +6,7 @@ import '../../types/category.dart';
 import '../../types/expense.dart';
 import '../../utils/currency_format.dart';
 import '../../utils/date_utils.dart';
+import '../category/category_icon.dart';
 
 class ExpenseListTile extends StatelessWidget {
   const ExpenseListTile({
@@ -75,10 +76,12 @@ class ExpenseListTile extends StatelessWidget {
                       width: 1.0,
                     ),
                   ),
-                  child: Icon(
-                    _iconFor(category?.icon),
-                    color: color,
-                    size: 20,
+                  child: Center(
+                    child: CategoryIcon(
+                      icon: category?.icon,
+                      color: color,
+                      size: 20,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 14),
@@ -239,18 +242,4 @@ String readableDate(DateTime date) {
     return 'Today';
   }
   return '${date.day}/${date.month}/${date.year}';
-}
-
-IconData _iconFor(String? name) {
-  return switch (name) {
-    'bolt' => Icons.bolt_rounded,
-    'local_fire_department' => Icons.local_fire_department_rounded,
-    'shopping_basket' => Icons.shopping_basket_rounded,
-    'wifi' => Icons.wifi_rounded,
-    'water_drop' => Icons.water_drop_rounded,
-    'home' => Icons.home_rounded,
-    'build' => Icons.build_rounded,
-    'local_gas_station' => Icons.local_gas_station_rounded,
-    _ => Icons.more_horiz_rounded,
-  };
 }

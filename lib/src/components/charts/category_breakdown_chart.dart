@@ -7,6 +7,7 @@ import '../../theme/wallet_melt_theme.dart';
 import '../../types/category.dart';
 import '../../utils/insights.dart';
 import '../../utils/currency_format.dart';
+import '../category/category_icon.dart';
 
 class CategoryBreakdownChart extends StatelessWidget {
   const CategoryBreakdownChart({required this.items, super.key});
@@ -101,8 +102,8 @@ class CategoryBreakdownChart extends StatelessWidget {
                             ),
                           ),
                           child: Center(
-                            child: Icon(
-                              _iconFor(item.category.icon),
+                            child: CategoryIcon(
+                              icon: item.category.icon,
                               color: colorFromHex(item.category.color),
                               size: 20,
                             ),
@@ -184,18 +185,5 @@ class CategoryBreakdownChart extends StatelessWidget {
       ),
     );
   }
-
-  IconData _iconFor(String? name) {
-    return switch (name) {
-      'bolt' => Icons.bolt_rounded,
-      'local_fire_department' => Icons.local_fire_department_rounded,
-      'shopping_basket' => Icons.shopping_basket_rounded,
-      'wifi' => Icons.wifi_rounded,
-      'water_drop' => Icons.water_drop_rounded,
-      'home' => Icons.home_rounded,
-      'build' => Icons.build_rounded,
-      'local_gas_station' => Icons.local_gas_station_rounded,
-      _ => Icons.more_horiz_rounded,
-    };
-  }
 }
+

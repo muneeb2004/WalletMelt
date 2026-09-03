@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'category_icon.dart';
 import '../../theme/wallet_melt_theme.dart';
 import '../../types/category.dart';
 
@@ -57,14 +58,28 @@ class WalletCategoryChip extends StatelessWidget {
                 widthFactor: 1.0,
                 heightFactor: 1.0,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  child: Text(
-                    category.name,
-                    style: theme.textTheme.labelLarge,
-                    textHeightBehavior: const TextHeightBehavior(
-                      applyHeightToFirstAscent: false,
-                      applyHeightToLastDescent: false,
-                    ),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CategoryIcon(
+                        icon: category.icon,
+                        size: 16,
+                        color: selected ? color : (isDark ? Colors.white70 : Colors.black87),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        category.name,
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          color: selected ? color : null,
+                          fontWeight: selected ? FontWeight.bold : FontWeight.w500,
+                        ),
+                        textHeightBehavior: const TextHeightBehavior(
+                          applyHeightToFirstAscent: false,
+                          applyHeightToLastDescent: false,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

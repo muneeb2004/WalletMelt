@@ -2,7 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import 'dart:convert';
+import 'dart:io' as io;
+import 'package:file_picker/file_picker.dart';
+import 'package:path_provider/path_provider.dart';
+
 import '../../components/category/category_chip.dart';
+import '../../components/category/category_icon.dart';
+import '../../services/svg/svg_safeguard_service.dart';
 import '../../components/fuel/fuel_editor.dart';
 import '../../components/glass/app_background.dart';
 import '../../types/expense.dart';
@@ -962,11 +969,16 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       '#A88CC2'
     ];
     var selectedColor = colors.first;
+    var selectedIcon = categoryPresets.first.id;
+    String? uploadError;
+    var isUploading = false;
+
     await showAppBottomSheet<void>(
       context,
       builder: (sheetContext) {
         return StatefulBuilder(
           builder: (context, setSheetState) {
+            final activeColor = colorFromHex(selectedColor);
             return SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(
@@ -979,29 +991,203 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Custom category',
+                    Text('Custom Category',
                         style: Theme.of(context).textTheme.titleLarge),
                     const SizedBox(height: 14),
+
+                    // Live preview tile
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: activeColor.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: activeColor.withValues(alpha: 0.25)),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: activeColor.withValues(alpha: 0.2),
+                              shape: BoxShape.circle,
+                            ),
+                            child: CategoryIcon(
+                              icon: selectedIcon,
+                              size: 24,
+                              color: activeColor,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              nameController.text.trim().isEmpty
+                                  ? 'Category Preview'
+                                  : nameController.text.trim(),
+                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+
                     TextField(
-                        controller: nameController,
-                        autofocus: true,
-                        decoration: const InputDecoration(labelText: 'Name')),
+                      controller: nameController,
+                      autofocus: true,
+                      decoration: const InputDecoration(labelText: 'Category Name'),
+                      onChanged: (_) => setSheetState(() {}),
+                    ),
+                    const SizedBox(height: 14),
+
+                    Text(
+                      'Choose Category Icon',
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                    const SizedBox(height: 8),
+
+                    // Preset icons grid
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        for (final preset in categoryPresets)
+                          InkWell(
+                            borderRadius: BorderRadius.circular(12),
+                            onTap: () => setSheetState(() {
+                              selectedIcon = preset.id;
+                              uploadError = null;
+                            }),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 150),
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: selectedIcon == preset.id
+                                    ? activeColor.withValues(alpha: 0.22)
+                                    : Theme.of(context).cardColor.withValues(alpha: 0.5),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: selectedIcon == preset.id
+                                      ? activeColor
+                                      : Theme.of(context).dividerColor.withValues(alpha: 0.2),
+                                  width: selectedIcon == preset.id ? 2 : 1,
+                                ),
+                              ),
+                              child: Tooltip(
+                                message: preset.label,
+                                child: CategoryIcon(
+                                  icon: preset.id,
+                                  size: 22,
+                                  color: selectedIcon == preset.id ? activeColor : null,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
                     const SizedBox(height: 12),
+
+                    // Upload Custom SVG Option
+                    OutlinedButton.icon(
+                      icon: isUploading
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.upload_file_rounded, size: 18),
+                      label: Text(
+                        selectedIcon.startsWith('custom:')
+                            ? 'Custom SVG Uploaded (Tap to Change)'
+                            : 'Upload Custom SVG',
+                      ),
+                      onPressed: isUploading
+                          ? null
+                          : () async {
+                              try {
+                                setSheetState(() => isUploading = true);
+                                final files = await FilePicker.pickFiles(
+                                  type: FileType.custom,
+                                  allowedExtensions: ['svg'],
+                                );
+                                if (files.isNotEmpty) {
+                                  final file = files.first;
+                                  String? content;
+                                  final bytes = await file.readAsBytes();
+                                  if (bytes.isNotEmpty) {
+                                    content = utf8.decode(bytes);
+                                  } else if (file.path != null) {
+                                    content = await io.File(file.path!).readAsString();
+                                  }
+                                  if (content == null || content.isEmpty) {
+                                    setSheetState(() => uploadError = 'Could not read file contents.');
+                                    return;
+                                  }
+
+                                  const safeguard = SvgSafeguardService();
+                                  final val = safeguard.validate(content);
+                                  if (!val.isValid) {
+                                    setSheetState(() => uploadError = val.errorMessage);
+                                    return;
+                                  }
+
+                                  final docsDir = await getApplicationDocumentsDirectory();
+                                  final iconId = await safeguard.saveCustomSvg(
+                                    sanitizedSvg: val.sanitizedContent!,
+                                    baseDir: docsDir,
+                                  );
+
+                                  setSheetState(() {
+                                    selectedIcon = iconId;
+                                    uploadError = null;
+                                  });
+                                }
+                              } catch (e) {
+                                setSheetState(() => uploadError = 'Upload error: $e');
+                              } finally {
+                                setSheetState(() => isUploading = false);
+                              }
+                            },
+                    ),
+
+                    if (uploadError != null) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        uploadError!,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+
+                    const SizedBox(height: 14),
+                    Text(
+                      'Category Color',
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                    const SizedBox(height: 8),
                     WMColorPicker(
                       selectedColor: selectedColor,
                       presetColors: colors,
                       onColorChanged: (c) => setSheetState(() => selectedColor = c),
                     ),
-                    const SizedBox(height: 18),
+                    const SizedBox(height: 20),
                     PrimaryButton(
                       label: 'Create category',
                       onPressed: () async {
                         if (nameController.text.trim().isEmpty) return;
                         final navigator = Navigator.of(sheetContext);
                         final category = await appState.addCategory(
-                            name: nameController.text,
-                            icon: 'more_horiz',
-                            color: selectedColor);
+                          name: nameController.text.trim(),
+                          icon: selectedIcon,
+                          color: selectedColor,
+                        );
                         if (!mounted || !sheetContext.mounted) return;
                         setState(() => _categoryId = category.id);
                         navigator.pop();

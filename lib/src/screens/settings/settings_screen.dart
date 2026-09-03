@@ -1178,6 +1178,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         groceryItems: await state.listAllGroceryItemsForExport(),
         categories: state.categories,
         budgets: await state.listAllBudgetsForExport(),
+        monthlyBudgets: await state.listAllMonthlyBudgetsForExport(),
         settings: state.settings,
       );
       final shareResult = await widget.exportShareService.shareFile(

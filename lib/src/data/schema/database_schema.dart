@@ -61,6 +61,18 @@ CREATE TABLE category_budgets (
 );
 ''';
 
+  static const createMonthlyBudgets = '''
+CREATE TABLE monthly_budgets (
+  id TEXT PRIMARY KEY,
+  month TEXT NOT NULL UNIQUE,
+  amount REAL NOT NULL,
+  amountMinorUnits INTEGER,
+  currency TEXT NOT NULL,
+  createdAt TEXT NOT NULL,
+  updatedAt TEXT NOT NULL
+);
+''';
+
   static const createSyncMetadata = '''
 CREATE TABLE sync_metadata (
   entityType TEXT NOT NULL,
@@ -79,5 +91,6 @@ CREATE TABLE sync_metadata (
     'CREATE INDEX idx_expenses_deleted ON expenses(deletedAt);',
     'CREATE INDEX idx_grocery_items_expense ON grocery_items(expenseId);',
     'CREATE INDEX idx_budgets_month ON category_budgets(month);',
+    'CREATE UNIQUE INDEX IF NOT EXISTS idx_monthly_budgets_month ON monthly_budgets(month);',
   ];
 }

@@ -28,6 +28,7 @@ import 'package:wallet_melt/src/types/budget.dart';
 import 'package:wallet_melt/src/types/category.dart' as wm;
 import 'package:wallet_melt/src/types/expense.dart';
 import 'package:wallet_melt/src/types/grocery_item.dart';
+import 'package:wallet_melt/src/types/monthly_budget.dart';
 import 'package:wallet_melt/src/types/settings.dart';
 
 void main() {
@@ -1569,6 +1570,7 @@ class FakeWalletMeltJsonBackupService extends WalletMeltJsonBackupService {
     required Iterable<wm.Category> categories,
     required Iterable<CategoryBudget> budgets,
     required WalletMeltSettings settings,
+    Iterable<MonthlyBudget>? monthlyBudgets,
     DateTime? exportedAt,
     Directory? directory,
     bool packageReceipts = true,
@@ -1600,6 +1602,7 @@ class FailingWalletMeltJsonBackupService
     required Iterable<wm.Category> categories,
     required Iterable<CategoryBudget> budgets,
     required WalletMeltSettings settings,
+    Iterable<MonthlyBudget>? monthlyBudgets,
     DateTime? exportedAt,
     Directory? directory,
     bool packageReceipts = true,

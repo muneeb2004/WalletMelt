@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/repositories/drift/drift_budget_repository.dart';
+import '../data/repositories/drift/drift_monthly_budget_repository.dart';
 import '../data/repositories/drift/drift_category_repository.dart';
 import '../data/repositories/drift/drift_expense_repository.dart';
 import '../data/repositories/drift/drift_item_repository.dart';
@@ -30,6 +31,12 @@ final driftBudgetRepositoryProvider =
     FutureProvider<DriftBudgetRepository>((ref) async {
   final database = await ref.watch(walletMeltDatabaseProvider.future);
   return DriftBudgetRepository(database);
+});
+
+final driftMonthlyBudgetRepositoryProvider =
+    FutureProvider<DriftMonthlyBudgetRepository>((ref) async {
+  final database = await ref.watch(walletMeltDatabaseProvider.future);
+  return DriftMonthlyBudgetRepository(database);
 });
 
 final driftItemRepositoryProvider =

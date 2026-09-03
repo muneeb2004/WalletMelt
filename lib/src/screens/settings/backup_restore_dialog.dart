@@ -180,12 +180,14 @@ class _BackupRestoreDialogState extends State<BackupRestoreDialog> {
       await state.loadDeletedExpenses();
       final groceryItems = await state.listAllGroceryItemsForExport();
       final budgets = await state.listAllBudgetsForExport();
+      final monthlyBudgets = await state.listAllMonthlyBudgetsForExport();
       
       safetyBackup = await widget.jsonBackupService.createBackup(
         expenses: [...state.expenses, ...state.deletedExpenses],
         groceryItems: groceryItems,
         categories: state.categories,
         budgets: budgets,
+        monthlyBudgets: monthlyBudgets,
         settings: state.settings,
         packageReceipts: false,
         directory: docDir,

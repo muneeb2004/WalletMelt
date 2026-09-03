@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../components/glass/app_background.dart';
 import '../../components/category/category_chip.dart';
+import '../../components/category/category_icon.dart';
 import '../../state/app_state.dart';
 import '../../theme/wallet_melt_theme.dart';
 import '../../types/subscription.dart' as wm_sub;
@@ -287,12 +288,13 @@ class _SubscriptionCard extends StatelessWidget {
                   : theme.colorScheme.primary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              category != null
-                  ? _iconFor(category!.icon)
-                  : Icons.repeat_rounded,
-              color: category != null ? colorFromHex(category!.color) : theme.colorScheme.primary,
-              size: 22,
+            child: Center(
+              child: CategoryIcon(
+                icon: category?.icon,
+                color: category != null ? colorFromHex(category!.color) : theme.colorScheme.primary,
+                size: 22,
+                defaultIcon: Icons.repeat_rounded,
+              ),
             ),
           ),
           const SizedBox(width: 14),
@@ -1234,16 +1236,3 @@ class _ActionButton extends StatelessWidget {
   }
 }
 
-IconData _iconFor(String? name) {
-  return switch (name) {
-    'bolt' => Icons.bolt_rounded,
-    'local_fire_department' => Icons.local_fire_department_rounded,
-    'shopping_basket' => Icons.shopping_basket_rounded,
-    'wifi' => Icons.wifi_rounded,
-    'water_drop' => Icons.water_drop_rounded,
-    'home' => Icons.home_rounded,
-    'build' => Icons.build_rounded,
-    'local_gas_station' => Icons.local_gas_station_rounded,
-    _ => Icons.more_horiz_rounded,
-  };
-}

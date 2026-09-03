@@ -253,6 +253,7 @@ class WalletMeltJsonRestoreService {
           await db.delete(db.receipts).go();
           await db.delete(db.expenses).go();
           await db.delete(db.categoryBudgets).go();
+          await db.delete(db.monthlyBudgets).go();
           await db.delete(db.syncMetadata).go();
           await db.delete(db.categories).go();
 
@@ -751,6 +752,7 @@ class WalletMeltJsonRestoreService {
         await db.delete(db.receipts).go();
         await db.delete(db.expenses).go();
         await db.delete(db.categoryBudgets).go();
+        await db.delete(db.monthlyBudgets).go();
         await db.delete(db.syncMetadata).go();
         await db.delete(db.categories).go();
 
@@ -850,6 +852,20 @@ class WalletMeltJsonRestoreService {
                   amount: _requiredDouble(budget, 'amount'),
                   currency: _requiredString(budget, 'currency'),
                   month: _requiredString(budget, 'month'),
+                  createdAt: _requiredString(budget, 'created_at'),
+                  updatedAt: _requiredString(budget, 'updated_at'),
+                ),
+              );
+        }
+
+        final monthlyBudgets = _asMaps(backup['monthly_budgets']);
+        for (final budget in monthlyBudgets) {
+          await db.into(db.monthlyBudgets).insert(
+                local.MonthlyBudgetsCompanion.insert(
+                  id: _requiredString(budget, 'id'),
+                  month: _requiredString(budget, 'month'),
+                  amount: _requiredDouble(budget, 'amount'),
+                  currency: _requiredString(budget, 'currency'),
                   createdAt: _requiredString(budget, 'created_at'),
                   updatedAt: _requiredString(budget, 'updated_at'),
                 ),

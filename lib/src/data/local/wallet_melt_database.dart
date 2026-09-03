@@ -98,6 +98,27 @@ class CategoryBudgets extends Table {
       ];
 }
 
+class MonthlyBudgets extends Table {
+  @override
+  String get tableName => 'monthly_budgets';
+
+  TextColumn get id => text()();
+  TextColumn get month => text().named('month')();
+  RealColumn get amount => real()();
+  IntColumn get amountMinorUnits => integer().named('amountMinorUnits').nullable()();
+  TextColumn get currency => text()();
+  TextColumn get createdAt => text().named('createdAt')();
+  TextColumn get updatedAt => text().named('updatedAt')();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+
+  @override
+  List<Set<Column<Object>>> get uniqueKeys => [
+        {month},
+      ];
+}
+
 class SyncMetadata extends Table {
   @override
   String get tableName => 'sync_metadata';
@@ -491,13 +512,14 @@ class V1MigrationMetrics {
     FuelTemplateComponents,
     FuelTransactions,
     FuelComponents,
+    MonthlyBudgets,
   ],
 )
 class WalletMeltDatabase extends _$WalletMeltDatabase {
   WalletMeltDatabase(super.executor, {this.preMigrationBackupPath});
   WalletMeltDatabase.memory() : this(openInMemoryConnection());
 
-  static const currentSchemaVersion = 8;
+  static const currentSchemaVersion = 9;
 
   final String? preMigrationBackupPath;
 
@@ -584,6 +606,9 @@ class WalletMeltDatabase extends _$WalletMeltDatabase {
           if (from < 8 && to >= 8) {
             await _upgradeFromV7ToV8(m, from, to);
           }
+          if (from < 9 && to >= 9) {
+            await _upgradeFromV8ToV9(m, from, to);
+          }
         },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON;');
@@ -598,6 +623,7 @@ class WalletMeltDatabase extends _$WalletMeltDatabase {
             'CREATE INDEX IF NOT EXISTS debt_records_payeeId_idx ON debt_records (payeeId);',
             'CREATE INDEX IF NOT EXISTS subscriptions_status_idx ON subscriptions (status, nextOccurrenceDate);',
             'CREATE INDEX IF NOT EXISTS category_budgets_month_idx ON category_budgets (month);',
+            'CREATE UNIQUE INDEX IF NOT EXISTS monthly_budgets_month_idx ON monthly_budgets (month);',
             'CREATE INDEX IF NOT EXISTS fuel_transactions_expenseId_idx ON fuel_transactions (expenseId);',
             'CREATE INDEX IF NOT EXISTS fuel_components_fuelTransactionId_idx ON fuel_components (fuelTransactionId);',
             'CREATE INDEX IF NOT EXISTS fuel_template_components_templateId_idx ON fuel_template_components (templateId);',
@@ -740,6 +766,40 @@ class WalletMeltDatabase extends _$WalletMeltDatabase {
       }
     } catch (e) {
       if (hasAudit && from >= 7) {
+        await customStatement(
+          'UPDATE migration_audit SET status = ?, completedAt = ?, errorMessage = ? WHERE id = ?;',
+          ['failed', DateTime.now().toIso8601String(), e.toString(), auditId],
+        );
+      }
+      rethrow;
+    }
+  }
+
+  Future<void> _upgradeFromV8ToV9(Migrator m, int from, int to) async {
+    final hasAudit = await _tableExists('migration_audit');
+    final auditId = 'audit_v8_v9_${DateTime.now().millisecondsSinceEpoch}';
+    final startedAt = DateTime.now().toIso8601String();
+    if (hasAudit && from >= 8) {
+      await customStatement(
+        'INSERT INTO migration_audit (id, fromVersion, toVersion, startedAt, status, preMigrationBackupPath) VALUES (?, ?, ?, ?, ?, ?);',
+        [auditId, from, to, startedAt, 'in_progress', preMigrationBackupPath],
+      );
+    }
+
+    try {
+      if (!await _tableExists('monthly_budgets')) {
+        await m.createTable(monthlyBudgets);
+      }
+      await customStatement('CREATE UNIQUE INDEX IF NOT EXISTS monthly_budgets_month_idx ON monthly_budgets (month);');
+
+      if (hasAudit && from >= 8) {
+        await customStatement(
+          'UPDATE migration_audit SET status = ?, completedAt = ? WHERE id = ?;',
+          ['completed', DateTime.now().toIso8601String(), auditId],
+        );
+      }
+    } catch (e) {
+      if (hasAudit && from >= 8) {
         await customStatement(
           'UPDATE migration_audit SET status = ?, completedAt = ?, errorMessage = ? WHERE id = ?;',
           ['failed', DateTime.now().toIso8601String(), e.toString(), auditId],

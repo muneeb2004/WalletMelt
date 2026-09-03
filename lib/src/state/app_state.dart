@@ -43,11 +43,14 @@ import '../data/repositories/drift/drift_essential_expense_repository.dart';
 import '../data/repositories/drift/drift_fuel_repository.dart';
 import '../types/merchant.dart';
 import '../data/repositories/drift/drift_store_repository.dart';
+import '../data/repositories/drift/drift_monthly_budget_repository.dart';
+import '../types/monthly_budget.dart';
 
 class AppState extends ChangeNotifier {
   AppState({
     DriftCategoryRepository? driftCategoryRepository,
     DriftBudgetRepository? driftBudgetRepository,
+    DriftMonthlyBudgetRepository? driftMonthlyBudgetRepository,
     DriftExpenseRepository? driftExpenseRepository,
     DriftDebtRepository? driftDebtRepository,
     DriftGroceryTemplateRepository? driftGroceryTemplateRepository,
@@ -65,6 +68,10 @@ class AppState extends ChangeNotifier {
         receiptStorage = receiptStorageService ?? LocalReceiptStorageService() {
     _driftCategoryRepository = driftCategoryRepository ?? _FakeDriftCategoryRepository();
     _driftBudgetRepository = driftBudgetRepository ?? _FakeDriftBudgetRepository();
+    _driftMonthlyBudgetRepository = driftMonthlyBudgetRepository ??
+        (driftDatabase != null
+            ? DriftMonthlyBudgetRepository(driftDatabase)
+            : _FakeDriftMonthlyBudgetRepository());
     _driftExpenseRepository = driftExpenseRepository ?? _FakeDriftExpenseRepository();
     _driftDebtRepository = driftDebtRepository ?? _FakeDriftDebtRepository();
     _driftGroceryTemplateRepository = driftGroceryTemplateRepository ?? _FakeDriftGroceryTemplateRepository();
@@ -78,6 +85,7 @@ class AppState extends ChangeNotifier {
   AppState.test({
     DriftCategoryRepository? driftCategoryRepository,
     DriftBudgetRepository? driftBudgetRepository,
+    DriftMonthlyBudgetRepository? driftMonthlyBudgetRepository,
     DriftExpenseRepository? driftExpenseRepository,
     DriftDebtRepository? driftDebtRepository,
     DriftGroceryTemplateRepository? driftGroceryTemplateRepository,
@@ -101,6 +109,8 @@ class AppState extends ChangeNotifier {
     _driftCategoryRepository = driftCategoryRepository ?? _FakeDriftCategoryRepository();
 
     _driftBudgetRepository = driftBudgetRepository ?? _FakeDriftBudgetRepository();
+    _driftMonthlyBudgetRepository =
+        driftMonthlyBudgetRepository ?? _FakeDriftMonthlyBudgetRepository();
     _driftExpenseRepository = driftExpenseRepository ?? _FakeDriftExpenseRepository();
     _driftDebtRepository = driftDebtRepository ?? _FakeDriftDebtRepository();
     _driftGroceryTemplateRepository = driftGroceryTemplateRepository ?? _FakeDriftGroceryTemplateRepository();
@@ -119,6 +129,7 @@ class AppState extends ChangeNotifier {
   local.WalletMeltDatabase? _driftDatabase;
   late DriftCategoryRepository _driftCategoryRepository;
   late DriftBudgetRepository _driftBudgetRepository;
+  late DriftMonthlyBudgetRepository _driftMonthlyBudgetRepository;
   late DriftExpenseRepository _driftExpenseRepository;
   late DriftDebtRepository _driftDebtRepository;
   late DriftGroceryTemplateRepository _driftGroceryTemplateRepository;
@@ -127,6 +138,9 @@ class AppState extends ChangeNotifier {
   late DriftEssentialExpenseRepository _driftEssentialExpenseRepository;
   late DriftFuelRepository _driftFuelRepository;
   late DriftStoreRepository _driftStoreRepository;
+
+  MonthlyBudget? _currentMonthlyBudget;
+  final Map<String, MonthlyBudget?> _monthlyBudgetCache = {};
 
   List<wm_debt.DebtRecord> debts = const [];
   List<wm_template.GroceryTemplate> groceryTemplates = const [];
@@ -264,7 +278,7 @@ class AppState extends ChangeNotifier {
       budgets: currentBudgets,
       essentialTemplates: essentialTemplates,
       subscriptions: subscriptions,
-      monthlyBudgetAmount: settings.monthlyBudgetAmount,
+      monthlyBudgetAmount: getMonthlyBudgetAmount(currentMonthKey),
     );
     return _cachedInsightCards!;
   }
@@ -325,6 +339,8 @@ class AppState extends ChangeNotifier {
     categories = await _listCategories();
     expenses = await _listActiveExpenses();
     currentBudgets = await _listBudgetsForMonth(currentMonthKey);
+    _currentMonthlyBudget = await _driftMonthlyBudgetRepository.getForMonth(currentMonthKey);
+    _monthlyBudgetCache[currentMonthKey] = _currentMonthlyBudget;
     _updateCurrentMonthExpenses();
 
     debts = await _driftDebtRepository.listAll();
@@ -375,22 +391,70 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  double? getMonthlyBudgetAmount() {
+  double? getMonthlyBudgetAmount([String? month]) {
+    final key = month ?? currentMonthKey;
+    if (key == currentMonthKey && _currentMonthlyBudget != null) {
+      return _currentMonthlyBudget!.amount;
+    }
+    if (_monthlyBudgetCache.containsKey(key) && _monthlyBudgetCache[key] != null) {
+      return _monthlyBudgetCache[key]!.amount;
+    }
     return settings.monthlyBudgetAmount;
   }
 
-  Future<void> setMonthlyBudgetAmount(double amount) async {
+  Future<MonthlyBudget?> getMonthlyBudgetForMonth(String month) async {
+    if (_monthlyBudgetCache.containsKey(month)) {
+      return _monthlyBudgetCache[month];
+    }
+    final budget = await _driftMonthlyBudgetRepository.getForMonth(month);
+    _monthlyBudgetCache[month] = budget;
+    return budget;
+  }
+
+  Future<void> setMonthlyBudgetAmount(double amount, {String? month}) async {
+    final key = month ?? currentMonthKey;
     _clearCache();
+    _clearAnalyticsCache();
+    await _driftMonthlyBudgetRepository.upsert(
+      month: key,
+      amount: amount,
+      currency: settings.currency,
+    );
+    // Keep settings updated as latest default
     settings = settings.copyWith(monthlyBudgetAmount: amount);
     await _settingsService.save(settings);
+
+    _currentMonthlyBudget = await _driftMonthlyBudgetRepository.getForMonth(currentMonthKey);
+    _monthlyBudgetCache[key] = await _driftMonthlyBudgetRepository.getForMonth(key);
+    _monthlyBudgetCache[currentMonthKey] = _currentMonthlyBudget;
     notifyListeners();
   }
 
-  Future<void> clearMonthlyBudgetAmount() async {
+  Future<void> clearMonthlyBudgetAmount({String? month}) async {
+    final key = month ?? currentMonthKey;
     _clearCache();
-    settings = settings.copyWith(clearMonthlyBudget: true);
-    await _settingsService.save(settings);
+    _clearAnalyticsCache();
+    await _driftMonthlyBudgetRepository.delete(key);
+    _monthlyBudgetCache.remove(key);
+    if (key == currentMonthKey) {
+      _currentMonthlyBudget = null;
+    }
+    if (key == monthKey(DateTime.now())) {
+      settings = settings.copyWith(clearMonthlyBudget: true);
+      await _settingsService.save(settings);
+    }
     notifyListeners();
+  }
+
+  Future<bool> copyBudgetFromPreviousMonth() async {
+    final prevMonth = DateTime(selectedMonth.year, selectedMonth.month - 1);
+    final prevKey = monthKey(prevMonth);
+    final prevBudget = await getMonthlyBudgetForMonth(prevKey);
+    if (prevBudget != null && prevBudget.amount > 0) {
+      await setMonthlyBudgetAmount(prevBudget.amount);
+      return true;
+    }
+    return false;
   }
 
   double getCurrentMonthTotalSpent() {
@@ -590,6 +654,10 @@ class AppState extends ChangeNotifier {
     return _driftBudgetRepository.listAll();
   }
 
+  Future<List<MonthlyBudget>> listAllMonthlyBudgetsForExport() async {
+    return _driftMonthlyBudgetRepository.listAll();
+  }
+
   Future<void> addDebt(wm_debt.DebtRecord debt) async {
     await _driftDebtRepository.createDebt(debt);
     await refresh();
@@ -787,16 +855,33 @@ class AppState extends ChangeNotifier {
 
   Future<void> previousMonth() async {
     _clearCache();
+    _clearAnalyticsCache();
     selectedMonth = DateTime(selectedMonth.year, selectedMonth.month - 1);
     currentBudgets = await _listBudgetsForMonth(currentMonthKey);
+    _currentMonthlyBudget = await _driftMonthlyBudgetRepository.getForMonth(currentMonthKey);
+    _monthlyBudgetCache[currentMonthKey] = _currentMonthlyBudget;
     _updateCurrentMonthExpenses();
     notifyListeners();
   }
 
   Future<void> nextMonth() async {
     _clearCache();
+    _clearAnalyticsCache();
     selectedMonth = DateTime(selectedMonth.year, selectedMonth.month + 1);
     currentBudgets = await _listBudgetsForMonth(currentMonthKey);
+    _currentMonthlyBudget = await _driftMonthlyBudgetRepository.getForMonth(currentMonthKey);
+    _monthlyBudgetCache[currentMonthKey] = _currentMonthlyBudget;
+    _updateCurrentMonthExpenses();
+    notifyListeners();
+  }
+
+  Future<void> setSelectedMonth(DateTime month) async {
+    _clearCache();
+    _clearAnalyticsCache();
+    selectedMonth = DateTime(month.year, month.month);
+    currentBudgets = await _listBudgetsForMonth(currentMonthKey);
+    _currentMonthlyBudget = await _driftMonthlyBudgetRepository.getForMonth(currentMonthKey);
+    _monthlyBudgetCache[currentMonthKey] = _currentMonthlyBudget;
     _updateCurrentMonthExpenses();
     notifyListeners();
   }
@@ -924,6 +1009,39 @@ class _FakeDriftStoreRepository extends DriftStoreRepository {
   Future<List<Merchant>> getSuggestions({String? query, int limit = 8}) async => [];
   @override
   Future<String?> recordMerchantHistory(String merchantName) async => null;
+}
+
+class _FakeDriftMonthlyBudgetRepository extends DriftMonthlyBudgetRepository {
+  _FakeDriftMonthlyBudgetRepository() : super(_dummyDb);
+  final Map<String, MonthlyBudget> _fakeStore = {};
+
+  @override
+  Future<MonthlyBudget?> getForMonth(String month) async => _fakeStore[month];
+
+  @override
+  Future<List<MonthlyBudget>> listAll() async => _fakeStore.values.toList();
+
+  @override
+  Future<void> upsert({
+    required String month,
+    required double amount,
+    required String currency,
+  }) async {
+    final now = DateTime.now().toIso8601String();
+    _fakeStore[month] = MonthlyBudget(
+      id: 'fake_$month',
+      month: month,
+      amount: amount,
+      currency: currency,
+      createdAt: now,
+      updatedAt: now,
+    );
+  }
+
+  @override
+  Future<void> delete(String month) async {
+    _fakeStore.remove(month);
+  }
 }
 
 local.WalletMeltDatabase? _lazyDummyDb;

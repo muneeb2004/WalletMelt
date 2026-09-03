@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../types/budget.dart';
+import '../types/monthly_budget.dart';
 import 'repository_providers.dart';
 
 class BudgetLookup {
@@ -26,6 +27,13 @@ final monthlyBudgetsProvider =
   return repository.listForMonth(month);
 });
 
+final monthlyBudgetForMonthProvider =
+    FutureProvider.family<MonthlyBudget?, String>((ref, month) async {
+  final repository =
+      await ref.watch(driftMonthlyBudgetRepositoryProvider.future);
+  return repository.getForMonth(month);
+});
+
 final budgetByCategoryProvider =
     FutureProvider.family<CategoryBudget?, BudgetLookup>((ref, lookup) async {
   final budgets = await ref.watch(monthlyBudgetsProvider(lookup.month).future);
@@ -34,3 +42,4 @@ final budgetByCategoryProvider =
   }
   return null;
 });
+

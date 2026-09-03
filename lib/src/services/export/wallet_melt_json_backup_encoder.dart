@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import '../../types/budget.dart';
+import '../../types/monthly_budget.dart';
 import '../../types/category.dart';
 import '../../types/expense.dart';
 import '../../types/grocery_item.dart';
@@ -19,6 +20,7 @@ class WalletMeltJsonBackupEncoder {
     required Iterable<CategoryBudget> budgets,
     required WalletMeltSettings settings,
     required DateTime exportedAt,
+    Iterable<MonthlyBudget>? monthlyBudgets,
     String? appVersion,
   }) {
     final backup = <String, Object?>{
@@ -32,6 +34,7 @@ class WalletMeltJsonBackupEncoder {
           'grocery_items',
           'categories',
           'budgets',
+          if (monthlyBudgets != null) 'monthly_budgets',
           'settings',
         ],
       },
@@ -40,6 +43,9 @@ class WalletMeltJsonBackupEncoder {
           _sortedGroceryItems(groceryItems).map(_groceryItemToJson).toList(),
       'categories': _sortedCategories(categories).map(_categoryToJson).toList(),
       'budgets': _sortedBudgets(budgets).map(_budgetToJson).toList(),
+      if (monthlyBudgets != null)
+        'monthly_budgets':
+            _sortedMonthlyBudgets(monthlyBudgets).map(_monthlyBudgetToJson).toList(),
       'settings': _settingsToJson(settings),
     };
 
@@ -130,6 +136,23 @@ class WalletMeltJsonBackupEncoder {
       'amount': budget.amount,
       'currency': budget.currency,
       'month': budget.month,
+      'created_at': budget.createdAt,
+      'updated_at': budget.updatedAt,
+    };
+  }
+
+  List<MonthlyBudget> _sortedMonthlyBudgets(Iterable<MonthlyBudget> budgets) {
+    final sorted = budgets.toList()
+      ..sort((left, right) => left.month.compareTo(right.month));
+    return sorted;
+  }
+
+  Map<String, Object?> _monthlyBudgetToJson(MonthlyBudget budget) {
+    return <String, Object?>{
+      'id': budget.id,
+      'month': budget.month,
+      'amount': budget.amount,
+      'currency': budget.currency,
       'created_at': budget.createdAt,
       'updated_at': budget.updatedAt,
     };

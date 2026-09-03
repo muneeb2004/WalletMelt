@@ -9,6 +9,7 @@ import '../../types/merchant.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/primary_button.dart';
+import '../../components/category/category_icon.dart';
 
 class MerchantsScreen extends StatefulWidget {
   const MerchantsScreen({super.key});
@@ -35,20 +36,6 @@ class _MerchantsScreenState extends State<MerchantsScreen> {
   void dispose() {
     _searchController.dispose();
     super.dispose();
-  }
-
-  static IconData _iconFor(String? name) {
-    return switch (name) {
-      'bolt' => Icons.bolt_rounded,
-      'local_fire_department' => Icons.local_fire_department_rounded,
-      'shopping_basket' => Icons.shopping_basket_rounded,
-      'wifi' => Icons.wifi_rounded,
-      'water_drop' => Icons.water_drop_rounded,
-      'home' => Icons.home_rounded,
-      'build' => Icons.build_rounded,
-      'local_gas_station' => Icons.local_gas_station_rounded,
-      _ => Icons.category_rounded,
-    };
   }
 
   void _showAddEditMerchantSheet(BuildContext context, {Merchant? merchant}) {
@@ -102,7 +89,11 @@ class _MerchantsScreenState extends State<MerchantsScreen> {
                             value: c.id,
                             child: Row(
                               children: [
-                                Icon(_iconFor(c.icon), size: 16, color: WalletMeltColors.brand),
+                                CategoryIcon(
+                                  icon: c.icon,
+                                  size: 16,
+                                  color: WalletMeltColors.brand,
+                                ),
                                 const SizedBox(width: 8),
                                 Text(c.name),
                               ],
@@ -344,7 +335,11 @@ class _MerchantsScreenState extends State<MerchantsScreen> {
                                               child: Row(
                                                 mainAxisSize: MainAxisSize.min,
                                                 children: [
-                                                  Icon(_iconFor(category.icon), size: 12, color: WalletMeltColors.brand),
+                                                  CategoryIcon(
+                                                    icon: category.icon,
+                                                    size: 12,
+                                                    color: WalletMeltColors.brand,
+                                                  ),
                                                   const SizedBox(width: 4),
                                                   Text(
                                                     category.name,

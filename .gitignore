@@ -5,6 +5,8 @@
 build/
 coverage/
 android/.gradle/
+android/.kotlin/
+.kotlin/
 android/local.properties
 android/app/build/
 *.jks

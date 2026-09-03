@@ -9,6 +9,8 @@ import '../../utils/currency_format.dart';
 import '../../utils/date_utils.dart';
 import '../../utils/number_parser.dart';
 import '../../types/budget.dart';
+import '../../types/monthly_budget.dart';
+import '../../components/category/category_icon.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/progress_bar.dart';
@@ -392,12 +394,40 @@ class _BudgetScreenState extends State<BudgetScreen> {
   }
 
   Widget _buildEmptyHeroCard(BuildContext context, AppState state, double totalSpent) {
-    return EmptyState(
-      icon: Icons.savings_outlined,
-      title: 'No monthly budget set',
-      subtitle: 'Set a monthly limit to track your total spending.',
-      actionLabel: 'Set Budget',
-      onActionPressed: () => BudgetScreen.showSetBudgetSheet(context, state, null, totalSpent),
+    final prevMonth = DateTime(state.selectedMonth.year, state.selectedMonth.month - 1);
+    final prevMonthName = readableMonth(prevMonth);
+    return FutureBuilder<MonthlyBudget?>(
+      future: state.getMonthlyBudgetForMonth(monthKey(prevMonth)),
+      builder: (context, snapshot) {
+        final prevBudget = snapshot.data;
+        return Column(
+          children: [
+            EmptyState(
+              icon: Icons.savings_outlined,
+              title: 'No monthly budget set',
+              subtitle: 'Set a monthly limit to track your total spending.',
+              actionLabel: 'Set Budget',
+              onActionPressed: () => BudgetScreen.showSetBudgetSheet(context, state, null, totalSpent),
+            ),
+            if (prevBudget != null && prevBudget.amount > 0) ...[
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                icon: const Icon(Icons.history_rounded, size: 18),
+                label: Text('Copy from $prevMonthName (${formatMoney(prevBudget.amount, state.settings.currency)})'),
+                onPressed: () async {
+                  await state.setMonthlyBudgetAmount(prevBudget.amount);
+                  if (context.mounted) {
+                    showSuccessSnackbar(
+                      context,
+                      'Copied $prevMonthName budget (${formatMoney(prevBudget.amount, state.settings.currency)}) to ${readableMonth(state.selectedMonth)}',
+                    );
+                  }
+                },
+              ),
+            ],
+          ],
+        );
+      },
     );
   }
 
@@ -425,8 +455,10 @@ class _BudgetScreenState extends State<BudgetScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                readableMonth(selectedMonth),
-                style: Theme.of(context).textTheme.titleLarge,
+                'Total Monthly Budget',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
               ),
               PopupMenuButton<String>(
                 icon: const Icon(Icons.more_vert_rounded),
@@ -730,13 +762,16 @@ class _BudgetScreenState extends State<BudgetScreen> {
           children: [
             Row(
               children: [
-                // Color indicator dot
                 Container(
-                  width: 12,
-                  height: 12,
+                  padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
+                    color: categoryColor.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: CategoryIcon(
+                    icon: category?.icon,
+                    size: 18,
                     color: categoryColor,
-                    shape: BoxShape.circle,
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -880,7 +915,17 @@ class _BudgetScreenState extends State<BudgetScreen> {
                         for (final cat in state.categories)
                           DropdownMenuItem(
                             value: cat.id,
-                            child: Text(cat.name),
+                            child: Row(
+                              children: [
+                                CategoryIcon(
+                                  icon: cat.icon,
+                                  size: 18,
+                                  color: colorFromHex(cat.color),
+                                ),
+                                const SizedBox(width: 10),
+                                Text(cat.name),
+                              ],
+                            ),
                           ),
                       ],
                       onChanged: isEdit

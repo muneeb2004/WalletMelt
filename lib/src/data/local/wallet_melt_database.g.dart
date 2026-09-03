@@ -10588,6 +10588,399 @@ class FuelComponentsCompanion extends UpdateCompanion<FuelComponent> {
   }
 }
 
+class $MonthlyBudgetsTable extends MonthlyBudgets
+    with TableInfo<$MonthlyBudgetsTable, MonthlyBudget> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $MonthlyBudgetsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _monthMeta = const VerificationMeta('month');
+  @override
+  late final GeneratedColumn<String> month = GeneratedColumn<String>(
+      'month', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
+  @override
+  late final GeneratedColumn<double> amount = GeneratedColumn<double>(
+      'amount', aliasedName, false,
+      type: DriftSqlType.double, requiredDuringInsert: true);
+  static const VerificationMeta _amountMinorUnitsMeta =
+      const VerificationMeta('amountMinorUnits');
+  @override
+  late final GeneratedColumn<int> amountMinorUnits = GeneratedColumn<int>(
+      'amountMinorUnits', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _currencyMeta =
+      const VerificationMeta('currency');
+  @override
+  late final GeneratedColumn<String> currency = GeneratedColumn<String>(
+      'currency', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+      'createdAt', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<String> updatedAt = GeneratedColumn<String>(
+      'updatedAt', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, month, amount, amountMinorUnits, currency, createdAt, updatedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'monthly_budgets';
+  @override
+  VerificationContext validateIntegrity(Insertable<MonthlyBudget> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('month')) {
+      context.handle(
+          _monthMeta, month.isAcceptableOrUnknown(data['month']!, _monthMeta));
+    } else if (isInserting) {
+      context.missing(_monthMeta);
+    }
+    if (data.containsKey('amount')) {
+      context.handle(_amountMeta,
+          amount.isAcceptableOrUnknown(data['amount']!, _amountMeta));
+    } else if (isInserting) {
+      context.missing(_amountMeta);
+    }
+    if (data.containsKey('amountMinorUnits')) {
+      context.handle(
+          _amountMinorUnitsMeta,
+          amountMinorUnits.isAcceptableOrUnknown(
+              data['amountMinorUnits']!, _amountMinorUnitsMeta));
+    }
+    if (data.containsKey('currency')) {
+      context.handle(_currencyMeta,
+          currency.isAcceptableOrUnknown(data['currency']!, _currencyMeta));
+    } else if (isInserting) {
+      context.missing(_currencyMeta);
+    }
+    if (data.containsKey('createdAt')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['createdAt']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updatedAt')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updatedAt']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+        {month},
+      ];
+  @override
+  MonthlyBudget map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MonthlyBudget(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      month: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}month'])!,
+      amount: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}amount'])!,
+      amountMinorUnits: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}amountMinorUnits']),
+      currency: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}currency'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}createdAt'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}updatedAt'])!,
+    );
+  }
+
+  @override
+  $MonthlyBudgetsTable createAlias(String alias) {
+    return $MonthlyBudgetsTable(attachedDatabase, alias);
+  }
+}
+
+class MonthlyBudget extends DataClass implements Insertable<MonthlyBudget> {
+  final String id;
+  final String month;
+  final double amount;
+  final int? amountMinorUnits;
+  final String currency;
+  final String createdAt;
+  final String updatedAt;
+  const MonthlyBudget(
+      {required this.id,
+      required this.month,
+      required this.amount,
+      this.amountMinorUnits,
+      required this.currency,
+      required this.createdAt,
+      required this.updatedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['month'] = Variable<String>(month);
+    map['amount'] = Variable<double>(amount);
+    if (!nullToAbsent || amountMinorUnits != null) {
+      map['amountMinorUnits'] = Variable<int>(amountMinorUnits);
+    }
+    map['currency'] = Variable<String>(currency);
+    map['createdAt'] = Variable<String>(createdAt);
+    map['updatedAt'] = Variable<String>(updatedAt);
+    return map;
+  }
+
+  MonthlyBudgetsCompanion toCompanion(bool nullToAbsent) {
+    return MonthlyBudgetsCompanion(
+      id: Value(id),
+      month: Value(month),
+      amount: Value(amount),
+      amountMinorUnits: amountMinorUnits == null && nullToAbsent
+          ? const Value.absent()
+          : Value(amountMinorUnits),
+      currency: Value(currency),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory MonthlyBudget.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return MonthlyBudget(
+      id: serializer.fromJson<String>(json['id']),
+      month: serializer.fromJson<String>(json['month']),
+      amount: serializer.fromJson<double>(json['amount']),
+      amountMinorUnits: serializer.fromJson<int?>(json['amountMinorUnits']),
+      currency: serializer.fromJson<String>(json['currency']),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+      updatedAt: serializer.fromJson<String>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'month': serializer.toJson<String>(month),
+      'amount': serializer.toJson<double>(amount),
+      'amountMinorUnits': serializer.toJson<int?>(amountMinorUnits),
+      'currency': serializer.toJson<String>(currency),
+      'createdAt': serializer.toJson<String>(createdAt),
+      'updatedAt': serializer.toJson<String>(updatedAt),
+    };
+  }
+
+  MonthlyBudget copyWith(
+          {String? id,
+          String? month,
+          double? amount,
+          Value<int?> amountMinorUnits = const Value.absent(),
+          String? currency,
+          String? createdAt,
+          String? updatedAt}) =>
+      MonthlyBudget(
+        id: id ?? this.id,
+        month: month ?? this.month,
+        amount: amount ?? this.amount,
+        amountMinorUnits: amountMinorUnits.present
+            ? amountMinorUnits.value
+            : this.amountMinorUnits,
+        currency: currency ?? this.currency,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+      );
+  MonthlyBudget copyWithCompanion(MonthlyBudgetsCompanion data) {
+    return MonthlyBudget(
+      id: data.id.present ? data.id.value : this.id,
+      month: data.month.present ? data.month.value : this.month,
+      amount: data.amount.present ? data.amount.value : this.amount,
+      amountMinorUnits: data.amountMinorUnits.present
+          ? data.amountMinorUnits.value
+          : this.amountMinorUnits,
+      currency: data.currency.present ? data.currency.value : this.currency,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MonthlyBudget(')
+          ..write('id: $id, ')
+          ..write('month: $month, ')
+          ..write('amount: $amount, ')
+          ..write('amountMinorUnits: $amountMinorUnits, ')
+          ..write('currency: $currency, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id, month, amount, amountMinorUnits, currency, createdAt, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MonthlyBudget &&
+          other.id == this.id &&
+          other.month == this.month &&
+          other.amount == this.amount &&
+          other.amountMinorUnits == this.amountMinorUnits &&
+          other.currency == this.currency &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class MonthlyBudgetsCompanion extends UpdateCompanion<MonthlyBudget> {
+  final Value<String> id;
+  final Value<String> month;
+  final Value<double> amount;
+  final Value<int?> amountMinorUnits;
+  final Value<String> currency;
+  final Value<String> createdAt;
+  final Value<String> updatedAt;
+  final Value<int> rowid;
+  const MonthlyBudgetsCompanion({
+    this.id = const Value.absent(),
+    this.month = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.amountMinorUnits = const Value.absent(),
+    this.currency = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  MonthlyBudgetsCompanion.insert({
+    required String id,
+    required String month,
+    required double amount,
+    this.amountMinorUnits = const Value.absent(),
+    required String currency,
+    required String createdAt,
+    required String updatedAt,
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        month = Value(month),
+        amount = Value(amount),
+        currency = Value(currency),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt);
+  static Insertable<MonthlyBudget> custom({
+    Expression<String>? id,
+    Expression<String>? month,
+    Expression<double>? amount,
+    Expression<int>? amountMinorUnits,
+    Expression<String>? currency,
+    Expression<String>? createdAt,
+    Expression<String>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (month != null) 'month': month,
+      if (amount != null) 'amount': amount,
+      if (amountMinorUnits != null) 'amountMinorUnits': amountMinorUnits,
+      if (currency != null) 'currency': currency,
+      if (createdAt != null) 'createdAt': createdAt,
+      if (updatedAt != null) 'updatedAt': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  MonthlyBudgetsCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? month,
+      Value<double>? amount,
+      Value<int?>? amountMinorUnits,
+      Value<String>? currency,
+      Value<String>? createdAt,
+      Value<String>? updatedAt,
+      Value<int>? rowid}) {
+    return MonthlyBudgetsCompanion(
+      id: id ?? this.id,
+      month: month ?? this.month,
+      amount: amount ?? this.amount,
+      amountMinorUnits: amountMinorUnits ?? this.amountMinorUnits,
+      currency: currency ?? this.currency,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (month.present) {
+      map['month'] = Variable<String>(month.value);
+    }
+    if (amount.present) {
+      map['amount'] = Variable<double>(amount.value);
+    }
+    if (amountMinorUnits.present) {
+      map['amountMinorUnits'] = Variable<int>(amountMinorUnits.value);
+    }
+    if (currency.present) {
+      map['currency'] = Variable<String>(currency.value);
+    }
+    if (createdAt.present) {
+      map['createdAt'] = Variable<String>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updatedAt'] = Variable<String>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MonthlyBudgetsCompanion(')
+          ..write('id: $id, ')
+          ..write('month: $month, ')
+          ..write('amount: $amount, ')
+          ..write('amountMinorUnits: $amountMinorUnits, ')
+          ..write('currency: $currency, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$WalletMeltDatabase extends GeneratedDatabase {
   _$WalletMeltDatabase(QueryExecutor e) : super(e);
   $WalletMeltDatabaseManager get managers => $WalletMeltDatabaseManager(this);
@@ -10617,6 +11010,7 @@ abstract class _$WalletMeltDatabase extends GeneratedDatabase {
   late final $FuelTransactionsTable fuelTransactions =
       $FuelTransactionsTable(this);
   late final $FuelComponentsTable fuelComponents = $FuelComponentsTable(this);
+  late final $MonthlyBudgetsTable monthlyBudgets = $MonthlyBudgetsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -10642,7 +11036,8 @@ abstract class _$WalletMeltDatabase extends GeneratedDatabase {
         essentialExpenseTemplates,
         fuelTemplateComponents,
         fuelTransactions,
-        fuelComponents
+        fuelComponents,
+        monthlyBudgets
       ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
@@ -19483,6 +19878,212 @@ typedef $$FuelComponentsTableProcessedTableManager = ProcessedTableManager<
     (FuelComponent, $$FuelComponentsTableReferences),
     FuelComponent,
     PrefetchHooks Function({bool fuelTransactionId})>;
+typedef $$MonthlyBudgetsTableCreateCompanionBuilder = MonthlyBudgetsCompanion
+    Function({
+  required String id,
+  required String month,
+  required double amount,
+  Value<int?> amountMinorUnits,
+  required String currency,
+  required String createdAt,
+  required String updatedAt,
+  Value<int> rowid,
+});
+typedef $$MonthlyBudgetsTableUpdateCompanionBuilder = MonthlyBudgetsCompanion
+    Function({
+  Value<String> id,
+  Value<String> month,
+  Value<double> amount,
+  Value<int?> amountMinorUnits,
+  Value<String> currency,
+  Value<String> createdAt,
+  Value<String> updatedAt,
+  Value<int> rowid,
+});
+
+class $$MonthlyBudgetsTableFilterComposer
+    extends Composer<_$WalletMeltDatabase, $MonthlyBudgetsTable> {
+  $$MonthlyBudgetsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get month => $composableBuilder(
+      column: $table.month, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get amount => $composableBuilder(
+      column: $table.amount, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get amountMinorUnits => $composableBuilder(
+      column: $table.amountMinorUnits,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get currency => $composableBuilder(
+      column: $table.currency, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+}
+
+class $$MonthlyBudgetsTableOrderingComposer
+    extends Composer<_$WalletMeltDatabase, $MonthlyBudgetsTable> {
+  $$MonthlyBudgetsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get month => $composableBuilder(
+      column: $table.month, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get amount => $composableBuilder(
+      column: $table.amount, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get amountMinorUnits => $composableBuilder(
+      column: $table.amountMinorUnits,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get currency => $composableBuilder(
+      column: $table.currency, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$MonthlyBudgetsTableAnnotationComposer
+    extends Composer<_$WalletMeltDatabase, $MonthlyBudgetsTable> {
+  $$MonthlyBudgetsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get month =>
+      $composableBuilder(column: $table.month, builder: (column) => column);
+
+  GeneratedColumn<double> get amount =>
+      $composableBuilder(column: $table.amount, builder: (column) => column);
+
+  GeneratedColumn<int> get amountMinorUnits => $composableBuilder(
+      column: $table.amountMinorUnits, builder: (column) => column);
+
+  GeneratedColumn<String> get currency =>
+      $composableBuilder(column: $table.currency, builder: (column) => column);
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$MonthlyBudgetsTableTableManager extends RootTableManager<
+    _$WalletMeltDatabase,
+    $MonthlyBudgetsTable,
+    MonthlyBudget,
+    $$MonthlyBudgetsTableFilterComposer,
+    $$MonthlyBudgetsTableOrderingComposer,
+    $$MonthlyBudgetsTableAnnotationComposer,
+    $$MonthlyBudgetsTableCreateCompanionBuilder,
+    $$MonthlyBudgetsTableUpdateCompanionBuilder,
+    (
+      MonthlyBudget,
+      BaseReferences<_$WalletMeltDatabase, $MonthlyBudgetsTable, MonthlyBudget>
+    ),
+    MonthlyBudget,
+    PrefetchHooks Function()> {
+  $$MonthlyBudgetsTableTableManager(
+      _$WalletMeltDatabase db, $MonthlyBudgetsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$MonthlyBudgetsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$MonthlyBudgetsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$MonthlyBudgetsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> month = const Value.absent(),
+            Value<double> amount = const Value.absent(),
+            Value<int?> amountMinorUnits = const Value.absent(),
+            Value<String> currency = const Value.absent(),
+            Value<String> createdAt = const Value.absent(),
+            Value<String> updatedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              MonthlyBudgetsCompanion(
+            id: id,
+            month: month,
+            amount: amount,
+            amountMinorUnits: amountMinorUnits,
+            currency: currency,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String month,
+            required double amount,
+            Value<int?> amountMinorUnits = const Value.absent(),
+            required String currency,
+            required String createdAt,
+            required String updatedAt,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              MonthlyBudgetsCompanion.insert(
+            id: id,
+            month: month,
+            amount: amount,
+            amountMinorUnits: amountMinorUnits,
+            currency: currency,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$MonthlyBudgetsTableProcessedTableManager = ProcessedTableManager<
+    _$WalletMeltDatabase,
+    $MonthlyBudgetsTable,
+    MonthlyBudget,
+    $$MonthlyBudgetsTableFilterComposer,
+    $$MonthlyBudgetsTableOrderingComposer,
+    $$MonthlyBudgetsTableAnnotationComposer,
+    $$MonthlyBudgetsTableCreateCompanionBuilder,
+    $$MonthlyBudgetsTableUpdateCompanionBuilder,
+    (
+      MonthlyBudget,
+      BaseReferences<_$WalletMeltDatabase, $MonthlyBudgetsTable, MonthlyBudget>
+    ),
+    MonthlyBudget,
+    PrefetchHooks Function()>;
 
 class $WalletMeltDatabaseManager {
   final _$WalletMeltDatabase _db;
@@ -19531,4 +20132,6 @@ class $WalletMeltDatabaseManager {
       $$FuelTransactionsTableTableManager(_db, _db.fuelTransactions);
   $$FuelComponentsTableTableManager get fuelComponents =>
       $$FuelComponentsTableTableManager(_db, _db.fuelComponents);
+  $$MonthlyBudgetsTableTableManager get monthlyBudgets =>
+      $$MonthlyBudgetsTableTableManager(_db, _db.monthlyBudgets);
 }

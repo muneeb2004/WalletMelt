@@ -5,6 +5,7 @@ import 'package:archive/archive.dart';
 import 'package:path/path.dart' as p;
 
 import '../../types/budget.dart';
+import '../../types/monthly_budget.dart';
 import '../../types/category.dart';
 import '../../types/expense.dart';
 import '../../types/grocery_item.dart';
@@ -36,6 +37,7 @@ class WalletMeltJsonBackupService {
     required Iterable<Category> categories,
     required Iterable<CategoryBudget> budgets,
     required WalletMeltSettings settings,
+    Iterable<MonthlyBudget>? monthlyBudgets,
     DateTime? exportedAt,
     Directory? directory,
     bool packageReceipts = true,
@@ -47,6 +49,7 @@ class WalletMeltJsonBackupService {
       groceryItems: groceryItems,
       categories: categories,
       budgets: budgets,
+      monthlyBudgets: monthlyBudgets,
       settings: settings,
       exportedAt: timestamp,
       appVersion: _appVersion,

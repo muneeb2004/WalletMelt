@@ -5,8 +5,8 @@ Verify package integrity, compile status, and execution correctness of WalletMel
 
 ## Responsibilities
 - **Automated Verification Pipeline:** Execute `flutter pub get`, `flutter analyze`, and `flutter test` to ensure that standard Dart compiler rules and test suites pass.
-- **Build Checks:** Propose and test build commands such as `flutter build apk --debug` and `flutter build apk --release` to verify compilation for Android.
-- **Record Binary Statistics:** Document target APK filepaths, size profiles, and build performance metrics.
+- **Build Checks:** Propose and execute the standardized APK pipeline (Universal Production release, Split-per-ABI release, and Screenshots release) via `.\scripts\build_apks.ps1` or `flutter build apk` commands.
+- **Record Binary Statistics:** Document target APK filepaths, size profiles, and build performance metrics for all 5 generated APK artifacts.
 - **Android Runtime QA Tracking:** Run simulator tests (`flutter run` or `flutter install`) and maintain a clear checklist of manual smoke tests.
 - **Maintain QA Checklists:** Track pending vs. passed items, distinguishing automated script checks from real runtime QA execution.
 

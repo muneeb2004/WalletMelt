@@ -35,6 +35,7 @@ void main() {
       return ChangeNotifierProvider<AppState>.value(
         value: appState,
         child: MaterialApp.router(
+          theme: WalletMeltTheme.light(),
           routerConfig: router,
         ),
       );
@@ -169,6 +170,37 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Edit Monthly Budget'), findsOneWidget);
+    });
+
+    testWidgets('Dashboard renders two-line greeting without overflow at 360dp phone width',
+        (tester) async {
+      tester.view.physicalSize = const Size(360 * 2, 800 * 2);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      final appState = createAppState(monthlyBudget: 3000.0);
+      await tester.pumpWidget(buildDashboardHarness(appState: appState));
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('Good'), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is Text && (w.data == 'Morning' || w.data == 'Afternoon' || w.data == 'Evening'),
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('Dashboard hero card displays TOTAL SPEND without redundant month mention',
+        (tester) async {
+      final appState = createAppState(monthlyBudget: 5000.0);
+      await tester.pumpWidget(buildDashboardHarness(appState: appState));
+      await tester.pumpAndSettle();
+
+      expect(find.text('TOTAL SPEND'), findsOneWidget);
+      // Redundant month label like "JUNE 2026 SPEND" must NOT be present
+      expect(find.textContaining('JUNE 2026 SPEND'), findsNothing);
     });
   });
 }
