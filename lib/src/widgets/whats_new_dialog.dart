@@ -89,14 +89,14 @@ class WhatsNewContent extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "What's New in v1.1",
+                        "What's New in v1.1.1",
                         style: theme.textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.w900,
                           fontSize: 20,
                         ),
                       ),
                       Text(
-                        'Fresh updates, smoother taps, and colorful budgets',
+                        'Dynamic monthly budgets, category vector icons & smooth experience',
                         style: TextStyle(
                           fontSize: 12,
                           color: WalletMeltColors.textMuted,
@@ -123,10 +123,48 @@ class WhatsNewContent extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Version 1.1.1 Highlights
+              _buildSectionBadge(
+                label: 'VERSION 1.1.1 UPDATES',
+                color: WalletMeltColors.brand,
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(
+                icon: Icons.savings_rounded,
+                iconColor: const Color(0xFF00B894),
+                title: 'Dynamic Monthly Budgets',
+                description:
+                    'Set dynamic budget ceilings for individual months with adaptive insights. Roll over your remaining budget ceiling from the previous month with a single tap.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(
+                icon: Icons.category_rounded,
+                iconColor: const Color(0xFF6C5CE7),
+                title: 'Vector Icons & Presets',
+                description:
+                    'Crisp vector SVG icons for all default categories, 12 curated custom category presets, and safeguarded SVG file uploads.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(
+                icon: Icons.wb_sunny_rounded,
+                iconColor: const Color(0xFFFDCB6E),
+                title: 'Dashboard Polish',
+                description:
+                    'A personalized time-aware greeting and enhanced breathing room across the Total Spend and metric cards for a cleaner look.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 24),
+
               // Version 1.1 Highlights
               _buildSectionBadge(
                 label: 'VERSION 1.1 UPDATES',
-                color: WalletMeltColors.brand,
+                color: const Color(0xFF4EA8DE),
                 isDark: isDark,
               ),
               const SizedBox(height: 14),

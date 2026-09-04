@@ -16,6 +16,12 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      // Check for v1.1.1 section badge & items
+      expect(find.text('VERSION 1.1.1 UPDATES'), findsOneWidget);
+      expect(find.text('Dynamic Monthly Budgets'), findsOneWidget);
+      expect(find.text('Vector Icons & Presets'), findsOneWidget);
+      expect(find.text('Dashboard Polish'), findsOneWidget);
+
       // Check for v1.1 section badge & items
       expect(find.text('VERSION 1.1 UPDATES'), findsOneWidget);
       expect(find.text('Focused History'), findsOneWidget);
@@ -46,14 +52,14 @@ void main() {
       await tester.tap(find.text('Open'));
       await tester.pumpAndSettle();
 
-      expect(find.text("What's New in v1.1"), findsOneWidget);
+      expect(find.text("What's New in v1.1.1"), findsOneWidget);
       expect(find.byTooltip('Close'), findsOneWidget);
 
       // Tap close button in header
       await tester.tap(find.byTooltip('Close'));
       await tester.pumpAndSettle();
 
-      expect(find.text("What's New in v1.1"), findsNothing);
+      expect(find.text("What's New in v1.1.1"), findsNothing);
     });
   });
 }

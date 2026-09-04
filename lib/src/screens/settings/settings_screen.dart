@@ -188,7 +188,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Text(
-                                        'v1.1',
+                                        'v1.1.1',
                                         style: TextStyle(
                                           fontSize: 10,
                                           fontWeight: FontWeight.w800,
@@ -975,7 +975,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ),
                       Text(
-                        'v1.1.0',
+                        'v1.1.1',
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: WalletMeltColors.textMuted,
                         ),
@@ -1042,14 +1042,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Version 1.1 Highlights',
+                              'Version 1.1.1 Highlights',
                               style: theme.textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.w800,
                                 fontSize: 15,
                               ),
                             ),
                             Text(
-                              'Back navigation fix, current month history & custom colors',
+                              'Dynamic monthly budgets, category vector icons & UI polish',
                               style: TextStyle(
                                 fontSize: 11.5,
                                 color: WalletMeltColors.textMuted,

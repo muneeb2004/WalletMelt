@@ -26,7 +26,18 @@ Write-Host "`n=======================================================" -Foregrou
 Write-Host "  WalletMelt Standardized APK Build Pipeline" -ForegroundColor Cyan
 Write-Host "=======================================================`n" -ForegroundColor Cyan
 
+if (-not (Get-Command flutter -ErrorAction SilentlyContinue)) {
+    if (Test-Path "D:\flutter\bin") {
+        $env:PATH = "D:\flutter\bin;$env:PATH"
+    }
+}
+
 $outputDir = "build/app/outputs/flutter-apk"
+
+# Ensure stripped native libraries are always freshly generated
+if (Test-Path "build/app/intermediates/stripped_native_libs") {
+    Remove-Item -Recurse -Force "build/app/intermediates/stripped_native_libs" -ErrorAction SilentlyContinue
+}
 
 # Step 1: Production Universal Release APK
 if (-not $SkipUniversal) {
@@ -62,6 +73,21 @@ if (-not $SkipScreenshots) {
 }
 
 $sw.Stop()
+
+# Mirror production binaries to legacy non-flavor paths for backwards compatibility
+$compatibilityMap = @{
+    "app-production-release.apk" = "app-release.apk"
+    "app-arm64-v8a-production-release.apk" = "app-arm64-v8a-release.apk"
+    "app-armeabi-v7a-production-release.apk" = "app-armeabi-v7a-release.apk"
+    "app-x86_64-production-release.apk" = "app-x86_64-release.apk"
+}
+foreach ($src in $compatibilityMap.Keys) {
+    $srcFile = Join-Path $outputDir $src
+    $destFile = Join-Path $outputDir $compatibilityMap[$src]
+    if (Test-Path $srcFile) {
+        Copy-Item $srcFile $destFile -Force
+    }
+}
 
 Write-Host "=======================================================" -ForegroundColor Cyan
 Write-Host "  Build Completed in $([math]::Round($sw.Elapsed.TotalSeconds, 1))s" -ForegroundColor Cyan
