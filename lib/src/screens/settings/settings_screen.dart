@@ -317,6 +317,127 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             const SizedBox(height: 28),
 
+            // SECTION: CUSTOMIZATION & FORMULAS
+            const Text(
+              'CUSTOMIZATION & FORMULAS',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.0,
+                color: WalletMeltColors.textMuted,
+              ),
+            ),
+            const SizedBox(height: 10),
+            WMGlassSurface.tier1(
+              padding: const EdgeInsets.all(18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Icon & SVG Manager
+                  InkWell(
+                    onTap: () => context.push('/settings/icons'),
+                    borderRadius: BorderRadius.circular(12),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 38,
+                            height: 38,
+                            decoration: BoxDecoration(
+                              color: WalletMeltColors.brand.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(
+                              Icons.palette_outlined,
+                              size: 20,
+                              color: WalletMeltColors.brand,
+                            ),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Icon & SVG Manager',
+                                  style: theme.textTheme.bodyLarge?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'Customize built-in and uploaded SVG icons across the app.',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: WalletMeltColors.textMuted,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Icon(Icons.chevron_right_rounded, color: Colors.grey),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8),
+                    child: Divider(height: 1, thickness: 0.5),
+                  ),
+
+                  // Metric Calculations & Formulas
+                  InkWell(
+                    onTap: () => context.push('/settings/metrics'),
+                    borderRadius: BorderRadius.circular(12),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 38,
+                            height: 38,
+                            decoration: BoxDecoration(
+                              color: WalletMeltColors.positive.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(
+                              Icons.functions_rounded,
+                              size: 20,
+                              color: WalletMeltColors.positive,
+                            ),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Metric Calculations & Formulas',
+                                  style: theme.textTheme.bodyLarge?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'Detailed breakdown of how daily allowance and metrics are calculated.',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: WalletMeltColors.textMuted,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Icon(Icons.chevron_right_rounded, color: Colors.grey),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 28),
+
             // SECTION 2: SECURITY & PRIVACY
             Text(
               'SECURITY & PRIVACY',

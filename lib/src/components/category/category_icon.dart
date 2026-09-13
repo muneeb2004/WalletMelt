@@ -4,6 +4,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
+import '../../services/svg/svg_customization_service.dart';
+
 class CategoryPreset {
   const CategoryPreset({
     required this.id,
@@ -79,7 +81,7 @@ const List<CategoryPreset> categoryPresets = [
   ),
 ];
 
-const Map<String, String> _standardCategorySvgMap = {
+const Map<String, String> standardCategorySvgMap = {
   'electricity': 'assets/icons/categories/electricity.svg',
   'bolt': 'assets/icons/categories/electricity.svg',
   'gas': 'assets/icons/categories/gas.svg',
@@ -99,6 +101,8 @@ const Map<String, String> _standardCategorySvgMap = {
   'other': 'assets/icons/categories/other.svg',
   'more_horiz': 'assets/icons/categories/other.svg',
 };
+
+const Map<String, String> _standardCategorySvgMap = standardCategorySvgMap;
 
 class CategoryIcon extends StatelessWidget {
   const CategoryIcon({
@@ -134,60 +138,77 @@ class CategoryIcon extends StatelessWidget {
         ? ColorFilter.mode(color!, BlendMode.srcIn)
         : null;
 
-    // 1. Custom uploaded SVG
-    if (raw.startsWith('custom:')) {
-      final filename = p.basename(raw.substring('custom:'.length));
-      if (_cachedDocsPath != null) {
-        final file = File(p.join(_cachedDocsPath!, 'custom_icons', filename));
-        return _buildFileSvg(file, colorFilter);
-      }
-      return FutureBuilder<String>(
-        future: _getDocsPath(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return SizedBox(width: size, height: size);
+    return ListenableBuilder(
+      listenable: SvgCustomizationService.instance,
+      builder: (context, _) {
+        // 0. Check for customized override (reflects across the board)
+        final overrideSvg = SvgCustomizationService.instance.getOverrideSync(raw);
+        if (overrideSvg != null) {
+          return SvgPicture.string(
+            overrideSvg,
+            width: size,
+            height: size,
+            colorFilter: colorFilter,
+            placeholderBuilder: (_) => Icon(defaultIcon, size: size, color: color),
+          );
+        }
+
+        // 1. Custom uploaded SVG
+        if (raw.startsWith('custom:')) {
+          final filename = p.basename(raw.substring('custom:'.length));
+          if (_cachedDocsPath != null) {
+            final file = File(p.join(_cachedDocsPath!, 'custom_icons', filename));
+            return _buildFileSvg(file, colorFilter);
           }
-          final file = File(p.join(snapshot.data!, 'custom_icons', filename));
+          return FutureBuilder<String>(
+            future: _getDocsPath(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return SizedBox(width: size, height: size);
+              }
+              final file = File(p.join(snapshot.data!, 'custom_icons', filename));
+              return _buildFileSvg(file, colorFilter);
+            },
+          );
+        }
+
+        // Direct file path
+        if (raw.endsWith('.svg') && (raw.contains('/') || raw.contains('\\'))) {
+          final file = File(raw);
           return _buildFileSvg(file, colorFilter);
-        },
-      );
-    }
+        }
 
-    // Direct file path
-    if (raw.endsWith('.svg') && (raw.contains('/') || raw.contains('\\'))) {
-      final file = File(raw);
-      return _buildFileSvg(file, colorFilter);
-    }
+        // 2. Preset custom SVG
+        final preset = categoryPresets.cast<CategoryPreset?>().firstWhere(
+              (p) => p?.id == raw || raw == 'preset:${p?.id}',
+              orElse: () => null,
+            );
+        if (preset != null) {
+          return SvgPicture.asset(
+            preset.assetPath,
+            width: size,
+            height: size,
+            colorFilter: colorFilter,
+            placeholderBuilder: (_) => Icon(defaultIcon, size: size, color: color),
+          );
+        }
 
-    // 2. Preset custom SVG
-    final preset = categoryPresets.cast<CategoryPreset?>().firstWhere(
-          (p) => p?.id == raw || raw == 'preset:${p?.id}',
-          orElse: () => null,
-        );
-    if (preset != null) {
-      return SvgPicture.asset(
-        preset.assetPath,
-        width: size,
-        height: size,
-        colorFilter: colorFilter,
-        placeholderBuilder: (_) => Icon(defaultIcon, size: size, color: color),
-      );
-    }
+        // 3. Standard category SVG
+        final standardAsset = _standardCategorySvgMap[raw.toLowerCase()];
+        if (standardAsset != null) {
+          return SvgPicture.asset(
+            standardAsset,
+            width: size,
+            height: size,
+            colorFilter: colorFilter,
+            placeholderBuilder: (_) => Icon(defaultIcon, size: size, color: color),
+          );
+        }
 
-    // 3. Standard category SVG
-    final standardAsset = _standardCategorySvgMap[raw.toLowerCase()];
-    if (standardAsset != null) {
-      return SvgPicture.asset(
-        standardAsset,
-        width: size,
-        height: size,
-        colorFilter: colorFilter,
-        placeholderBuilder: (_) => Icon(defaultIcon, size: size, color: color),
-      );
-    }
-
-    // 4. Legacy fallback to Material IconData
-    return Icon(_legacyIconFor(raw), size: size, color: color);
+        // 4. Legacy fallback to Material IconData
+        return Icon(_legacyIconFor(raw), size: size, color: color);
+      },
+    );
   }
 
   Widget _buildFileSvg(File file, ColorFilter? colorFilter) {

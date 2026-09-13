@@ -10,6 +10,7 @@ import '../../state/app_state.dart';
 import '../../theme/wallet_melt_theme.dart';
 import '../../utils/currency_format.dart';
 import '../../utils/date_utils.dart';
+import '../../analytics/financial_metrics_calculator.dart';
 import '../../types/debt.dart';
 import '../../widgets/section_header.dart';
 import '../../types/subscription.dart' as wm_sub;
@@ -142,16 +143,19 @@ class DashboardScreen extends StatelessWidget {
     }
 
     final totalSpent = state.getCurrentMonthTotalSpent();
-    final hasBudget = monthlyBudget != null && monthlyBudget > 0;
-    final budgetLimit = monthlyBudget ?? 0.0;
-    final remaining = budgetLimit - totalSpent;
-    final isOverBudget = hasBudget && remaining < 0;
+    final allowanceResult =
+        FinancialMetricsCalculator.calculateDailySpendAllowance(
+      monthlyBudget: monthlyBudget,
+      totalSpent: totalSpent,
+      month: selectedMonth,
+    );
+    final hasBudget = allowanceResult.hasBudget;
+    final budgetLimit = allowanceResult.totalBudget;
+    final remaining = allowanceResult.remainingBudget ?? 0.0;
+    final isOverBudget = allowanceResult.isOverBudget;
     final ratio = hasBudget ? (totalSpent / budgetLimit).clamp(0.0, 1.5) : 0.0;
     final Color budgetColor = budgetProgressColor(ratio);
-    final now = DateTime.now();
-    final isCurrentMonth = selectedMonth.year == now.year && selectedMonth.month == now.month;
-    final lastDayOfMonth = DateTime(selectedMonth.year, selectedMonth.month + 1, 0).day;
-    final daysRemaining = isCurrentMonth ? (lastDayOfMonth - now.day + 1).clamp(1, 31) : 1;
+    final isCurrentMonth = allowanceResult.isCurrentMonth;
 
     return Scaffold(
       body: AppBackground(
@@ -525,57 +529,74 @@ class DashboardScreen extends StatelessWidget {
                       // Daily Spend Allowance (Feature)
                       if (isCurrentMonth) ...[
                         const SizedBox(height: 10),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: isDark
-                                ? Colors.white.withValues(alpha: 0.08)
-                                : const Color(0xFF0F172A).withValues(alpha: 0.04),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
+                        InkWell(
+                          onTap: () => context.push('/settings/metrics'),
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            decoration: BoxDecoration(
                               color: isDark
                                   ? Colors.white.withValues(alpha: 0.08)
-                                  : const Color(0xFFE2E8F0),
-                              width: 1.0,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'DAILY ALLOWANCE',
-                                style: TextStyle(
-                                  fontSize: 10.5,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 0.6,
-                                  color: isDark
-                                      ? const Color(0xFF94A3B8)
-                                      : const Color(0xFF64748B),
-                                ),
+                                  : const Color(0xFF0F172A).withValues(alpha: 0.04),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: isDark
+                                    ? Colors.white.withValues(alpha: 0.08)
+                                    : const Color(0xFFE2E8F0),
+                                width: 1.0,
                               ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: FittedBox(
-                                  fit: BoxFit.scaleDown,
-                                  alignment: Alignment.centerRight,
-                                  child: Text(
-                                    isOverBudget
-                                        ? 'Over budget — no daily allowance'
-                                        : '${formatMoney(remaining / daysRemaining, currency)} / day',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700,
-                                      color: isOverBudget
-                                          ? WalletMeltColors.danger
-                                          : (isDark
-                                              ? Colors.white
-                                              : WalletMeltColors.textPrimary),
-                                      fontFeatures: const [FontFeature.tabularFigures()],
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      'DAILY ALLOWANCE',
+                                      style: TextStyle(
+                                        fontSize: 10.5,
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: 0.6,
+                                        color: isDark
+                                            ? const Color(0xFF94A3B8)
+                                            : const Color(0xFF64748B),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Icon(
+                                      Icons.info_outline_rounded,
+                                      size: 13,
+                                      color: isDark
+                                          ? const Color(0xFF94A3B8)
+                                          : const Color(0xFF64748B),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    alignment: Alignment.centerRight,
+                                    child: Text(
+                                      isOverBudget
+                                          ? 'Over budget — no daily allowance'
+                                          : '${formatMoney(allowanceResult.dailyAllowance, currency)} / day',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w700,
+                                        color: isOverBudget
+                                            ? WalletMeltColors.danger
+                                            : (isDark
+                                                ? Colors.white
+                                                : WalletMeltColors.textPrimary),
+                                        fontFeatures: const [FontFeature.tabularFigures()],
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ],

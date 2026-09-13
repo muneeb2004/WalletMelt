@@ -11,6 +11,8 @@ import '../screens/history/receipt_viewer_screen.dart';
 import '../screens/insights/insights_screen.dart';
 import '../screens/onboarding/onboarding_screen.dart';
 import '../screens/settings/settings_screen.dart';
+import '../screens/settings/svg_manager_screen.dart';
+import '../screens/settings/metric_calculations_screen.dart';
 import '../screens/debt/debt_screen.dart';
 import '../screens/planning/planning_screen.dart';
 import '../screens/payee/payees_screen.dart';
@@ -230,6 +232,12 @@ class _WalletMeltAppState extends State<WalletMeltApp> {
         GoRoute(
             path: '/settings',
             builder: (context, state) => const SettingsScreen()),
+        GoRoute(
+            path: '/settings/icons',
+            builder: (context, state) => const SvgManagerScreen()),
+        GoRoute(
+            path: '/settings/metrics',
+            builder: (context, state) => const MetricCalculationsScreen()),
         GoRoute(
             path: '/payees',
             builder: (context, state) => const PayeesScreen()),

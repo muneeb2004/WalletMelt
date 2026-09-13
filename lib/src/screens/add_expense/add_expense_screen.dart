@@ -10,6 +10,8 @@ import 'package:path_provider/path_provider.dart';
 import '../../components/category/category_chip.dart';
 import '../../components/category/category_icon.dart';
 import '../../services/svg/svg_safeguard_service.dart';
+import '../../services/svg/svg_customization_service.dart';
+import '../settings/svg_editor_dialog.dart';
 import '../../components/fuel/fuel_editor.dart';
 import '../../components/glass/app_background.dart';
 import '../../types/expense.dart';
@@ -1152,6 +1154,31 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                               }
                             },
                     ),
+
+                    if (selectedIcon.isNotEmpty) ...[
+                      const SizedBox(height: 6),
+                      TextButton.icon(
+                        style: TextButton.styleFrom(
+                          visualDensity: VisualDensity.compact,
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        ),
+                        icon: const Icon(Icons.tune_rounded, size: 16),
+                        label: const Text('Edit Selected SVG', style: TextStyle(fontSize: 12)),
+                        onPressed: () async {
+                          final item = SvgIconItem(
+                            id: selectedIcon,
+                            label: nameController.text.trim().isNotEmpty
+                                ? nameController.text.trim()
+                                : 'Selected Icon',
+                            type: selectedIcon.startsWith('custom:')
+                                ? SvgIconType.custom
+                                : SvgIconType.preset,
+                          );
+                          await SvgEditorDialog.show(context, item);
+                          setSheetState(() {});
+                        },
+                      ),
+                    ],
 
                     if (uploadError != null) ...[
                       const SizedBox(height: 6),

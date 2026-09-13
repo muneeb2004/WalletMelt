@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
+import '../../analytics/financial_metrics_calculator.dart';
 import '../../components/glass/app_background.dart';
 import '../../state/app_state.dart';
 import '../../theme/wallet_melt_theme.dart';
@@ -593,16 +595,30 @@ class _BudgetScreenState extends State<BudgetScreen> {
           if (selectedMonth.year == DateTime.now().year &&
               selectedMonth.month == DateTime.now().month) ...[
             const SizedBox(height: AppSpacing.sm),
-            _buildFullWidthMetricRow(
-              context: context,
-              isDark: isDark,
-              icon: Icons.today_rounded,
-              label: isOverBudget ? 'Daily Allowance' : 'Daily Spend Allowance',
-              value: isOverBudget
-                  ? 'No allowance remaining'
-                  : '${formatMoney(remaining / daysLeft.clamp(1, 999), currency)} / day',
-              valueColor: isOverBudget ? WalletMeltColors.danger : WalletMeltColors.positive,
-            ),
+            () {
+              final allowanceResult =
+                  FinancialMetricsCalculator.calculateDailySpendAllowance(
+                monthlyBudget: monthlyBudget,
+                totalSpent: totalSpent,
+                month: selectedMonth,
+              );
+              return _buildFullWidthMetricRow(
+                context: context,
+                isDark: isDark,
+                icon: Icons.today_rounded,
+                label: isOverBudget ? 'Daily Allowance' : 'Daily Spend Allowance',
+                value: isOverBudget
+                    ? 'No allowance remaining'
+                    : '${formatMoney(allowanceResult.dailyAllowance, currency)} / day',
+                valueColor: isOverBudget ? WalletMeltColors.danger : WalletMeltColors.positive,
+                trailing: Icon(
+                  Icons.info_outline_rounded,
+                  size: 15,
+                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                ),
+                onTap: () => context.push('/settings/metrics'),
+              );
+            }(),
           ],
         ],
       ),
@@ -616,9 +632,11 @@ class _BudgetScreenState extends State<BudgetScreen> {
     required String label,
     required String value,
     Color? valueColor,
+    Widget? trailing,
+    VoidCallback? onTap,
   }) {
     final tt = Theme.of(context).textTheme;
-    return Container(
+    final rowContent = Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
@@ -668,9 +686,22 @@ class _BudgetScreenState extends State<BudgetScreen> {
               ),
             ),
           ),
+          if (trailing != null) ...[
+            const SizedBox(width: 6),
+            trailing,
+          ],
         ],
       ),
     );
+
+    if (onTap != null) {
+      return InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppSpacing.cardRadius - 8),
+        child: rowContent,
+      );
+    }
+    return rowContent;
   }
 
   Widget _buildCategoryBudgetsSection(
@@ -826,16 +857,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
   // _getBudgetColor removed — use top-level budgetProgressColor() from wallet_melt_theme.dart
 
   int _getDaysLeftInMonth(DateTime month) {
-    final now = DateTime.now();
-    if (month.year < now.year ||
-        (month.year == now.year && month.month < now.month)) {
-      return 0; // Past month
-    }
-    final lastDay = DateTime(month.year, month.month + 1, 0).day;
-    if (month.year == now.year && month.month == now.month) {
-      return lastDay - now.day;
-    }
-    return lastDay;
+    return FinancialMetricsCalculator.calculateDaysRemainingInMonth(month);
   }
 
 
