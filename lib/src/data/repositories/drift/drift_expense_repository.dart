@@ -1,3 +1,4 @@
+import '../../../utils/currency_format.dart';
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
@@ -302,6 +303,8 @@ class DriftExpenseRepository {
         );
   }
 
+  static int? _minorOrNull(double? v) => v == null ? null : toMinorUnits(v);
+
   local.ExpensesCompanion _expenseInsertCompanion(domain.Expense expense,
       {String? storeId}) {
     return local.ExpensesCompanion.insert(
@@ -322,6 +325,9 @@ class DriftExpenseRepository {
       deletedAt: Value(expense.deletedAt),
       subtotalAmount: Value(expense.subtotalAmount),
       taxAmount: Value(expense.taxAmount),
+      amountMinorUnits: Value(toMinorUnits(expense.amount)),
+      subtotalAmountMinorUnits: Value(_minorOrNull(expense.subtotalAmount)),
+      taxAmountMinorUnits: Value(_minorOrNull(expense.taxAmount)),
     );
   }
 
@@ -345,6 +351,9 @@ class DriftExpenseRepository {
       deletedAt: Value(expense.deletedAt),
       subtotalAmount: Value(expense.subtotalAmount),
       taxAmount: Value(expense.taxAmount),
+      amountMinorUnits: Value(toMinorUnits(expense.amount)),
+      subtotalAmountMinorUnits: Value(_minorOrNull(expense.subtotalAmount)),
+      taxAmountMinorUnits: Value(_minorOrNull(expense.taxAmount)),
     );
   }
 

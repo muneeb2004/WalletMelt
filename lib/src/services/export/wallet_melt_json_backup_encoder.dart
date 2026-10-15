@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:crypto/crypto.dart';
+
 import '../../types/budget.dart';
 import '../../types/monthly_budget.dart';
 import '../../types/category.dart';
@@ -10,7 +12,24 @@ import '../../types/settings.dart';
 class WalletMeltJsonBackupEncoder {
   const WalletMeltJsonBackupEncoder();
 
+  /// Base format (no extended section, no checksum).
   static const int formatVersion = 1;
+
+  /// Complete format: adds the `extended` section, `schema_version` and a
+  /// `metadata.checksum` over the whole document.
+  static const int extendedFormatVersion = 2;
+  static const String checksumPrefix = 'sha256:';
+
+  /// SHA-256 over the compact JSON of [root] with `metadata.checksum` removed.
+  static String computeChecksum(Map<String, Object?> root) {
+    final copy = Map<String, Object?>.from(root);
+    final metadata = Map<String, Object?>.from(copy['metadata']! as Map)
+      ..remove('checksum');
+    copy['metadata'] = metadata;
+    final digest = sha256.convert(utf8.encode(jsonEncode(copy)));
+    return '$checksumPrefix$digest';
+  }
+
   static const String format = 'walletmelt.local_json_backup';
 
   String encode({
@@ -22,11 +41,15 @@ class WalletMeltJsonBackupEncoder {
     required DateTime exportedAt,
     Iterable<MonthlyBudget>? monthlyBudgets,
     String? appVersion,
+    Map<String, Object?>? extended,
+    int? schemaVersion,
   }) {
     final backup = <String, Object?>{
       'metadata': <String, Object?>{
         'format': format,
-        'format_version': formatVersion,
+        'format_version': extended == null ? formatVersion : extendedFormatVersion,
+        if (extended != null && schemaVersion != null)
+          'schema_version': schemaVersion,
         'app_version': appVersion,
         'exported_at': exportedAt.toIso8601String(),
         'includes': <String>[
@@ -36,6 +59,7 @@ class WalletMeltJsonBackupEncoder {
           'budgets',
           if (monthlyBudgets != null) 'monthly_budgets',
           'settings',
+          if (extended != null) 'extended',
         ],
       },
       'expenses': _sortedExpenses(expenses).map(_expenseToJson).toList(),
@@ -47,7 +71,13 @@ class WalletMeltJsonBackupEncoder {
         'monthly_budgets':
             _sortedMonthlyBudgets(monthlyBudgets).map(_monthlyBudgetToJson).toList(),
       'settings': _settingsToJson(settings),
+      if (extended != null) 'extended': extended,
     };
+
+    if (extended != null) {
+      (backup['metadata']! as Map<String, Object?>)['checksum'] =
+          computeChecksum(backup);
+    }
 
     return const JsonEncoder.withIndent('  ').convert(backup);
   }

@@ -53,6 +53,7 @@ Welcome to the **WalletMelt Engineering Control Plane**. This Obsidian vault ser
 - [[ADR-0006-Standardized-Five-Target-APK-Pipeline]]: Unified compilation of all 5 production and screenshot APKs.
 - [[ADR-0007-SVG-Customization-and-Global-Overrides]]: Disk-persisted SVG overrides with global real-time reflection.
 - [[ADR-0008-Deterministic-Financial-Metrics-Engine]]: Pure mathematical engine and explicit transparency menu.
+- [[ADR-0009-Complete-Backup-v2-and-Safe-Full-Replace]]: Complete checksummed backup v2 and safe, verified Full Replace.
 
 ### 6. Work & Knowledge
 - [[Work-Tracker]]: Current status (Now, Next, Later, Blocked).

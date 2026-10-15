@@ -72,6 +72,7 @@ class _CreatePinScreenState extends State<CreatePinScreen> {
         Navigator.of(context).pop(true);
       } else {
         await WMHaptics.error();
+        if (!mounted) return;
         _shakeKey.currentState?.shake();
         setState(() {
           _enteredPin = '';

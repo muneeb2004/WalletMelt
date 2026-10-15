@@ -2,7 +2,7 @@
 type: adr
 status: accepted
 created: 2026-09-01
-updated: 2026-09-13
+updated: 2026-10-15
 domain: architecture
 related:
   - "[[Backup-and-Restore-Architecture]]"
@@ -36,3 +36,5 @@ Adopt a strictly **Safe-Merge** restore pipeline:
 ## Related Code
 - `lib/src/services/export/wallet_melt_json_restore_service.dart`
 - `lib/src/services/export/wallet_melt_json_restore_dry_run_planner.dart`
+
+> **Update 2026-10-15:** refined by [[ADR-0009-Complete-Backup-v2-and-Safe-Full-Replace]]: Full Replace is now allowed for complete v2 backups under strict conditions; Safe Merge remains the default.

@@ -66,3 +66,20 @@ related:
 
 ### TD-008: No localization infrastructure
 - No `flutter_localizations`/ARB/RTL; formatting ignores locale. Blocks Urdu (see [[Student-Market-Strategy]] theme 5). **Priority**: Strategic.
+
+
+### TD-009: Renewal engine bugs found in 2026-10-15 bug hunt
+- Month-end drift/skipped months: **fixed** (anchor-day clamping, see [[Analytics-and-Calculations]]).
+- Non-atomic renewal loop (duplicate expenses on partial failure) and no in-flight guard on `refresh()`: **in progress**.
+- Debt repayments use `double` math and never write `*MinorUnits`: **in progress**.
+
+
+---
+
+## Resolution log (2026-10-15)
+- **TD-004** `fullReplace` crashed on FK and contradicted the Constitution: **resolved** by [[ADR-0009-Complete-Backup-v2-and-Safe-Full-Replace]] (complete, verified, v2-only).
+- **TD-005** backups omitted debts/subscriptions/etc.: **resolved** (format v2 `extended` section, checksum).
+- **TD-007** untracked `app_version.dart`: **resolved** (committed in `1bf9f16`).
+- **TD-009** renewal bugs: month-end drift **fixed**; renewals now atomic with an in-flight guard; debt/expense/subscription repositories write minor units (restore back-fills them). Tests: `test/subscription_renewal_test.dart`.
+- **TD-006** unused `PinHash.hashPin` static-salt wrapper **removed**; `LedgerIntegrityService` and `SecureClipboardService` still unreferenced (open).
+- Open low items: undisposed method-local `TextEditingController`s in sheets (disposing after pop risks use-after-dispose; left as is), remaining `catch (_) {}` in UI/file services, category-budget/grocery repositories do not write minor units (restore back-fills).

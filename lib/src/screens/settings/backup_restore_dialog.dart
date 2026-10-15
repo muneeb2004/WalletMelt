@@ -162,9 +162,9 @@ class _BackupRestoreDialogState extends State<BackupRestoreDialog> {
       if (confirmed != true) return;
     }
 
+    if (!mounted) return;
     setState(() => _isRestoring = true);
     widget.onRestoreStarted?.call();
-    if (!mounted) return;
 
     Directory? zipExtractDir;
     final stopwatch = Stopwatch()..start();
@@ -188,6 +188,8 @@ class _BackupRestoreDialogState extends State<BackupRestoreDialog> {
         categories: state.categories,
         budgets: budgets,
         monthlyBudgets: monthlyBudgets,
+        extendedTables: await state.exportExtendedTables(),
+        schemaVersion: state.backupSchemaVersion,
         settings: state.settings,
         packageReceipts: false,
         directory: docDir,
@@ -380,6 +382,13 @@ class _BackupRestoreDialogState extends State<BackupRestoreDialog> {
                       selected: _selectedMode == RestoreMode.fullReplace,
                       warningColor: true,
                       onTap: () {
+                        if ((widget.preview.formatVersion ?? 1) < 2) {
+                          showErrorSnackbar(
+                            context,
+                            'Full Replace needs a complete (format v2) backup. Use Safe Merge for this file.',
+                          );
+                          return;
+                        }
                         setState(() => _selectedMode = RestoreMode.fullReplace);
                         _updateDryRunPlan(RestoreMode.fullReplace);
                       },
@@ -408,6 +417,16 @@ class _BackupRestoreDialogState extends State<BackupRestoreDialog> {
                     _buildCountRow(Icons.category_outlined, 'Categories', '${widget.preview.categoriesCount} categories'),
                     _buildCountRow(Icons.shopping_basket_outlined, 'Grocery Items', '${widget.preview.groceryItemsCount} items'),
                     _buildCountRow(Icons.calendar_month_outlined, 'Budgets', '${widget.preview.budgetsCount} budgets'),
+                    if (widget.preview.extendedCounts.isNotEmpty)
+                      _buildCountRow(
+                        Icons.inventory_2_outlined,
+                        'Also included',
+                        '${widget.preview.extendedCounts['debt_records'] ?? 0} debts, '
+                        '${widget.preview.extendedCounts['subscriptions'] ?? 0} subscriptions, '
+                        '${widget.preview.extendedCounts['payees'] ?? 0} payees, '
+                        '${widget.preview.extendedCounts['essential_expense_templates'] ?? 0} essentials, '
+                        '${widget.preview.extendedCounts['fuel_transactions'] ?? 0} fuel logs',
+                      ),
                     _buildCountRow(
                       widget.backupFile.isZip ? Icons.image_rounded : Icons.image_not_supported_outlined, 
                       'Physical Receipts', 

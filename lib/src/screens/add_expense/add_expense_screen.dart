@@ -1124,6 +1124,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                   } else if (file.path != null) {
                                     content = await io.File(file.path!).readAsString();
                                   }
+                                  if (!context.mounted) return;
                                   if (content == null || content.isEmpty) {
                                     setSheetState(() => uploadError = 'Could not read file contents.');
                                     return;
@@ -1142,15 +1143,20 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                     baseDir: docsDir,
                                   );
 
+                                  if (!context.mounted) return;
                                   setSheetState(() {
                                     selectedIcon = iconId;
                                     uploadError = null;
                                   });
                                 }
                               } catch (e) {
-                                setSheetState(() => uploadError = 'Upload error: $e');
+                                if (context.mounted) {
+                                  setSheetState(() => uploadError = 'Upload error: $e');
+                                }
                               } finally {
-                                setSheetState(() => isUploading = false);
+                                if (context.mounted) {
+                                  setSheetState(() => isUploading = false);
+                                }
                               }
                             },
                     ),
@@ -1175,6 +1181,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                 : SvgIconType.preset,
                           );
                           await SvgEditorDialog.show(context, item);
+                          if (!context.mounted) return;
                           setSheetState(() {});
                         },
                       ),

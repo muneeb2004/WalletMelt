@@ -31,3 +31,5 @@ related:
 - `FLAG_SECURE` is set in `MainActivity.kt` and via `security_utils.dart`; skipped only in debug screenshot mode.
 - Present but **unreferenced** in `lib/`: `LedgerIntegrityService` (hard-coded software fallback key), `SecureClipboardService`; `RootDetectionService` is advisory only (settings screen). See [[Technical-Debt-Registry]] TD-006.
 - Release manifest declares only `USE_BIOMETRIC`/`USE_FINGERPRINT`; **no INTERNET** (declared only in debug/profile); `allowBackup=false`; no HTTP/analytics SDK. This is the evidence base for "no telemetry".
+
+> 2026-10-15: the unused `PinHash.hashPin` static-salt compatibility wrapper was removed; `PinKdf` is the only PIN hashing entry point.

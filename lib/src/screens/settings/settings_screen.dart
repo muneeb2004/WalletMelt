@@ -1301,6 +1301,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         categories: state.categories,
         budgets: await state.listAllBudgetsForExport(),
         monthlyBudgets: await state.listAllMonthlyBudgetsForExport(),
+        extendedTables: await state.exportExtendedTables(),
+        schemaVersion: state.backupSchemaVersion,
         settings: state.settings,
       );
       final shareResult = await widget.exportShareService.shareFile(

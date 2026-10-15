@@ -252,7 +252,7 @@ class DebtScreen extends StatefulWidget {
                               firstDate: DateTime.now().subtract(const Duration(days: 365)),
                               lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
                             );
-                            if (picked != null) {
+                            if (picked != null && builderContext.mounted) {
                               setSheetState(() => selectedDueDate = picked);
                             }
                           },

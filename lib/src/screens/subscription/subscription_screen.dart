@@ -753,7 +753,7 @@ class _AddSubscriptionSheetState extends State<_AddSubscriptionSheet> {
                       firstDate: DateTime(2000),
                       lastDate: DateTime(2100),
                     );
-                    if (picked != null) {
+                    if (picked != null && mounted) {
                       setState(() {
                         _startDate = picked;
                       });

@@ -241,7 +241,9 @@ class WalletMeltJsonRestoreDryRunPlanner {
     final formatSupported =
         metadata['format'] == WalletMeltJsonBackupEncoder.format;
     final versionSupported =
-        metadata['format_version'] == WalletMeltJsonBackupEncoder.formatVersion;
+        metadata['format_version'] == WalletMeltJsonBackupEncoder.formatVersion ||
+            metadata['format_version'] ==
+                WalletMeltJsonBackupEncoder.extendedFormatVersion;
 
     final issues = builder.issues;
     final completedSafetyChecks = <RestoreSafetyCheck>{

@@ -1,3 +1,4 @@
+import 'wallet_melt_json_backup_extended_tables.dart';
 import 'dart:convert';
 import 'dart:io' as io;
 
@@ -183,14 +184,30 @@ class WalletMeltJsonRestoreService {
         state.skippedItems += budgetResult.skipped;
         state.warnings.addAll(budgetResult.warnings);
 
+        final violationsBefore = await _foreignKeyViolationCount(db);
+        await _mergeMonthlyBudgets(db, _asMaps(backup['monthly_budgets']));
+        final extendedSection = backup[BackupExtendedTables.sectionKey];
+        if (extendedSection is Map) {
+          state.extendedCounts = await BackupExtendedTables.importInto(
+            db,
+            extendedSection.cast<String, Object?>(),
+            replace: false,
+            categoryMap: categoryMaps,
+            expenseMap: expenseMaps,
+            importedExpenseIds: state.insertedExpenseIds.toSet(),
+          );
+        }
+
         if (options.importSettings) {
           await _onStep(RestoreExecutionStep.importSettingsIfSelected);
           state.settingsImported = await _importSettings(backup['settings']);
         }
 
+        await db.backfillMinorUnits();
         await _onStep(RestoreExecutionStep.verifyCounts);
         _verifyCounts(dryRunPlan, state);
         await _verifyInsertedRelationships(db, state);
+        await _requireNoForeignKeyViolations(db, baseline: violationsBefore);
       });
       await _onStep(RestoreExecutionStep.commitOrRollback);
 
@@ -239,105 +256,95 @@ class WalletMeltJsonRestoreService {
     }
     final backup = decoded.cast<String, Object?>();
 
+    if (backup[BackupExtendedTables.sectionKey] is! Map) {
+      return WalletMeltJsonRestoreResult.failure(
+        'Full replace needs a complete (format v2) backup. This backup does '
+        'not contain debts, subscriptions, payees, essentials or fuel data, so '
+        'replacing the database with it would lose them. Use Safe Merge instead.',
+        safetyBackupPath: safetyBackup.path,
+      );
+    }
+
     try {
       final state = _RestoreMutationState(safetyBackupPath: safetyBackup.path);
 
       await _onStep(RestoreExecutionStep.startTransaction);
       await db.transaction(() async {
-        await db.customStatement('PRAGMA foreign_keys = OFF;');
+        // Foreign keys stay ON: children are deleted before parents and
+        // inserted after them, and a foreign_key_check gates the commit.
+        await _deleteAllUserData(db);
 
-        try {
-          // 1. Delete all existing records
-          await db.delete(db.groceryItems).go();
-          await db.delete(db.expenseItems).go();
-          await db.delete(db.receipts).go();
-          await db.delete(db.expenses).go();
-          await db.delete(db.categoryBudgets).go();
-          await db.delete(db.monthlyBudgets).go();
-          await db.delete(db.syncMetadata).go();
-          await db.delete(db.categories).go();
+        // Identity ID maps (the database is empty, so nothing can collide).
+        final categoryMaps = <String, String>{
+          for (final c in _asMaps(backup['categories']))
+            _requiredString(c, 'id'): _requiredString(c, 'id'),
+        };
+        final expenseMaps = <String, String>{
+          for (final e in _asMaps(backup['expenses']))
+            _requiredString(e, 'id'): _requiredString(e, 'id'),
+        };
+        final groceryItemMaps = <String, String>{
+          for (final i in _asMaps(backup['grocery_items']))
+            _requiredString(i, 'id'): _requiredString(i, 'id'),
+        };
+        final budgetMaps = <String, String>{
+          for (final b in _asMaps(backup['budgets']))
+            _requiredString(b, 'id'): _requiredString(b, 'id'),
+        };
 
-          await db.delete(db.itemAliases).go();
-          await db.delete(db.items).go();
-          await db.delete(db.stores).go();
-          await db.delete(db.units).go();
+        state.insertedCategories = await _mergeCategories(
+          db,
+          _asMaps(backup['categories']),
+          categoryMaps,
+        );
+        state.insertedExpenses = await _mergeExpenses(
+          db,
+          _asMaps(backup['expenses']),
+          categoryMaps,
+          expenseMaps,
+          state,
+          zipExtractDir: zipExtractDir,
+          options: options,
+        );
+        state.insertedGroceryItems = await _mergeGroceryItems(
+          db,
+          _asMaps(backup['grocery_items']),
+          expenseMaps,
+          groceryItemMaps,
+          state,
+        );
+        final budgetResult = await _mergeBudgets(
+          db,
+          _asMaps(backup['budgets']),
+          categoryMaps,
+          budgetMaps,
+          state: state,
+          skipConflicts: false,
+        );
+        state.insertedBudgets = budgetResult.inserted;
+        state.skippedItems += budgetResult.skipped;
+        state.warnings.addAll(budgetResult.warnings);
 
-          // 2. Setup ID mappings (in full replace, maps are 1-to-1 matching backup IDs)
-          final categoryMaps = <String, String>{};
-          for (final cat in _asMaps(backup['categories'])) {
-            final sourceId = _requiredString(cat, 'id');
-            categoryMaps[sourceId] = sourceId;
-          }
-          final expenseMaps = <String, String>{};
-          for (final exp in _asMaps(backup['expenses'])) {
-            final sourceId = _requiredString(exp, 'id');
-            expenseMaps[sourceId] = sourceId;
-          }
-          final groceryItemMaps = <String, String>{};
-          for (final item in _asMaps(backup['grocery_items'])) {
-            final sourceId = _requiredString(item, 'id');
-            groceryItemMaps[sourceId] = sourceId;
-          }
-          final budgetMaps = <String, String>{};
-          for (final budget in _asMaps(backup['budgets'])) {
-            final sourceId = _requiredString(budget, 'id');
-            budgetMaps[sourceId] = sourceId;
-          }
+        await _mergeMonthlyBudgets(db, _asMaps(backup['monthly_budgets']));
+        state.extendedCounts = await BackupExtendedTables.importInto(
+          db,
+          (backup[BackupExtendedTables.sectionKey]! as Map)
+              .cast<String, Object?>(),
+          replace: true,
+          categoryMap: categoryMaps,
+          expenseMap: expenseMaps,
+          importedExpenseIds: state.insertedExpenseIds.toSet(),
+        );
 
-          // 3. Import categories
-          state.insertedCategories = await _mergeCategories(
-            db,
-            _asMaps(backup['categories']),
-            categoryMaps,
-          );
-
-          // 4. Import expenses
-          state.insertedExpenses = await _mergeExpenses(
-            db,
-            _asMaps(backup['expenses']),
-            categoryMaps,
-            expenseMaps,
-            state,
-            zipExtractDir: zipExtractDir,
-            options: options,
-          );
-
-          // 5. Import grocery items
-          state.insertedGroceryItems = await _mergeGroceryItems(
-            db,
-            _asMaps(backup['grocery_items']),
-            expenseMaps,
-            groceryItemMaps,
-            state,
-          );
-
-          // 6. Import budgets
-          final budgetResult = await _mergeBudgets(
-            db,
-            _asMaps(backup['budgets']),
-            categoryMaps,
-            budgetMaps,
-            state: state,
-            skipConflicts: false,
-          );
-          state.insertedBudgets = budgetResult.inserted;
-          state.skippedItems += budgetResult.skipped;
-          state.warnings.addAll(budgetResult.warnings);
-
-          if (options.importSettings) {
-            state.settingsImported = await _importSettings(backup['settings']);
-          }
-
-          // 7. Rebuild indexes
-          await db.customStatement('REINDEX;');
-          await db.customStatement('ANALYZE;');
-
-          await _onStep(RestoreExecutionStep.verifyCounts);
-          _verifyCounts(dryRunPlan, state);
-          await _verifyInsertedRelationships(db, state);
-        } finally {
-          await db.customStatement('PRAGMA foreign_keys = ON;');
+        if (options.importSettings) {
+          state.settingsImported = await _importSettings(backup['settings']);
         }
+
+        await db.backfillMinorUnits();
+        await _onStep(RestoreExecutionStep.verifyCounts);
+        _verifyCounts(dryRunPlan, state);
+        await _verifyInsertedRelationships(db, state);
+        await _requireNoForeignKeyViolations(db, baseline: 0);
       });
       await _onStep(RestoreExecutionStep.commitOrRollback);
 
@@ -353,18 +360,10 @@ class WalletMeltJsonRestoreService {
         warnings: List.unmodifiable(state.warnings),
       );
     } catch (error) {
-      // Rollback database from safety backup file to satisfy Phase 2 recovery safety
-      try {
-        final safetyJson = await io.File(safetyBackup.path).readAsString();
-        await _executeRawReplaceRestore(db, safetyJson);
-      } catch (recoveryError) {
-        return WalletMeltJsonRestoreResult.failure(
-          'Replace restore failed and recovery from safety snapshot also failed: $recoveryError. Original error: $error',
-          safetyBackupPath: safetyBackup.path,
-        );
-      }
+      // The transaction has already rolled back; no destructive "recovery"
+      // pass is attempted. The safety backup stays on disk for manual recovery.
       return WalletMeltJsonRestoreResult.failure(
-        'Replace restore failed and database was successfully rolled back: $error',
+        'Replace restore failed and the database was rolled back unchanged: $error',
         safetyBackupPath: safetyBackup.path,
       );
     }
@@ -732,157 +731,6 @@ class WalletMeltJsonRestoreService {
             ),
           );
     }
-  }
-
-  Future<void> _executeRawReplaceRestore(
-    local.WalletMeltDatabase db,
-    String safetyJsonText,
-  ) async {
-    final decoded = jsonDecode(safetyJsonText);
-    if (decoded is! Map) {
-      throw const FormatException('Invalid safety snapshot format.');
-    }
-    final backup = decoded.cast<String, Object?>();
-
-    await db.transaction(() async {
-      await db.customStatement('PRAGMA foreign_keys = OFF;');
-      try {
-        await db.delete(db.groceryItems).go();
-        await db.delete(db.expenseItems).go();
-        await db.delete(db.receipts).go();
-        await db.delete(db.expenses).go();
-        await db.delete(db.categoryBudgets).go();
-        await db.delete(db.monthlyBudgets).go();
-        await db.delete(db.syncMetadata).go();
-        await db.delete(db.categories).go();
-
-        await db.delete(db.itemAliases).go();
-        await db.delete(db.items).go();
-        await db.delete(db.stores).go();
-        await db.delete(db.units).go();
-
-        for (final cat in _asMaps(backup['categories'])) {
-          await db.into(db.categories).insert(
-                local.CategoriesCompanion.insert(
-                  id: _requiredString(cat, 'id'),
-                  name: _requiredString(cat, 'name'),
-                  icon: _requiredString(cat, 'icon'),
-                  color: _requiredString(cat, 'color'),
-                  isDefault: _boolValue(cat['is_default']),
-                  createdAt: _requiredString(cat, 'created_at'),
-                  updatedAt: _requiredString(cat, 'updated_at'),
-                ),
-              );
-        }
-
-        for (final expense in _asMaps(backup['expenses'])) {
-          final targetId = _requiredString(expense, 'id');
-          final receiptUri = _nullableString(expense['receipt_image_uri']);
-
-          await db.into(db.expenses).insert(
-                local.ExpensesCompanion.insert(
-                  id: targetId,
-                  amount: _requiredDouble(expense, 'amount'),
-                  currency: _requiredString(expense, 'currency'),
-                  categoryId: _requiredString(expense, 'category_id'),
-                  title: _requiredString(expense, 'title'),
-                  vendor: Value(_nullableString(expense['vendor'])),
-                  date: _requiredString(expense, 'date'),
-                  notes: Value(_nullableString(expense['notes'])),
-                  receiptImageUri: Value(receiptUri),
-                  isRecurring: Value(_boolValue(expense['is_recurring'])),
-                  recurrenceFrequency:
-                      Value(_nullableString(expense['recurrence_frequency'])),
-                  createdAt: _requiredString(expense, 'created_at'),
-                  updatedAt: _requiredString(expense, 'updated_at'),
-                  deletedAt: Value(_nullableString(expense['deleted_at'])),
-                ),
-              );
-
-          if (receiptUri != null) {
-            await db.into(db.receipts).insert(
-                  local.ReceiptsCompanion.insert(
-                    id: 'legacy_receipt_$targetId',
-                    expenseId: targetId,
-                    uri: receiptUri,
-                    mimeType: const Value('image/jpeg'),
-                    createdAt: _requiredString(expense, 'created_at'),
-                    deletedAt: Value(_nullableString(expense['deleted_at'])),
-                  ),
-                );
-          }
-        }
-
-        for (final item in _asMaps(backup['grocery_items'])) {
-          final targetId = _requiredString(item, 'id');
-          final expenseId = _requiredString(item, 'expense_id');
-          final name = _requiredString(item, 'name');
-          final amount = _requiredDouble(item, 'amount');
-          final createdAt = _requiredString(item, 'created_at');
-
-          await db.into(db.groceryItems).insert(
-                local.GroceryItemsCompanion.insert(
-                  id: targetId,
-                  expenseId: expenseId,
-                  name: name,
-                  amount: amount,
-                  createdAt: createdAt,
-                ),
-              );
-
-          await db.into(db.expenseItems).insert(
-                local.ExpenseItemsCompanion.insert(
-                  id: targetId,
-                  expenseId: expenseId,
-                  itemId: const Value(null),
-                  nameSnapshot: name,
-                  totalPrice: amount,
-                  currency: 'PKR',
-                  createdAt: createdAt,
-                  updatedAt: createdAt,
-                ),
-              );
-        }
-
-        for (final budget in _asMaps(backup['budgets'])) {
-          await db.into(db.categoryBudgets).insert(
-                local.CategoryBudgetsCompanion.insert(
-                  id: _requiredString(budget, 'id'),
-                  categoryId: _requiredString(budget, 'category_id'),
-                  amount: _requiredDouble(budget, 'amount'),
-                  currency: _requiredString(budget, 'currency'),
-                  month: _requiredString(budget, 'month'),
-                  createdAt: _requiredString(budget, 'created_at'),
-                  updatedAt: _requiredString(budget, 'updated_at'),
-                ),
-              );
-        }
-
-        final monthlyBudgets = _asMaps(backup['monthly_budgets']);
-        for (final budget in monthlyBudgets) {
-          await db.into(db.monthlyBudgets).insert(
-                local.MonthlyBudgetsCompanion.insert(
-                  id: _requiredString(budget, 'id'),
-                  month: _requiredString(budget, 'month'),
-                  amount: _requiredDouble(budget, 'amount'),
-                  currency: _requiredString(budget, 'currency'),
-                  createdAt: _requiredString(budget, 'created_at'),
-                  updatedAt: _requiredString(budget, 'updated_at'),
-                ),
-              );
-        }
-
-        final settingsJson = backup['settings'];
-        if (settingsJson is Map) {
-          await _importSettings(settingsJson);
-        }
-
-        await db.customStatement('REINDEX;');
-        await db.customStatement('ANALYZE;');
-      } finally {
-        await db.customStatement('PRAGMA foreign_keys = ON;');
-      }
-    });
   }
 
   Future<int> _mergeGroceryItems(
@@ -1256,6 +1104,80 @@ class WalletMeltJsonRestoreService {
     }
   }
 
+  /// Deletes every restorable table, children before parents.
+  Future<void> _deleteAllUserData(local.WalletMeltDatabase db) async {
+    for (final table in const [
+      'expense_items',
+      'receipts',
+      'fuel_components',
+      'fuel_transactions',
+      'grocery_items',
+      'expenses',
+      'fuel_template_components',
+      'essential_expense_templates',
+      'subscriptions',
+      'debt_repayments',
+      'debt_records',
+      'payees',
+      'grocery_templates',
+      'category_budgets',
+      'monthly_budgets',
+      'sync_metadata',
+      'item_aliases',
+      'items',
+      'stores',
+      'categories',
+      'units',
+    ]) {
+      await db.customStatement('DELETE FROM $table;');
+    }
+  }
+
+  Future<int> _foreignKeyViolationCount(local.WalletMeltDatabase db) async {
+    final rows = await db.customSelect('PRAGMA foreign_key_check;').get();
+    return rows.length;
+  }
+
+  Future<void> _requireNoForeignKeyViolations(
+    local.WalletMeltDatabase db, {
+    required int baseline,
+  }) async {
+    final count = await _foreignKeyViolationCount(db);
+    if (count > baseline) {
+      throw StateError(
+        'Restore would leave $count foreign key violation(s); rolled back.',
+      );
+    }
+  }
+
+  Future<int> _mergeMonthlyBudgets(
+    local.WalletMeltDatabase db,
+    List<Map<String, Object?>> rows,
+  ) async {
+    var inserted = 0;
+    for (final row in rows) {
+      final month = _requiredString(row, 'month');
+      final existing = await db.customSelect(
+        'SELECT 1 AS x FROM monthly_budgets WHERE month = ? LIMIT 1;',
+        variables: [Variable(month)],
+      ).get();
+      if (existing.isNotEmpty) continue;
+      await db.into(db.monthlyBudgets).insert(
+            local.MonthlyBudgetsCompanion.insert(
+              id: _requiredString(row, 'id'),
+              month: month,
+              amount: _requiredDouble(row, 'amount'),
+              currency: _requiredString(row, 'currency'),
+              createdAt: _requiredString(row, 'created_at'),
+              updatedAt: _requiredString(row, 'updated_at'),
+            ),
+            mode: InsertMode.insertOrIgnore,
+          );
+      inserted++;
+    }
+    return inserted;
+  }
+
   List<Map<String, Object?>> _asMaps(Object? value) {
     if (value is! List) return const [];
     return value
@@ -1288,6 +1210,7 @@ class WalletMeltJsonRestoreService {
 }
 
 class _RestoreMutationState {
+  Map<String, int> extendedCounts = const {};
   _RestoreMutationState({required this.safetyBackupPath});
 
   final String safetyBackupPath;

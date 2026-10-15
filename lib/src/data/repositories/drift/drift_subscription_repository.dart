@@ -1,3 +1,6 @@
+import 'drift_expense_repository.dart';
+import '../../../types/expense.dart' show ExpenseDraft;
+import '../../../utils/currency_format.dart';
 import 'package:drift/drift.dart';
 
 import '../../local/wallet_melt_database.dart' as local;
@@ -33,6 +36,8 @@ class DriftSubscriptionRepository {
       categoryId: sub.categoryId,
       amount: sub.amount,
       taxAmount: Value(sub.taxAmount),
+      amountMinorUnits: Value(toMinorUnits(sub.amount)),
+      taxAmountMinorUnits: Value(sub.taxAmount == null ? null : toMinorUnits(sub.taxAmount!)),
       currency: sub.currency,
       description: Value(sub.description),
       startDate: sub.startDate,
@@ -50,6 +55,23 @@ class DriftSubscriptionRepository {
     return sub;
   }
 
+  /// Creates every renewal expense and advances the subscription in ONE
+  /// transaction: either all of it is saved or none of it, so a failure part
+  /// way through can never leave expenses behind that a later run would
+  /// generate again.
+  Future<void> applyRenewals({
+    required domain.Subscription updated,
+    required List<ExpenseDraft> drafts,
+    required DriftExpenseRepository expenseRepository,
+  }) {
+    return _db.transaction(() async {
+      for (final draft in drafts) {
+        await expenseRepository.create(draft);
+      }
+      await update(updated);
+    });
+  }
+
   Future<void> update(domain.Subscription sub) async {
     await (_db.update(_db.subscriptions)..where((t) => t.id.equals(sub.id)))
         .write(
@@ -58,6 +80,8 @@ class DriftSubscriptionRepository {
         categoryId: Value(sub.categoryId),
         amount: Value(sub.amount),
         taxAmount: Value(sub.taxAmount),
+        amountMinorUnits: Value(toMinorUnits(sub.amount)),
+        taxAmountMinorUnits: Value(sub.taxAmount == null ? null : toMinorUnits(sub.taxAmount!)),
         currency: Value(sub.currency),
         description: Value(sub.description),
         startDate: Value(sub.startDate),

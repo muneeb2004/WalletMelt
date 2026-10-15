@@ -3,7 +3,7 @@ type: architecture
 status: stable
 priority: high
 created: 2026-09-13
-updated: 2026-09-13
+updated: 2026-10-15
 domain: architecture
 related:
   - "[[Product-Requirements]]"
@@ -40,3 +40,6 @@ All financial metrics are calculated via [`FinancialMetricsCalculator`](file:///
 
 6. **Subscription Monthly Normalization**:
    Converts weekly ($\times 52 / 12$), bi-weekly ($\times 26 / 12$), quarterly ($/ 3$), and annual ($/ 12$) commitments into precise 30-day monthly burn rates.
+
+## Subscription Renewal Dates (changed 2026-10-15)
+`Subscription.calculateNextRenewalDate` advances month-based cycles (monthly 1, quarterly 3, semi-annual 6, annual 12 months) from the **anchor day** taken from `startDate`, clamped to the last day of the target month. Jan 31 -> Feb 28/29 -> Mar 31 (no permanent drift, no skipped February). `custom_N` adds N calendar days via `DateTime(y, m, d + N)` (no DST hour shift); `N <= 0` falls back to 30. Renewals are saved **atomically per subscription** (`DriftSubscriptionRepository.applyRenewals`: all renewal expenses + the advanced date in one transaction) and concurrent runs share one in-flight Future. Regression tests: `test/subscription_renewal_test.dart`.

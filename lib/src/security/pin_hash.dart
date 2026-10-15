@@ -78,17 +78,3 @@ class PinKdf {
   }
 }
 
-/// Backwards compatibility wrapper for PinHash.
-class PinHash {
-  PinHash._();
-
-  static String hashPin(String pin, {List<int>? salt, int? iterations}) {
-    final effectiveSalt = salt ?? utf8.encode('walletmelt_static_salt_legacy');
-    return PinKdf.hashPin(
-      pin: pin,
-      salt: effectiveSalt,
-      iterations: iterations ?? PinKdf.defaultIterations,
-    );
-  }
-}
-

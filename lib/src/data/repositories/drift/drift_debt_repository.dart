@@ -1,3 +1,4 @@
+import '../../../utils/currency_format.dart';
 import 'package:drift/drift.dart';
 
 import '../../local/wallet_melt_database.dart' as local;
@@ -43,6 +44,8 @@ class DriftDebtRepository {
       type: debt.type.name,
       principalAmount: debt.principalAmount,
       remainingAmount: debt.remainingAmount,
+      principalAmountMinorUnits: Value(toMinorUnits(debt.principalAmount)),
+      remainingAmountMinorUnits: Value(toMinorUnits(debt.remainingAmount)),
       currency: debt.currency,
       description: Value(debt.description),
       createdAt: debt.createdAt,
@@ -76,8 +79,10 @@ class DriftDebtRepository {
             ..where((t) => t.id.equals(repayment.debtId)))
           .getSingle();
 
-      final newRemaining = (debt.remainingAmount - repayment.amount).clamp(0.0, double.infinity);
-      final isSettled = newRemaining <= 0;
+      // Integer minor-unit arithmetic avoids float drift (0.1 + 0.2 style errors).
+      final newRemainingMinor = (toMinorUnits(debt.remainingAmount) - toMinorUnits(repayment.amount)).clamp(0, 1 << 52);
+      final newRemaining = fromMinorUnits(newRemainingMinor);
+      final isSettled = newRemainingMinor <= 0;
       final newStatus = isSettled
           ? domain.DebtStatus.settled.name
           : domain.DebtStatus.partiallyPaid.name;
@@ -90,6 +95,7 @@ class DriftDebtRepository {
           .write(
         local.DebtRecordsCompanion(
           remainingAmount: Value(newRemaining),
+          remainingAmountMinorUnits: Value(newRemainingMinor),
           status: Value(newStatus),
           settledAt: Value(settledAtStr),
         ),

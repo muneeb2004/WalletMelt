@@ -74,3 +74,6 @@ related:
 
 ## 6. Strategy Context
 Product direction (best student finance tracker, Pakistan then international) is tracked in [[Student-Market-Strategy]]; verified capability gaps in [[Gap-Analysis-vs-Code]]. Strategy items are `proposed` and do not alter the stable scope.
+
+## 7. Backup v2 (2026-10-15)
+Backups are format v2 (checksummed, all tables) with Full Replace restricted to v2; see [[ADR-0009-Complete-Backup-v2-and-Safe-Full-Replace]] and [[Backup-Format-Specification]]. Renewal engine is atomic ([[Analytics-and-Calculations]]).

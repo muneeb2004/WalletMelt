@@ -145,6 +145,7 @@ class _SvgEditorDialogState extends State<SvgEditorDialog> {
         }
       }
     } catch (e) {
+      if (!mounted) return;
       setState(() => _validationError = 'File import failed: $e');
     }
   }
@@ -163,6 +164,7 @@ class _SvgEditorDialogState extends State<SvgEditorDialog> {
         showSuccessSnackbar(context, 'SVG updated and applied across the board!');
       }
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _validationError = 'Save error: $e';
         _isSaving = false;

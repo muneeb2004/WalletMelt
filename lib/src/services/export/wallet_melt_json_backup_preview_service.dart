@@ -1,3 +1,4 @@
+import 'wallet_melt_json_backup_extended_tables.dart';
 import 'dart:convert';
 import 'wallet_melt_json_backup_validator.dart';
 
@@ -31,8 +32,12 @@ class WalletMeltBackupPreview {
     this.budgetsCount = 0,
     this.hasSettings = false,
     this.receiptImageCount = 0,
+    this.extendedCounts = const {},
     this.warnings = const [],
   });
+
+  /// Row counts of the v2 `extended` section (empty for v1 backups).
+  final Map<String, int> extendedCounts;
 }
 
 class WalletMeltJsonBackupPreviewService {
@@ -120,6 +125,8 @@ class WalletMeltJsonBackupPreviewService {
         budgetsCount: budgetsList.length,
         hasSettings: settingsMap != null,
         receiptImageCount: receiptImageCount,
+        extendedCounts:
+            BackupExtendedTables.counts(map[BackupExtendedTables.sectionKey]),
         warnings: warnings,
       );
     } catch (e) {

@@ -1,5 +1,5 @@
 import 'package:drift/drift.dart';
-import 'package:flutter/foundation.dart' show kIsWeb, visibleForTesting;
+import 'package:flutter/foundation.dart' show debugPrint, kIsWeb, visibleForTesting;
 import 'package:path/path.dart' as p;
 import 'package:sqflite/sqflite.dart' show getDatabasesPath;
 
@@ -633,11 +633,35 @@ class WalletMeltDatabase extends _$WalletMeltDatabase {
           ]) {
             try {
               await customStatement(sql);
-            } catch (_) {}
+            } catch (error) {
+              // Index creation is best-effort (a missing optional table must
+              // not block opening the database) but failures should be visible.
+              debugPrint('Index statement failed: $sql ($error)');
+            }
           }
         },
       );
 
+
+  /// Fills any missing `*MinorUnits` column from its REAL counterpart.
+  /// Used after restores, whose inserts bypass the repositories.
+  Future<void> backfillMinorUnits() async {
+    const statements = <String>[
+      'UPDATE expenses SET amountMinorUnits = CAST(ROUND(amount * 100) AS INTEGER) WHERE amountMinorUnits IS NULL;',
+      'UPDATE expenses SET subtotalAmountMinorUnits = CAST(ROUND(subtotalAmount * 100) AS INTEGER) WHERE subtotalAmount IS NOT NULL AND subtotalAmountMinorUnits IS NULL;',
+      'UPDATE expenses SET taxAmountMinorUnits = CAST(ROUND(taxAmount * 100) AS INTEGER) WHERE taxAmount IS NOT NULL AND taxAmountMinorUnits IS NULL;',
+      'UPDATE category_budgets SET amountMinorUnits = CAST(ROUND(amount * 100) AS INTEGER) WHERE amountMinorUnits IS NULL;',
+      'UPDATE monthly_budgets SET amountMinorUnits = CAST(ROUND(amount * 100) AS INTEGER) WHERE amountMinorUnits IS NULL;',
+      'UPDATE debt_records SET principalAmountMinorUnits = CAST(ROUND(principalAmount * 100) AS INTEGER) WHERE principalAmountMinorUnits IS NULL;',
+      'UPDATE debt_records SET remainingAmountMinorUnits = CAST(ROUND(remainingAmount * 100) AS INTEGER) WHERE remainingAmountMinorUnits IS NULL;',
+      'UPDATE subscriptions SET amountMinorUnits = CAST(ROUND(amount * 100) AS INTEGER) WHERE amountMinorUnits IS NULL;',
+      'UPDATE subscriptions SET taxAmountMinorUnits = CAST(ROUND(taxAmount * 100) AS INTEGER) WHERE taxAmount IS NOT NULL AND taxAmountMinorUnits IS NULL;',
+      'UPDATE grocery_items SET amountMinorUnits = CAST(ROUND(amount * 100) AS INTEGER) WHERE amountMinorUnits IS NULL;',
+    ];
+    for (final sql in statements) {
+      await customStatement(sql);
+    }
+  }
 
   Future<void> _upgradeFromV7ToV8(Migrator m, int from, int to) async {
     final hasAudit = await _tableExists('migration_audit');

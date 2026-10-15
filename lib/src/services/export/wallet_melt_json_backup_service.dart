@@ -39,6 +39,8 @@ class WalletMeltJsonBackupService {
     required Iterable<CategoryBudget> budgets,
     required WalletMeltSettings settings,
     Iterable<MonthlyBudget>? monthlyBudgets,
+    Map<String, Object?>? extendedTables,
+    int? schemaVersion,
     DateTime? exportedAt,
     Directory? directory,
     bool packageReceipts = true,
@@ -54,6 +56,8 @@ class WalletMeltJsonBackupService {
       settings: settings,
       exportedAt: timestamp,
       appVersion: _appVersion,
+      extended: extendedTables,
+      schemaVersion: schemaVersion,
     );
 
     if (!packageReceipts) {
@@ -125,7 +129,7 @@ class WalletMeltJsonBackupService {
         'receipts': receiptFiles.length,
       },
       'app_version': _appVersion ?? AppVersion.fullVersion,
-      'schema_version': 2,
+      'schema_version': schemaVersion ?? 2,
       'export_timestamp': timestamp.toIso8601String(),
       'platform': PlatformInfo.isWeb
           ? 'Web'

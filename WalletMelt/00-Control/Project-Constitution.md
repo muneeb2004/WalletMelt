@@ -3,7 +3,7 @@ type: constitution
 status: stable
 priority: high
 created: 2026-09-13
-updated: 2026-09-13
+updated: 2026-10-15
 domain: control
 related:
   - "[[AI-Engineering-Protocol]]"
@@ -36,8 +36,8 @@ related:
    - Background grace period is fixed at 30 seconds before locking.
    - `FLAG_SECURE` prevents sensitive financial data from appearing in the OS app switcher.
 6. **Data Safety in Restores & Migrations**:
-   - Restores are **Safe-Merge** only inside a single transactional rollback boundary.
-   - Destructive full database overwrites or silent collision deletions are forbidden.
+   - Restores run inside a single transactional rollback boundary. **Safe-Merge** is the default. Full Replace is permitted only for complete format-v2 backups, with explicit confirmation, a pre-restore safety backup and foreign-key verification ([[ADR-0009-Complete-Backup-v2-and-Safe-Full-Replace]], amended 2026-10-15).
+   - Silent destructive overwrites or silent collision deletions are forbidden.
    - Schema upgrades must increment `currentSchemaVersion` and include idempotent table migration steps in `WalletMeltDatabase`.
 
 ## 3. Rules for AI Agents

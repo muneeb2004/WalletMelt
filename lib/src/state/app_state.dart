@@ -1,3 +1,4 @@
+import '../services/export/wallet_melt_json_backup_extended_tables.dart';
 import 'dart:io' as io;
 import 'package:flutter/foundation.dart';
 import 'package:collection/collection.dart';
@@ -658,6 +659,18 @@ class AppState extends ChangeNotifier {
     return _driftMonthlyBudgetRepository.listAll();
   }
 
+  /// Backup v2 extended section (every table the legacy sections do not own),
+  /// or null when no Drift database is attached (tests, screenshots).
+  Future<Map<String, Object?>?> exportExtendedTables() async {
+    final db = _driftDatabase;
+    if (db == null) return null;
+    return BackupExtendedTables.export(db);
+  }
+
+  /// Drift schema version recorded in v2 backups.
+  int? get backupSchemaVersion =>
+      _driftDatabase == null ? null : local.WalletMeltDatabase.currentSchemaVersion;
+
   Future<void> addDebt(wm_debt.DebtRecord debt) async {
     await _driftDebtRepository.createDebt(debt);
     await refresh();
@@ -744,7 +757,21 @@ class AppState extends ChangeNotifier {
     await refresh();
   }
 
-  Future<void> processSubscriptionRenewals() async {
+  Future<void>? _renewalsInFlight;
+
+  /// Generates due subscription renewal expenses. Concurrent callers share a
+  /// single in-flight run so overlapping refreshes cannot double-generate.
+  Future<void> processSubscriptionRenewals() {
+    final running = _renewalsInFlight;
+    if (running != null) return running;
+    final run = _processSubscriptionRenewals().whenComplete(() {
+      _renewalsInFlight = null;
+    });
+    _renewalsInFlight = run;
+    return run;
+  }
+
+  Future<void> _processSubscriptionRenewals() async {
     final subs = await _driftSubscriptionRepository.listAll();
     final todayStr = DateTime.now().toIso8601String().substring(0, 10);
 
@@ -752,14 +779,21 @@ class AppState extends ChangeNotifier {
       if (sub.status != SubscriptionStatus.active) continue;
 
       var currentNextDateStr = sub.nextOccurrenceDate;
+      if (DateTime.tryParse(currentNextDateStr) == null) {
+        debugPrint(
+            'Skipping renewals for "${sub.name}": bad date $currentNextDateStr');
+        continue;
+      }
+
+      // Pure computation first; nothing is written until the whole catch-up
+      // for this subscription is known, then it is saved atomically.
       var updatedSub = sub;
-      bool hasRenewals = false;
+      final drafts = <ExpenseDraft>[];
 
       while (currentNextDateStr.compareTo(todayStr) <= 0) {
-        hasRenewals = true;
         final parsedDate = DateTime.parse(currentNextDateStr);
-        
-        final draft = ExpenseDraft(
+
+        drafts.add(ExpenseDraft(
           amount: sub.amount + (sub.taxAmount ?? 0.0),
           currency: sub.currency,
           categoryId: sub.categoryId,
@@ -769,21 +803,28 @@ class AppState extends ChangeNotifier {
           notes: 'Auto-generated subscription renewal for ${sub.name}',
           subtotalAmount: sub.amount,
           taxAmount: sub.taxAmount,
-        );
-
-        await _driftExpenseRepository.create(draft);
+        ));
 
         final nextDate = sub.calculateNextRenewalDate(parsedDate);
         currentNextDateStr = nextDate.toIso8601String().substring(0, 10);
-        
+
         updatedSub = updatedSub.copyWith(
           nextOccurrenceDate: currentNextDateStr,
           updatedAt: DateTime.now().toIso8601String(),
         );
       }
 
-      if (hasRenewals) {
-        await _driftSubscriptionRepository.update(updatedSub);
+      if (drafts.isEmpty) continue;
+      try {
+        await _driftSubscriptionRepository.applyRenewals(
+          updated: updatedSub,
+          drafts: drafts,
+          expenseRepository: _driftExpenseRepository,
+        );
+      } catch (error) {
+        // The transaction rolled back: no partial expenses, date unchanged.
+        debugPrint(
+            'Renewal for "${sub.name}" failed and was rolled back: $error');
       }
     }
   }

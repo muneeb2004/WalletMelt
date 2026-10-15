@@ -49,7 +49,9 @@ void main() {
         ),
       );
 
+      await _reveal(tester, find.text('Data export'));
       expect(find.text('Data export'), findsOneWidget);
+      await _reveal(tester, find.text('Export expenses CSV'));
       expect(find.text('Export expenses CSV'), findsOneWidget);
     });
 
@@ -76,7 +78,7 @@ void main() {
         ),
       );
 
-      await tester.ensureVisible(find.text('Export expenses CSV'));
+      await _reveal(tester, find.text('Export expenses CSV'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Export expenses CSV'));
       await tester.pumpAndSettle();
@@ -123,11 +125,11 @@ void main() {
         ),
       );
 
-      await tester.ensureVisible(find.text('Include deleted expenses'));
+      await _reveal(tester, find.text('Include deleted expenses'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Include deleted expenses'));
       await tester.pumpAndSettle();
-      await tester.ensureVisible(find.text('Export expenses CSV'));
+      await _reveal(tester, find.text('Export expenses CSV'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Export expenses CSV'));
       await tester.pumpAndSettle();
@@ -157,7 +159,7 @@ void main() {
         ),
       );
 
-      await tester.ensureVisible(find.text('Export expenses CSV'));
+      await _reveal(tester, find.text('Export expenses CSV'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Export expenses CSV'));
       await tester.pumpAndSettle();
@@ -204,7 +206,7 @@ void main() {
         ),
       );
 
-      await tester.ensureVisible(find.text('Back up JSON'));
+      await _reveal(tester, find.text('Back up JSON'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Back up JSON'));
       await tester.pumpAndSettle();
@@ -366,7 +368,7 @@ void main() {
       expect(find.text('Receipt warning example'), findsOneWidget);
 
       // Close preview
-      await tester.ensureVisible(find.text('Close'));
+      await _reveal(tester, find.text('Close'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Close'));
       await tester.pumpAndSettle();
@@ -958,7 +960,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Validate backup file'));
       await tester.pumpAndSettle();
-      await tester.ensureVisible(find.text('Safe merge'));
+      await _reveal(tester, find.text('Safe merge'));
       await tester.tap(find.text('Safe merge'));
       await tester.pumpAndSettle();
 
@@ -1010,7 +1012,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Validate backup file'));
       await tester.pumpAndSettle();
-      await tester.ensureVisible(find.text('Safe merge'));
+      await _reveal(tester, find.text('Safe merge'));
       await tester.tap(find.text('Safe merge'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Cancel'));
@@ -1066,10 +1068,10 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Validate backup file'));
       await tester.pumpAndSettle();
-      await tester.ensureVisible(find.text('Safe merge'));
+      await _reveal(tester, find.text('Safe merge'));
       await tester.tap(find.text('Safe merge'));
       await tester.pumpAndSettle();
-      await tester.ensureVisible(find.text('Create safety backup and merge'));
+      await _reveal(tester, find.text('Create safety backup and merge'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Create safety backup and merge'));
       await tester.pump();
@@ -1136,10 +1138,10 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Validate backup file'));
       await tester.pumpAndSettle();
-      await tester.ensureVisible(find.text('Safe merge'));
+      await _reveal(tester, find.text('Safe merge'));
       await tester.tap(find.text('Safe merge'));
       await tester.pumpAndSettle();
-      await tester.ensureVisible(find.text('Create safety backup and merge'));
+      await _reveal(tester, find.text('Create safety backup and merge'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Create safety backup and merge'));
       await tester.pump();
@@ -1196,10 +1198,10 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Validate backup file'));
       await tester.pumpAndSettle();
-      await tester.ensureVisible(find.text('Safe merge'));
+      await _reveal(tester, find.text('Safe merge'));
       await tester.tap(find.text('Safe merge'));
       await tester.pumpAndSettle();
-      await tester.ensureVisible(find.text('Create safety backup and merge'));
+      await _reveal(tester, find.text('Create safety backup and merge'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Create safety backup and merge'));
       await tester.pump();
@@ -1249,10 +1251,10 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Validate backup file'));
       await tester.pumpAndSettle();
-      await tester.ensureVisible(find.text('Safe merge'));
+      await _reveal(tester, find.text('Safe merge'));
       await tester.tap(find.text('Safe merge'));
       await tester.pumpAndSettle();
-      await tester.ensureVisible(find.text('Create safety backup and merge'));
+      await _reveal(tester, find.text('Create safety backup and merge'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Create safety backup and merge'));
       await tester.pump();
@@ -1309,10 +1311,10 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Validate backup file'));
       await tester.pumpAndSettle();
-      await tester.ensureVisible(find.text('Safe merge'));
+      await _reveal(tester, find.text('Safe merge'));
       await tester.tap(find.text('Safe merge'));
       await tester.pumpAndSettle();
-      await tester.ensureVisible(find.text('Create safety backup and merge'));
+      await _reveal(tester, find.text('Create safety backup and merge'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Create safety backup and merge'));
       await tester.pump();
@@ -1361,6 +1363,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      await _reveal(tester, find.text('Change PIN'));
       expect(find.text('Change PIN'), findsOneWidget);
       expect(find.text('Update your 4-digit security code.'), findsOneWidget);
       expect(find.text('Disable PIN Lock'), findsOneWidget);
@@ -1571,6 +1574,8 @@ class FakeWalletMeltJsonBackupService extends WalletMeltJsonBackupService {
     required Iterable<CategoryBudget> budgets,
     required WalletMeltSettings settings,
     Iterable<MonthlyBudget>? monthlyBudgets,
+    Map<String, Object?>? extendedTables,
+    int? schemaVersion,
     DateTime? exportedAt,
     Directory? directory,
     bool packageReceipts = true,
@@ -1603,6 +1608,8 @@ class FailingWalletMeltJsonBackupService
     required Iterable<CategoryBudget> budgets,
     required WalletMeltSettings settings,
     Iterable<MonthlyBudget>? monthlyBudgets,
+    Map<String, Object?>? extendedTables,
+    int? schemaVersion,
     DateTime? exportedAt,
     Directory? directory,
     bool packageReceipts = true,
@@ -1911,4 +1918,17 @@ class FakePinLockController extends PinLockController {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {}
+}
+
+/// The settings list builds lazily; scroll the target into the built range
+/// before asking the framework to make it fully visible.
+Future<void> _reveal(WidgetTester tester, Finder finder) async {
+  if (finder.evaluate().isEmpty) {
+    await tester.scrollUntilVisible(
+      finder,
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+  }
+  await tester.ensureVisible(finder);
 }

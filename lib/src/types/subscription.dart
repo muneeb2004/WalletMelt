@@ -44,24 +44,42 @@ class Subscription {
   bool get isCancelled => status == SubscriptionStatus.cancelled;
   bool get isDeleted => deletedAt != null;
 
+  /// Day of month the subscription was anchored to (from [startDate]), so that
+  /// month-end renewals do not drift (Jan 31 -> Feb 28 -> Mar 31, not Mar 28).
+  int get _anchorDay {
+    final parsed = DateTime.tryParse(startDate);
+    return parsed?.day ?? 31;
+  }
+
+  static DateTime _addMonthsClamped(DateTime from, int months, int anchorDay) {
+    final total = from.year * 12 + (from.month - 1) + months;
+    final year = total ~/ 12;
+    final month = total % 12 + 1;
+    final lastDay = DateTime(year, month + 1, 0).day;
+    return DateTime(year, month, anchorDay > lastDay ? lastDay : anchorDay);
+  }
+
   DateTime calculateNextRenewalDate(DateTime current) {
     final cycle = billingCycle.toLowerCase().trim();
+    final anchor = _anchorDay;
     if (cycle == 'monthly') {
-      return DateTime(current.year, current.month + 1, current.day);
+      return _addMonthsClamped(current, 1, anchor);
     } else if (cycle == 'quarterly') {
-      return DateTime(current.year, current.month + 3, current.day);
+      return _addMonthsClamped(current, 3, anchor);
     } else if (cycle == 'semi-annual' || cycle == 'semi_annual') {
-      return DateTime(current.year, current.month + 6, current.day);
+      return _addMonthsClamped(current, 6, anchor);
     } else if (cycle == 'annual' || cycle == 'yearly') {
-      return DateTime(current.year + 1, current.month, current.day);
+      return _addMonthsClamped(current, 12, anchor);
     } else if (cycle.startsWith('custom_')) {
       final parts = cycle.split('_');
       if (parts.length == 2) {
-        final days = int.tryParse(parts[1]) ?? 30;
-        return current.add(Duration(days: days));
+        final parsedDays = int.tryParse(parts[1]) ?? 30;
+        // A non-positive interval would never advance the date; fall back to 30.
+        final days = parsedDays > 0 ? parsedDays : 30;
+        return DateTime(current.year, current.month, current.day + days);
       }
     }
-    return DateTime(current.year, current.month + 1, current.day);
+    return _addMonthsClamped(current, 1, anchor);
   }
 
   Subscription copyWith({

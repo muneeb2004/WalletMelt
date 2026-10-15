@@ -12,29 +12,27 @@ related:
 
 # Backup and Restore Architecture
 
-## 1. Architectural Guardrails
-WalletMelt backup and restore (`lib/src/services/export/`) is **Safe-Merge by constitutional rule**. **Code reality (2026-10-15): a `RestoreMode.fullReplace` also exists** (`wallet_melt_json_restore_service.dart` `restoreFullReplace`, selectable in `backup_restore_dialog.dart` behind a confirmation; wipes tables inside a transaction with a pre-restore safety backup). This contradicts the Constitution and ADR-0005 and is tracked as [[Technical-Debt-Registry]] TD-004 pending a user decision. Guardrails for safe-merge:
-- Destructive table drops, truncated databases, or blind row replacements are forbidden.
-- Restores execute entirely within a single Drift database transaction. If any entity fails foreign-key validation, the entire operation aborts and rolls back cleanly.
+## 1. Guardrails (see [[ADR-0009-Complete-Backup-v2-and-Safe-Full-Replace]])
+- **Safe Merge** is the default and works for v1 and v2 backups.
+- **Full Replace** exists only for complete v2 backups, in one transaction, with foreign keys ON and a `foreign_key_check` gate; it never runs a destructive "recovery" pass.
+- Both modes restore inside a single Drift transaction and roll back entirely on any failure.
+- A complete v2 pre-restore safety backup is written before any mutation; its path is shown if a restore fails.
 
-## 2. Restore Pipeline Stages
+## 2. Pipeline
 ```text
-1. User Selects JSON File
-   ↓
-2. Verify Format & Metadata (Validate schema version, top-level keys, SHA checksum)
-   ↓
-3. Read-Only Preview & Conflict Detection (Detect duplicate IDs, category collisions)
-   ↓
-4. Dry-Run Planner (Generates deterministic ID remapping table, checks blockers)
-   ↓
-5. Pre-Restore Safety Backup (Automatically writes snapshot to local disk)
-   ↓
-6. Transactional Safe-Merge (Additive writes using remapped IDs under Drift transaction)
-   ↓
-7. Post-Merge Verification & State Refresh (AppState reloads and notifies listeners)
+select file -> decrypt/unzip -> validate (format 1|2, v2: checksum + schema + extended shape)
+ -> preview (counts) -> conflict detection / dry-run plan -> explicit confirmation
+ -> safety backup -> transaction { core sections, monthly budgets, extended section,
+    settings, minor-unit backfill, count + relationship + foreign_key_check }
+ -> refresh AppState
 ```
 
-## 3. Verified Container & Encryption (2026-10-15)
-- JSON: `metadata.format = "walletmelt.local_json_backup"`, `format_version = 1` (snake_case). ZIP variant (when receipts included): `backup.json`, `metadata.json`, `receipts/*`. Files: `walletmelt-backup-<timestamp>.json|.zip`.
-- Optional encryption: header `WMENC01`, PBKDF2-HMAC-SHA256 100k, AES-256-CTR, HMAC-SHA256 tag.
-- Written keys: metadata, expenses, grocery_items, categories, budgets, monthly_budgets, settings. **Debts, subscriptions, payees, essentials, fuel are not exported** (data-loss risk on restore; see TD-005).
+## 3. Components
+- `WalletMeltJsonBackupEncoder` (v1/v2 JSON, checksum), `BackupExtendedTables` (generic per-table export/import), `WalletMeltJsonBackupValidator`, `WalletMeltJsonBackupPreviewService`, `WalletMeltJsonBackupConflictService`, `WalletMeltJsonRestoreDryRunPlanner`, `WalletMeltJsonRestoreService` (`restoreSafeMerge`, `restoreFullReplace`), `BackupEncryptionService`.
+- Format details: [[Backup-Format-Specification]].
+
+## 4. Verification
+`test/services/export/backup_v2_roundtrip_test.dart` seeds all tables, exports v2 and asserts per-table row counts and an empty `foreign_key_check` after Full Replace (empty and populated destination) and Safe Merge; also tamper detection and v1 refusal for Full Replace.
+
+## 5. Preview (2026-10-15)
+`WalletMeltBackupPreview.extendedCounts` carries per-table row counts of the v2 `extended` section; the restore dialog shows debts, subscriptions, payees, essentials and fuel logs. Full Replace is disabled in the dialog for v1 backups. ZIP `metadata.json` records the real Drift `schema_version`.

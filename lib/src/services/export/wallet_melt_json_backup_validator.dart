@@ -1,3 +1,6 @@
+import '../../data/local/wallet_melt_database.dart' show WalletMeltDatabase;
+import 'wallet_melt_json_backup_encoder.dart';
+import 'wallet_melt_json_backup_extended_tables.dart';
 import 'dart:convert';
 import 'dart:io';
 
@@ -222,7 +225,7 @@ class WalletMeltJsonBackupValidator {
         return const WalletMeltJsonBackupValidationResult.invalid(
             'Format version is not an integer.');
       }
-      if (formatVersion != 1) {
+      if (formatVersion != 1 && formatVersion != 2) {
         return WalletMeltJsonBackupValidationResult.invalid(
             'Unsupported format version: $formatVersion');
       }
@@ -258,6 +261,29 @@ class WalletMeltJsonBackupValidator {
       if (settings != null && settings is! Map) {
         return const WalletMeltJsonBackupValidationResult.invalid(
             'settings is neither null nor a JSON object.');
+      }
+
+      if (formatVersion >= 2) {
+        final storedChecksum = metadataMap['checksum'];
+        if (storedChecksum is! String) {
+          return const WalletMeltJsonBackupValidationResult.invalid(
+              'Backup checksum is missing.');
+        }
+        if (storedChecksum != WalletMeltJsonBackupEncoder.computeChecksum(map)) {
+          return const WalletMeltJsonBackupValidationResult.invalid(
+              'Backup checksum mismatch: the file is corrupted or was modified.');
+        }
+        final schemaVersion = metadataMap['schema_version'];
+        if (schemaVersion is int &&
+            schemaVersion > WalletMeltDatabase.currentSchemaVersion) {
+          return WalletMeltJsonBackupValidationResult.invalid(
+              'Backup schema version $schemaVersion is newer than this app supports (${WalletMeltDatabase.currentSchemaVersion}).');
+        }
+        final extendedError =
+            BackupExtendedTables.validate(map[BackupExtendedTables.sectionKey]);
+        if (extendedError != null) {
+          return WalletMeltJsonBackupValidationResult.invalid(extendedError);
+        }
       }
 
       return const WalletMeltJsonBackupValidationResult.valid();

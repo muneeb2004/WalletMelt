@@ -149,7 +149,7 @@ void main() {
       final invalidJson = jsonEncode({
         'metadata': {
           'format': 'walletmelt.local_json_backup',
-          'format_version': 2, // unsupported version
+          'format_version': 3, // unsupported version
         },
         'expenses': [],
         'grocery_items': [],
@@ -160,7 +160,7 @@ void main() {
 
       final result = validator.validate(invalidJson);
       expect(result.isValid, isFalse);
-      expect(result.error, contains('Unsupported format version: 2'));
+      expect(result.error, contains('Unsupported format version: 3'));
     });
 
     test('rejects non-list entities', () {
