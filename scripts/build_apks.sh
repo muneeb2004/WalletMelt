@@ -3,12 +3,17 @@ set -e
 
 echo "======================================================="
 echo "  WalletMelt Standardized APK Build Pipeline"
+TARGET_VERSION=$(grep "^version:" pubspec.yaml | head -n 1 | awk '{print $2}')
+echo "  Target App Version: $TARGET_VERSION"
 echo "======================================================="
 
 OUTPUT_DIR="build/app/outputs/flutter-apk"
 
-# Ensure stripped native libraries are always freshly generated
-rm -rf build/app/intermediates/stripped_native_libs 2>/dev/null || true
+# Ensure old APK outputs are cleared so results are guaranteed fresh
+rm -f "$OUTPUT_DIR"/*.apk 2>/dev/null || true
+
+# Purge all Gradle and Flutter intermediates to prevent AGP caching stale libapp.so / assets
+rm -rf build/app/intermediates 2>/dev/null || true
 
 # 1. Production Universal Release APK
 echo "[1/3] Building Production Universal Release APK..."

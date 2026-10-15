@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Enforces vault updates alongside code. Escape hatch: put [skip-docs] in the commit message.
+msg_file="$1"
+if grep -qiE '\[skip-docs\]' "$msg_file"; then exit 0; fi
+root=$(git rev-parse --show-toplevel) && cd "$root" || exit 0
+exec bash scripts/docs_guard.sh staged

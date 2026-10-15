@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../constants/app_version.dart';
 import '../theme/wallet_melt_theme.dart';
 
 /// Shows the celebratory, friendly What's New modal sheet / dialog.
@@ -89,14 +90,14 @@ class WhatsNewContent extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "What's New in v1.1.1",
+                        "What's New in ${AppVersion.displayVersion}",
                         style: theme.textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.w900,
                           fontSize: 20,
                         ),
                       ),
                       Text(
-                        'Dynamic monthly budgets, category vector icons & smooth experience',
+                        'SVG vector customization, transparent financial metrics & enhanced controls',
                         style: TextStyle(
                           fontSize: 12,
                           color: WalletMeltColors.textMuted,
@@ -123,10 +124,48 @@ class WhatsNewContent extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Version 1.1.2 Highlights
+              _buildSectionBadge(
+                label: 'VERSION 1.1.2 UPDATES',
+                color: WalletMeltColors.brand,
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(
+                icon: Icons.draw_rounded,
+                iconColor: const Color(0xFF6C5CE7),
+                title: 'Across-the-Board SVG Customization',
+                description:
+                    'Full visual freedom! Customize any default or custom category with crisp vector SVGs, preset bundles, color tints, and interactive code editing.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(
+                icon: Icons.calculate_rounded,
+                iconColor: const Color(0xFF00B894),
+                title: 'Financial Metrics Transparency',
+                description:
+                    'Demystify your finances. Dive into the new Metric Calculations screen to see deterministic mathematical formulas, live examples, and auditing for all insights.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(
+                icon: Icons.tune_rounded,
+                iconColor: const Color(0xFFFDCB6E),
+                title: 'Settings & Visual Overhaul',
+                description:
+                    'Cleaner organization with dedicated Visual Customization and Financial Calculations menus, expanded layout breathing room, and instant live overrides.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 24),
+
               // Version 1.1.1 Highlights
               _buildSectionBadge(
                 label: 'VERSION 1.1.1 UPDATES',
-                color: WalletMeltColors.brand,
+                color: const Color(0xFF00B894),
                 isDark: isDark,
               ),
               const SizedBox(height: 14),

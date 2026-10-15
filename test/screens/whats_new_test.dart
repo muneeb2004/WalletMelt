@@ -16,6 +16,12 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      // Check for v1.1.2 section badge & items
+      expect(find.text('VERSION 1.1.2 UPDATES'), findsOneWidget);
+      expect(find.text('Across-the-Board SVG Customization'), findsOneWidget);
+      expect(find.text('Financial Metrics Transparency'), findsOneWidget);
+      expect(find.text('Settings & Visual Overhaul'), findsOneWidget);
+
       // Check for v1.1.1 section badge & items
       expect(find.text('VERSION 1.1.1 UPDATES'), findsOneWidget);
       expect(find.text('Dynamic Monthly Budgets'), findsOneWidget);
@@ -52,14 +58,14 @@ void main() {
       await tester.tap(find.text('Open'));
       await tester.pumpAndSettle();
 
-      expect(find.text("What's New in v1.1.1"), findsOneWidget);
+      expect(find.text("What's New in v1.1.2"), findsOneWidget);
       expect(find.byTooltip('Close'), findsOneWidget);
 
       // Tap close button in header
       await tester.tap(find.byTooltip('Close'));
       await tester.pumpAndSettle();
 
-      expect(find.text("What's New in v1.1.1"), findsNothing);
+      expect(find.text("What's New in v1.1.2"), findsNothing);
     });
   });
 }

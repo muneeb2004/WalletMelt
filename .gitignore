@@ -24,3 +24,7 @@ ios/Runner/GeneratedPluginRegistrant.*
 # Dependencies & Build Outputs
 node_modules/
 out/
+
+# Obsidian per-user UI state (keep the rest of WalletMelt/.obsidian versioned)
+WalletMelt/.obsidian/workspace*.json
+WalletMelt/.obsidian/cache

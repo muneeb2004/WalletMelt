@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../../state/app_state.dart';
 import '../../theme/wallet_melt_theme.dart';
+import '../../constants/app_version.dart';
 import '../../types/debt.dart';
 import '../../screens/debt/debt_screen.dart';
 import '../../widgets/whats_new_dialog.dart';
@@ -55,8 +56,8 @@ class _AppShellState extends State<AppShell>
     final state = context.read<AppState>();
     if (state.settings.hasCompletedOnboarding &&
         state.settings.hasAcceptedPrivacyPolicy &&
-        state.settings.lastSeenWhatsNewVersion != '1.1.1') {
-      state.updateLastSeenWhatsNewVersion('1.1.1');
+        state.settings.lastSeenWhatsNewVersion != AppVersion.version) {
+      state.updateLastSeenWhatsNewVersion(AppVersion.version);
       showWhatsNewModal(context);
     }
   }

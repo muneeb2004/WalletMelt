@@ -32,11 +32,26 @@ if (-not (Get-Command flutter -ErrorAction SilentlyContinue)) {
     }
 }
 
+$pubspecVersion = "unknown"
+if (Test-Path "pubspec.yaml") {
+    $match = Select-String -Path "pubspec.yaml" -Pattern "^version:\s*(.+)$"
+    if ($match) {
+        $pubspecVersion = $match.Matches[0].Groups[1].Value.Trim()
+    }
+}
+
+Write-Host "  Target App Version: $pubspecVersion`n" -ForegroundColor Magenta
+
 $outputDir = "build/app/outputs/flutter-apk"
 
-# Ensure stripped native libraries are always freshly generated
-if (Test-Path "build/app/intermediates/stripped_native_libs") {
-    Remove-Item -Recurse -Force "build/app/intermediates/stripped_native_libs" -ErrorAction SilentlyContinue
+# Ensure old APK outputs are cleared so results are guaranteed fresh
+if (Test-Path $outputDir) {
+    Get-ChildItem -Path $outputDir -Filter "*.apk" | Remove-Item -Force -ErrorAction SilentlyContinue
+}
+
+# Purge all Gradle and Flutter intermediates to prevent AGP caching stale libapp.so / assets
+if (Test-Path "build/app/intermediates") {
+    Remove-Item -Recurse -Force "build/app/intermediates" -ErrorAction SilentlyContinue
 }
 
 # Step 1: Production Universal Release APK

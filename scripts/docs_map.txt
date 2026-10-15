@@ -1,0 +1,8 @@
+# regex on changed code path => vault note (file name) that must also change
+^lib/src/data/(local|schema|migrations)/ => Database-and-Drift-Architecture.md
+^lib/src/security/ => Security-and-Authentication.md
+^lib/src/analytics/ => Analytics-and-Calculations.md
+^lib/src/services/export/ => Backup-and-Restore-Architecture.md
+^pubspec\.yaml$ => Current-Project-State.md
+^scripts/build_apks => Build-and-Release-Pipeline.md
+^\.claude/|\.githooks/ => AI-Engineering-Protocol.md

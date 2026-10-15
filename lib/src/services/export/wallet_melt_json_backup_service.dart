@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:archive/archive.dart';
 import 'package:path/path.dart' as p;
 
+import '../../constants/app_version.dart';
 import '../../types/budget.dart';
 import '../../types/monthly_budget.dart';
 import '../../types/category.dart';
@@ -115,7 +116,7 @@ class WalletMeltJsonBackupService {
     final metadataJson = jsonEncode({
       'backupVersion': 1,
       'createdAt': timestamp.toIso8601String(),
-      'walletMeltVersion': _appVersion ?? '1.1.1+5',
+      'walletMeltVersion': _appVersion ?? AppVersion.fullVersion,
       'recordCounts': {
         'expenses': expenses.length,
         'categories': categories.length,
@@ -123,7 +124,7 @@ class WalletMeltJsonBackupService {
         'budgets': budgets.length,
         'receipts': receiptFiles.length,
       },
-      'app_version': _appVersion ?? '1.1.1+5',
+      'app_version': _appVersion ?? AppVersion.fullVersion,
       'schema_version': 2,
       'export_timestamp': timestamp.toIso8601String(),
       'platform': PlatformInfo.isWeb

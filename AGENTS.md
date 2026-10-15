@@ -35,3 +35,20 @@ or in Bash:
 ```
 
 Always report the status, paths, and file sizes (in MB) for all 5 generated APK artifacts upon completion.
+
+## Obsidian Vault & Docs Guard
+
+- The vault `WalletMelt/` is the authority for intent, architecture and decisions; code is authority for behavior. Start at `WalletMelt/00-Control/Index.md`.
+- **Every code change updates the vault.** `.githooks/commit-msg` rejects commits that change `lib/ android/ ios/ test/ integration_test/ scripts/ pubspec.yaml` without a staged `WalletMelt/` note (rules: `scripts/docs_map.txt`; escape: `[skip-docs]` for no-doc-impact changes). A Claude Code Stop hook (`.claude/`) enforces the same during sessions.
+- After cloning run `bash scripts/setup_hooks.sh` (or `scripts/setup_hooks.ps1`) to set `core.hooksPath`.
+- Commit the vault with the code; an untracked vault cannot be checked.
+
+## Model Routing
+
+Opus advises (before committing to an approach and before declaring done). Sonnet is the main agent and does all writing, code and judgment. Haiku sub-agents are used STRICTLY for mechanical read-only enumeration (counts, lists, claim-vs-code diffs); never for notes, strategy, code or guards.
+
+### Routing enforcement (committed config, applies whenever Claude Code runs here)
+- `.claude/settings.json`: `model: sonnet` (main), `advisorModel: opus` (advisor tool), `CLAUDE_CODE_SUBAGENT_MODEL=haiku` (all sub-agents).
+- `.claude/agents/haiku-explorer.md`: Haiku, tools limited to Read/Grep/Glob (read-only, cannot write).
+- `.claude/agent_guard.py` (PreToolUse on `Agent`): denies any sub-agent other than `haiku-explorer`, `Explore`, `claude-code-guide`, and any non-haiku model. Opus is never a sub-agent. Override only with `WALLETMELT_ALLOW_ANY_AGENT=1` when the user explicitly asks.
+- Call the advisor (Opus) before committing to an approach and before declaring done.

@@ -1,0 +1,14 @@
+/// Central source of truth for the application version metadata.
+abstract final class AppVersion {
+  /// The major.minor.patch version string.
+  static const String version = '1.1.2';
+
+  /// The build number / version code.
+  static const int buildNumber = 6;
+
+  /// Full version with build number formatted for logs and backups.
+  static const String fullVersion = '$version+$buildNumber';
+
+  /// Display string prefixed with 'v' for badges and UI headers.
+  static const String displayVersion = 'v$version';
+}

@@ -1,0 +1,76 @@
+---
+type: state
+status: stable
+priority: high
+created: 2026-09-13
+updated: 2026-10-15
+domain: control
+related:
+  - "[[Project-Constitution]]"
+  - "[[AI-Engineering-Protocol]]"
+---
+
+# Current Project State
+
+## 1. Verified Release & Version
+- **Current Version**: `1.1.2+6` (declared in `pubspec.yaml`).
+- **Git Branch**: `main`. Working tree has uncommitted v1.1.2 follow-ups (app_version.dart, whats_new, backup service, build scripts) as of 2026-10-15; vault itself is new/untracked until committed.
+- **Toolchain**:
+  - Flutter 3.44.2 stable / Dart 3.12.2.
+  - Android SDK 36.1.0 / Java 21 (`D:\AndroidStudioNew\jbr`).
+  - Target Platform: Android (minSdk 24, targetSdk 35/36), iOS compatible codebase.
+
+## 2. Active Architecture & Subsystems
+- **UI & Routing**:
+  - `go_router` 17.5.0 with `StatefulShellRoute.indexedStack` managing 4 main branches: Dashboard (`/`), History (`/history`), Planning (`/planning`), Debt (`/debt`).
+  - Top-level modal/full-screen routes: `/settings`, `/settings/icons`, `/settings/metrics`, `/payees`, `/merchants`, `/insights`, `/expense/new`, `/expense/:id`, `/expense/:id/edit`, `/receipt/:id`, `/pin-lock`, `/privacy-consent`, `/privacy-policy`, `/onboarding`; redirects `/subscriptions` and `/essentials` -> `/planning?tab=...`. Bottom-nav labels: Home, History, Planning, Debts. Budget, Subscriptions and Essentials are Planning tabs, not routes.
+- **State Management**:
+  - `Provider` (`AppState`) is the primary UI state coordinator across all screens.
+  - `Riverpod` (`ProviderScope`) wraps root to provide Drift repositories via dependency injection.
+- **Persistence**:
+  - **Drift**: Primary database engine (`WalletMeltDatabase`, schema version 9) with singleton lifecycle guard (`open()`).
+  - **sqflite**: Legacy fallback database (`AppDatabase`) preserved across all repositories.
+  - **Receipt Files**: Local filesystem storage in app documents directory under `receipts/`.
+  - **SVG Overrides**: Persisted in `custom_icons/overrides/<id>.svg` and managed by `SvgCustomizationService`.
+- **Security & Integrity**:
+  - PIN storage using SHA-256 with salt in `flutter_secure_storage`.
+  - `PinLockController` with 30-second background grace period, 5-attempt / 30-second lockout throttle, and `FLAG_SECURE` window protection.
+
+## 3. Database Schema State (Drift v9)
+22 Managed Tables:
+1. `Categories`
+2. `Expenses` (supports subtotal, taxAmount, minor units, soft delete `deletedAt`)
+3. `GroceryItems` (itemized lines under expenses)
+4. `CategoryBudgets` (per category, per month)
+5. `MonthlyBudgets` (per-month dynamic overall budget limits)
+6. `SyncMetadata` (future-proofing sync entity mappings)
+7. `Units` (measurement units with dimension conversion factors)
+8. `Stores` (merchant normalization with normalized names)
+9. `Items` & `ItemAliases` (grocery product normalization)
+10. `ExpenseItems` (detailed line-item breakdown)
+11. `Receipts` (image URI metadata)
+12. `MigrationAudit` (historical migration verification trail)
+13. `Payees` (normalized counterparties for loans and debts)
+14. `DebtRecords` & `DebtRepayments` (receivables, liabilities, tracking)
+15. `GroceryTemplates` (reusable item lists)
+16. `Subscriptions` (recurring cadence, next occurrence dates, versioning)
+17. `EssentialExpenseTemplates` (fixed essential costs)
+18. `FuelTemplateComponents`, `FuelTransactions`, `FuelComponents` (fuel tracking)
+
+## 4. Test Suite & Verification Baseline
+- Static Analysis: `flutter analyze` -> **0 warnings / 0 errors**.
+- Automated Test Suite: Passing tests across unit, repository, service, analytics, and screen widget suites.
+- Release APK Pipelines: Verified via `.\scripts\build_apks.ps1`:
+  - `app-production-release.apk` (Universal Fat APK)
+  - `app-arm64-v8a-production-release.apk`
+  - `app-armeabi-v7a-production-release.apk`
+  - `app-x86_64-production-release.apk`
+  - `app-screenshots-release.apk`
+
+## 5. Known Constraints & Limitations
+- **No Remote Backend**: App is completely local-first.
+- **KGP Build Warnings**: Upstream plugins (`flutter_image_compress_common`, `share_plus`) emit deprecation warnings for Kotlin Gradle Plugin; non-blocking for current builds.
+- **Windows Gradle Properties**: Retains `kotlin.incremental=false`, `kotlin.compiler.execution.strategy=in-process`, `org.gradle.parallel=false` to prevent cross-drive compile locks.
+
+## 6. Strategy Context
+Product direction (best student finance tracker, Pakistan then international) is tracked in [[Student-Market-Strategy]]; verified capability gaps in [[Gap-Analysis-vs-Code]]. Strategy items are `proposed` and do not alter the stable scope.

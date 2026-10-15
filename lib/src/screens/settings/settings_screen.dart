@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../components/glass/app_background.dart';
+import '../../constants/app_version.dart';
 import '../../constants/currencies.dart';
 import '../../services/export/expense_csv_export_service.dart';
 import '../../services/export/export_share_service.dart';
@@ -187,10 +188,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Text(
-                                        'v1.1.1',
-                                        style: TextStyle(
-                                          fontSize: 10,
+                                       Text(
+                                         AppVersion.displayVersion,
+                                         style: TextStyle(
+                                           fontSize: 10,
                                           fontWeight: FontWeight.w800,
                                           color:
                                               theme.brightness == Brightness.dark
@@ -1096,7 +1097,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ),
                       Text(
-                        'v1.1.1',
+                        AppVersion.displayVersion,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: WalletMeltColors.textMuted,
                         ),
@@ -1163,14 +1164,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Version 1.1.1 Highlights',
+                              'Version 1.1.2 Highlights',
                               style: theme.textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.w800,
                                 fontSize: 15,
                               ),
                             ),
                             Text(
-                              'Dynamic monthly budgets, category vector icons & UI polish',
+                              'SVG vector customization, transparent financial metrics & UI polish',
                               style: TextStyle(
                                 fontSize: 11.5,
                                 color: WalletMeltColors.textMuted,
@@ -1186,27 +1187,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   const SizedBox(height: 12),
                   _buildSettingsWhatsNewBullet(
                     context,
-                    title: 'Current Month History',
+                    title: 'SVG Vector Customization',
                     subtitle:
-                        'Past spending now focuses on the active month, with Show All on demand.',
+                        'Customize any category with vector SVGs, presets, tints, and live overrides.',
                   ),
                   _buildSettingsWhatsNewBullet(
                     context,
-                    title: 'Escape Room Bug Squashed',
+                    title: 'Transparent Financial Metrics',
                     subtitle:
-                        'Opening an expense no longer traps you; the back button returns smoothly.',
+                        'Inspect deterministic formulas and calculation auditing in Settings.',
                   ),
                   _buildSettingsWhatsNewBullet(
                     context,
-                    title: 'Custom Category Colors',
+                    title: 'Dynamic Monthly Budgets',
                     subtitle:
-                        'Choose any color via interactive rainbow slider or paste direct Hex codes.',
+                        'Month-specific budget ceilings with single-tap leftover rollover.',
                   ),
                   _buildSettingsWhatsNewBullet(
                     context,
-                    title: 'Forgiving Number Inputs',
+                    title: 'Refined Navigation & Controls',
                     subtitle:
-                        'Type with commas, decimals, spaces, or currency symbols without math errors.',
+                        'Fluid back gestures, forgiving number entry, and expanded card spacing.',
                   ),
                   const SizedBox(height: 10),
                   // Sneak Peek at v1.2 Card
