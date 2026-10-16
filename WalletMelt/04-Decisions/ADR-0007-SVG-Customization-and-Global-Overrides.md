@@ -2,7 +2,7 @@
 type: adr
 status: accepted
 created: 2026-09-13
-updated: 2026-09-13
+updated: 2026-10-17
 domain: architecture
 related:
   - "[[Application-Architecture]]"
@@ -36,3 +36,10 @@ Users requested the ability to modify existing category icon SVGs (colors, marku
 - `lib/src/components/category/category_icon.dart`
 - `lib/src/screens/settings/svg_manager_screen.dart`
 - `lib/src/screens/settings/svg_editor_dialog.dart`
+
+## Amendment 2026-10-17: modify tools and a larger default library
+- **Modify tools.** `SvgEditOps` (`lib/src/services/svg/svg_edit_ops.dart`) is a pure set of edits on SVG text: tint (works on `currentColor` icons, which the old regex tint did not), theme colour, line weight (0.5 to 3), outline/filled, rotate, flip, zoom, reset position. Geometry edits compose onto one `<g id="wm-transform">` so repeated edits never nest. Every result still goes through `SvgSafeguardService` before saving.
+- **Editor.** `SvgEditorDialog` gains a Modify section (undo and redo with 50 steps, the operations above, a line-weight slider) and "Save as new", which stores the modified markup as a new custom icon via `SvgCustomizationService.createCustomIcon` and leaves the original untouched. File replacement is undoable.
+- **Default library.** 29 more preset icons (41 presets in total) in the same Lucide-style 24x24 stroke format: coffee, mobile, books, stationery, clothing, medicine, insurance, subscriptions, tax and fees, charity, cash, bike, bus, ride, flights, hotel, movies, music, games, haircut, bank, cards, wallet, bills, tech, printing, garden, hostel, kids. They appear in the preset picker (`categoryPresets`) and the SVG manager. Attribution is in `assets/icons/LICENSE-LUCIDE.txt`.
+- **Tests.** `test/services/svg_edit_ops_test.dart` covers each operation, safeguard compatibility, preset registration, uniqueness and rendering.
+

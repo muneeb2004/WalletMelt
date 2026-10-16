@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../services/svg/svg_customization_service.dart';
+import '../../services/svg/svg_edit_ops.dart';
 import '../../services/svg/svg_safeguard_service.dart';
 import '../../theme/wallet_melt_theme.dart';
 import '../../widgets/app_snackbar.dart';
@@ -40,6 +41,9 @@ class _SvgEditorDialogState extends State<SvgEditorDialog> {
   String? _validationError;
   String _currentSvgCode = '';
   Color? _selectedColorOverride;
+  final List<String> _undo = [];
+  final List<String> _redo = [];
+  static const int _historyLimit = 50;
 
   final List<Color> _presetColors = const [
     Color(0xFF38BDF8), // Sky Blue
@@ -96,29 +100,63 @@ class _SvgEditorDialogState extends State<SvgEditorDialog> {
   }
 
   void _applyColorToXml(Color color) {
-    final hex = '#${color.toARGB32().toRadixString(16).padLeft(8, '0').substring(2).toUpperCase()}';
-    String updated = _codeController.text;
+    final hex =
+        '#${color.toARGB32().toRadixString(16).padLeft(8, '0').substring(2).toUpperCase()}';
+    _applyOp((svg) => SvgEditOps.setColor(svg, hex));
+    setState(() => _selectedColorOverride = color);
+  }
 
-    // Replace fill and stroke hex colors or currentColor
-    updated = updated.replaceAll(
-      RegExp(r'fill="#[0-9a-fA-F]{3,8}"'),
-      'fill="$hex"',
-    );
-    updated = updated.replaceAll(
-      RegExp(r'stroke="#[0-9a-fA-F]{3,8}"'),
-      'stroke="$hex"',
-    );
+  /// Applies [op] to the current markup and records an undo step. Does
+  /// nothing while the markup is invalid.
+  void _applyOp(String Function(String svg) op) {
+    if (_validationError != null) return;
+    final before = _codeController.text;
+    final after = op(before);
+    if (after == before) return;
+    _pushUndo(before);
+    _redo.clear();
+    _codeController.text = after;
+    _validateCode(after);
+  }
 
-    // If svg has neither fill nor stroke, add fill to path/circle/rect
-    if (!updated.contains('fill=') && !updated.contains('stroke=')) {
-      updated = updated.replaceFirst('<svg ', '<svg fill="$hex" ');
+  void _pushUndo(String code) {
+    _undo.add(code);
+    if (_undo.length > _historyLimit) _undo.removeAt(0);
+  }
+
+  void _undoOp() {
+    if (_undo.isEmpty) return;
+    _redo.add(_codeController.text);
+    final previous = _undo.removeLast();
+    _codeController.text = previous;
+    _validateCode(previous);
+  }
+
+  void _redoOp() {
+    if (_redo.isEmpty) return;
+    _pushUndo(_codeController.text);
+    final next = _redo.removeLast();
+    _codeController.text = next;
+    _validateCode(next);
+  }
+
+  Future<void> _saveAsNew() async {
+    if (_validationError != null) return;
+    setState(() => _isSaving = true);
+    try {
+      await SvgCustomizationService.instance
+          .createCustomIcon(_codeController.text);
+      if (!mounted) return;
+      setState(() => _isSaving = false);
+      showSuccessSnackbar(
+          context, 'Saved as a new custom icon. The original is unchanged.');
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _validationError = 'Save error: $e';
+        _isSaving = false;
+      });
     }
-
-    _codeController.text = updated;
-    setState(() {
-      _selectedColorOverride = color;
-      _validateCode(updated);
-    });
   }
 
   Future<void> _pickReplacementFile() async {
@@ -140,6 +178,8 @@ class _SvgEditorDialogState extends State<SvgEditorDialog> {
         }
 
         if (content != null && content.isNotEmpty) {
+          _pushUndo(_codeController.text);
+          _redo.clear();
           _codeController.text = content;
           _validateCode(content);
         }
@@ -434,6 +474,121 @@ class _SvgEditorDialogState extends State<SvgEditorDialog> {
 
                       const SizedBox(height: 18),
 
+                      const SizedBox(height: 16),
+
+                      // Modify tools
+                      Text(
+                        'MODIFY',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.8,
+                          color: context.scheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          _toolChip(Icons.undo_rounded, 'Undo',
+                              _undo.isEmpty ? null : _undoOp),
+                          _toolChip(Icons.redo_rounded, 'Redo',
+                              _redo.isEmpty ? null : _redoOp),
+                          _toolChip(Icons.rotate_left_rounded, 'Rotate left',
+                              () => _applyOp(SvgEditOps.rotateLeft)),
+                          _toolChip(Icons.rotate_right_rounded, 'Rotate right',
+                              () => _applyOp(SvgEditOps.rotateRight)),
+                          _toolChip(Icons.flip_rounded, 'Flip horizontal',
+                              () => _applyOp(SvgEditOps.flipHorizontal)),
+                          _toolChip(Icons.flip_rounded, 'Flip vertical',
+                              () => _applyOp(SvgEditOps.flipVertical),
+                              turns: 0.25),
+                          _toolChip(Icons.zoom_out_rounded, 'Smaller',
+                              () => _applyOp((s) => SvgEditOps.zoom(s, 0.9))),
+                          _toolChip(Icons.zoom_in_rounded, 'Larger',
+                              () => _applyOp((s) => SvgEditOps.zoom(s, 1.1))),
+                          _toolChip(
+                            SvgEditOps.isFilled(_codeController.text)
+                                ? Icons.crop_square_rounded
+                                : Icons.square_rounded,
+                            SvgEditOps.isFilled(_codeController.text)
+                                ? 'Outline'
+                                : 'Filled',
+                            SvgEditOps.hasStroke(_codeController.text) ||
+                                    !SvgEditOps.isFilled(_codeController.text)
+                                ? () => _applyOp(SvgEditOps.toggleFilled)
+                                : null,
+                          ),
+                          _toolChip(Icons.format_color_reset_rounded,
+                              'Theme colour', () {
+                            _applyOp(SvgEditOps.useThemeColor);
+                            setState(() => _selectedColorOverride = null);
+                          }),
+                          _toolChip(
+                            Icons.restart_alt_rounded,
+                            'Reset position',
+                            SvgEditOps.hasTransform(_codeController.text)
+                                ? () => _applyOp(SvgEditOps.resetTransform)
+                                : null,
+                          ),
+                        ],
+                      ),
+                      if (SvgEditOps.hasStroke(_codeController.text)) ...[
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Text(
+                              'Line weight',
+                              style: Theme.of(context).textTheme.labelMedium,
+                            ),
+                            Expanded(
+                              child: Slider(
+                                min: SvgEditOps.minStrokeWidth,
+                                max: SvgEditOps.maxStrokeWidth,
+                                divisions: 10,
+                                label: (SvgEditOps.strokeWidthOf(
+                                            _codeController.text) ??
+                                        2)
+                                    .toStringAsFixed(2),
+                                value: (SvgEditOps.strokeWidthOf(
+                                            _codeController.text) ??
+                                        2)
+                                    .clamp(SvgEditOps.minStrokeWidth,
+                                        SvgEditOps.maxStrokeWidth)
+                                    .toDouble(),
+                                onChangeStart: (_) {
+                                  if (_validationError == null) {
+                                    _pushUndo(_codeController.text);
+                                    _redo.clear();
+                                  }
+                                },
+                                onChanged: (v) {
+                                  if (_validationError != null) return;
+                                  final next = SvgEditOps.setStrokeWidth(
+                                      _codeController.text, v);
+                                  _codeController.text = next;
+                                  _validateCode(next);
+                                },
+                              ),
+                            ),
+                            SizedBox(
+                              width: 36,
+                              child: Text(
+                                (SvgEditOps.strokeWidthOf(
+                                            _codeController.text) ??
+                                        2)
+                                    .toStringAsFixed(2),
+                                textAlign: TextAlign.end,
+                                style: Theme.of(context).textTheme.labelMedium,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+
+                      const SizedBox(height: 16),
+
                       // Markup Code Editor
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -554,6 +709,13 @@ class _SvgEditorDialogState extends State<SvgEditorDialog> {
                         ),
                         const SizedBox(width: 10),
                       ],
+                      OutlinedButton(
+                        onPressed: (_validationError != null || _isSaving)
+                            ? null
+                            : _saveAsNew,
+                        child: const Text('Save as new'),
+                      ),
+                      const SizedBox(width: 10),
                       Expanded(
                         child: FilledButton(
                           style: FilledButton.styleFrom(
@@ -564,20 +726,20 @@ class _SvgEditorDialogState extends State<SvgEditorDialog> {
                               ? null
                               : _save,
                           child: _isSaving
-                              ? const SizedBox(
+                              ? SizedBox(
                                   width: 20,
                                   height: 20,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
-                                    color: Colors.black,
+                                    color: context.scheme.onPrimary,
                                   ),
                                 )
-                              : const Text(
+                              : Text(
                                   'Save & Reflect Everywhere',
                                   style: TextStyle(
                                     fontWeight: FontWeight.w800,
                                     fontSize: 14,
-                                    color: Colors.black,
+                                    color: context.scheme.onPrimary,
                                   ),
                                 ),
                         ),
@@ -587,6 +749,19 @@ class _SvgEditorDialogState extends State<SvgEditorDialog> {
                 ),
               ],
             ),
+    );
+  }
+
+  Widget _toolChip(IconData icon, String label, VoidCallback? onPressed,
+      {double turns = 0}) {
+    return ActionChip(
+      avatar: RotatedBox(
+        quarterTurns: (turns * 4).round(),
+        child: Icon(icon, size: 18),
+      ),
+      label: Text(label),
+      onPressed: onPressed,
+      tooltip: label,
     );
   }
 
@@ -616,6 +791,7 @@ class _SvgEditorDialogState extends State<SvgEditorDialog> {
                   _currentSvgCode,
                   width: size,
                   height: size,
+                  theme: SvgTheme(currentColor: context.scheme.onSurface),
                   placeholderBuilder: (_) =>
                       SizedBox(width: size, height: size),
                 ),

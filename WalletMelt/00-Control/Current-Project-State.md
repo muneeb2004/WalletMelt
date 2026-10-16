@@ -83,3 +83,6 @@ UI follows the Tonal Material 3 system with a single indigo brand ([[ADR-0010-To
 
 ## 9. Logo (2026-10-17)
 New logo (wallet and droplet) in brand tokens; launcher background `#15141A`. See [[Design-System-and-UX]] section 1.
+
+## 10. SVG editing (2026-10-17)
+Icons can now be modified (tint, line weight, outline/filled, rotate, flip, zoom, undo) and saved as new custom icons; 41 default presets. See [[ADR-0007-SVG-Customization-and-Global-Overrides]].

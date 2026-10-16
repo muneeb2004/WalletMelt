@@ -79,6 +79,151 @@ const List<CategoryPreset> categoryPresets = [
     label: 'Savings',
     assetPath: 'assets/icons/categories/presets/savings.svg',
   ),
+  CategoryPreset(
+    id: 'coffee',
+    label: 'Coffee & Tea',
+    assetPath: 'assets/icons/categories/presets/coffee.svg',
+  ),
+  CategoryPreset(
+    id: 'smartphone',
+    label: 'Mobile & Data',
+    assetPath: 'assets/icons/categories/presets/smartphone.svg',
+  ),
+  CategoryPreset(
+    id: 'book',
+    label: 'Books',
+    assetPath: 'assets/icons/categories/presets/book.svg',
+  ),
+  CategoryPreset(
+    id: 'pencil',
+    label: 'Stationery',
+    assetPath: 'assets/icons/categories/presets/pencil.svg',
+  ),
+  CategoryPreset(
+    id: 'shirt',
+    label: 'Clothing',
+    assetPath: 'assets/icons/categories/presets/shirt.svg',
+  ),
+  CategoryPreset(
+    id: 'pill',
+    label: 'Medicine',
+    assetPath: 'assets/icons/categories/presets/pill.svg',
+  ),
+  CategoryPreset(
+    id: 'shield',
+    label: 'Insurance',
+    assetPath: 'assets/icons/categories/presets/shield.svg',
+  ),
+  CategoryPreset(
+    id: 'repeat',
+    label: 'Subscriptions',
+    assetPath: 'assets/icons/categories/presets/repeat.svg',
+  ),
+  CategoryPreset(
+    id: 'percent',
+    label: 'Tax & Fees',
+    assetPath: 'assets/icons/categories/presets/percent.svg',
+  ),
+  CategoryPreset(
+    id: 'heart',
+    label: 'Charity',
+    assetPath: 'assets/icons/categories/presets/heart.svg',
+  ),
+  CategoryPreset(
+    id: 'banknote',
+    label: 'Cash',
+    assetPath: 'assets/icons/categories/presets/banknote.svg',
+  ),
+  CategoryPreset(
+    id: 'bicycle',
+    label: 'Bike',
+    assetPath: 'assets/icons/categories/presets/bicycle.svg',
+  ),
+  CategoryPreset(
+    id: 'bus',
+    label: 'Bus & Metro',
+    assetPath: 'assets/icons/categories/presets/bus.svg',
+  ),
+  CategoryPreset(
+    id: 'car',
+    label: 'Ride & Taxi',
+    assetPath: 'assets/icons/categories/presets/car.svg',
+  ),
+  CategoryPreset(
+    id: 'plane',
+    label: 'Flights',
+    assetPath: 'assets/icons/categories/presets/plane.svg',
+  ),
+  CategoryPreset(
+    id: 'bed',
+    label: 'Hotel & Stay',
+    assetPath: 'assets/icons/categories/presets/bed.svg',
+  ),
+  CategoryPreset(
+    id: 'film',
+    label: 'Movies',
+    assetPath: 'assets/icons/categories/presets/film.svg',
+  ),
+  CategoryPreset(
+    id: 'music',
+    label: 'Music',
+    assetPath: 'assets/icons/categories/presets/music.svg',
+  ),
+  CategoryPreset(
+    id: 'gamepad',
+    label: 'Games',
+    assetPath: 'assets/icons/categories/presets/gamepad.svg',
+  ),
+  CategoryPreset(
+    id: 'scissors',
+    label: 'Haircut',
+    assetPath: 'assets/icons/categories/presets/scissors.svg',
+  ),
+  CategoryPreset(
+    id: 'landmark',
+    label: 'Bank',
+    assetPath: 'assets/icons/categories/presets/landmark.svg',
+  ),
+  CategoryPreset(
+    id: 'credit_card',
+    label: 'Cards',
+    assetPath: 'assets/icons/categories/presets/credit_card.svg',
+  ),
+  CategoryPreset(
+    id: 'wallet',
+    label: 'Wallet',
+    assetPath: 'assets/icons/categories/presets/wallet.svg',
+  ),
+  CategoryPreset(
+    id: 'receipt',
+    label: 'Bills',
+    assetPath: 'assets/icons/categories/presets/receipt.svg',
+  ),
+  CategoryPreset(
+    id: 'laptop',
+    label: 'Tech',
+    assetPath: 'assets/icons/categories/presets/laptop.svg',
+  ),
+  CategoryPreset(
+    id: 'printer',
+    label: 'Printing',
+    assetPath: 'assets/icons/categories/presets/printer.svg',
+  ),
+  CategoryPreset(
+    id: 'leaf',
+    label: 'Garden',
+    assetPath: 'assets/icons/categories/presets/leaf.svg',
+  ),
+  CategoryPreset(
+    id: 'building',
+    label: 'Hostel',
+    assetPath: 'assets/icons/categories/presets/building.svg',
+  ),
+  CategoryPreset(
+    id: 'baby',
+    label: 'Kids',
+    assetPath: 'assets/icons/categories/presets/baby.svg',
+  ),
 ];
 
 const Map<String, String> standardCategorySvgMap = {

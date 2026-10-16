@@ -236,6 +236,25 @@ class SvgCustomizationService extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Saves [svgContent] as a brand-new custom icon and returns its id
+  /// (`custom:<file>.svg`). Used to keep a modified copy of a built-in icon
+  /// without touching the original.
+  ///
+  /// Throws [FormatException] if validation fails.
+  Future<String> createCustomIcon(String svgContent) async {
+    final val = _safeguard.validate(svgContent);
+    if (!val.isValid || val.sanitizedContent == null) {
+      throw FormatException(val.errorMessage ?? 'Invalid SVG markup');
+    }
+    final base = Directory(await _getDocsPath());
+    final id = await _safeguard.saveCustomSvg(
+      sanitizedSvg: val.sanitizedContent!,
+      baseDir: base,
+    );
+    notifyListeners();
+    return id;
+  }
+
   /// Reverts an overridden SVG back to its original built-in asset.
   Future<void> resetToDefault(String rawId) async {
     final key = normalizeKey(rawId);
