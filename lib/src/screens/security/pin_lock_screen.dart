@@ -254,7 +254,6 @@ class _PinLockScreenState extends State<PinLockScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final pinController = context.watch<PinLockController>();
     final isLockedOut = pinController.isLockedOut;
     final isBiometricsEnabled = pinController.isBiometricsEnabled;
@@ -291,9 +290,7 @@ class _PinLockScreenState extends State<PinLockScreen> {
                                   fontWeight: FontWeight.w900,
                                   fontSize: isCompact ? 26 : 30,
                                   letterSpacing: -0.8,
-                                  color: isDark
-                                      ? WalletMeltColors.darkTextPrimary
-                                      : WalletMeltColors.textPrimary,
+                                  color: context.scheme.onSurface,
                                 ),
                               ),
                               const SizedBox(height: 6),
@@ -301,10 +298,8 @@ class _PinLockScreenState extends State<PinLockScreen> {
                               Text(
                                 '${_getGreeting()} • Enter your PIN',
                                 style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: isDark
-                                      ? WalletMeltColors.darkTextSecondary
-                                      : WalletMeltColors.textSecondary,
-                                  fontSize: 13,
+                                  color: context.scheme.onSurfaceVariant,
+                                  fontSize: 12,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -337,13 +332,11 @@ class _PinLockScreenState extends State<PinLockScreen> {
                                           key: ValueKey(_errorMessage),
                                           textAlign: TextAlign.center,
                                           style: TextStyle(
-                                            fontSize: 12.0,
+                                            fontSize: 12,
                                             fontWeight: FontWeight.w600,
                                             color: _hasError || isLockedOut
                                                 ? theme.colorScheme.error
-                                                : (isDark
-                                                    ? WalletMeltColors.darkTextSecondary
-                                                    : WalletMeltColors.textSecondary),
+                                                : (context.scheme.onSurfaceVariant),
                                           ),
                                         )
                                       : Text(
@@ -353,11 +346,9 @@ class _PinLockScreenState extends State<PinLockScreen> {
                                           key: const ValueKey('instruction'),
                                           textAlign: TextAlign.center,
                                           style: TextStyle(
-                                            fontSize: 12.0,
+                                            fontSize: 12,
                                             fontWeight: FontWeight.w500,
-                                            color: isDark
-                                                ? WalletMeltColors.darkTextSecondary
-                                                : WalletMeltColors.textSecondary,
+                                            color: context.scheme.onSurfaceVariant,
                                           ),
                                         ),
                                 ),
@@ -392,10 +383,8 @@ class _PinLockScreenState extends State<PinLockScreen> {
                               'Forgot PIN? Uninstalling and reinstalling clears local access.',
                               textAlign: TextAlign.center,
                               style: theme.textTheme.bodySmall?.copyWith(
-                                fontSize: 10.5,
-                                color: isDark
-                                    ? Colors.white.withValues(alpha: 0.3)
-                                    : Colors.black.withValues(alpha: 0.35),
+                                fontSize: 11,
+                                color: context.scheme.onSurface.withValues(alpha: 0.35),
                               ),
                             ),
                           ),

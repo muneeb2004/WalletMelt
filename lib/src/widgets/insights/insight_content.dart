@@ -41,13 +41,12 @@ class WhyChangedContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final deltaSign = data.totalDelta > 0 ? '+' : '';
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.04),
+        color: (context.scheme.onSurface).withValues(alpha: 0.04),
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
       ),
       child: Row(
@@ -61,7 +60,7 @@ class WhyChangedContent extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
-                  color: isDark ? WalletMeltColors.darkTextSecondary : WalletMeltColors.textSecondary,
+                  color: context.scheme.onSurfaceVariant,
                 ),
               ),
               const SizedBox(height: 2),
@@ -70,7 +69,7 @@ class WhyChangedContent extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
-                  color: isDark ? WalletMeltColors.darkTextPrimary : WalletMeltColors.textPrimary,
+                  color: context.scheme.onSurface,
                 ),
               ),
             ],
@@ -82,9 +81,9 @@ class WhyChangedContent extends StatelessWidget {
                 '$deltaSign${formatMoney(data.totalDelta, currency)}',
                 style: withTabularFigures(
                   TextStyle(
-                    fontSize: 15,
+                    fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: data.isIncrease ? WalletMeltColors.warning : WalletMeltColors.positive,
+                    color: data.isIncrease ? context.money.cautionText : context.money.incomeText,
                   ),
                 ),
               ),
@@ -93,7 +92,7 @@ class WhyChangedContent extends StatelessWidget {
                 '${data.directionalContributionPercent.toStringAsFixed(0)}% contribution',
                 style: TextStyle(
                   fontSize: 11,
-                  color: isDark ? WalletMeltColors.darkTextSecondary : WalletMeltColors.textSecondary,
+                  color: context.scheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -116,7 +115,6 @@ class BudgetRiskContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final highest = data.highestRiskItem;
     final usagePct = highest.usagePercent.clamp(0.0, 100.0) / 100.0;
 
@@ -131,9 +129,9 @@ class BudgetRiskContent extends StatelessWidget {
                 '${formatMoney(highest.spent, currency)} spent',
                 style: withTabularFigures(
                   TextStyle(
-                    fontSize: 13,
+                    fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: isDark ? WalletMeltColors.darkTextPrimary : WalletMeltColors.textPrimary,
+                    color: context.scheme.onSurface,
                   ),
                 ),
                 overflow: TextOverflow.ellipsis,
@@ -145,7 +143,7 @@ class BudgetRiskContent extends StatelessWidget {
                 'Limit: ${formatMoney(highest.budgetAmount, currency)}',
                 style: TextStyle(
                   fontSize: 12,
-                  color: isDark ? WalletMeltColors.darkTextSecondary : WalletMeltColors.textSecondary,
+                  color: context.scheme.onSurfaceVariant,
                 ),
                 textAlign: TextAlign.end,
                 overflow: TextOverflow.ellipsis,
@@ -159,11 +157,11 @@ class BudgetRiskContent extends StatelessWidget {
           child: LinearProgressIndicator(
             value: usagePct,
             minHeight: 6,
-            backgroundColor: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.08),
+            backgroundColor: (context.scheme.onSurface).withValues(alpha: 0.08),
             valueColor: AlwaysStoppedAnimation<Color>(
               highest.usagePercent >= 95
-                  ? WalletMeltColors.danger
-                  : (highest.usagePercent >= 80 ? WalletMeltColors.warning : WalletMeltColors.brand),
+                  ? context.scheme.error
+                  : (highest.usagePercent >= 80 ? context.money.cautionText : context.scheme.primary),
             ),
           ),
         ),
@@ -173,7 +171,7 @@ class BudgetRiskContent extends StatelessWidget {
             'Projected month-end: ${formatMoney(highest.projectedTotal!, currency)}',
             style: TextStyle(
               fontSize: 11,
-              color: isDark ? WalletMeltColors.darkTextSecondary : WalletMeltColors.textSecondary,
+              color: context.scheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -194,7 +192,6 @@ class VelocityContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final changeSign = data.projectedChangePercent > 0 ? '+' : '';
 
     return Row(
@@ -207,7 +204,7 @@ class VelocityContent extends StatelessWidget {
               'Projected Total',
               style: TextStyle(
                 fontSize: 11,
-                color: isDark ? WalletMeltColors.darkTextSecondary : WalletMeltColors.textSecondary,
+                color: context.scheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: 2),
@@ -215,9 +212,9 @@ class VelocityContent extends StatelessWidget {
               formatMoney(data.projectedTotal, currency),
               style: withTabularFigures(
                 TextStyle(
-                  fontSize: 16,
+                  fontSize: 17,
                   fontWeight: FontWeight.w700,
-                  color: isDark ? WalletMeltColors.darkTextPrimary : WalletMeltColors.textPrimary,
+                  color: context.scheme.onSurface,
                 ),
               ),
             ),
@@ -226,7 +223,7 @@ class VelocityContent extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
-            color: (data.projectedChangePercent > 0 ? WalletMeltColors.warning : WalletMeltColors.positive)
+            color: (data.projectedChangePercent > 0 ? context.money.cautionText : context.money.incomeText)
                 .withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
           ),
@@ -235,7 +232,7 @@ class VelocityContent extends StatelessWidget {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: data.projectedChangePercent > 0 ? WalletMeltColors.warning : WalletMeltColors.positive,
+              color: data.projectedChangePercent > 0 ? context.money.cautionText : context.money.incomeText,
             ),
           ),
         ),
@@ -256,7 +253,6 @@ class CategoryChangesContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Column(
       children: data.changes.take(3).map((change) {
@@ -271,9 +267,9 @@ class CategoryChangesContent extends StatelessWidget {
               Text(
                 change.categoryName,
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: 12,
                   fontWeight: FontWeight.w500,
-                  color: isDark ? WalletMeltColors.darkTextPrimary : WalletMeltColors.textPrimary,
+                  color: context.scheme.onSurface,
                 ),
               ),
               Text(
@@ -282,7 +278,7 @@ class CategoryChangesContent extends StatelessWidget {
                   TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: isIncrease ? WalletMeltColors.warning : WalletMeltColors.positive,
+                    color: isIncrease ? context.money.cautionText : context.money.incomeText,
                   ),
                 ),
               ),
@@ -306,7 +302,6 @@ class FrequencyContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -317,9 +312,9 @@ class FrequencyContent extends StatelessWidget {
               '${data.currentCount}',
               style: withTabularFigures(
                 TextStyle(
-                  fontSize: 16,
+                  fontSize: 17,
                   fontWeight: FontWeight.w700,
-                  color: isDark ? WalletMeltColors.darkTextPrimary : WalletMeltColors.textPrimary,
+                  color: context.scheme.onSurface,
                 ),
               ),
             ),
@@ -328,7 +323,7 @@ class FrequencyContent extends StatelessWidget {
               'vs ${data.previousCount} last mo',
               style: TextStyle(
                 fontSize: 11,
-                color: isDark ? WalletMeltColors.darkTextSecondary : WalletMeltColors.textSecondary,
+                color: context.scheme.onSurfaceVariant,
               ),
             ),
           ],
@@ -336,7 +331,7 @@ class FrequencyContent extends StatelessWidget {
         Container(
           width: 1,
           height: 28,
-          color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.1),
+          color: (context.scheme.onSurface).withValues(alpha: 0.1),
         ),
         Column(
           children: [
@@ -344,9 +339,9 @@ class FrequencyContent extends StatelessWidget {
               formatMoney(data.currentAvgValue, currency),
               style: withTabularFigures(
                 TextStyle(
-                  fontSize: 16,
+                  fontSize: 17,
                   fontWeight: FontWeight.w700,
-                  color: isDark ? WalletMeltColors.darkTextPrimary : WalletMeltColors.textPrimary,
+                  color: context.scheme.onSurface,
                 ),
               ),
             ),
@@ -355,7 +350,7 @@ class FrequencyContent extends StatelessWidget {
               'avg / purchase',
               style: TextStyle(
                 fontSize: 11,
-                color: isDark ? WalletMeltColors.darkTextSecondary : WalletMeltColors.textSecondary,
+                color: context.scheme.onSurfaceVariant,
               ),
             ),
           ],
@@ -375,7 +370,6 @@ class MerchantInconsistencyContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Wrap(
       spacing: AppSpacing.xs,
@@ -384,14 +378,14 @@ class MerchantInconsistencyContent extends StatelessWidget {
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.05),
+            color: (context.scheme.onSurface).withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
           ),
           child: Text(
             '${item.displayName}: ${item.categoryNames.join(', ')}',
             style: TextStyle(
               fontSize: 11,
-              color: isDark ? WalletMeltColors.darkTextSecondary : WalletMeltColors.textSecondary,
+              color: context.scheme.onSurfaceVariant,
             ),
           ),
         );
@@ -412,7 +406,6 @@ class EssentialSplitContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final essentialPct = (data.essentialPercent / 100.0).clamp(0.0, 1.0);
 
     return Padding(
@@ -427,10 +420,10 @@ class EssentialSplitContent extends StatelessWidget {
                 child: Text(
                   'Essential: ${formatMoney(data.essentialTotal, currency)} (${data.essentialPercent.toStringAsFixed(0)}%)',
                   style: withTabularFigures(
-                    const TextStyle(
+                    TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: WalletMeltColors.brand,
+                      color: context.scheme.primary,
                     ),
                   ),
                   overflow: TextOverflow.ellipsis,
@@ -443,7 +436,7 @@ class EssentialSplitContent extends StatelessWidget {
                   style: withTabularFigures(
                     TextStyle(
                       fontSize: 12,
-                      color: isDark ? WalletMeltColors.darkTextSecondary : WalletMeltColors.textSecondary,
+                      color: context.scheme.onSurfaceVariant,
                     ),
                   ),
                   textAlign: TextAlign.end,
@@ -458,8 +451,8 @@ class EssentialSplitContent extends StatelessWidget {
             child: LinearProgressIndicator(
               value: essentialPct,
               minHeight: 6,
-              backgroundColor: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.08),
-              valueColor: const AlwaysStoppedAnimation<Color>(WalletMeltColors.brand),
+              backgroundColor: (context.scheme.onSurface).withValues(alpha: 0.08),
+              valueColor: AlwaysStoppedAnimation<Color>(context.scheme.primary),
             ),
           ),
         ],

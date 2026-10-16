@@ -115,7 +115,6 @@ class _SvgManagerScreenState extends State<SvgManagerScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     final query = _searchController.text.toLowerCase().trim();
     final filtered = _allIcons.where((item) {
@@ -178,13 +177,13 @@ class _SvgManagerScreenState extends State<SvgManagerScreen> {
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: WalletMeltColors.brand.withValues(alpha: 0.15),
+                      color: context.scheme.primary.withValues(alpha: 0.15),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.auto_awesome_rounded,
                       size: 20,
-                      color: WalletMeltColors.brand,
+                      color: context.scheme.primary,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -196,17 +195,15 @@ class _SvgManagerScreenState extends State<SvgManagerScreen> {
                           'Across-the-Board SVG Reflection',
                           style: TextStyle(
                             fontWeight: FontWeight.w800,
-                            fontSize: 13,
+                            fontSize: 12,
                           ),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           'Tap any SVG icon to edit its color, paths, or code. Saved modifications immediately update every category, budget, and transaction tile.',
                           style: TextStyle(
-                            fontSize: 11.5,
-                            color: isDark
-                                ? const Color(0xFF94A3B8)
-                                : const Color(0xFF64748B),
+                            fontSize: 11,
+                            color: context.scheme.onSurfaceVariant,
                             height: 1.3,
                           ),
                         ),
@@ -221,12 +218,10 @@ class _SvgManagerScreenState extends State<SvgManagerScreen> {
             // Search Box
             Container(
               decoration: BoxDecoration(
-                color: isDark ? WalletMeltColors.darkSurface : Colors.white,
+                color: context.scheme.surfaceContainer,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: isDark
-                      ? WalletMeltColors.darkBorder
-                      : WalletMeltColors.lightBorder,
+                  color: context.scheme.outlineVariant,
                   width: 1.0,
                 ),
               ),
@@ -283,8 +278,8 @@ class _SvgManagerScreenState extends State<SvgManagerScreen> {
                   padding: const EdgeInsets.all(40),
                   child: Column(
                     children: [
-                      const Icon(Icons.search_off_rounded,
-                          size: 40, color: Colors.grey),
+                      Icon(Icons.search_off_rounded,
+                          size: 40, color: context.scheme.onSurfaceVariant),
                       const SizedBox(height: 8),
                       Text(
                         'No icons match "$query"',
@@ -316,16 +311,12 @@ class _SvgManagerScreenState extends State<SvgManagerScreen> {
                           height: 44,
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
-                            color: isDark
-                                ? const Color(0xFF1E2430)
-                                : const Color(0xFFF1F5F9),
+                            color: context.scheme.surfaceContainer,
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
                               color: isCustomized
-                                  ? WalletMeltColors.brand
-                                  : (isDark
-                                      ? Colors.white12
-                                      : Colors.black12),
+                                  ? context.scheme.primary
+                                  : (context.scheme.outlineVariant),
                               width: isCustomized ? 1.5 : 1.0,
                             ),
                           ),
@@ -333,10 +324,8 @@ class _SvgManagerScreenState extends State<SvgManagerScreen> {
                             icon: item.id,
                             size: 24,
                             color: isCustomized
-                                ? WalletMeltColors.brand
-                                : (isDark
-                                    ? Colors.white
-                                    : WalletMeltColors.textPrimary),
+                                ? context.scheme.primary
+                                : (context.scheme.onSurface),
                           ),
                         ),
                         const SizedBox(width: 14),
@@ -357,10 +346,8 @@ class _SvgManagerScreenState extends State<SvgManagerScreen> {
                                     ? 'Custom user SVG'
                                     : 'Identifier: ${item.id}',
                                 style: TextStyle(
-                                  fontSize: 11.5,
-                                  color: isDark
-                                      ? const Color(0xFF94A3B8)
-                                      : const Color(0xFF64748B),
+                                  fontSize: 11,
+                                  color: context.scheme.onSurfaceVariant,
                                 ),
                               ),
                             ],
@@ -371,25 +358,25 @@ class _SvgManagerScreenState extends State<SvgManagerScreen> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
-                              color: WalletMeltColors.brand
+                              color: context.scheme.primary
                                   .withValues(alpha: 0.18),
                               borderRadius: BorderRadius.circular(6),
                             ),
-                            child: const Text(
+                            child: Text(
                               'EDITED',
                               style: TextStyle(
-                                fontSize: 10,
+                                fontSize: 11,
                                 fontWeight: FontWeight.w800,
-                                color: WalletMeltColors.brand,
+                                color: context.scheme.primary,
                               ),
                             ),
                           ),
                           const SizedBox(width: 8),
                         ],
-                        const Icon(
+                        Icon(
                           Icons.edit_note_rounded,
                           size: 20,
-                          color: Colors.grey,
+                          color: context.scheme.onSurfaceVariant,
                         ),
                       ],
                     ),
@@ -404,19 +391,18 @@ class _SvgManagerScreenState extends State<SvgManagerScreen> {
 
   Widget _buildFilterChip(String type, String label) {
     final isSelected = _filterType == type;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return ChoiceChip(
       selected: isSelected,
       label: Text(label),
       onSelected: (_) => setState(() => _filterType = type),
-      selectedColor: isDark ? WalletMeltColors.brand : WalletMeltColors.textPrimary,
+      selectedColor: context.scheme.primary,
       labelStyle: TextStyle(
-        fontSize: 11.5,
+        fontSize: 11,
         fontWeight: FontWeight.w700,
         color: isSelected
-            ? (isDark ? Colors.black : Colors.white)
-            : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+            ? (context.scheme.onPrimary)
+            : (context.scheme.onSurfaceVariant),
       ),
     );
   }

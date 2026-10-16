@@ -253,7 +253,6 @@ class _InsightsScreenState extends State<InsightsScreen> {
 
     _calculateMetrics(state);
     final expensiveSub = mostExpensiveSub;
-    final isDark = theme.brightness == Brightness.dark;
 
     if (state.errorMessage != null) {
       return Scaffold(
@@ -315,13 +314,13 @@ class _InsightsScreenState extends State<InsightsScreen> {
                         const SizedBox(height: 2),
                         Row(
                           children: [
-                            const Icon(Icons.calendar_today_rounded,
-                                size: 13, color: WalletMeltColors.textMuted),
+                            Icon(Icons.calendar_today_rounded,
+                                size: 13, color: context.scheme.onSurfaceVariant),
                             const SizedBox(width: 6),
                             Text(
                               readableMonth(selectedMonth),
                               style: theme.textTheme.bodyMedium?.copyWith(
-                                color: WalletMeltColors.textMuted,
+                                color: context.scheme.onSurfaceVariant,
                                 fontSize: 12,
                               ),
                             ),
@@ -356,8 +355,8 @@ class _InsightsScreenState extends State<InsightsScreen> {
                               Container(
                                 width: 8,
                                 height: 8,
-                                decoration: const BoxDecoration(
-                                  color: WalletMeltColors.brand,
+                                decoration: BoxDecoration(
+                                  color: context.scheme.primary,
                                   shape: BoxShape.circle,
                                 ),
                               ),
@@ -368,9 +367,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
                                   fontSize: 11,
                                   fontWeight: FontWeight.w800,
                                   letterSpacing: 1.1,
-                                  color: isDark
-                                      ? const Color(0xFF94A3B8)
-                                      : const Color(0xFF64748B),
+                                  color: context.scheme.onSurfaceVariant,
                                 ),
                               ),
                             ],
@@ -381,9 +378,9 @@ class _InsightsScreenState extends State<InsightsScreen> {
                                   horizontal: 8, vertical: 3),
                               decoration: BoxDecoration(
                                 color: insights.monthOverMonthDelta! <= 0
-                                    ? WalletMeltColors.positive
+                                    ? context.money.incomeText
                                         .withValues(alpha: 0.18)
-                                    : WalletMeltColors.danger
+                                    : context.scheme.error
                                         .withValues(alpha: 0.18),
                                 borderRadius: BorderRadius.circular(8),
                               ),
@@ -395,19 +392,19 @@ class _InsightsScreenState extends State<InsightsScreen> {
                                         ? Icons.trending_down_rounded
                                         : Icons.trending_up_rounded,
                                     color: insights.monthOverMonthDelta! <= 0
-                                        ? WalletMeltColors.positive
-                                        : WalletMeltColors.danger,
+                                        ? context.money.incomeText
+                                        : context.scheme.error,
                                     size: 14,
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
                                     '${insights.monthOverMonthDelta! >= 0 ? '+' : ''}${insights.monthOverMonthDelta!.toStringAsFixed(1)}%',
                                     style: TextStyle(
-                                      fontSize: 10.5,
+                                      fontSize: 11,
                                       fontWeight: FontWeight.w800,
                                       color: insights.monthOverMonthDelta! <= 0
-                                          ? WalletMeltColors.positive
-                                          : WalletMeltColors.danger,
+                                          ? context.money.incomeText
+                                          : context.scheme.error,
                                     ),
                                   ),
                                 ],
@@ -420,9 +417,9 @@ class _InsightsScreenState extends State<InsightsScreen> {
                       Text(
                         formatMoney(insights.total, currency),
                         style: TextStyle(
-                          fontSize: 36,
+                          fontSize: 34,
                           fontWeight: FontWeight.w900,
-                          color: isDark ? Colors.white : WalletMeltColors.textPrimary,
+                          color: context.scheme.onSurface,
                           letterSpacing: -0.6,
                           height: 1.05,
                         ),
@@ -433,10 +430,8 @@ class _InsightsScreenState extends State<InsightsScreen> {
                             ? 'Add another month of expenses to compare trends.'
                             : 'Highest category: ${insights.highestCategory!.category.name} (${formatMoney(insights.highestCategory!.total, currency)})',
                         style: TextStyle(
-                          fontSize: 12.5,
-                          color: isDark
-                              ? const Color(0xFF94A3B8)
-                              : const Color(0xFF64748B),
+                          fontSize: 12,
+                          color: context.scheme.onSurfaceVariant,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -520,10 +515,10 @@ class _InsightsScreenState extends State<InsightsScreen> {
                         Text(
                           '${netDebtPosition >= 0 ? "+" : ""}${netDebtPosition.toStringAsFixed(netDebtPosition % 1 == 0 ? 0 : 2)} $currency',
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: 17,
                             fontWeight: FontWeight.w900,
                             color: netDebtPosition >= 0
-                                ? WalletMeltColors.positive
+                                ? context.money.incomeText
                                 : theme.colorScheme.error,
                           ),
                         ),
@@ -532,15 +527,13 @@ class _InsightsScreenState extends State<InsightsScreen> {
                     AppSpacing.gapSm,
                     Divider(
                         height: 1,
-                        color: isDark
-                            ? WalletMeltColors.darkBorder
-                            : WalletMeltColors.lightBorder),
+                        color: context.scheme.outlineVariant),
                     AppSpacing.gapSm,
                     TripleMetricRow(
                       label1: 'RECEIVABLES',
                       value1:
                           '${receivables.toStringAsFixed(receivables % 1 == 0 ? 0 : 2)} $currency',
-                      color1: WalletMeltColors.positive,
+                      color1: context.money.incomeText,
                       label2: 'LIABILITIES',
                       value2:
                           '${liabilities.toStringAsFixed(liabilities % 1 == 0 ? 0 : 2)} $currency',
@@ -550,14 +543,12 @@ class _InsightsScreenState extends State<InsightsScreen> {
                           '${overdueAmount.toStringAsFixed(overdueAmount % 1 == 0 ? 0 : 2)} $currency',
                       color3: overdueAmount > 0
                           ? theme.colorScheme.error
-                          : WalletMeltColors.textMuted,
+                          : context.scheme.onSurfaceVariant,
                     ),
                     AppSpacing.gapSm,
                     Divider(
                         height: 1,
-                        color: isDark
-                            ? WalletMeltColors.darkBorder
-                            : WalletMeltColors.lightBorder),
+                        color: context.scheme.outlineVariant),
                     AppSpacing.gapSm,
                     Row(
                       children: [
@@ -565,11 +556,11 @@ class _InsightsScreenState extends State<InsightsScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
+                              Text(
                                 'LARGEST DEBTOR',
                                 style: TextStyle(
-                                    fontSize: 9,
-                                    color: WalletMeltColors.textMuted,
+                                    fontSize: 11,
+                                    color: context.scheme.onSurfaceVariant,
                                     fontWeight: FontWeight.bold),
                               ),
                               const SizedBox(height: 4),
@@ -590,11 +581,11 @@ class _InsightsScreenState extends State<InsightsScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
+                              Text(
                                 'LARGEST CREDITOR',
                                 style: TextStyle(
-                                    fontSize: 9,
-                                    color: WalletMeltColors.textMuted,
+                                    fontSize: 11,
+                                    color: context.scheme.onSurfaceVariant,
                                     fontWeight: FontWeight.bold),
                               ),
                               const SizedBox(height: 4),
@@ -633,13 +624,13 @@ class _InsightsScreenState extends State<InsightsScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text('Tax Paid This Month:',
-                            style: TextStyle(fontSize: 13)),
+                            style: TextStyle(fontSize: 12)),
                         Text(
                           '${monthlyTax.toStringAsFixed(monthlyTax % 1 == 0 ? 0 : 2)} $currency',
-                          style: const TextStyle(
+                          style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
-                              color: WalletMeltColors.danger),
+                              color: context.scheme.error),
                         ),
                       ],
                     ),
@@ -648,22 +639,20 @@ class _InsightsScreenState extends State<InsightsScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text('Tax Paid This Year:',
-                            style: TextStyle(fontSize: 13)),
+                            style: TextStyle(fontSize: 12)),
                         Text(
                           '${yearlyTax.toStringAsFixed(yearlyTax % 1 == 0 ? 0 : 2)} $currency',
-                          style: const TextStyle(
+                          style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
-                              color: WalletMeltColors.danger),
+                              color: context.scheme.error),
                         ),
                       ],
                     ),
                     AppSpacing.gapSm,
                     Divider(
                         height: 1,
-                        color: isDark
-                            ? WalletMeltColors.darkBorder
-                            : WalletMeltColors.lightBorder),
+                        color: context.scheme.outlineVariant),
                     AppSpacing.gapSm,
                     Row(
                       children: [
@@ -671,18 +660,18 @@ class _InsightsScreenState extends State<InsightsScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
+                              Text(
                                 'TAXABLE SPEND',
                                 style: TextStyle(
-                                    fontSize: 9,
-                                    color: WalletMeltColors.textMuted,
+                                    fontSize: 11,
+                                    color: context.scheme.onSurfaceVariant,
                                     fontWeight: FontWeight.bold),
                               ),
                               const SizedBox(height: 2),
                               Text(
                                 '${taxableSpend.toStringAsFixed(taxableSpend % 1 == 0 ? 0 : 2)} $currency',
                                 style: const TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 13),
+                                    fontWeight: FontWeight.bold, fontSize: 12),
                               ),
                             ],
                           ),
@@ -691,26 +680,24 @@ class _InsightsScreenState extends State<InsightsScreen> {
                         Container(
                             width: 1,
                             height: 28,
-                            color: isDark
-                                ? WalletMeltColors.darkBorder
-                                : WalletMeltColors.lightBorder),
+                            color: context.scheme.outlineVariant),
                         AppSpacing.gapSm,
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
+                              Text(
                                 'TAX-FREE SPEND',
                                 style: TextStyle(
-                                    fontSize: 9,
-                                    color: WalletMeltColors.textMuted,
+                                    fontSize: 11,
+                                    color: context.scheme.onSurfaceVariant,
                                     fontWeight: FontWeight.bold),
                               ),
                               const SizedBox(height: 2),
                               Text(
                                 '${nonTaxableSpend.toStringAsFixed(nonTaxableSpend % 1 == 0 ? 0 : 2)} $currency',
                                 style: const TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 13),
+                                    fontWeight: FontWeight.bold, fontSize: 12),
                               ),
                             ],
                           ),
@@ -721,15 +708,13 @@ class _InsightsScreenState extends State<InsightsScreen> {
                       AppSpacing.gapSm,
                       Divider(
                           height: 1,
-                          color: isDark
-                              ? WalletMeltColors.darkBorder
-                              : WalletMeltColors.lightBorder),
+                          color: context.scheme.outlineVariant),
                       AppSpacing.gapSm,
-                      const Text(
+                      Text(
                         'TAX BY CATEGORY (THIS MONTH)',
                         style: TextStyle(
-                            fontSize: 9,
-                            color: WalletMeltColors.textMuted,
+                            fontSize: 11,
+                            color: context.scheme.onSurfaceVariant,
                             fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 6),
@@ -772,13 +757,13 @@ class _InsightsScreenState extends State<InsightsScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text('Monthly Est. Spend:',
-                            style: TextStyle(fontSize: 13)),
+                            style: TextStyle(fontSize: 12)),
                         Text(
                           '${monthlySubSpend.toStringAsFixed(monthlySubSpend % 1 == 0 ? 0 : 2)} $currency',
-                          style: const TextStyle(
+                          style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
-                              color: WalletMeltColors.brandDeep),
+                              color: context.scheme.primary),
                         ),
                       ],
                     ),
@@ -787,28 +772,26 @@ class _InsightsScreenState extends State<InsightsScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text('Annual Est. Spend:',
-                            style: TextStyle(fontSize: 13)),
+                            style: TextStyle(fontSize: 12)),
                         Text(
                           '${annualSubSpend.toStringAsFixed(annualSubSpend % 1 == 0 ? 0 : 2)} $currency',
-                          style: const TextStyle(
+                          style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
-                              color: WalletMeltColors.brandDeep),
+                              color: context.scheme.primary),
                         ),
                       ],
                     ),
                     AppSpacing.gapSm,
                     Divider(
                         height: 1,
-                        color: isDark
-                            ? WalletMeltColors.darkBorder
-                            : WalletMeltColors.lightBorder),
+                        color: context.scheme.outlineVariant),
                     AppSpacing.gapSm,
-                    const Text(
+                    Text(
                       'MOST EXPENSIVE',
                       style: TextStyle(
-                          fontSize: 9,
-                          color: WalletMeltColors.textMuted,
+                          fontSize: 11,
+                          color: context.scheme.onSurfaceVariant,
                           fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 4),
@@ -817,21 +800,19 @@ class _InsightsScreenState extends State<InsightsScreen> {
                           ? '${expensiveSub.name} (${(expensiveSub.amount + (expensiveSub.taxAmount ?? 0.0)).toStringAsFixed(0)} $currency/${expensiveSub.billingCycle})'
                           : 'None active',
                       style: const TextStyle(
-                          fontSize: 13, fontWeight: FontWeight.bold),
+                          fontSize: 12, fontWeight: FontWeight.bold),
                     ),
                     if (subSpendByCategory.isNotEmpty) ...[
                       AppSpacing.gapSm,
                       Divider(
                           height: 1,
-                          color: isDark
-                              ? WalletMeltColors.darkBorder
-                              : WalletMeltColors.lightBorder),
+                          color: context.scheme.outlineVariant),
                       AppSpacing.gapSm,
-                      const Text(
+                      Text(
                         'SUBSCRIPTIONS BY CATEGORY',
                         style: TextStyle(
-                            fontSize: 9,
-                            color: WalletMeltColors.textMuted,
+                            fontSize: 11,
+                            color: context.scheme.onSurfaceVariant,
                             fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 6),

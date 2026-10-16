@@ -125,15 +125,13 @@ class _VerifyPinScreenState extends State<VerifyPinScreen> {
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: isDark
-                                    ? WalletMeltColors.brand.withValues(alpha: 0.12)
-                                    : WalletMeltColors.brand.withValues(alpha: 0.15),
+                                    ? context.scheme.primary.withValues(alpha: 0.12)
+                                    : context.scheme.primary.withValues(alpha: 0.15),
                               ),
                               child: Icon(
                                 Icons.security_rounded,
                                 size: 28,
-                                color: isDark
-                                    ? WalletMeltColors.brand
-                                    : WalletMeltColors.brandDeep,
+                                color: context.scheme.primary,
                               ),
                             ),
                             const SizedBox(height: 16),
@@ -143,9 +141,7 @@ class _VerifyPinScreenState extends State<VerifyPinScreen> {
                                 fontWeight: FontWeight.w800,
                                 fontSize: isCompact ? 22 : 24,
                                 letterSpacing: -0.5,
-                                color: isDark
-                                    ? WalletMeltColors.darkTextPrimary
-                                    : WalletMeltColors.textPrimary,
+                                color: context.scheme.onSurface,
                               ),
                             ),
                             const SizedBox(height: 6),
@@ -153,10 +149,8 @@ class _VerifyPinScreenState extends State<VerifyPinScreen> {
                               widget.instruction,
                               textAlign: TextAlign.center,
                               style: theme.textTheme.bodyMedium?.copyWith(
-                                color: isDark
-                                    ? WalletMeltColors.darkTextSecondary
-                                    : WalletMeltColors.textSecondary,
-                                fontSize: 13,
+                                color: context.scheme.onSurfaceVariant,
+                                fontSize: 12,
                               ),
                             ),
                           ],
@@ -185,7 +179,7 @@ class _VerifyPinScreenState extends State<VerifyPinScreen> {
                                         key: ValueKey(_errorMessage),
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
-                                          fontSize: 12.5,
+                                          fontSize: 12,
                                           fontWeight: FontWeight.w600,
                                           color: theme.colorScheme.error,
                                         ),

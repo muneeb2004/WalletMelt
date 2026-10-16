@@ -94,7 +94,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     final state = context.read<AppState>();
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final currency = context.select((AppState s) => s.settings.currency);
     final themePreference =
         context.select((AppState s) => s.settings.themePreference);
@@ -125,7 +124,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.w900,
-                      fontSize: 24,
+                      fontSize: 22,
                     ),
                   ),
                 ),
@@ -163,7 +162,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               'WalletMelt',
                               style: theme.textTheme.titleLarge?.copyWith(
                                 fontWeight: FontWeight.w900,
-                                fontSize: 19,
+                                fontSize: 17,
                                 letterSpacing: -0.5,
                               ),
                             ),
@@ -176,11 +175,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     vertical: 2,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: WalletMeltColors.brand
+                                    color: context.scheme.primary
                                         .withValues(alpha: 0.15),
                                     borderRadius: BorderRadius.circular(6),
                                     border: Border.all(
-                                      color: WalletMeltColors.brand
+                                      color: context.scheme.primary
                                           .withValues(alpha: 0.3),
                                       width: 0.8,
                                     ),
@@ -191,12 +190,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                        Text(
                                          AppVersion.displayVersion,
                                          style: TextStyle(
-                                           fontSize: 10,
+                                           fontSize: 11,
                                           fontWeight: FontWeight.w800,
                                           color:
                                               theme.brightness == Brightness.dark
-                                                  ? WalletMeltColors.brand
-                                                  : WalletMeltColors.textPrimary,
+                                                  ? context.scheme.primary
+                                                  : context.scheme.onSurface,
                                         ),
                                       ),
                                       const SizedBox(width: 3),
@@ -205,8 +204,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                         size: 10,
                                         color:
                                             theme.brightness == Brightness.dark
-                                                ? WalletMeltColors.brand
-                                                : WalletMeltColors.textPrimary,
+                                                ? context.scheme.primary
+                                                : context.scheme.onSurface,
                                       ),
                                     ],
                                   ),
@@ -221,9 +220,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.brightness == Brightness.dark
-                                ? WalletMeltColors.darkTextSecondary
-                                : WalletMeltColors.textSecondary,
-                            fontSize: 11.5,
+                                ? context.scheme.onSurfaceVariant
+                                : context.scheme.onSurfaceVariant,
+                            fontSize: 11,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -243,7 +242,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 fontSize: 11,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 1.0,
-                color: WalletMeltColors.textMuted,
+                color: context.scheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: 10),
@@ -257,7 +256,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     decoration: const InputDecoration(labelText: 'Currency'),
                     dropdownColor:
                         theme.brightness == Brightness.dark
-                            ? WalletMeltColors.darkSurface
+                            ? context.scheme.surfaceContainer
                             : Colors.white,
                     borderRadius: BorderRadius.circular(18),
                     isExpanded: true,
@@ -298,7 +297,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     decoration: const InputDecoration(labelText: 'Theme'),
                     dropdownColor:
                         theme.brightness == Brightness.dark
-                            ? WalletMeltColors.darkSurface
+                            ? context.scheme.surfaceContainer
                             : Colors.white,
                     borderRadius: BorderRadius.circular(18),
                     items: const [
@@ -319,13 +318,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const SizedBox(height: 28),
 
             // SECTION: CUSTOMIZATION & FORMULAS
-            const Text(
+            Text(
               'CUSTOMIZATION & FORMULAS',
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 1.0,
-                color: WalletMeltColors.textMuted,
+                color: context.scheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: 10),
@@ -346,13 +345,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             width: 38,
                             height: 38,
                             decoration: BoxDecoration(
-                              color: WalletMeltColors.brand.withValues(alpha: 0.15),
+                              color: context.scheme.primary.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.palette_outlined,
                               size: 20,
-                              color: WalletMeltColors.brand,
+                              color: context.scheme.primary,
                             ),
                           ),
                           const SizedBox(width: 14),
@@ -370,13 +369,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 Text(
                                   'Customize built-in and uploaded SVG icons across the app.',
                                   style: theme.textTheme.bodySmall?.copyWith(
-                                    color: WalletMeltColors.textMuted,
+                                    color: context.scheme.onSurfaceVariant,
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          const Icon(Icons.chevron_right_rounded, color: Colors.grey),
+                          Icon(Icons.chevron_right_rounded, color: context.scheme.onSurfaceVariant),
                         ],
                       ),
                     ),
@@ -399,13 +398,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             width: 38,
                             height: 38,
                             decoration: BoxDecoration(
-                              color: WalletMeltColors.positive.withValues(alpha: 0.15),
+                              color: context.money.incomeText.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.functions_rounded,
                               size: 20,
-                              color: WalletMeltColors.positive,
+                              color: context.money.incomeText,
                             ),
                           ),
                           const SizedBox(width: 14),
@@ -423,13 +422,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 Text(
                                   'Detailed breakdown of how daily allowance and metrics are calculated.',
                                   style: theme.textTheme.bodySmall?.copyWith(
-                                    color: WalletMeltColors.textMuted,
+                                    color: context.scheme.onSurfaceVariant,
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          const Icon(Icons.chevron_right_rounded, color: Colors.grey),
+                          Icon(Icons.chevron_right_rounded, color: context.scheme.onSurfaceVariant),
                         ],
                       ),
                     ),
@@ -446,7 +445,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 fontSize: 11,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 1.0,
-                color: WalletMeltColors.textMuted,
+                color: context.scheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: 10),
@@ -467,20 +466,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           margin: const EdgeInsets.only(bottom: 14),
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.amber.withValues(alpha: 0.12),
+                            color: context.money.caution.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.amber.withValues(alpha: 0.4)),
+                            border: Border.all(color: context.money.caution.withValues(alpha: 0.4)),
                           ),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Icon(Icons.warning_amber_rounded, color: Colors.amber, size: 20),
+                              Icon(Icons.warning_amber_rounded, color: context.money.caution, size: 20),
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Text(
                                   'Device Security Notice: System modifications or su binaries were detected. On rooted devices, financial data is exposed to local root processes.',
                                   style: theme.textTheme.bodySmall?.copyWith(
-                                    color: isDark ? Colors.amber.shade200 : Colors.amber.shade900,
+                                    color: context.money.cautionText,
                                   ),
                                 ),
                               ),
@@ -505,7 +504,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             child: Text(
                               'Protect WalletMelt with a 4-digit PIN.',
                               style: theme.textTheme.bodySmall?.copyWith(
-                                color: WalletMeltColors.textMuted,
+                                color: context.scheme.onSurfaceVariant,
                               ),
                             ),
                           ),
@@ -556,8 +555,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 color: isPinEnabled
                                     ? null
                                     : (theme.brightness == Brightness.dark
-                                        ? WalletMeltColors.darkTextSecondary.withValues(alpha: 0.5)
-                                        : WalletMeltColors.textSecondary.withValues(alpha: 0.5)),
+                                        ? context.scheme.onSurfaceVariant.withValues(alpha: 0.5)
+                                        : context.scheme.onSurfaceVariant.withValues(alpha: 0.5)),
                               ),
                             ),
                             subtitle: Padding(
@@ -567,7 +566,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     ? 'Use device $biometricLabel to unlock faster.'
                                     : '$biometricLabel requires PIN protection to be enabled first.',
                                 style: theme.textTheme.bodySmall?.copyWith(
-                                  color: WalletMeltColors.textMuted,
+                                  color: context.scheme.onSurfaceVariant,
                                 ),
                               ),
                             ),
@@ -661,13 +660,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     width: 36,
                                     height: 36,
                                     decoration: BoxDecoration(
-                                      color: WalletMeltColors.brand.withValues(alpha: 0.12),
+                                      color: context.scheme.primary.withValues(alpha: 0.12),
                                       borderRadius: BorderRadius.circular(10),
                                     ),
-                                    child: const Icon(
+                                    child: Icon(
                                       Icons.pin_outlined,
                                       size: 20,
-                                      color: WalletMeltColors.brand,
+                                      color: context.scheme.primary,
                                     ),
                                   ),
                                   const SizedBox(width: 14),
@@ -685,7 +684,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                         Text(
                                           'Update your 4-digit security code.',
                                           style: theme.textTheme.bodySmall?.copyWith(
-                                            color: WalletMeltColors.textMuted,
+                                            color: context.scheme.onSurfaceVariant,
                                           ),
                                         ),
                                       ],
@@ -694,7 +693,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   Icon(
                                     Icons.chevron_right_rounded,
                                     size: 20,
-                                    color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                                    color: context.scheme.onSurfaceVariant,
                                   ),
                                 ],
                               ),
@@ -759,7 +758,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                         Text(
                                           'Turn off PIN and biometric protection.',
                                           style: theme.textTheme.bodySmall?.copyWith(
-                                            color: WalletMeltColors.textMuted,
+                                            color: context.scheme.onSurfaceVariant,
                                           ),
                                         ),
                                       ],
@@ -768,7 +767,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   Icon(
                                     Icons.chevron_right_rounded,
                                     size: 20,
-                                    color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                                    color: context.scheme.onSurfaceVariant,
                                   ),
                                 ],
                               ),
@@ -804,7 +803,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                       Text(
                                         'Review offline security terms and liability limitations.',
                                         style: theme.textTheme.bodySmall?.copyWith(
-                                          color: WalletMeltColors.textMuted,
+                                          color: context.scheme.onSurfaceVariant,
                                         ),
                                       ),
                                     ],
@@ -813,7 +812,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 Icon(
                                   Icons.chevron_right_rounded,
                                   size: 20,
-                                  color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                                  color: context.scheme.onSurfaceVariant,
                                 ),
                               ],
                             ),
@@ -835,7 +834,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 fontSize: 11,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 1.0,
-                color: WalletMeltColors.textMuted,
+                color: context.scheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: 10),
@@ -854,7 +853,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   Text(
                     'Manage list of people for lending, borrowing, and other people-centric records.',
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: WalletMeltColors.textMuted,
+                      color: context.scheme.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(height: 14),
@@ -885,7 +884,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   Text(
                     'Manage frequent shops, restaurants, and bill vendors for 1-tap category selection.',
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: WalletMeltColors.textMuted,
+                      color: context.scheme.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(height: 14),
@@ -909,7 +908,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 fontSize: 11,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 1.0,
-                color: WalletMeltColors.textMuted,
+                color: context.scheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: 10),
@@ -1015,7 +1014,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   Text(
                     'Select a backup JSON file to verify its structure and compatibility before importing. No changes will be made to your data.',
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: WalletMeltColors.textMuted,
+                      color: context.scheme.onSurfaceVariant,
                     ),
                   ),
 
@@ -1025,7 +1024,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         deletedExpensesLength, lastExportedAt),
                     style: theme.textTheme.bodySmall?.copyWith(
                       fontStyle: FontStyle.italic,
-                      color: WalletMeltColors.textMuted,
+                      color: context.scheme.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -1040,7 +1039,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 fontSize: 11,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 1.0,
-                color: WalletMeltColors.textMuted,
+                color: context.scheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: 10),
@@ -1060,7 +1059,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   Text(
                     'All expenses, settings, categories, budgets, and receipt images stay stored locally on this device. There is no remote login, backend databases, or cloud tracking.',
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: WalletMeltColors.textMuted,
+                      color: context.scheme.onSurfaceVariant,
                       height: 1.4,
                     ),
                   ),
@@ -1079,7 +1078,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   Text(
                     'Automatic cloud synchronization, shared household ledger profiles, OCR-based receipt scanning, and recurring expense reminders are planned for future versions.',
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: WalletMeltColors.textMuted,
+                      color: context.scheme.onSurfaceVariant,
                       height: 1.4,
                     ),
                   ),
@@ -1099,7 +1098,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       Text(
                         AppVersion.displayVersion,
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: WalletMeltColors.textMuted,
+                          color: context.scheme.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -1120,7 +1119,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 1.0,
-                    color: WalletMeltColors.textMuted,
+                    color: context.scheme.onSurfaceVariant,
                   ),
                 ),
                 TextButton.icon(
@@ -1149,12 +1148,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         height: 36,
                         decoration: BoxDecoration(
                           color:
-                              WalletMeltColors.brand.withValues(alpha: 0.16),
+                              context.scheme.primary.withValues(alpha: 0.16),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.auto_awesome_rounded,
-                          color: WalletMeltColors.brand,
+                          color: context.scheme.primary,
                           size: 20,
                         ),
                       ),
@@ -1167,14 +1166,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               'Version ${AppVersion.version} Highlights',
                               style: theme.textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.w800,
-                                fontSize: 15,
+                                fontSize: 14,
                               ),
                             ),
                             Text(
                               'SVG vector customization, transparent financial metrics & UI polish',
                               style: TextStyle(
-                                fontSize: 11.5,
-                                color: WalletMeltColors.textMuted,
+                                fontSize: 11,
+                                color: context.scheme.onSurfaceVariant,
                               ),
                             ),
                           ],
@@ -1215,17 +1214,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 12, vertical: 10),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF6C5CE7).withValues(alpha: 0.10),
+                      color: context.scheme.primary.withValues(alpha: 0.10),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
-                        color: const Color(0xFF6C5CE7).withValues(alpha: 0.25),
+                        color: context.scheme.primary.withValues(alpha: 0.25),
                       ),
                     ),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(Icons.lightbulb_outline_rounded,
-                            size: 16, color: Color(0xFF6C5CE7)),
+                        Icon(Icons.lightbulb_outline_rounded,
+                            size: 16, color: context.scheme.primary),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
@@ -1233,9 +1232,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             style: TextStyle(
                               fontSize: 11,
                               height: 1.35,
-                              color: isDark
-                                  ? const Color(0xFFA29BFE)
-                                  : const Color(0xFF5A49D8),
+                              color: context.scheme.surfaceContainer,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -1549,7 +1546,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _buildSettingsWhatsNewBullet(BuildContext context,
       {required String title, required String subtitle}) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
@@ -1559,8 +1555,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             width: 6,
             height: 6,
             margin: const EdgeInsets.only(top: 6, right: 10),
-            decoration: const BoxDecoration(
-              color: WalletMeltColors.brand,
+            decoration: BoxDecoration(
+              color: context.scheme.primary,
               shape: BoxShape.circle,
             ),
           ),
@@ -1570,18 +1566,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 style: TextStyle(
                   fontSize: 12,
                   fontFamily: 'PlusJakartaSans',
-                  color: isDark
-                      ? WalletMeltColors.darkTextSecondary
-                      : WalletMeltColors.textSecondary,
+                  color: context.scheme.onSurfaceVariant,
                 ),
                 children: [
                   TextSpan(
                     text: '$title: ',
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
-                      color: isDark
-                          ? Colors.white
-                          : WalletMeltColors.textPrimary,
+                      color: context.scheme.onSurface,
                     ),
                   ),
                   TextSpan(text: subtitle),

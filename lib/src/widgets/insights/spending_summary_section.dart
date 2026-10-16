@@ -32,7 +32,6 @@ class SpendingSummarySection extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -54,16 +53,16 @@ class SpendingSummarySection extends StatelessWidget {
                     Text(
                       'Top Categories',
                       style: TextStyle(
-                        fontSize: 15,
+                        fontSize: 14,
                         fontWeight: FontWeight.w700,
-                        color: isDark ? WalletMeltColors.darkTextPrimary : WalletMeltColors.textPrimary,
+                        color: context.scheme.onSurface,
                       ),
                     ),
                     Text(
                       'By net spend',
                       style: TextStyle(
                         fontSize: 12,
-                        color: isDark ? WalletMeltColors.darkTextSecondary : WalletMeltColors.textSecondary,
+                        color: context.scheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -84,18 +83,18 @@ class SpendingSummarySection extends StatelessWidget {
                               Text(
                                 item.categoryName,
                                 style: TextStyle(
-                                  fontSize: 13,
+                                  fontSize: 12,
                                   fontWeight: FontWeight.w500,
-                                  color: isDark ? WalletMeltColors.darkTextPrimary : WalletMeltColors.textPrimary,
+                                  color: context.scheme.onSurface,
                                 ),
                               ),
                               Text(
                                 '${formatMoney(item.netAmount, currency)} (${item.percentOfTotal.toStringAsFixed(0)}%)',
                                 style: withTabularFigures(
                                   TextStyle(
-                                    fontSize: 13,
+                                    fontSize: 12,
                                     fontWeight: FontWeight.w600,
-                                    color: isDark ? WalletMeltColors.darkTextPrimary : WalletMeltColors.textPrimary,
+                                    color: context.scheme.onSurface,
                                   ),
                                 ),
                               ),
@@ -107,8 +106,8 @@ class SpendingSummarySection extends StatelessWidget {
                             child: LinearProgressIndicator(
                               value: (item.percentOfTotal / 100.0).clamp(0.0, 1.0),
                               minHeight: 4,
-                              backgroundColor: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.06),
-                              valueColor: const AlwaysStoppedAnimation<Color>(WalletMeltColors.brand),
+                              backgroundColor: (context.scheme.onSurface).withValues(alpha: 0.06),
+                              valueColor: AlwaysStoppedAnimation<Color>(context.scheme.primary),
                             ),
                           ),
                         ],
@@ -132,9 +131,9 @@ class SpendingSummarySection extends StatelessWidget {
                 Text(
                   'Top Merchants',
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: isDark ? WalletMeltColors.darkTextPrimary : WalletMeltColors.textPrimary,
+                    color: context.scheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.md),
@@ -153,16 +152,16 @@ class SpendingSummarySection extends StatelessWidget {
                                 Text(
                                   merchant.displayName,
                                   style: TextStyle(
-                                    fontSize: 13,
+                                    fontSize: 12,
                                     fontWeight: FontWeight.w500,
-                                    color: isDark ? WalletMeltColors.darkTextPrimary : WalletMeltColors.textPrimary,
+                                    color: context.scheme.onSurface,
                                   ),
                                 ),
                                 Text(
                                   '${merchant.positiveTransactionCount} purchases${merchant.refundCount > 0 ? ', ${merchant.refundCount} refunds' : ''}',
                                   style: TextStyle(
                                     fontSize: 11,
-                                    color: isDark ? WalletMeltColors.darkTextSecondary : WalletMeltColors.textSecondary,
+                                    color: context.scheme.onSurfaceVariant,
                                   ),
                                 ),
                               ],
@@ -172,9 +171,9 @@ class SpendingSummarySection extends StatelessWidget {
                             formatMoney(merchant.netAmount, currency),
                             style: withTabularFigures(
                               TextStyle(
-                                fontSize: 13,
+                                fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color: isDark ? WalletMeltColors.darkTextPrimary : WalletMeltColors.textPrimary,
+                                color: context.scheme.onSurface,
                               ),
                             ),
                           ),
@@ -199,9 +198,9 @@ class SpendingSummarySection extends StatelessWidget {
                 Text(
                   'Largest Transactions',
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: isDark ? WalletMeltColors.darkTextPrimary : WalletMeltColors.textPrimary,
+                    color: context.scheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.md),
@@ -220,16 +219,16 @@ class SpendingSummarySection extends StatelessWidget {
                                 Text(
                                   expense.title,
                                   style: TextStyle(
-                                    fontSize: 13,
+                                    fontSize: 12,
                                     fontWeight: FontWeight.w500,
-                                    color: isDark ? WalletMeltColors.darkTextPrimary : WalletMeltColors.textPrimary,
+                                    color: context.scheme.onSurface,
                                   ),
                                 ),
                                 Text(
                                   '${expense.categoryName}${expense.vendor != null && expense.vendor!.isNotEmpty ? ' · ${expense.vendor}' : ''}',
                                   style: TextStyle(
                                     fontSize: 11,
-                                    color: isDark ? WalletMeltColors.darkTextSecondary : WalletMeltColors.textSecondary,
+                                    color: context.scheme.onSurfaceVariant,
                                   ),
                                 ),
                               ],
@@ -239,9 +238,9 @@ class SpendingSummarySection extends StatelessWidget {
                             formatMoney(expense.amount, currency),
                             style: withTabularFigures(
                               TextStyle(
-                                fontSize: 13,
+                                fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color: isDark ? WalletMeltColors.darkTextPrimary : WalletMeltColors.textPrimary,
+                                color: context.scheme.onSurface,
                               ),
                             ),
                           ),

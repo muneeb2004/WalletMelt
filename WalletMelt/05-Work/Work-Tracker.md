@@ -40,5 +40,6 @@ related:
 ## Added 2026-10-17
 - **Done**: Tonal design system foundation ([[ADR-0010-Tonal-Material3-Design-System-and-Brand]]): theme, `WMCard`, Material 3 shell navigation, dashboard.
 - **Done 2026-10-17**: History, Add expense, Planning, Budget, Subscriptions, Essentials, Debts migrated by codemod to colour roles and the six-step scale.
-- **Next**: Migrate Settings, Insights, Security, Onboarding, Merchants, Payees, What's new; fix screenshot suite hang (pre-existing, see TD-010); lower the baselines in `design_token_guard_test.dart` ([[Technical-Debt-Registry]] TD-010). Update screenshot harness expectations.
+- **Done 2026-10-17**: Settings, Insights, Security, Onboarding, Merchants, Payees, Privacy, What's new and shared widgets migrated; app-wide design-system migration complete.
+- **Next**: Fix screenshot suite hang (pre-existing, see TD-010); lower the baselines in `design_token_guard_test.dart` ([[Technical-Debt-Registry]] TD-010). Update screenshot harness expectations.
 

@@ -331,14 +331,13 @@ class _BackupRestoreDialogState extends State<BackupRestoreDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final textTheme = Theme.of(context).textTheme;
 
     final hasConflicts = _conflictSummary != null && _conflictSummary!.duplicateExpenseIdCount > 0;
     final requiresResolution = hasConflicts && !_conflictsResolved && _selectedMode == RestoreMode.safeMerge;
 
     return Dialog(
-      backgroundColor: isDark ? const Color(0xFF161616) : const Color(0xFFFAFAF6),
+      backgroundColor: context.scheme.surfaceContainer,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
       insetPadding: const EdgeInsets.symmetric(horizontal: 16.0 /* AppSpacing.md */, vertical: 24.0 /* AppSpacing.lg */),
       child: ConstrainedBox(
@@ -351,7 +350,7 @@ class _BackupRestoreDialogState extends State<BackupRestoreDialog> {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.settings_backup_restore_rounded, color: WalletMeltColors.brand, size: 28),
+                  Icon(Icons.settings_backup_restore_rounded, color: context.scheme.primary, size: 28),
                   const SizedBox(width: 12),
                   Text('Backup Preview', style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
                 ],
@@ -403,7 +402,7 @@ class _BackupRestoreDialogState extends State<BackupRestoreDialog> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.03),
+                  color: context.scheme.outlineVariant,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Column(
@@ -442,12 +441,12 @@ class _BackupRestoreDialogState extends State<BackupRestoreDialog> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.warning_amber_rounded, size: 14, color: WalletMeltColors.warning),
+                      Icon(Icons.warning_amber_rounded, size: 14, color: context.money.cautionText),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
                           warning,
-                          style: const TextStyle(color: WalletMeltColors.warning, fontSize: 12),
+                          style: TextStyle(color: context.money.cautionText, fontSize: 12),
                         ),
                       ),
                     ],
@@ -466,11 +465,11 @@ class _BackupRestoreDialogState extends State<BackupRestoreDialog> {
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
                         color: requiresResolution 
-                            ? WalletMeltColors.warning.withValues(alpha: 0.1) 
-                            : Colors.green.withValues(alpha: 0.1),
+                            ? context.money.cautionText.withValues(alpha: 0.1) 
+                            : context.money.incomeText.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(
-                          color: requiresResolution ? WalletMeltColors.warning : Colors.green,
+                          color: requiresResolution ? context.money.cautionText : context.money.incomeText,
                           width: 1,
                         ),
                       ),
@@ -478,7 +477,7 @@ class _BackupRestoreDialogState extends State<BackupRestoreDialog> {
                         children: [
                           Icon(
                             requiresResolution ? Icons.warning_amber_rounded : Icons.check_circle_outline_rounded,
-                            color: requiresResolution ? WalletMeltColors.warning : Colors.green,
+                            color: requiresResolution ? context.money.cautionText : context.money.incomeText,
                           ),
                           const SizedBox(width: 10),
                           Expanded(
@@ -487,8 +486,8 @@ class _BackupRestoreDialogState extends State<BackupRestoreDialog> {
                                   ? '${_conflictSummary!.duplicateExpenseIdCount} expense ID(s) already exist in local data. You must resolve them before merging.'
                                   : 'All conflicting records resolved successfully.',
                               style: TextStyle(
-                                color: requiresResolution ? WalletMeltColors.warning : Colors.green,
-                                fontSize: 13,
+                                color: requiresResolution ? context.money.cautionText : context.money.incomeText,
+                                fontSize: 12,
                                 fontWeight: FontWeight.bold
                               ),
                             ),
@@ -510,9 +509,9 @@ class _BackupRestoreDialogState extends State<BackupRestoreDialog> {
                         ),
                       ),
                   ] else ...[
-                    const Text(
+                    Text(
                       'No conflicts detected with current local data.',
-                      style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 13),
+                      style: TextStyle(color: context.money.incomeText, fontWeight: FontWeight.bold, fontSize: 12),
                     ),
                   ],
                 ],
@@ -521,18 +520,18 @@ class _BackupRestoreDialogState extends State<BackupRestoreDialog> {
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: Colors.red.withValues(alpha: 0.1),
+                    color: context.scheme.error.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: Colors.red, width: 1),
+                    border: Border.all(color: context.scheme.error, width: 1),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Row(
+                      Row(
                         children: [
-                          Icon(Icons.warning_rounded, color: Colors.red),
+                          Icon(Icons.warning_rounded, color: context.scheme.error),
                           SizedBox(width: 10),
-                          Text('DATA DELETION WARNING', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                          Text('DATA DELETION WARNING', style: TextStyle(color: context.scheme.error, fontWeight: FontWeight.bold)),
                         ],
                       ),
                       const SizedBox(height: 8),
@@ -542,7 +541,7 @@ class _BackupRestoreDialogState extends State<BackupRestoreDialog> {
                         '• ${widget.localSnapshot.categories.length} Categories\n'
                         '• ${widget.localSnapshot.budgets.length} Budgets\n'
                         '• ${widget.localSnapshot.groceryItems.length} Grocery Items',
-                        style: const TextStyle(color: Colors.red, fontSize: 12, height: 1.5),
+                        style: TextStyle(color: context.scheme.error, fontSize: 12, height: 1.5),
                       ),
                     ],
                   ),
@@ -554,7 +553,7 @@ class _BackupRestoreDialogState extends State<BackupRestoreDialog> {
                   controller: _replaceConfirmController,
                   decoration: InputDecoration(
                     hintText: 'REPLACE',
-                    hintStyle: TextStyle(color: Colors.grey.withValues(alpha: 0.6)),
+                    hintStyle: TextStyle(color: context.scheme.onSurfaceVariant.withValues(alpha: 0.6)),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   ),
@@ -568,10 +567,10 @@ class _BackupRestoreDialogState extends State<BackupRestoreDialog> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.03),
+                    color: context.scheme.outlineVariant,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: isDark ? Colors.white24 : Colors.black12,
+                      color: context.scheme.outlineVariant,
                       width: 1,
                     ),
                   ),
@@ -582,7 +581,7 @@ class _BackupRestoreDialogState extends State<BackupRestoreDialog> {
                         'Dry-run restore plan',
                         style: textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: WalletMeltColors.brand,
+                          color: context.scheme.primary,
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -600,13 +599,13 @@ class _BackupRestoreDialogState extends State<BackupRestoreDialog> {
                           Text(
                             'Dry-run only',
                             style: TextStyle(
-                              color: isDark ? Colors.white38 : Colors.black38,
+                              color: context.scheme.outlineVariant,
                               fontSize: 11,
                               fontStyle: FontStyle.italic,
                             ),
                           ),
                           if (_dryRunPlan!.isValid && !_dryRunPlan!.hasBlockers)
-                            const Icon(Icons.check_circle_outline, color: Colors.green, size: 16),
+                            Icon(Icons.check_circle_outline, color: context.money.incomeText, size: 16),
                         ],
                       ),
                     ],
@@ -617,18 +616,18 @@ class _BackupRestoreDialogState extends State<BackupRestoreDialog> {
                   Container(
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: WalletMeltColors.warning.withValues(alpha: 0.1),
+                      color: context.money.cautionText.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: WalletMeltColors.warning, width: 1),
+                      border: Border.all(color: context.money.cautionText, width: 1),
                     ),
-                    child: const Row(
+                    child: Row(
                       children: [
-                        Icon(Icons.warning_amber_rounded, color: WalletMeltColors.warning),
+                        Icon(Icons.warning_amber_rounded, color: context.money.cautionText),
                         SizedBox(width: 10),
                         Expanded(
                           child: Text(
                             'Restore is unavailable until validation safety gates are satisfied.',
-                            style: TextStyle(color: WalletMeltColors.warning, fontWeight: FontWeight.bold, fontSize: 13),
+                            style: TextStyle(color: context.money.cautionText, fontWeight: FontWeight.bold, fontSize: 12),
                           ),
                         ),
                       ],
@@ -640,21 +639,21 @@ class _BackupRestoreDialogState extends State<BackupRestoreDialog> {
                   Container(
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: Colors.red.withValues(alpha: 0.1),
+                      color: context.scheme.error.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: Colors.red, width: 1),
+                      border: Border.all(color: context.scheme.error, width: 1),
                     ),
-                    child: const Column(
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.error_outline, color: Colors.red),
+                            Icon(Icons.error_outline, color: context.scheme.error),
                             SizedBox(width: 10),
                             Expanded(
                               child: Text(
                                 'blockers must be resolved first',
-                                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 13),
+                                style: TextStyle(color: context.scheme.error, fontWeight: FontWeight.bold, fontSize: 12),
                               ),
                             ),
                           ],
@@ -662,7 +661,7 @@ class _BackupRestoreDialogState extends State<BackupRestoreDialog> {
                         SizedBox(height: 8),
                         Text(
                           'will not resolve conflicts automatically',
-                          style: TextStyle(color: Colors.red, fontSize: 12),
+                          style: TextStyle(color: context.scheme.error, fontSize: 12),
                         ),
                       ],
                     ),
@@ -686,7 +685,7 @@ class _BackupRestoreDialogState extends State<BackupRestoreDialog> {
                   Expanded(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: _selectedMode == RestoreMode.fullReplace ? Colors.red : WalletMeltColors.brand,
+                        backgroundColor: _selectedMode == RestoreMode.fullReplace ? context.scheme.error : context.scheme.primary,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
@@ -721,15 +720,15 @@ class _BackupRestoreDialogState extends State<BackupRestoreDialog> {
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(
         children: [
-          Icon(icon, size: 16, color: Colors.grey),
+          Icon(icon, size: 16, color: context.scheme.onSurfaceVariant),
           const SizedBox(width: 8),
-          Text(label, style: const TextStyle(color: Colors.grey, fontSize: 13)),
+          Text(label, style: TextStyle(color: context.scheme.onSurfaceVariant, fontSize: 12)),
           const SizedBox(width: 16),
           Expanded(
             child: Text(
               value,
               textAlign: TextAlign.right,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
               overflow: TextOverflow.ellipsis,
             ),
           ),
@@ -756,8 +755,7 @@ class _ModeTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primaryColor = warningColor ? Colors.red : WalletMeltColors.brand;
+    final primaryColor = warningColor ? context.scheme.error : context.scheme.primary;
 
     return InkWell(
       onTap: onTap,
@@ -767,7 +765,7 @@ class _ModeTab extends StatelessWidget {
         decoration: BoxDecoration(
           color: selected 
               ? primaryColor.withValues(alpha: 0.15) 
-              : (isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.03)),
+              : (context.scheme.outlineVariant),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: selected ? primaryColor : Colors.transparent,
@@ -776,14 +774,14 @@ class _ModeTab extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Icon(icon, color: selected ? primaryColor : Colors.grey, size: 20),
+            Icon(icon, color: selected ? primaryColor : context.scheme.onSurfaceVariant, size: 20),
             const SizedBox(height: 6),
             Text(
               label,
               style: TextStyle(
-                color: selected ? primaryColor : Colors.grey,
+                color: selected ? primaryColor : context.scheme.onSurfaceVariant,
                 fontWeight: FontWeight.bold,
-                fontSize: 13
+                fontSize: 12
               ),
             ),
           ],

@@ -24,18 +24,14 @@ class PinIndicator extends StatelessWidget {
     final dotColor = hasError
         ? theme.colorScheme.error
         : (isSuccess
-            ? (isDark ? WalletMeltColors.brand : WalletMeltColors.textPrimary)
-            : (isDark ? WalletMeltColors.brand : WalletMeltColors.textPrimary));
+            ? (context.scheme.primary)
+            : (context.scheme.primary));
 
     final emptyBorderColor = hasError
         ? theme.colorScheme.error.withValues(alpha: 0.5)
-        : (isDark
-            ? Colors.white.withValues(alpha: 0.22)
-            : Colors.black.withValues(alpha: 0.20));
+        : (context.scheme.onSurface.withValues(alpha: 0.20));
 
-    final emptyFillColor = isDark
-        ? Colors.white.withValues(alpha: 0.05)
-        : Colors.black.withValues(alpha: 0.04);
+    final emptyFillColor = context.scheme.onSurface.withValues(alpha: 0.04);
 
     return Semantics(
       label: hasError

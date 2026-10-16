@@ -57,11 +57,11 @@ class NumberPad extends StatelessWidget {
                           },
                     borderRadius: BorderRadius.circular(buttonSize / 2),
                     splashColor: isDark
-                        ? WalletMeltColors.brand.withValues(alpha: 0.12)
-                        : Colors.black.withValues(alpha: 0.08),
+                        ? context.scheme.primary.withValues(alpha: 0.12)
+                        : context.scheme.shadow.withValues(alpha: 0.08),
                     highlightColor: isDark
-                        ? WalletMeltColors.brand.withValues(alpha: 0.06)
-                        : Colors.black.withValues(alpha: 0.04),
+                        ? context.scheme.primary.withValues(alpha: 0.06)
+                        : context.scheme.shadow.withValues(alpha: 0.04),
                     child: Container(
                       height: buttonSize,
                       width: buttonSize,
@@ -69,17 +69,15 @@ class NumberPad extends StatelessWidget {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: isDark
-                            ? WalletMeltColors.darkSurface.withValues(alpha: disabled ? 0.3 : 0.7)
+                            ? context.scheme.surfaceContainer.withValues(alpha: disabled ? 0.3 : 0.7)
                             : Colors.white.withValues(alpha: disabled ? 0.4 : 0.85),
                         border: Border.all(
-                          color: isDark
-                              ? WalletMeltColors.darkBorder
-                              : WalletMeltColors.lightBorder,
+                          color: context.scheme.outlineVariant,
                           width: 1.0,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.03),
+                            color: context.scheme.shadow.withValues(alpha: isDark ? 0.15 : 0.03),
                             blurRadius: 6,
                             offset: const Offset(0, 2),
                           ),
@@ -92,11 +90,9 @@ class NumberPad extends StatelessWidget {
                           fontWeight: FontWeight.w700,
                           color: disabled
                               ? (isDark
-                                  ? WalletMeltColors.darkTextSecondary.withValues(alpha: 0.4)
-                                  : WalletMeltColors.textSecondary.withValues(alpha: 0.4))
-                              : (isDark
-                                  ? WalletMeltColors.darkTextPrimary
-                                  : WalletMeltColors.textPrimary),
+                                  ? context.scheme.onSurfaceVariant.withValues(alpha: 0.4)
+                                  : context.scheme.onSurfaceVariant.withValues(alpha: 0.4))
+                              : (context.scheme.onSurface),
                         ),
                       ),
                     ),
@@ -140,11 +136,9 @@ class NumberPad extends StatelessWidget {
                         size: buttonSize * 0.34,
                         color: disabled
                             ? (isDark
-                                ? WalletMeltColors.darkTextSecondary.withValues(alpha: 0.3)
-                                : WalletMeltColors.textSecondary.withValues(alpha: 0.3))
-                            : (isDark
-                                ? WalletMeltColors.darkTextPrimary
-                                : WalletMeltColors.textPrimary),
+                                ? context.scheme.onSurfaceVariant.withValues(alpha: 0.3)
+                                : context.scheme.onSurfaceVariant.withValues(alpha: 0.3))
+                            : (context.scheme.onSurface),
                       ),
                     ),
                   ),
@@ -185,11 +179,11 @@ class NumberPad extends StatelessWidget {
                           },
                     borderRadius: BorderRadius.circular(buttonSize / 2),
                     splashColor: isDark
-                        ? WalletMeltColors.brand.withValues(alpha: 0.15)
-                        : Colors.black.withValues(alpha: 0.08),
+                        ? context.scheme.primary.withValues(alpha: 0.15)
+                        : context.scheme.shadow.withValues(alpha: 0.08),
                     highlightColor: isDark
-                        ? WalletMeltColors.brand.withValues(alpha: 0.08)
-                        : Colors.black.withValues(alpha: 0.04),
+                        ? context.scheme.primary.withValues(alpha: 0.08)
+                        : context.scheme.shadow.withValues(alpha: 0.04),
                     child: Container(
                       height: buttonSize,
                       width: buttonSize,
@@ -197,21 +191,17 @@ class NumberPad extends StatelessWidget {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: isDark
-                            ? WalletMeltColors.darkSurface.withValues(alpha: 0.5)
+                            ? context.scheme.surfaceContainer.withValues(alpha: 0.5)
                             : Colors.white.withValues(alpha: 0.6),
                         border: Border.all(
-                          color: isDark
-                              ? WalletMeltColors.darkBorder
-                              : WalletMeltColors.lightBorder,
+                          color: context.scheme.outlineVariant,
                           width: 1.0,
                         ),
                       ),
                       child: Icon(
                         biometricIcon ?? Icons.fingerprint_rounded,
                         size: buttonSize * 0.42,
-                        color: isDark
-                            ? WalletMeltColors.brand
-                            : WalletMeltColors.textPrimary,
+                        color: context.scheme.primary,
                       ),
                     ),
                   ),

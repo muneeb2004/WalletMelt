@@ -80,13 +80,13 @@ class MetricCalculationsScreen extends StatelessWidget {
                     width: 42,
                     height: 42,
                     decoration: BoxDecoration(
-                      color: WalletMeltColors.brand.withValues(alpha: 0.15),
+                      color: context.scheme.primary.withValues(alpha: 0.15),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.functions_rounded,
                       size: 22,
-                      color: WalletMeltColors.brand,
+                      color: context.scheme.primary,
                     ),
                   ),
                   const SizedBox(width: 14),
@@ -105,10 +105,8 @@ class MetricCalculationsScreen extends StatelessWidget {
                         Text(
                           'Every metric in WalletMelt is calculated deterministically with zero hidden estimates. Here is the exact mathematical breakdown of how your figures are derived.',
                           style: TextStyle(
-                            fontSize: 11.5,
-                            color: isDark
-                                ? const Color(0xFF94A3B8)
-                                : const Color(0xFF64748B),
+                            fontSize: 11,
+                            color: context.scheme.onSurfaceVariant,
                             height: 1.3,
                           ),
                         ),
@@ -123,7 +121,7 @@ class MetricCalculationsScreen extends StatelessWidget {
             // ══════════════════════════════════════════════════════════════════
             // FEATURED SECTION: PER DAY ALLOWANCE
             // ══════════════════════════════════════════════════════════════════
-            _buildSectionHeader(
+            _buildSectionHeader(context, 
               title: 'FEATURED: PER DAY ALLOWANCE',
               icon: Icons.today_rounded,
               isDark: isDark,
@@ -141,15 +139,15 @@ class MetricCalculationsScreen extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: WalletMeltColors.brand.withValues(alpha: 0.15),
+                          color: context.scheme.primary.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(6),
                         ),
-                        child: const Text(
+                        child: Text(
                           'PRIMARY METRIC',
                           style: TextStyle(
-                            fontSize: 10,
+                            fontSize: 11,
                             fontWeight: FontWeight.w800,
-                            color: WalletMeltColors.brand,
+                            color: context.scheme.primary,
                             letterSpacing: 0.5,
                           ),
                         ),
@@ -158,11 +156,9 @@ class MetricCalculationsScreen extends StatelessWidget {
                       Text(
                         readableMonth(selectedMonth),
                         style: TextStyle(
-                          fontSize: 11.5,
+                          fontSize: 11,
                           fontWeight: FontWeight.w600,
-                          color: isDark
-                              ? const Color(0xFF94A3B8)
-                              : const Color(0xFF64748B),
+                          color: context.scheme.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -172,7 +168,7 @@ class MetricCalculationsScreen extends StatelessWidget {
                   const Text(
                     'Daily Spend Allowance Formula',
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 17,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
@@ -183,14 +179,10 @@ class MetricCalculationsScreen extends StatelessWidget {
                     width: double.infinity,
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: isDark
-                          ? const Color(0xFF0D1117)
-                          : const Color(0xFFF1F5F9),
+                      color: context.scheme.surfaceContainer,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: isDark
-                            ? WalletMeltColors.darkBorder
-                            : WalletMeltColors.lightBorder,
+                        color: context.scheme.outlineVariant,
                         width: 1.0,
                       ),
                     ),
@@ -203,8 +195,8 @@ class MetricCalculationsScreen extends StatelessWidget {
                             style: TextStyle(
                               fontFamily: 'monospace',
                               fontWeight: FontWeight.w800,
-                              fontSize: 12.5,
-                              color: isDark ? Colors.white : Colors.black87,
+                              fontSize: 12,
+                              color: context.scheme.onSurface,
                             ),
                           ),
                         ),
@@ -216,10 +208,8 @@ class MetricCalculationsScreen extends StatelessWidget {
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontFamily: 'monospace',
-                              fontSize: 10.5,
-                              color: isDark
-                                  ? const Color(0xFF94A3B8)
-                                  : const Color(0xFF64748B),
+                              fontSize: 11,
+                              color: context.scheme.onSurfaceVariant,
                               height: 1.35,
                             ),
                           ),
@@ -233,29 +223,27 @@ class MetricCalculationsScreen extends StatelessWidget {
                   Text(
                     'YOUR REAL-TIME CURRENT MONTH BREAKDOWN:',
                     style: TextStyle(
-                      fontSize: 10.5,
+                      fontSize: 11,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 0.8,
-                      color: isDark
-                          ? const Color(0xFF94A3B8)
-                          : const Color(0xFF64748B),
+                      color: context.scheme.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(height: 8),
 
-                  _buildFormulaStepRow(
+                  _buildFormulaStepRow(context, 
                     label: 'Monthly Budget Limit (B)',
                     value: allowanceResult.hasBudget
                         ? formatMoney(allowanceResult.totalBudget, currency)
                         : 'No Budget Set',
                     isDark: isDark,
                   ),
-                  _buildFormulaStepRow(
+                  _buildFormulaStepRow(context, 
                     label: 'Total Spent So Far (S)',
                     value: formatMoney(allowanceResult.totalSpent, currency),
                     isDark: isDark,
                   ),
-                  _buildFormulaStepRow(
+                  _buildFormulaStepRow(context, 
                     label: 'Remaining Budget (R = B – S)',
                     value: allowanceResult.hasBudget
                         ? (allowanceResult.isOverBudget
@@ -264,16 +252,16 @@ class MetricCalculationsScreen extends StatelessWidget {
                                 allowanceResult.remainingBudget ?? 0, currency))
                         : 'N/A',
                     valueColor: allowanceResult.isOverBudget
-                        ? WalletMeltColors.danger
-                        : WalletMeltColors.positive,
+                        ? context.scheme.error
+                        : context.money.incomeText,
                     isDark: isDark,
                   ),
-                  _buildFormulaStepRow(
+                  _buildFormulaStepRow(context, 
                     label: 'Current Calendar Day',
                     value: 'Day ${now.day} of $lastDayOfMonth days',
                     isDark: isDark,
                   ),
-                  _buildFormulaStepRow(
+                  _buildFormulaStepRow(context, 
                     label: 'Active Days Remaining ($lastDayOfMonth – ${now.day} + 1)',
                     value: '${allowanceResult.daysRemaining} days (including today)',
                     isDark: isDark,
@@ -309,8 +297,8 @@ class MetricCalculationsScreen extends StatelessWidget {
                           fontSize: 14,
                           fontWeight: FontWeight.w900,
                           color: allowanceResult.isOverBudget
-                              ? WalletMeltColors.danger
-                              : WalletMeltColors.brand,
+                              ? context.scheme.error
+                              : context.scheme.primary,
                         ),
                       ),
                     ],
@@ -321,12 +309,10 @@ class MetricCalculationsScreen extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: isDark
-                          ? Colors.white.withValues(alpha: 0.04)
-                          : Colors.black.withValues(alpha: 0.03),
+                      color: context.scheme.onSurface.withValues(alpha: 0.03),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
-                        color: isDark ? Colors.white10 : Colors.black12,
+                        color: context.scheme.outlineVariant,
                         width: 0.8,
                       ),
                     ),
@@ -341,25 +327,25 @@ class MetricCalculationsScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 6),
-                        _buildBulletPoint(
+                        _buildBulletPoint(context, 
                           title: 'Why is "+ 1" added to remaining days?',
                           detail:
                               'Today has not finished. Your remaining budget is available to spend today plus the remaining calendar days through end-of-month. Excluding today would cause an artificial compression of daily allowances.',
                           isDark: isDark,
                         ),
-                        _buildBulletPoint(
+                        _buildBulletPoint(context, 
                           title: 'What happens when over budget?',
                           detail:
                               'When total spending exceeds the monthly budget (Remaining Budget ≤ 0), the daily allowance automatically drops to 0.00 and is highlighted in red to signal that no further discretionary allowance remains.',
                           isDark: isDark,
                         ),
-                        _buildBulletPoint(
+                        _buildBulletPoint(context, 
                           title: 'What happens on the final day of the month?',
                           detail:
                               'On the last calendar day, Days Remaining evaluates to 1. The entire remaining budget is allocated as today\'s allowance.',
                           isDark: isDark,
                         ),
-                        _buildBulletPoint(
+                        _buildBulletPoint(context, 
                           title: 'What about past or future months?',
                           detail:
                               'Past months are permanently closed and historical total spending is displayed. Future months show the full monthly allocation divided by that month\'s total day count.',
@@ -376,7 +362,7 @@ class MetricCalculationsScreen extends StatelessWidget {
             // ══════════════════════════════════════════════════════════════════
             // SECTION 2: MONTHLY BUDGET UTILIZATION & HEALTH
             // ══════════════════════════════════════════════════════════════════
-            _buildSectionHeader(
+            _buildSectionHeader(context, 
               title: 'BUDGET PROGRESS & UTILIZATION',
               icon: Icons.pie_chart_outline_rounded,
               isDark: isDark,
@@ -388,13 +374,13 @@ class MetricCalculationsScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildFormulaBox(
+                  _buildFormulaBox(context, 
                     formula: 'Utilization Ratio = Total Spent / Monthly Budget Limit\n'
                         'Utilization % = Utilization Ratio × 100%',
                     isDark: isDark,
                   ),
                   const SizedBox(height: 12),
-                  _buildFormulaStepRow(
+                  _buildFormulaStepRow(context, 
                     label: 'Current Status',
                     value: budgetUtil.hasBudget
                         ? '${budgetUtil.percentage.toStringAsFixed(1)}% Used'
@@ -408,20 +394,20 @@ class MetricCalculationsScreen extends StatelessWidget {
                     style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 6),
-                  _buildColorRuleItem(
-                    color: WalletMeltColors.positive,
+                  _buildColorRuleItem(context, 
+                    color: context.money.incomeText,
                     label: '≤ 70% Spent (Healthy)',
                     description: 'Pacing well within monthly ceiling.',
                     isDark: isDark,
                   ),
-                  _buildColorRuleItem(
-                    color: WalletMeltColors.warning,
+                  _buildColorRuleItem(context, 
+                    color: context.money.cautionText,
                     label: '70% – 90% Spent (Caution)',
                     description: 'Approaching budget ceiling.',
                     isDark: isDark,
                   ),
-                  _buildColorRuleItem(
-                    color: WalletMeltColors.danger,
+                  _buildColorRuleItem(context, 
+                    color: context.scheme.error,
                     label: '> 90% Spent or Over Budget (Critical)',
                     description: 'Near depletion or exceeded limit.',
                     isDark: isDark,
@@ -434,7 +420,7 @@ class MetricCalculationsScreen extends StatelessWidget {
             // ══════════════════════════════════════════════════════════════════
             // SECTION 3: SPENDING VELOCITY & PACE
             // ══════════════════════════════════════════════════════════════════
-            _buildSectionHeader(
+            _buildSectionHeader(context, 
               title: 'SPENDING VELOCITY & PROJECTED TOTAL',
               icon: Icons.speed_rounded,
               isDark: isDark,
@@ -446,7 +432,7 @@ class MetricCalculationsScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildFormulaBox(
+                  _buildFormulaBox(context, 
                     formula: 'Daily Pace = Total Positive Spend / Days Elapsed\n'
                         'Projected Month Spend = Daily Pace × Total Days in Month\n'
                         'Projected Change % = ((Projected – Last Month) / Last Month) × 100',
@@ -456,10 +442,8 @@ class MetricCalculationsScreen extends StatelessWidget {
                   Text(
                     'Velocity evaluates whether your current daily run-rate is accelerating or decelerating compared to the previous month. Requires at least 3 active days and 5 transactions.',
                     style: TextStyle(
-                      fontSize: 11.5,
-                      color: isDark
-                          ? const Color(0xFF94A3B8)
-                          : const Color(0xFF64748B),
+                      fontSize: 11,
+                      color: context.scheme.onSurfaceVariant,
                       height: 1.3,
                     ),
                   ),
@@ -471,7 +455,7 @@ class MetricCalculationsScreen extends StatelessWidget {
             // ══════════════════════════════════════════════════════════════════
             // SECTION 4: FINANCIAL OBLIGATIONS & DEBT
             // ══════════════════════════════════════════════════════════════════
-            _buildSectionHeader(
+            _buildSectionHeader(context, 
               title: 'FINANCIAL OBLIGATIONS (DEBT)',
               icon: Icons.handshake_rounded,
               isDark: isDark,
@@ -483,7 +467,7 @@ class MetricCalculationsScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildFormulaBox(
+                  _buildFormulaBox(context, 
                     formula: 'Receivables (Owed to Me) = ∑ Unsettled lent amounts\n'
                         'Liabilities (I Owe) = ∑ Unsettled borrowed amounts\n'
                         'Net Position = Receivables – Liabilities\n'
@@ -491,31 +475,31 @@ class MetricCalculationsScreen extends StatelessWidget {
                     isDark: isDark,
                   ),
                   const SizedBox(height: 12),
-                  _buildFormulaStepRow(
+                  _buildFormulaStepRow(context, 
                     label: 'Current Receivables',
                     value: formatMoney(debtSummary.receivables, currency),
-                    valueColor: WalletMeltColors.positive,
+                    valueColor: context.money.incomeText,
                     isDark: isDark,
                   ),
-                  _buildFormulaStepRow(
+                  _buildFormulaStepRow(context, 
                     label: 'Current Liabilities',
                     value: formatMoney(debtSummary.liabilities, currency),
-                    valueColor: WalletMeltColors.danger,
+                    valueColor: context.scheme.error,
                     isDark: isDark,
                   ),
-                  _buildFormulaStepRow(
+                  _buildFormulaStepRow(context, 
                     label: 'Current Net Position',
                     value: '${debtSummary.netPosition >= 0 ? "+" : ""}${formatMoney(debtSummary.netPosition, currency)}',
                     valueColor: debtSummary.netPosition >= 0
-                        ? WalletMeltColors.positive
-                        : WalletMeltColors.danger,
+                        ? context.money.incomeText
+                        : context.scheme.error,
                     isDark: isDark,
                   ),
-                  _buildFormulaStepRow(
+                  _buildFormulaStepRow(context, 
                     label: 'Overdue Outstanding',
                     value: formatMoney(debtSummary.overdueAmount, currency),
                     valueColor: debtSummary.overdueAmount > 0
-                        ? WalletMeltColors.danger
+                        ? context.scheme.error
                         : null,
                     isDark: isDark,
                   ),
@@ -527,7 +511,7 @@ class MetricCalculationsScreen extends StatelessWidget {
             // ══════════════════════════════════════════════════════════════════
             // SECTION 5: SUBSCRIPTION NORMALIZATION
             // ══════════════════════════════════════════════════════════════════
-            _buildSectionHeader(
+            _buildSectionHeader(context, 
               title: 'SUBSCRIPTION BILLING NORMALIZATION',
               icon: Icons.autorenew_rounded,
               isDark: isDark,
@@ -539,7 +523,7 @@ class MetricCalculationsScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildFormulaBox(
+                  _buildFormulaBox(context, 
                     formula: 'Monthly Equivalent (Monthly) = Cost\n'
                         'Monthly Equivalent (Quarterly) = Cost / 3\n'
                         'Monthly Equivalent (Semi-Annual) = Cost / 6\n'
@@ -552,10 +536,8 @@ class MetricCalculationsScreen extends StatelessWidget {
                   Text(
                     'Standardizes varied recurring payment intervals to comparable monthly and annual cost metrics.',
                     style: TextStyle(
-                      fontSize: 11.5,
-                      color: isDark
-                          ? const Color(0xFF94A3B8)
-                          : const Color(0xFF64748B),
+                      fontSize: 11,
+                      color: context.scheme.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -566,7 +548,7 @@ class MetricCalculationsScreen extends StatelessWidget {
             // ══════════════════════════════════════════════════════════════════
             // SECTION 6: TAX & EFFECTIVE RATE
             // ══════════════════════════════════════════════════════════════════
-            _buildSectionHeader(
+            _buildSectionHeader(context, 
               title: 'TAX CALCULATIONS',
               icon: Icons.account_balance_rounded,
               isDark: isDark,
@@ -578,7 +560,7 @@ class MetricCalculationsScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildFormulaBox(
+                  _buildFormulaBox(context, 
                     formula: 'Taxable Spend = ∑ (Subtotal Amount)\n'
                         'Monthly Tax = ∑ (Tax Amount in Month)\n'
                         'Effective Tax Rate = (Monthly Tax / Taxable Spend) × 100%',
@@ -588,10 +570,8 @@ class MetricCalculationsScreen extends StatelessWidget {
                   Text(
                     'Separates gross amount into underlying net subtotal and tax paid. Only expenses with explicit tax entries are included in the effective tax rate calculation.',
                     style: TextStyle(
-                      fontSize: 11.5,
-                      color: isDark
-                          ? const Color(0xFF94A3B8)
-                          : const Color(0xFF64748B),
+                      fontSize: 11,
+                      color: context.scheme.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -603,7 +583,7 @@ class MetricCalculationsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionHeader({
+  Widget _buildSectionHeader(BuildContext context, {
     required String title,
     required IconData icon,
     required bool isDark,
@@ -613,31 +593,31 @@ class MetricCalculationsScreen extends StatelessWidget {
         Icon(
           icon,
           size: 16,
-          color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+          color: context.scheme.onSurfaceVariant,
         ),
         const SizedBox(width: 8),
         Text(
           title,
           style: TextStyle(
-            fontSize: 11.5,
+            fontSize: 11,
             fontWeight: FontWeight.w800,
             letterSpacing: 0.8,
-            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+            color: context.scheme.onSurfaceVariant,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildFormulaBox({required String formula, required bool isDark}) {
+  Widget _buildFormulaBox(BuildContext context, {required String formula, required bool isDark}) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF0D1117) : const Color(0xFFF1F5F9),
+        color: context.scheme.surfaceContainer,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
-          color: isDark ? Colors.white12 : Colors.black12,
+          color: context.scheme.outlineVariant,
           width: 0.8,
         ),
       ),
@@ -647,14 +627,14 @@ class MetricCalculationsScreen extends StatelessWidget {
           fontFamily: 'monospace',
           fontSize: 11,
           fontWeight: FontWeight.w700,
-          color: isDark ? Colors.white : Colors.black87,
+          color: context.scheme.onSurface,
           height: 1.4,
         ),
       ),
     );
   }
 
-  Widget _buildFormulaStepRow({
+  Widget _buildFormulaStepRow(BuildContext context, {
     required String label,
     required String value,
     Color? valueColor,
@@ -671,7 +651,7 @@ class MetricCalculationsScreen extends StatelessWidget {
               label,
               style: TextStyle(
                 fontSize: 12,
-                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                color: context.scheme.onSurfaceVariant,
               ),
             ),
           ),
@@ -682,9 +662,9 @@ class MetricCalculationsScreen extends StatelessWidget {
               value,
               textAlign: TextAlign.right,
               style: TextStyle(
-                fontSize: 12.5,
+                fontSize: 12,
                 fontWeight: FontWeight.w700,
-                color: valueColor ?? (isDark ? Colors.white : Colors.black87),
+                color: valueColor ?? (context.scheme.onSurface),
               ),
             ),
           ),
@@ -693,7 +673,7 @@ class MetricCalculationsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBulletPoint({
+  Widget _buildBulletPoint(BuildContext context, {
     required String title,
     required String detail,
     required bool isDark,
@@ -707,8 +687,8 @@ class MetricCalculationsScreen extends StatelessWidget {
             margin: const EdgeInsets.only(top: 5),
             width: 5,
             height: 5,
-            decoration: const BoxDecoration(
-              color: WalletMeltColors.brand,
+            decoration: BoxDecoration(
+              color: context.scheme.primary,
               shape: BoxShape.circle,
             ),
           ),
@@ -717,8 +697,8 @@ class MetricCalculationsScreen extends StatelessWidget {
             child: Text.rich(
               TextSpan(
                 style: TextStyle(
-                  fontSize: 11.5,
-                  color: isDark ? Colors.white70 : Colors.black87,
+                  fontSize: 11,
+                  color: context.scheme.onSurfaceVariant,
                   height: 1.35,
                 ),
                 children: [
@@ -736,7 +716,7 @@ class MetricCalculationsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildColorRuleItem({
+  Widget _buildColorRuleItem(BuildContext context, {
     required Color color,
     required String label,
     required String description,
@@ -773,7 +753,7 @@ class MetricCalculationsScreen extends StatelessWidget {
                     text: ' – $description',
                     style: TextStyle(
                       fontSize: 11,
-                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                      color: context.scheme.onSurfaceVariant,
                     ),
                   ),
                 ],

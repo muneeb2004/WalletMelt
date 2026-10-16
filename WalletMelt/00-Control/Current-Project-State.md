@@ -79,5 +79,5 @@ Product direction (best student finance tracker, Pakistan then international) is
 Backups are format v2 (checksummed, all tables) with Full Replace restricted to v2; see [[ADR-0009-Complete-Backup-v2-and-Safe-Full-Replace]] and [[Backup-Format-Specification]]. Renewal engine is atomic ([[Analytics-and-Calculations]]).
 
 ## 8. Design system (2026-10-17)
-UI follows the Tonal Material 3 system with a single indigo brand ([[ADR-0010-Tonal-Material3-Design-System-and-Brand]], [[Design-System-and-UX]]). Bottom navigation is a Material 3 `NavigationBar`; the contextual add action is an extended FAB; cards use `WMCard`. Legacy raw colours remain in unmigrated screens (TD-010).
+UI follows the Tonal Material 3 system with a single indigo brand ([[ADR-0010-Tonal-Material3-Design-System-and-Brand]], [[Design-System-and-UX]]). Bottom navigation is a Material 3 `NavigationBar`; the contextual add action is an extended FAB; cards use `WMCard`. All screens and shared widgets now consume colour roles and the six-step type scale; only intentional literals remain (TD-010).
 

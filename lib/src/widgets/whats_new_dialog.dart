@@ -4,12 +4,11 @@ import '../theme/wallet_melt_theme.dart';
 
 /// Shows the celebratory, friendly What's New modal sheet / dialog.
 Future<void> showWhatsNewModal(BuildContext context, {VoidCallback? onDismissed}) async {
-  final isDark = Theme.of(context).brightness == Brightness.dark;
 
   await showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: isDark ? const Color(0xFF131722) : Colors.white,
+    backgroundColor: context.scheme.surfaceContainer,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
     ),
@@ -62,7 +61,7 @@ class WhatsNewContent extends StatelessWidget {
               height: 4,
               margin: const EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
-                color: isDark ? Colors.white24 : Colors.black12,
+                color: context.scheme.outlineVariant,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -75,12 +74,12 @@ class WhatsNewContent extends StatelessWidget {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: WalletMeltColors.brand.withValues(alpha: 0.16),
+                    color: context.scheme.primary.withValues(alpha: 0.16),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.auto_awesome_rounded,
-                    color: WalletMeltColors.brand,
+                    color: context.scheme.primary,
                     size: 24,
                   ),
                 ),
@@ -93,14 +92,14 @@ class WhatsNewContent extends StatelessWidget {
                         "What's New in ${AppVersion.displayVersion}",
                         style: theme.textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.w900,
-                          fontSize: 20,
+                          fontSize: 22,
                         ),
                       ),
                       Text(
                         'SVG vector customization, transparent financial metrics & enhanced controls',
                         style: TextStyle(
                           fontSize: 12,
-                          color: WalletMeltColors.textMuted,
+                          color: context.scheme.onSurfaceVariant,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -127,14 +126,14 @@ class WhatsNewContent extends StatelessWidget {
               // Version 1.1.2 Highlights
               _buildSectionBadge(
                 label: 'VERSION ${AppVersion.version} UPDATES',
-                color: WalletMeltColors.brand,
+                color: context.scheme.primary,
                 isDark: isDark,
               ),
               const SizedBox(height: 14),
 
-              _buildChangelogItem(
+              _buildChangelogItem(context, 
                 icon: Icons.draw_rounded,
-                iconColor: const Color(0xFF6C5CE7),
+                iconColor: context.scheme.primary,
                 title: 'Across-the-Board SVG Customization',
                 description:
                     'Full visual freedom! Customize any default or custom category with crisp vector SVGs, preset bundles, color tints, and interactive code editing.',
@@ -142,9 +141,9 @@ class WhatsNewContent extends StatelessWidget {
               ),
               const SizedBox(height: 14),
 
-              _buildChangelogItem(
+              _buildChangelogItem(context, 
                 icon: Icons.calculate_rounded,
-                iconColor: const Color(0xFF00B894),
+                iconColor: context.money.income,
                 title: 'Financial Metrics Transparency',
                 description:
                     'Demystify your finances. Dive into the new Metric Calculations screen to see deterministic mathematical formulas, live examples, and auditing for all insights.',
@@ -152,9 +151,9 @@ class WhatsNewContent extends StatelessWidget {
               ),
               const SizedBox(height: 14),
 
-              _buildChangelogItem(
+              _buildChangelogItem(context, 
                 icon: Icons.tune_rounded,
-                iconColor: const Color(0xFFFDCB6E),
+                iconColor: context.money.caution,
                 title: 'Settings & Visual Overhaul',
                 description:
                     'Cleaner organization with dedicated Visual Customization and Financial Calculations menus, expanded layout breathing room, and instant live overrides.',
@@ -165,14 +164,14 @@ class WhatsNewContent extends StatelessWidget {
               // Version 1.1.1 Highlights
               _buildSectionBadge(
                 label: 'VERSION 1.1.1 UPDATES',
-                color: const Color(0xFF00B894),
+                color: context.money.income,
                 isDark: isDark,
               ),
               const SizedBox(height: 14),
 
-              _buildChangelogItem(
+              _buildChangelogItem(context, 
                 icon: Icons.savings_rounded,
-                iconColor: const Color(0xFF00B894),
+                iconColor: context.money.income,
                 title: 'Dynamic Monthly Budgets',
                 description:
                     'Set dynamic budget ceilings for individual months with adaptive insights. Roll over your remaining budget ceiling from the previous month with a single tap.',
@@ -180,9 +179,9 @@ class WhatsNewContent extends StatelessWidget {
               ),
               const SizedBox(height: 14),
 
-              _buildChangelogItem(
+              _buildChangelogItem(context, 
                 icon: Icons.category_rounded,
-                iconColor: const Color(0xFF6C5CE7),
+                iconColor: context.scheme.primary,
                 title: 'Vector Icons & Presets',
                 description:
                     'Crisp vector SVG icons for all default categories, 12 curated custom category presets, and safeguarded SVG file uploads.',
@@ -190,9 +189,9 @@ class WhatsNewContent extends StatelessWidget {
               ),
               const SizedBox(height: 14),
 
-              _buildChangelogItem(
+              _buildChangelogItem(context, 
                 icon: Icons.wb_sunny_rounded,
-                iconColor: const Color(0xFFFDCB6E),
+                iconColor: context.money.caution,
                 title: 'Dashboard Polish',
                 description:
                     'A personalized time-aware greeting and enhanced breathing room across the Total Spend and metric cards for a cleaner look.',
@@ -203,14 +202,14 @@ class WhatsNewContent extends StatelessWidget {
               // Version 1.1 Highlights
               _buildSectionBadge(
                 label: 'VERSION 1.1 UPDATES',
-                color: const Color(0xFF4EA8DE),
+                color: context.scheme.secondary,
                 isDark: isDark,
               ),
               const SizedBox(height: 14),
 
-              _buildChangelogItem(
+              _buildChangelogItem(context, 
                 icon: Icons.calendar_month_rounded,
-                iconColor: const Color(0xFF4EA8DE),
+                iconColor: context.scheme.secondary,
                 title: 'Focused History',
                 description:
                     "Your spending history now starts focused on the current month, saving your thumb from endless scrolling! Want to look back at last year's festive shopping? Just tap 'Show All' anytime.",
@@ -218,9 +217,9 @@ class WhatsNewContent extends StatelessWidget {
               ),
               const SizedBox(height: 14),
 
-              _buildChangelogItem(
+              _buildChangelogItem(context, 
                 icon: Icons.arrow_back_rounded,
-                iconColor: const Color(0xFF55EFC4),
+                iconColor: context.money.income,
                 title: 'Back Button Freedom',
                 description:
                     "Ever checked an expense and felt trapped because the back button wouldn't let you leave? That glitch has been officially evicted. The back button and your phone's swipe gestures now work smoothly every time.",
@@ -228,9 +227,9 @@ class WhatsNewContent extends StatelessWidget {
               ),
               const SizedBox(height: 14),
 
-              _buildChangelogItem(
+              _buildChangelogItem(context, 
                 icon: Icons.palette_rounded,
-                iconColor: const Color(0xFFE85D75),
+                iconColor: context.scheme.error,
                 title: 'Your Colors, Your Vibe',
                 description:
                     'Give your custom categories any shade under the sun! Pick from our fresh color palettes, slide through the interactive rainbow wheel, or type your favorite Hex code directly.',
@@ -238,9 +237,9 @@ class WhatsNewContent extends StatelessWidget {
               ),
               const SizedBox(height: 14),
 
-              _buildChangelogItem(
+              _buildChangelogItem(context, 
                 icon: Icons.pin_invoke_rounded,
-                iconColor: const Color(0xFFF4B740),
+                iconColor: context.money.caution,
                 title: 'Forgiving Number Entry',
                 description:
                     'Type fast without worrying about formatting. Enter amounts with commas (1,250.50), European decimals (1.250,50), extra spaces, or accidental currency symbols—we clean it up and handle the math automatically.',
@@ -260,12 +259,12 @@ class WhatsNewContent extends StatelessWidget {
                           width: 32,
                           height: 32,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF6C5CE7).withValues(alpha: 0.16),
+                            color: context.scheme.primary.withValues(alpha: 0.16),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.lightbulb_rounded,
-                            color: Color(0xFF6C5CE7),
+                            color: context.scheme.primary,
                             size: 18,
                           ),
                         ),
@@ -277,7 +276,7 @@ class WhatsNewContent extends StatelessWidget {
                               fontSize: 11,
                               fontWeight: FontWeight.w900,
                               letterSpacing: 1.0,
-                              color: isDark ? const Color(0xFFA29BFE) : const Color(0xFF6C5CE7),
+                              color: context.scheme.primary,
                             ),
                           ),
                         ),
@@ -287,9 +286,9 @@ class WhatsNewContent extends StatelessWidget {
                     Text(
                       "We hear you! Many of you asked to tie monthly budgets directly to your real-world bank balance and roll over leftover savings from month to month.\n\nBecause personal financial workflows vary so widely, we are designing a comprehensive, flexible balance & savings engine to handle every scenario without complexity. It's actively in the oven for the big v1.2 release!",
                       style: TextStyle(
-                        fontSize: 12.5,
+                        fontSize: 12,
                         height: 1.45,
-                        color: isDark ? WalletMeltColors.darkTextSecondary : WalletMeltColors.textSecondary,
+                        color: context.scheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -301,14 +300,14 @@ class WhatsNewContent extends StatelessWidget {
               // Version 1.0 Foundation Summary
               _buildSectionBadge(
                 label: 'VERSION 1.0 FOUNDATION',
-                color: const Color(0xFF64748B),
+                color: context.scheme.onSurfaceVariant,
                 isDark: isDark,
               ),
               const SizedBox(height: 14),
 
-              _buildChangelogItem(
+              _buildChangelogItem(context, 
                 icon: Icons.shield_rounded,
-                iconColor: const Color(0xFF64748B),
+                iconColor: context.scheme.onSurfaceVariant,
                 title: '100% Offline & Private',
                 description:
                     'No servers, no tracking, and no clouds. Your financial transactions stay strictly encrypted on your phone.',
@@ -316,9 +315,9 @@ class WhatsNewContent extends StatelessWidget {
               ),
               const SizedBox(height: 14),
 
-              _buildChangelogItem(
+              _buildChangelogItem(context, 
                 icon: Icons.lock_rounded,
-                iconColor: const Color(0xFF64748B),
+                iconColor: context.scheme.onSurfaceVariant,
                 title: 'PIN Lock & Encrypted Backups',
                 description:
                     'Military-grade PBKDF2 encryption protects your manual ZIP export archives, with fast PIN & biometric app locking.',
@@ -339,7 +338,7 @@ class WhatsNewContent extends StatelessWidget {
                     onPressed: onClose,
                     child: const Text(
                       'Awesome, Let’s Go!',
-                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
                     ),
                   ),
                 ),
@@ -377,7 +376,7 @@ class WhatsNewContent extends StatelessWidget {
       child: Text(
         label,
         style: TextStyle(
-          fontSize: 10,
+          fontSize: 11,
           fontWeight: FontWeight.w900,
           letterSpacing: 0.8,
           color: color,
@@ -386,7 +385,7 @@ class WhatsNewContent extends StatelessWidget {
     );
   }
 
-  Widget _buildChangelogItem({
+  Widget _buildChangelogItem(BuildContext context, {
     required IconData icon,
     required Color iconColor,
     required String title,
@@ -416,7 +415,7 @@ class WhatsNewContent extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w800,
-                  color: isDark ? Colors.white : WalletMeltColors.textPrimary,
+                  color: context.scheme.onSurface,
                 ),
               ),
               const SizedBox(height: 3),
@@ -425,7 +424,7 @@ class WhatsNewContent extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 12,
                   height: 1.4,
-                  color: isDark ? WalletMeltColors.darkTextSecondary : WalletMeltColors.textSecondary,
+                  color: context.scheme.onSurfaceVariant,
                 ),
               ),
             ],

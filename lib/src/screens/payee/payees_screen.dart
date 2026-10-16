@@ -167,7 +167,7 @@ class _PayeesScreenState extends State<PayeesScreen> {
               AppSpacing.gapSm,
               Text(
                 'All transactions linked to "${duplicatePayee.name}" will be reassigned to the selected contact. "${duplicatePayee.name}" will be archived.',
-                style: const TextStyle(fontSize: 12, color: WalletMeltColors.textMuted),
+                style: TextStyle(fontSize: 12, color: context.scheme.onSurfaceVariant),
               ),
               AppSpacing.gapMd,
               if (otherPayees.isEmpty)
@@ -227,7 +227,6 @@ class _PayeesScreenState extends State<PayeesScreen> {
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     // Filter payees based on search and soft deleted status
     final filtered = state.payees.where((p) {
@@ -312,7 +311,7 @@ class _PayeesScreenState extends State<PayeesScreen> {
                                                   payee.name,
                                                   style: const TextStyle(
                                                     fontWeight: FontWeight.w800,
-                                                    fontSize: 16,
+                                                    fontSize: 17,
                                                   ),
                                                   overflow: TextOverflow.ellipsis,
                                                 ),
@@ -323,16 +322,16 @@ class _PayeesScreenState extends State<PayeesScreen> {
                                                   padding: const EdgeInsets.symmetric(
                                                       horizontal: 8, vertical: 3),
                                                   decoration: BoxDecoration(
-                                                    color: WalletMeltColors.textMuted
+                                                    color: context.scheme.onSurfaceVariant
                                                         .withValues(alpha: 0.16),
                                                     borderRadius: BorderRadius.circular(6),
                                                   ),
-                                                  child: const Text(
+                                                  child: Text(
                                                     'INACTIVE',
                                                     style: TextStyle(
-                                                      fontSize: 8,
+                                                      fontSize: 11,
                                                       fontWeight: FontWeight.w900,
-                                                      color: WalletMeltColors.textMuted,
+                                                      color: context.scheme.onSurfaceVariant,
                                                     ),
                                                   ),
                                                 ),
@@ -343,14 +342,14 @@ class _PayeesScreenState extends State<PayeesScreen> {
                                             const SizedBox(height: 4),
                                             Row(
                                               children: [
-                                                const Icon(Icons.phone_rounded,
-                                                    size: 13, color: WalletMeltColors.textMuted),
+                                                Icon(Icons.phone_rounded,
+                                                    size: 13, color: context.scheme.onSurfaceVariant),
                                                 const SizedBox(width: 6),
                                                 Text(
                                                   payee.phone!,
-                                                  style: const TextStyle(
+                                                  style: TextStyle(
                                                       fontSize: 12,
-                                                      color: WalletMeltColors.textMuted),
+                                                      color: context.scheme.onSurfaceVariant),
                                                 ),
                                               ],
                                             ),
@@ -372,7 +371,7 @@ class _PayeesScreenState extends State<PayeesScreen> {
                                       child: Text(
                                         '$linkedCount transaction${linkedCount == 1 ? '' : 's'}',
                                         style: TextStyle(
-                                          fontSize: 10,
+                                          fontSize: 11,
                                           fontWeight: FontWeight.bold,
                                           color: theme.colorScheme.primary,
                                         ),
@@ -384,19 +383,17 @@ class _PayeesScreenState extends State<PayeesScreen> {
                                   const SizedBox(height: 10),
                                   Text(
                                     payee.notes!,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 12,
                                       fontStyle: FontStyle.italic,
-                                      color: WalletMeltColors.textMuted,
+                                      color: context.scheme.onSurfaceVariant,
                                     ),
                                   ),
                                 ],
                                 const SizedBox(height: 12),
                                 Divider(
                                   height: 1,
-                                  color: isDark
-                                      ? WalletMeltColors.darkBorder
-                                      : WalletMeltColors.lightBorder,
+                                  color: context.scheme.outlineVariant,
                                 ),
                                 const SizedBox(height: 10),
                                 Row(
@@ -427,9 +424,7 @@ class _PayeesScreenState extends State<PayeesScreen> {
                                           useRootNavigator: true,
                                           builder: (dialogContext) {
                                             return AlertDialog(
-                                              backgroundColor: isDark
-                                                  ? WalletMeltColors.darkSurface
-                                                  : Colors.white,
+                                              backgroundColor: context.scheme.surfaceContainer,
                                               title: Text(hasTransactions ? 'Deactivate Contact?' : 'Delete Contact?'),
                                               content: Text(
                                                 hasTransactions

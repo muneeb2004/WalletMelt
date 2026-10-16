@@ -86,3 +86,4 @@ Six steps only. Add no others.
 - Start every screen from `Scaffold` plus `AppBackground`, consume `colorScheme`, `context.money`, `textTheme` and `AppSpacing`.
 - Need a new colour or text size? Propose a role here and in `lib/src/theme/` first; do not inline it.
 - The guard test `test/theme/design_token_guard_test.dart` enforces a ratchet on raw colours and small fonts; lower its baseline when you migrate code, never raise it.
+- Intentional raw colours: category/user-picked colours, colour-picker and SVG-editor swatches, receipt-viewer image overlay, and white foreground on category-coloured swipe actions.

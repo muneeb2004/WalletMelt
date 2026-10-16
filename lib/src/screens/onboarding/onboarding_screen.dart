@@ -58,7 +58,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       body: AppBackground(
@@ -83,9 +82,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   TextButton(
                     onPressed: _skipOnboarding,
                     style: TextButton.styleFrom(
-                      foregroundColor: isDark
-                          ? WalletMeltColors.darkTextSecondary
-                          : WalletMeltColors.textSecondary,
+                      foregroundColor: context.scheme.onSurfaceVariant,
                     ),
                     child: const Text(
                       'Skip',
@@ -124,15 +121,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(999),
-                color: WalletMeltColors.brand,
+                color: context.scheme.primary,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.16),
+                    color: context.scheme.shadow.withValues(alpha: 0.16),
                     blurRadius: 12,
                     offset: const Offset(0, 6),
                   ),
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
+                    color: context.scheme.shadow.withValues(alpha: 0.08),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -141,8 +138,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size.fromHeight(54),
-                  backgroundColor: WalletMeltColors.brand,
-                  foregroundColor: WalletMeltColors.textPrimary,
+                  backgroundColor: context.scheme.primary,
+                  foregroundColor: context.scheme.onSurface,
                   shadowColor: Colors.transparent,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(999),
@@ -155,7 +152,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 child: Text(
                   _currentPage < 2 ? 'Next Feature' : 'Start Tracking',
                   style: const TextStyle(
-                    fontSize: 16,
+                    fontSize: 17,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 0.4,
                   ),
@@ -165,13 +162,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             const SizedBox(height: 16),
 
             // Bottom privacy assurance line
-            const Row(
+            Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
                   Icons.lock_outline_rounded,
                   size: 14,
-                  color: WalletMeltColors.textMuted,
+                  color: context.scheme.onSurfaceVariant,
                 ),
                 SizedBox(width: 6),
                 Text(
@@ -179,7 +176,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
-                    color: WalletMeltColors.textMuted,
+                    color: context.scheme.onSurfaceVariant,
                     letterSpacing: 0.2,
                   ),
                 ),
@@ -201,7 +198,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           Text(
             '100% Offline & Private',
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: WalletMeltColors.brandDeep,
+                  color: context.scheme.primary,
                   fontWeight: FontWeight.w900,
                 ),
           ),
@@ -228,10 +225,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               children: [
                 Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.security_rounded,
                       size: 28,
-                      color: WalletMeltColors.positive,
+                      color: context.money.incomeText,
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -239,7 +236,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         'Local-First Security',
                         style:
                             Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontSize: 15,
+                                  fontSize: 14,
                                   fontWeight: FontWeight.w900,
                                 ),
                       ),
@@ -284,7 +281,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 18, color: WalletMeltColors.positive),
+        Icon(icon, size: 18, color: context.money.incomeText),
         const SizedBox(width: 12),
         Expanded(
           child: Column(
@@ -294,7 +291,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 title,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w700,
-                      fontSize: 13.5,
+                      fontSize: 14,
                     ),
               ),
               const SizedBox(height: 2),
@@ -322,7 +319,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           Text(
             'Visual Budget Zones',
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: WalletMeltColors.brandDeep,
+                  color: context.scheme.primary,
                   fontWeight: FontWeight.w900,
                 ),
           ),
@@ -349,16 +346,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               children: [
                 Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.signal_cellular_alt_rounded,
                       size: 24,
-                      color: WalletMeltColors.brand,
+                      color: context.scheme.primary,
                     ),
                     const SizedBox(width: 12),
                     Text(
                       'Live Budget Progression',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontSize: 15,
+                            fontSize: 14,
                             fontWeight: FontWeight.w900,
                           ),
                     ),
@@ -370,7 +367,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ratio: 0.35,
                   amountText: '350 / 1,000',
                   icon: Icons.home_rounded,
-                  color: WalletMeltColors.positive,
+                  color: context.money.incomeText,
                 ),
                 const SizedBox(height: 16),
                 _buildSimulatedBudgetBar(
@@ -378,7 +375,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ratio: 0.78,
                   amountText: '390 / 500',
                   icon: Icons.shopping_basket_rounded,
-                  color: WalletMeltColors.brand,
+                  color: context.scheme.primary,
                 ),
                 const SizedBox(height: 16),
                 _buildSimulatedBudgetBar(
@@ -386,7 +383,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ratio: 1.05,
                   amountText: '210 / 200',
                   icon: Icons.bolt_rounded,
-                  color: WalletMeltColors.danger,
+                  color: context.scheme.error,
                 ),
               ],
             ),
@@ -416,7 +413,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 Text(
                   category,
                   style: const TextStyle(
-                      fontSize: 13, fontWeight: FontWeight.w700),
+                      fontSize: 12, fontWeight: FontWeight.w700),
                 ),
               ],
             ),
@@ -454,11 +451,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _buildPageThree(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final receiptBg =
-        isDark ? const Color(0xFF16161C) : const Color(0xFFFAF9F6);
+        context.scheme.surfaceContainer;
     final receiptBorderColor =
-        isDark ? const Color(0x28FFFFFF) : const Color(0x28000000);
+        context.scheme.surfaceContainer;
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
@@ -469,7 +465,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           Text(
             'Itemized Tracking',
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: WalletMeltColors.brandDeep,
+                  color: context.scheme.primary,
                   fontWeight: FontWeight.w900,
                 ),
           ),
@@ -512,30 +508,30 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           'WHOLE FOODS MARKET',
                           style: TextStyle(
                             fontFamily: 'Courier',
-                            fontSize: 13,
+                            fontSize: 12,
                             fontWeight: FontWeight.w900,
                           ),
                         ),
                       ),
-                      const Center(
+                      Center(
                         child: Text(
                           'Store #10432 - Austin, TX',
                           style: TextStyle(
                             fontFamily: 'Courier',
-                            fontSize: 10,
-                            color: WalletMeltColors.textMuted,
+                            fontSize: 11,
+                            color: context.scheme.onSurfaceVariant,
                           ),
                         ),
                       ),
                       const SizedBox(height: 8),
-                      const DottedLine(color: WalletMeltColors.textMuted),
+                      DottedLine(color: context.scheme.onSurfaceVariant),
                       const SizedBox(height: 8),
                       _buildReceiptItem('Whole Wheat Bread', 'x1', '\$3.50'),
                       _buildReceiptItem(
                           'Organic Whole Milk', 'x2 gal', '\$7.00'),
                       _buildReceiptItem('Fresh Bananas', 'x2.4 lbs', '\$2.28'),
                       const SizedBox(height: 8),
-                      const DottedLine(color: WalletMeltColors.textMuted),
+                      DottedLine(color: context.scheme.onSurfaceVariant),
                       const SizedBox(height: 8),
                       const Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -544,7 +540,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             'TOTAL',
                             style: TextStyle(
                               fontFamily: 'Courier',
-                              fontSize: 13,
+                              fontSize: 12,
                               fontWeight: FontWeight.w900,
                             ),
                           ),
@@ -552,7 +548,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             '\$12.78',
                             style: TextStyle(
                               fontFamily: 'Courier',
-                              fontSize: 13,
+                              fontSize: 12,
                               fontWeight: FontWeight.w900,
                             ),
                           ),
@@ -580,7 +576,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                   ),
                   dropdownColor:
-                      isDark ? WalletMeltColors.darkSurface : Colors.white,
+                      context.scheme.surfaceContainer,
                   borderRadius: BorderRadius.circular(20),
                   isExpanded: true,
                   items: [
@@ -657,10 +653,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 const SizedBox(width: 4),
                 Text(
                   qty,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Courier',
                     fontSize: 11,
-                    color: WalletMeltColors.textSecondary,
+                    color: context.scheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -714,9 +710,9 @@ class PageIndicator extends StatelessWidget {
 }
 
 class DottedLine extends StatelessWidget {
-  const DottedLine({super.key, this.color = Colors.grey});
+  const DottedLine({super.key, this.color});
 
-  final Color color;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -734,7 +730,7 @@ class DottedLine extends StatelessWidget {
               width: dashWidth,
               height: dashHeight,
               child: DecoratedBox(
-                decoration: BoxDecoration(color: color),
+                decoration: BoxDecoration(color: color ?? context.scheme.onSurfaceVariant),
               ),
             );
           }),

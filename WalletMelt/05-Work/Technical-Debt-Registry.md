@@ -75,11 +75,11 @@ related:
 
 
 ### TD-010: Legacy raw colours and small fonts outside the theme
-- **Problem**: After [[ADR-0010-Tonal-Material3-Design-System-and-Brand]] the theme, shell, dashboard and card primitive follow the Tonal system, but about 687 raw colour literals and 26 font sizes below 11 remain (down from 1,080 and 50). History, Add expense, Planning, Budget, Subscriptions, Essentials and Debts are migrated except white foregrounds on category-coloured actions; Settings, Insights, Security, Onboarding, Receipt viewer, Merchants, Payees and What's new are not.
+- **Problem**: After [[ADR-0010-Tonal-Material3-Design-System-and-Brand]] every screen and shared widget follows the Tonal system. 96 raw colour literals and 2 font sizes below 11 remain (down from 1,080 and 50), all intentional or low-value: white foregrounds on category-coloured actions, the receipt viewer (image overlay), the colour picker and SVG editor swatches, and a few overlays.
 - **Impact**: Some screens still look slightly off-system, especially dark-mode text that uses fixed `WalletMeltColors` status constants instead of `context.money` text colours.
 - **Also**: `test/screenshots/publication_screenshot_test.dart` hangs 10 minutes after its first capture, verified identical on pristine HEAD (not caused by the redesign). Publication screenshots in `walletmelt_screenshots/` still show the old UI until that is fixed and they are regenerated.
 - **Guard**: `test/theme/design_token_guard_test.dart` fails if either count rises (ratchet). Lower the baselines when migrating.
-- **Priority**: Medium. Migrate screen by screen (History, Add expense, Planning, Debts, Settings), not in one sweep.
+- **Priority**: Low. Remaining literals are mostly legitimate (swatches, image overlays); review before lowering further.
 - **Related Code**: `lib/src/screens/`, `lib/src/widgets/`, `lib/src/components/`
 
 ---

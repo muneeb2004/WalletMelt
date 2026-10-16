@@ -41,22 +41,20 @@ class WMBiometricButton extends StatelessWidget {
                 },
           borderRadius: BorderRadius.circular(100),
           splashColor: isDark
-              ? WalletMeltColors.brand.withValues(alpha: 0.12)
-              : Colors.black.withValues(alpha: 0.06),
+              ? context.scheme.primary.withValues(alpha: 0.12)
+              : context.scheme.shadow.withValues(alpha: 0.06),
           highlightColor: isDark
-              ? WalletMeltColors.brand.withValues(alpha: 0.06)
-              : Colors.black.withValues(alpha: 0.03),
+              ? context.scheme.primary.withValues(alpha: 0.06)
+              : context.scheme.shadow.withValues(alpha: 0.03),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(100),
               color: isDark
-                  ? WalletMeltColors.darkSurface.withValues(alpha: disabled ? 0.3 : 0.6)
+                  ? context.scheme.surfaceContainer.withValues(alpha: disabled ? 0.3 : 0.6)
                   : Colors.white.withValues(alpha: disabled ? 0.4 : 0.8),
               border: Border.all(
-                color: isDark
-                    ? WalletMeltColors.darkBorder
-                    : WalletMeltColors.lightBorder,
+                color: context.scheme.outlineVariant,
                 width: 1.0,
               ),
             ),
@@ -66,19 +64,15 @@ class WMBiometricButton extends StatelessWidget {
                 Icon(
                   resolvedIcon,
                   size: 18,
-                  color: isDark
-                      ? WalletMeltColors.brand
-                      : WalletMeltColors.textPrimary,
+                  color: context.scheme.primary,
                 ),
                 const SizedBox(width: 8),
                 Text(
                   'Unlock with $label',
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: isDark
-                        ? WalletMeltColors.darkTextPrimary
-                        : WalletMeltColors.textPrimary,
+                    color: context.scheme.onSurface,
                     letterSpacing: 0.1,
                   ),
                 ),

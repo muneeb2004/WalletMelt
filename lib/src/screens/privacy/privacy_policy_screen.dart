@@ -42,7 +42,7 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         backgroundColor: Theme.of(context).brightness == Brightness.dark
-            ? WalletMeltColors.darkSurface
+            ? context.scheme.surfaceContainer
             : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text(
@@ -60,7 +60,7 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
           ),
           FilledButton(
             style: FilledButton.styleFrom(
-              backgroundColor: Colors.redAccent,
+              backgroundColor: context.scheme.error,
               foregroundColor: Colors.white,
             ),
             onPressed: () {
@@ -117,12 +117,12 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: WalletMeltColors.brand.withValues(alpha: 0.15),
+                            color: context.scheme.primary.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.shield_rounded,
-                            color: WalletMeltColors.brand,
+                            color: context.scheme.primary,
                             size: 24,
                           ),
                         ),
@@ -138,13 +138,13 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
                                   : 'Privacy Policy',
                               style: theme.textTheme.titleLarge?.copyWith(
                                 fontWeight: FontWeight.w900,
-                                fontSize: 20,
+                                fontSize: 22,
                               ),
                             ),
                             Text(
                               'Last Updated: August 26, 2026',
                               style: theme.textTheme.bodySmall?.copyWith(
-                                color: WalletMeltColors.textMuted,
+                                color: context.scheme.onSurfaceVariant,
                                 fontSize: 11,
                               ),
                             ),
@@ -172,9 +172,9 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
                             children: [
                               Row(
                                 children: [
-                                  const Icon(
+                                  Icon(
                                     Icons.verified_user_rounded,
-                                    color: WalletMeltColors.brand,
+                                    color: context.scheme.primary,
                                     size: 20,
                                   ),
                                   const SizedBox(width: 8),
@@ -183,7 +183,7 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
                                       '100% On-Device & Offline Architecture',
                                       style: theme.textTheme.titleSmall?.copyWith(
                                         fontWeight: FontWeight.w800,
-                                        color: isDark ? Colors.white : Colors.black87,
+                                        color: context.scheme.onSurface,
                                       ),
                                     ),
                                   ),
@@ -195,9 +195,7 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
                                 'All financial records, receipts, and PINs remain stored exclusively in encrypted SQLite storage on your physical device.',
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   height: 1.45,
-                                  color: isDark
-                                      ? WalletMeltColors.darkTextSecondary
-                                      : WalletMeltColors.textSecondary,
+                                  color: context.scheme.onSurfaceVariant,
                                 ),
                               ),
                             ],
@@ -349,11 +347,11 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
                     padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
                     decoration: BoxDecoration(
                       color: isDark
-                          ? WalletMeltColors.darkSurface.withValues(alpha: 0.95)
+                          ? context.scheme.surfaceContainer.withValues(alpha: 0.95)
                           : Colors.white.withValues(alpha: 0.95),
                       border: Border(
                         top: BorderSide(
-                          color: isDark ? Colors.white10 : Colors.black12,
+                          color: context.scheme.outlineVariant,
                         ),
                       ),
                     ),
@@ -388,8 +386,8 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
                           children: [
                             FilledButton(
                               style: FilledButton.styleFrom(
-                                backgroundColor: WalletMeltColors.brand,
-                                foregroundColor: WalletMeltColors.textPrimary,
+                                backgroundColor: context.scheme.primary,
+                                foregroundColor: context.scheme.onSurface,
                                 padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 24),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(16),
@@ -402,7 +400,7 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
                                 'Accept & Continue',
                                 style: TextStyle(
                                   fontWeight: FontWeight.w800,
-                                  fontSize: 15.5,
+                                  fontSize: 14,
                                 ),
                               ),
                             ),
@@ -414,7 +412,7 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
                                   borderRadius: BorderRadius.circular(16),
                                 ),
                                 side: BorderSide(
-                                  color: isDark ? Colors.white24 : Colors.black26,
+                                  color: context.scheme.outlineVariant,
                                 ),
                               ),
                               onPressed: _onDeclineAndExit,
@@ -456,17 +454,14 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
   }
 
   Widget _buildParagraph(String text) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Text(
         text,
         style: TextStyle(
-          fontSize: 13,
+          fontSize: 12,
           height: 1.5,
-          color: isDark
-              ? WalletMeltColors.darkTextSecondary
-              : WalletMeltColors.textSecondary,
+          color: context.scheme.onSurfaceVariant,
         ),
       ),
     );

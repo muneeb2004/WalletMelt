@@ -22,10 +22,10 @@ class InsightCardShell extends StatelessWidget {
 
   Color _severityColor(BuildContext context) {
     return switch (card.severity) {
-      InsightSeverity.alert => WalletMeltColors.danger,
-      InsightSeverity.warning => WalletMeltColors.warning,
-      InsightSeverity.positive => WalletMeltColors.positive,
-      InsightSeverity.info => WalletMeltColors.brand,
+      InsightSeverity.alert => context.scheme.error,
+      InsightSeverity.warning => context.money.cautionText,
+      InsightSeverity.positive => context.money.incomeText,
+      InsightSeverity.info => context.scheme.primary,
     };
   }
 
@@ -37,7 +37,6 @@ class InsightCardShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final sevColor = _severityColor(context);
 
     return Container(
@@ -67,7 +66,7 @@ class InsightCardShell extends StatelessWidget {
                   child: Text(
                     _headerPillText(),
                     style: TextStyle(
-                      fontSize: 10,
+                      fontSize: 11,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 0.8,
                       color: sevColor,
@@ -80,7 +79,7 @@ class InsightCardShell extends StatelessWidget {
                     card.period!,
                     style: TextStyle(
                       fontSize: 12,
-                      color: isDark ? WalletMeltColors.darkTextSecondary : WalletMeltColors.textSecondary,
+                      color: context.scheme.onSurfaceVariant,
                     ),
                   ),
               ],
@@ -91,16 +90,16 @@ class InsightCardShell extends StatelessWidget {
               style: TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.w700,
-                color: isDark ? WalletMeltColors.darkTextPrimary : WalletMeltColors.textPrimary,
+                color: context.scheme.onSurface,
               ),
             ),
             const SizedBox(height: AppSpacing.xs),
             Text(
               card.description,
               style: TextStyle(
-                fontSize: 13,
+                fontSize: 12,
                 height: 1.35,
-                color: isDark ? WalletMeltColors.darkTextSecondary : WalletMeltColors.textSecondary,
+                color: context.scheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: AppSpacing.md),
@@ -123,7 +122,7 @@ class InsightCardShell extends StatelessWidget {
                   child: Text(
                     card.action!.label,
                     style: const TextStyle(
-                      fontSize: 13,
+                      fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),
                   ),

@@ -92,7 +92,7 @@ class _MerchantsScreenState extends State<MerchantsScreen> {
                                 CategoryIcon(
                                   icon: c.icon,
                                   size: 16,
-                                  color: WalletMeltColors.brand,
+                                  color: context.scheme.primary,
                                 ),
                                 const SizedBox(width: 8),
                                 Text(c.name),
@@ -124,7 +124,7 @@ class _MerchantsScreenState extends State<MerchantsScreen> {
                       title: const Text('Mark as Favorite', style: TextStyle(fontWeight: FontWeight.w600)),
                       subtitle: const Text('Pins merchant to top of suggestions in Add Expense'),
                       value: isFavorite,
-                      activeThumbColor: WalletMeltColors.brand,
+                      activeThumbColor: context.scheme.primary,
                       onChanged: (val) {
                         setSheetState(() {
                           isFavorite = val;
@@ -216,7 +216,6 @@ class _MerchantsScreenState extends State<MerchantsScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final state = context.watch<AppState>();
-    final isDark = theme.brightness == Brightness.dark;
 
     final allSaved = state.savedMerchants;
     final filtered = allSaved.where((m) {
@@ -306,7 +305,7 @@ class _MerchantsScreenState extends State<MerchantsScreen> {
                                   tooltip: merchant.isFavorite ? 'Unpin favorite' : 'Pin to favorites',
                                   icon: Icon(
                                     merchant.isFavorite ? Icons.star_rounded : Icons.star_outline_rounded,
-                                    color: merchant.isFavorite ? Colors.amber : WalletMeltColors.textMuted,
+                                    color: merchant.isFavorite ? context.money.caution : context.scheme.onSurfaceVariant,
                                     size: 24,
                                   ),
                                   onPressed: () => state.toggleMerchantFavorite(merchant.id),
@@ -329,7 +328,7 @@ class _MerchantsScreenState extends State<MerchantsScreen> {
                                             Container(
                                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                               decoration: BoxDecoration(
-                                                color: WalletMeltColors.brand.withValues(alpha: 0.12),
+                                                color: context.scheme.primary.withValues(alpha: 0.12),
                                                 borderRadius: BorderRadius.circular(6),
                                               ),
                                               child: Row(
@@ -338,7 +337,7 @@ class _MerchantsScreenState extends State<MerchantsScreen> {
                                                   CategoryIcon(
                                                     icon: category.icon,
                                                     size: 12,
-                                                    color: WalletMeltColors.brand,
+                                                    color: context.scheme.primary,
                                                   ),
                                                   const SizedBox(width: 4),
                                                   Text(
@@ -346,7 +345,7 @@ class _MerchantsScreenState extends State<MerchantsScreen> {
                                                     style: TextStyle(
                                                       fontSize: 11,
                                                       fontWeight: FontWeight.w600,
-                                                      color: isDark ? WalletMeltColors.brandSoft : WalletMeltColors.brandDeep,
+                                                      color: context.scheme.primary,
                                                     ),
                                                   ),
                                                 ],
@@ -361,7 +360,7 @@ class _MerchantsScreenState extends State<MerchantsScreen> {
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
                                                 style: theme.textTheme.bodySmall?.copyWith(
-                                                  color: WalletMeltColors.textMuted,
+                                                  color: context.scheme.onSurfaceVariant,
                                                 ),
                                               ),
                                             ),

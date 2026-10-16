@@ -33,7 +33,7 @@ class _RestoreSummaryDialogState extends State<RestoreSummaryDialog> {
     final hasWarnings = widget.result.warnings.isNotEmpty;
 
     return Dialog(
-      backgroundColor: isDark ? const Color(0xFF161616) : const Color(0xFFFAFAF6),
+      backgroundColor: context.scheme.surfaceContainer,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
       insetPadding: const EdgeInsets.symmetric(horizontal: 16.0 /* AppSpacing.md */, vertical: 24.0 /* AppSpacing.lg */),
       child: ConstrainedBox(
@@ -48,12 +48,12 @@ class _RestoreSummaryDialogState extends State<RestoreSummaryDialog> {
                 width: 64,
                 height: 64,
                 decoration: BoxDecoration(
-                  color: Colors.green.withValues(alpha: 0.15),
+                  color: context.money.incomeText.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.check_circle_rounded,
-                  color: Colors.green,
+                  color: context.money.incomeText,
                   size: 40,
                 ),
               ),
@@ -99,7 +99,7 @@ class _RestoreSummaryDialogState extends State<RestoreSummaryDialog> {
                     ),
                     label: Text(
                       _showDetails ? 'Hide Warnings' : 'View Warnings (${widget.result.warnings.length})',
-                      style: const TextStyle(fontSize: 13),
+                      style: const TextStyle(fontSize: 12),
                     ),
                   ),
                 ),
@@ -110,7 +110,7 @@ class _RestoreSummaryDialogState extends State<RestoreSummaryDialog> {
                     padding: const EdgeInsets.all(12),
                     margin: const EdgeInsets.only(top: 8),
                     decoration: BoxDecoration(
-                      color: isDark ? Colors.white.withValues(alpha: 0.04) : Colors.black.withValues(alpha: 0.03),
+                      color: context.scheme.onSurface.withValues(alpha: 0.03),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: SingleChildScrollView(
@@ -122,7 +122,7 @@ class _RestoreSummaryDialogState extends State<RestoreSummaryDialog> {
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Icon(Icons.warning_amber_rounded, size: 14, color: WalletMeltColors.warning),
+                                Icon(Icons.warning_amber_rounded, size: 14, color: context.money.cautionText),
                                 const SizedBox(width: 6),
                                 Expanded(
                                   child: Text(
@@ -146,7 +146,7 @@ class _RestoreSummaryDialogState extends State<RestoreSummaryDialog> {
                 height: 48,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: WalletMeltColors.brand,
+                    backgroundColor: context.scheme.primary,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -171,13 +171,13 @@ class _RestoreSummaryDialogState extends State<RestoreSummaryDialog> {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 6),
-          child: Text(label, style: const TextStyle(color: Colors.grey, fontSize: 13)),
+          child: Text(label, style: TextStyle(color: context.scheme.onSurfaceVariant, fontSize: 12)),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 6),
           child: Text(
             value,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
             textAlign: TextAlign.right,
           ),
         ),

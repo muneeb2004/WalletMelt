@@ -17,7 +17,6 @@ class CategoryBreakdownChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final state = context.watch<AppState>();
     final currency = state.settings.currency;
 
@@ -149,7 +148,7 @@ class CategoryBreakdownChart extends StatelessWidget {
                                         builder: (context, value, child) {
                                           return LinearProgressIndicator(
                                             value: value,
-                                            backgroundColor: isDark ? Colors.white12 : Colors.black12,
+                                            backgroundColor: context.scheme.outlineVariant,
                                             valueColor: AlwaysStoppedAnimation<Color>(
                                               colorFromHex(item.category.color),
                                             ),
@@ -164,7 +163,7 @@ class CategoryBreakdownChart extends StatelessWidget {
                                     '${(item.percentOfTotal * 100).toStringAsFixed(0)}%',
                                     style: theme.textTheme.bodySmall?.copyWith(
                                       fontFamily: 'PlusJakartaSans',
-                                      color: WalletMeltColors.textMuted,
+                                      color: context.scheme.onSurfaceVariant,
                                       fontWeight: FontWeight.bold,
                                       fontFeatures: const [FontFeature.tabularFigures()],
                                     ),

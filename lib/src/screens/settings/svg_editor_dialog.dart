@@ -49,7 +49,7 @@ class _SvgEditorDialogState extends State<SvgEditorDialog> {
     Color(0xFFA78BFA), // Purple
     Color(0xFFFB923C), // Orange
     Color(0xFF2DD4BF), // Teal
-    Color(0xFFE2E8F0), // Off White
+    Color(0xFFF1F5F9), // Off White
   ];
 
   @override
@@ -187,7 +187,7 @@ class _SvgEditorDialogState extends State<SvgEditorDialog> {
           ),
           FilledButton(
             style: FilledButton.styleFrom(
-              backgroundColor: WalletMeltColors.danger,
+              backgroundColor: context.scheme.error,
             ),
             onPressed: () => Navigator.of(ctx).pop(true),
             child: const Text('Reset'),
@@ -217,10 +217,10 @@ class _SvgEditorDialogState extends State<SvgEditorDialog> {
       ),
       padding: EdgeInsets.only(bottom: bottomInset),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF131720) : Colors.white,
+        color: context.scheme.surfaceContainer,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         border: Border.all(
-          color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder,
+          color: context.scheme.outlineVariant,
           width: 1.0,
         ),
       ),
@@ -240,9 +240,7 @@ class _SvgEditorDialogState extends State<SvgEditorDialog> {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: isDark
-                          ? Colors.white.withValues(alpha: 0.2)
-                          : Colors.black.withValues(alpha: 0.15),
+                      color: context.scheme.onSurface.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -270,19 +268,15 @@ class _SvgEditorDialogState extends State<SvgEditorDialog> {
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 6, vertical: 2),
                                   decoration: BoxDecoration(
-                                    color: isDark
-                                        ? Colors.white.withValues(alpha: 0.08)
-                                        : Colors.black.withValues(alpha: 0.06),
+                                    color: context.scheme.onSurface.withValues(alpha: 0.06),
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(
                                     widget.iconItem.type.name.toUpperCase(),
                                     style: TextStyle(
-                                      fontSize: 10,
+                                      fontSize: 11,
                                       fontWeight: FontWeight.w700,
-                                      color: isDark
-                                          ? const Color(0xFF94A3B8)
-                                          : const Color(0xFF64748B),
+                                      color: context.scheme.onSurfaceVariant,
                                     ),
                                   ),
                                 ),
@@ -293,16 +287,16 @@ class _SvgEditorDialogState extends State<SvgEditorDialog> {
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 6, vertical: 2),
                                     decoration: BoxDecoration(
-                                      color: WalletMeltColors.brand
+                                      color: context.scheme.primary
                                           .withValues(alpha: 0.2),
                                       borderRadius: BorderRadius.circular(4),
                                     ),
-                                    child: const Text(
+                                    child: Text(
                                       'CUSTOMIZED',
                                       style: TextStyle(
-                                        fontSize: 10,
+                                        fontSize: 11,
                                         fontWeight: FontWeight.w800,
-                                        color: WalletMeltColors.brand,
+                                        color: context.scheme.primary,
                                       ),
                                     ),
                                   ),
@@ -335,9 +329,7 @@ class _SvgEditorDialogState extends State<SvgEditorDialog> {
                           fontSize: 11,
                           fontWeight: FontWeight.w800,
                           letterSpacing: 0.8,
-                          color: isDark
-                              ? const Color(0xFF94A3B8)
-                              : const Color(0xFF64748B),
+                          color: context.scheme.onSurfaceVariant,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -378,9 +370,7 @@ class _SvgEditorDialogState extends State<SvgEditorDialog> {
                               fontSize: 11,
                               fontWeight: FontWeight.w800,
                               letterSpacing: 0.8,
-                              color: isDark
-                                  ? const Color(0xFF94A3B8)
-                                  : const Color(0xFF64748B),
+                              color: context.scheme.onSurfaceVariant,
                             ),
                           ),
                           TextButton.icon(
@@ -414,7 +404,7 @@ class _SvgEditorDialogState extends State<SvgEditorDialog> {
                                   shape: BoxShape.circle,
                                   border: Border.all(
                                     color: isSelected
-                                        ? (isDark ? Colors.white : Colors.black)
+                                        ? (context.scheme.onSurface)
                                         : Colors.white.withValues(alpha: 0.3),
                                     width: isSelected ? 2.5 : 1.0,
                                   ),
@@ -454,24 +444,22 @@ class _SvgEditorDialogState extends State<SvgEditorDialog> {
                               fontSize: 11,
                               fontWeight: FontWeight.w800,
                               letterSpacing: 0.8,
-                              color: isDark
-                                  ? const Color(0xFF94A3B8)
-                                  : const Color(0xFF64748B),
+                              color: context.scheme.onSurfaceVariant,
                             ),
                           ),
                           if (_validationError == null)
                             Row(
                               mainAxisSize: MainAxisSize.min,
-                              children: const [
+                              children: [
                                 Icon(Icons.check_circle_rounded,
-                                    size: 14, color: WalletMeltColors.positive),
+                                    size: 14, color: context.money.incomeText),
                                 SizedBox(width: 4),
                                 Text(
                                   'Valid SVG',
                                   style: TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w700,
-                                    color: WalletMeltColors.positive,
+                                    color: context.money.incomeText,
                                   ),
                                 ),
                               ],
@@ -482,16 +470,12 @@ class _SvgEditorDialogState extends State<SvgEditorDialog> {
 
                       Container(
                         decoration: BoxDecoration(
-                          color: isDark
-                              ? const Color(0xFF0D1117)
-                              : const Color(0xFFF1F5F9),
+                          color: context.scheme.surfaceContainer,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
                             color: _validationError != null
-                                ? WalletMeltColors.danger
-                                : (isDark
-                                    ? WalletMeltColors.darkBorder
-                                    : WalletMeltColors.lightBorder),
+                                ? context.scheme.error
+                                : (context.scheme.outlineVariant),
                             width: 1.0,
                           ),
                         ),
@@ -501,8 +485,8 @@ class _SvgEditorDialogState extends State<SvgEditorDialog> {
                           onChanged: _validateCode,
                           style: TextStyle(
                             fontFamily: 'monospace',
-                            fontSize: 12.5,
-                            color: isDark ? Colors.white : Colors.black87,
+                            fontSize: 12,
+                            color: context.scheme.onSurface,
                             height: 1.35,
                           ),
                           decoration: const InputDecoration(
@@ -519,24 +503,24 @@ class _SvgEditorDialogState extends State<SvgEditorDialog> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 10, vertical: 8),
                           decoration: BoxDecoration(
-                            color: WalletMeltColors.danger.withValues(alpha: 0.12),
+                            color: context.scheme.error.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: WalletMeltColors.danger.withValues(alpha: 0.3),
+                              color: context.scheme.error.withValues(alpha: 0.3),
                               width: 1.0,
                             ),
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.warning_amber_rounded,
-                                  size: 16, color: WalletMeltColors.danger),
+                              Icon(Icons.warning_amber_rounded,
+                                  size: 16, color: context.scheme.error),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   _validationError!,
-                                  style: const TextStyle(
-                                    fontSize: 11.5,
-                                    color: WalletMeltColors.danger,
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: context.scheme.error,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -560,9 +544,9 @@ class _SvgEditorDialogState extends State<SvgEditorDialog> {
                           .isCustomized(widget.iconItem.id)) ...[
                         OutlinedButton(
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: WalletMeltColors.danger,
+                            foregroundColor: context.scheme.error,
                             side: BorderSide(
-                              color: WalletMeltColors.danger.withValues(alpha: 0.5),
+                              color: context.scheme.error.withValues(alpha: 0.5),
                             ),
                           ),
                           onPressed: _isSaving ? null : _resetToDefault,
@@ -573,7 +557,7 @@ class _SvgEditorDialogState extends State<SvgEditorDialog> {
                       Expanded(
                         child: FilledButton(
                           style: FilledButton.styleFrom(
-                            backgroundColor: WalletMeltColors.brand,
+                            backgroundColor: context.scheme.primary,
                             padding: const EdgeInsets.symmetric(vertical: 14),
                           ),
                           onPressed: (_validationError != null || _isSaving)
@@ -619,15 +603,15 @@ class _SvgEditorDialogState extends State<SvgEditorDialog> {
           height: size + 20,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF1E2430) : const Color(0xFFE2E8F0),
+            color: context.scheme.surfaceContainer,
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: isDark ? Colors.white12 : Colors.black12,
+              color: context.scheme.outlineVariant,
               width: 0.8,
             ),
           ),
           child: _validationError != null
-              ? const Icon(Icons.broken_image_rounded, size: 20, color: Colors.grey)
+              ? Icon(Icons.broken_image_rounded, size: 20, color: context.scheme.onSurfaceVariant)
               : SvgPicture.string(
                   _currentSvgCode,
                   width: size,
@@ -640,9 +624,9 @@ class _SvgEditorDialogState extends State<SvgEditorDialog> {
         Text(
           label,
           style: TextStyle(
-            fontSize: 10.5,
+            fontSize: 11,
             fontWeight: FontWeight.w600,
-            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+            color: context.scheme.onSurfaceVariant,
           ),
         ),
       ],

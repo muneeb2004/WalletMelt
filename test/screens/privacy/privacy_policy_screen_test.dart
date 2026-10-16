@@ -48,29 +48,20 @@ void main() {
       expect(find.text('100% On-Device & Offline Architecture'), findsOneWidget);
       expect(find.text('0. Plain-Language Summary'), findsOneWidget);
 
-      await tester.scrollUntilVisible(
-        find.text('1. About This App and the Developer'),
-        300,
-      );
-      expect(find.text('1. About This App and the Developer'), findsOneWidget);
-
-      await tester.scrollUntilVisible(
-        find.text('9. Disclaimer of Warranties'),
-        500,
-      );
-      expect(find.text('9. Disclaimer of Warranties'), findsOneWidget);
-
-      await tester.scrollUntilVisible(
-        find.text('10. Limitation of Liability'),
-        500,
-      );
-      expect(find.text('10. Limitation of Liability'), findsOneWidget);
-
-      await tester.scrollUntilVisible(
-        find.text('14. Contact'),
-        500,
-      );
-      expect(find.text('14. Contact'), findsOneWidget);
+      // Drag the policy list in steps until each section is built; independent
+      // of text metrics.
+      for (final title in [
+        '1. About This App and the Developer',
+        '9. Disclaimer of Warranties',
+        '10. Limitation of Liability',
+        '14. Contact',
+      ]) {
+        for (var i = 0; i < 80 && find.text(title).evaluate().isEmpty; i++) {
+          await tester.drag(find.byType(ListView).first, const Offset(0, -200));
+          await tester.pump();
+        }
+        expect(find.text(title), findsOneWidget);
+      }
     });
 
 

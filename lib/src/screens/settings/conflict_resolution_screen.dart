@@ -107,7 +107,7 @@ class _ConflictResolutionScreenState extends State<ConflictResolutionScreen> {
     final isDark = theme.brightness == Brightness.dark;
     
     return Scaffold(
-      backgroundColor: isDark ? WalletMeltColors.darkBackgroundAlt : const Color(0xFFF7F7F4),
+      backgroundColor: context.scheme.surfaceContainer,
       appBar: AppBar(
         title: const Text('Resolve Conflicts', style: TextStyle(fontWeight: FontWeight.bold)),
         elevation: 0,
@@ -121,11 +121,11 @@ class _ConflictResolutionScreenState extends State<ConflictResolutionScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               margin: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: isDark ? WalletMeltColors.darkSurface : Colors.white,
+                color: context.scheme.surfaceContainer,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
+                    color: context.scheme.shadow.withValues(alpha: isDark ? 0.2 : 0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -206,10 +206,10 @@ class _ConflictResolutionScreenState extends State<ConflictResolutionScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+                color: context.scheme.surfaceContainer,
                 border: Border(
                   top: BorderSide(
-                    color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.1),
+                    color: context.scheme.outlineVariant,
                   ),
                 ),
               ),
@@ -218,7 +218,7 @@ class _ConflictResolutionScreenState extends State<ConflictResolutionScreen> {
                 height: 52,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: WalletMeltColors.brand,
+                    backgroundColor: context.scheme.primary,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
@@ -227,7 +227,7 @@ class _ConflictResolutionScreenState extends State<ConflictResolutionScreen> {
                   onPressed: () => widget.onResolved(_resolutions),
                   child: const Text(
                     'Resolve & Save Conflicts',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -260,7 +260,6 @@ class _ConflictCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     
     final backupTitle = backupExpense['title']?.toString() ?? 'Untitled';
     final backupAmount = backupExpense['amount'] is num 
@@ -273,14 +272,14 @@ class _ConflictCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF161616) : Colors.white,
+        color: context.scheme.surfaceContainer,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: currentChoice == ConflictResolution.keepExisting
-              ? Colors.blue.withValues(alpha: 0.3)
+              ? context.scheme.primary.withValues(alpha: 0.3)
               : currentChoice == ConflictResolution.useBackup
-                  ? Colors.green.withValues(alpha: 0.3)
-                  : WalletMeltColors.warning.withValues(alpha: 0.3),
+                  ? context.money.incomeText.withValues(alpha: 0.3)
+                  : context.money.cautionText.withValues(alpha: 0.3),
           width: 2,
         ),
       ),
@@ -296,17 +295,17 @@ class _ConflictCard extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: isDark ? Colors.white.withValues(alpha: 0.03) : Colors.black.withValues(alpha: 0.02),
+                      color: context.scheme.onSurface.withValues(alpha: 0.02),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Row(
+                        Row(
                           children: [
-                            Icon(Icons.phone_android, size: 14, color: Colors.blue),
+                            Icon(Icons.phone_android, size: 14, color: context.scheme.primary),
                             SizedBox(width: 4),
-                            Text('LOCAL VERSION', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.blue)),
+                            Text('LOCAL VERSION', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: context.scheme.primary)),
                           ],
                         ),
                         const SizedBox(height: 8),
@@ -314,12 +313,12 @@ class _ConflictCard extends StatelessWidget {
                         const SizedBox(height: 4),
                         Text(
                           formatMoney(localExpense.amount, localExpense.currency),
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 8),
-                        _buildDetailRow(Icons.calendar_today_outlined, localExpense.date),
-                        _buildDetailRow(Icons.category_outlined, localCategoryName),
-                        _buildDetailRow(
+                        _buildDetailRow(context, Icons.calendar_today_outlined, localExpense.date),
+                        _buildDetailRow(context, Icons.category_outlined, localCategoryName),
+                        _buildDetailRow(context, 
                           localExpense.receiptImageUri != null ? Icons.receipt_long : Icons.receipt_long_outlined,
                           localExpense.receiptImageUri != null ? 'Has Receipt' : 'No Receipt',
                         ),
@@ -335,17 +334,17 @@ class _ConflictCard extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: isDark ? Colors.white.withValues(alpha: 0.03) : Colors.black.withValues(alpha: 0.02),
+                      color: context.scheme.onSurface.withValues(alpha: 0.02),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Row(
+                        Row(
                           children: [
-                            Icon(Icons.cloud_upload_outlined, size: 14, color: Colors.green),
+                            Icon(Icons.cloud_upload_outlined, size: 14, color: context.money.incomeText),
                             SizedBox(width: 4),
-                            Text('BACKUP VERSION', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.green)),
+                            Text('BACKUP VERSION', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: context.money.incomeText)),
                           ],
                         ),
                         const SizedBox(height: 8),
@@ -353,12 +352,12 @@ class _ConflictCard extends StatelessWidget {
                         const SizedBox(height: 4),
                         Text(
                           formatMoney(backupAmount, backupCurrency),
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 8),
-                        _buildDetailRow(Icons.calendar_today_outlined, backupDate),
-                        _buildDetailRow(Icons.category_outlined, backupCategoryName),
-                        _buildDetailRow(
+                        _buildDetailRow(context, Icons.calendar_today_outlined, backupDate),
+                        _buildDetailRow(context, Icons.category_outlined, backupCategoryName),
+                        _buildDetailRow(context, 
                           backupHasReceipt ? Icons.receipt_long : Icons.receipt_long_outlined,
                           backupHasReceipt ? 'Has Receipt' : 'No Receipt',
                         ),
@@ -380,10 +379,10 @@ class _ConflictCard extends StatelessWidget {
                   child: OutlinedButton(
                     style: OutlinedButton.styleFrom(
                       backgroundColor: currentChoice == ConflictResolution.keepExisting
-                          ? Colors.blue.withValues(alpha: 0.1)
+                          ? context.scheme.primary.withValues(alpha: 0.1)
                           : Colors.transparent,
                       side: BorderSide(
-                        color: currentChoice == ConflictResolution.keepExisting ? Colors.blue : Colors.transparent,
+                        color: currentChoice == ConflictResolution.keepExisting ? context.scheme.primary : Colors.transparent,
                       ),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
@@ -396,10 +395,10 @@ class _ConflictCard extends StatelessWidget {
                   child: OutlinedButton(
                     style: OutlinedButton.styleFrom(
                       backgroundColor: currentChoice == ConflictResolution.useBackup
-                          ? Colors.green.withValues(alpha: 0.1)
+                          ? context.money.incomeText.withValues(alpha: 0.1)
                           : Colors.transparent,
                       side: BorderSide(
-                        color: currentChoice == ConflictResolution.useBackup ? Colors.green : Colors.transparent,
+                        color: currentChoice == ConflictResolution.useBackup ? context.money.incomeText : Colors.transparent,
                       ),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
@@ -412,10 +411,10 @@ class _ConflictCard extends StatelessWidget {
                   child: OutlinedButton(
                     style: OutlinedButton.styleFrom(
                       backgroundColor: currentChoice == ConflictResolution.mergeFields
-                          ? WalletMeltColors.warning.withValues(alpha: 0.1)
+                          ? context.money.cautionText.withValues(alpha: 0.1)
                           : Colors.transparent,
                       side: BorderSide(
-                        color: currentChoice == ConflictResolution.mergeFields ? WalletMeltColors.warning : Colors.transparent,
+                        color: currentChoice == ConflictResolution.mergeFields ? context.money.cautionText : Colors.transparent,
                       ),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
@@ -431,17 +430,17 @@ class _ConflictCard extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailRow(IconData icon, String text) {
+  Widget _buildDetailRow(BuildContext context, IconData icon, String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
         children: [
-          Icon(icon, size: 12, color: Colors.grey),
+          Icon(icon, size: 12, color: context.scheme.onSurfaceVariant),
           const SizedBox(width: 6),
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(fontSize: 11, color: Colors.grey),
+              style: TextStyle(fontSize: 11, color: context.scheme.onSurfaceVariant),
               overflow: TextOverflow.ellipsis,
             ),
           ),
