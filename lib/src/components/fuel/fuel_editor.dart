@@ -157,7 +157,6 @@ class _FuelEditorState extends State<FuelEditor> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -172,13 +171,13 @@ class _FuelEditorState extends State<FuelEditor> {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: WalletMeltColors.brand.withValues(alpha: 0.15),
+                  color: context.scheme.primary.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.speed_rounded,
                   size: 20,
-                  color: WalletMeltColors.brand,
+                  color: context.scheme.primary,
                 ),
               ),
               const SizedBox(width: 14),
@@ -190,10 +189,10 @@ class _FuelEditorState extends State<FuelEditor> {
                     Text(
                       'ODOMETER READING (OPTIONAL)',
                       style: TextStyle(
-                        fontSize: 10,
+                        fontSize: 11,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 0.8,
-                        color: WalletMeltColors.textMuted,
+                        color: context.scheme.onSurfaceVariant,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -202,15 +201,15 @@ class _FuelEditorState extends State<FuelEditor> {
                       keyboardType:
                           const TextInputType.numberWithOptions(decimal: true),
                       style: TextStyle(
-                        fontSize: 15,
+                        fontSize: 14,
                         fontWeight: FontWeight.w800,
-                        color: isDark ? Colors.white : WalletMeltColors.textPrimary,
+                        color: context.scheme.onSurface,
                       ),
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         hintText: 'e.g. 45200',
                         hintStyle: TextStyle(
                           fontSize: 14,
-                          color: WalletMeltColors.textMuted,
+                          color: context.scheme.onSurfaceVariant,
                           fontWeight: FontWeight.w500,
                         ),
                         border: InputBorder.none,
@@ -231,9 +230,7 @@ class _FuelEditorState extends State<FuelEditor> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: isDark
-                      ? Colors.white.withValues(alpha: 0.08)
-                      : Colors.black.withValues(alpha: 0.05),
+                  color: context.scheme.onSurface.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -241,7 +238,7 @@ class _FuelEditorState extends State<FuelEditor> {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w800,
-                    color: isDark ? WalletMeltColors.darkTextPrimary : WalletMeltColors.textPrimary,
+                    color: context.scheme.onSurface,
                   ),
                 ),
               ),
@@ -261,7 +258,7 @@ class _FuelEditorState extends State<FuelEditor> {
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     fontWeight: FontWeight.w800,
                     letterSpacing: 1.0,
-                    color: WalletMeltColors.textMuted,
+                    color: context.scheme.onSurfaceVariant,
                   ),
             ),
             TextButton.icon(
@@ -273,7 +270,7 @@ class _FuelEditorState extends State<FuelEditor> {
               },
               icon: const Icon(Icons.add_rounded, size: 18),
               label: const Text('Add Fuel Type',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
               style: TextButton.styleFrom(
                 visualDensity: VisualDensity.compact,
                 padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -306,14 +303,10 @@ class _FuelEditorState extends State<FuelEditor> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 10, vertical: 2),
                         decoration: BoxDecoration(
-                          color: isDark
-                              ? Colors.white.withValues(alpha: 0.06)
-                              : Colors.black.withValues(alpha: 0.04),
+                          color: context.scheme.onSurface.withValues(alpha: 0.04),
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
-                            color: isDark
-                                ? Colors.white.withValues(alpha: 0.12)
-                                : Colors.black.withValues(alpha: 0.08),
+                            color: context.scheme.onSurface.withValues(alpha: 0.08),
                           ),
                         ),
                         child: DropdownButtonHideUnderline(
@@ -330,13 +323,13 @@ class _FuelEditorState extends State<FuelEditor> {
                                   children: [
                                     Icon(type.icon,
                                         size: 16,
-                                        color: WalletMeltColors.brand),
+                                        color: context.scheme.primary),
                                     const SizedBox(width: 8),
                                     Text(
                                       type.displayName,
                                       style: const TextStyle(
                                           fontWeight: FontWeight.bold,
-                                          fontSize: 13),
+                                          fontSize: 12),
                                     ),
                                   ],
                                 ),
@@ -357,17 +350,17 @@ class _FuelEditorState extends State<FuelEditor> {
                       // Subtotal for this component
                       Text(
                         formatMoney(row.subtotal, widget.currency),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w800,
                           fontSize: 14,
-                          color: WalletMeltColors.brand,
+                          color: context.scheme.primary,
                         ),
                       ),
                       if (_rows.length > 1) ...[
                         const SizedBox(width: 8),
                         IconButton(
-                          icon: const Icon(Icons.close_rounded,
-                              size: 18, color: WalletMeltColors.textMuted),
+                          icon: Icon(Icons.close_rounded,
+                              size: 18, color: context.scheme.onSurfaceVariant),
                           tooltip: 'Remove',
                           visualDensity: VisualDensity.compact,
                           padding: EdgeInsets.zero,
@@ -382,8 +375,8 @@ class _FuelEditorState extends State<FuelEditor> {
                     const SizedBox(height: 4),
                     Text(
                       'Note: Multiple ${row.fuelType.displayName} entries in this purchase',
-                      style: const TextStyle(
-                          fontSize: 11, color: WalletMeltColors.warning),
+                      style: TextStyle(
+                          fontSize: 11, color: context.money.cautionText),
                     ),
                   ],
                   const SizedBox(height: 10),
@@ -457,30 +450,30 @@ class _FuelEditorState extends State<FuelEditor> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Total Fuel Volume',
+                  Text('Total Fuel Volume',
                       style: TextStyle(
-                          fontSize: 11, color: WalletMeltColors.textMuted)),
+                          fontSize: 11, color: context.scheme.onSurfaceVariant)),
                   const SizedBox(height: 2),
                   Text(
                     '${_totalLitres.toStringAsFixed(_totalLitres % 1 == 0 ? 0 : 2)} Litres',
                     style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 13),
+                        fontWeight: FontWeight.bold, fontSize: 12),
                   ),
                 ],
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  const Text('Fuel Subtotal',
+                  Text('Fuel Subtotal',
                       style: TextStyle(
-                          fontSize: 11, color: WalletMeltColors.textMuted)),
+                          fontSize: 11, color: context.scheme.onSurfaceVariant)),
                   const SizedBox(height: 2),
                   Text(
                     formatMoney(_totalAmount, widget.currency),
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontWeight: FontWeight.w900,
-                        fontSize: 15,
-                        color: WalletMeltColors.brand),
+                        fontSize: 14,
+                        color: context.scheme.primary),
                   ),
                 ],
               ),

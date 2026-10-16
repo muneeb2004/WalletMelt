@@ -379,9 +379,9 @@ class _ReceiptViewerScreenState extends State<ReceiptViewerScreen>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
+                Icon(
                   Icons.broken_image_rounded,
-                  color: WalletMeltColors.danger,
+                  color: context.scheme.error,
                   size: 64,
                 ),
                 const SizedBox(height: 16),
@@ -417,11 +417,11 @@ class _ReceiptViewerScreenState extends State<ReceiptViewerScreen>
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(
+      return Scaffold(
         backgroundColor: Colors.black,
         body: Center(
           child: CircularProgressIndicator(
-            color: WalletMeltColors.brand,
+            color: context.scheme.primary,
           ),
         ),
       );
@@ -602,7 +602,7 @@ class _ReceiptViewerScreenState extends State<ReceiptViewerScreen>
                         Text(
                           formatMoney(expense.amount, state.settings.currency),
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: WalletMeltColors.brand,
+                                color: context.scheme.primary,
                                 fontWeight: FontWeight.w800,
                               ),
                           maxLines: 1,

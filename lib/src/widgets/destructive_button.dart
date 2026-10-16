@@ -43,13 +43,13 @@ class _DestructiveButtonState extends State<DestructiveButton> {
                   const SizedBox(width: AppSpacing.sm),
                   Text(
                     widget.label,
-                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
+                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
                   ),
                 ],
               )
             : Text(
                 widget.label,
-                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
+                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
               );
 
     return AnimatedScale(

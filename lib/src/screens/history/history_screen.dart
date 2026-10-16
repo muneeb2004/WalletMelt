@@ -255,7 +255,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: theme.textTheme.headlineMedium?.copyWith(
-                                  fontSize: 24,
+                                  fontSize: 22,
                                   fontWeight: FontWeight.w900,
                                 ),
                               ),
@@ -264,9 +264,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                 _showRecycleBin
                                     ? 'Restore or permanently delete expenses'
                                     : 'All past expenses and receipts',
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  color: WalletMeltColors.textMuted,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: context.scheme.onSurfaceVariant,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -277,13 +277,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             height: 40,
                             decoration: BoxDecoration(
                               color: _showRecycleBin
-                                  ? (isDark ? WalletMeltColors.darkSurface : Colors.white)
-                                  : WalletMeltColors.danger.withValues(alpha: 0.12),
+                                  ? (context.scheme.surfaceContainer)
+                                  : context.scheme.error.withValues(alpha: 0.12),
                               shape: BoxShape.circle,
                               border: Border.all(
                                 color: _showRecycleBin
-                                    ? (isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder)
-                                    : WalletMeltColors.danger.withValues(alpha: 0.35),
+                                    ? (context.scheme.outlineVariant)
+                                    : context.scheme.error.withValues(alpha: 0.35),
                                 width: 1.0,
                               ),
                             ),
@@ -304,8 +304,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                     : Icons.delete_outline_rounded,
                                 size: 18,
                                 color: _showRecycleBin
-                                    ? (isDark ? Colors.white : WalletMeltColors.textPrimary)
-                                    : WalletMeltColors.danger,
+                                    ? (context.scheme.onSurface)
+                                    : context.scheme.error,
                               ),
                             ),
                           ),
@@ -317,15 +317,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       // ── Search Bar (Directive 2: flat translucent fill, no BackdropFilter) ──
                       Container(
                         decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF0C0E14) : Colors.white,
+                          color: context.scheme.surfaceContainer,
                           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                           border: Border.all(
-                            color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder,
+                            color: context.scheme.outlineVariant,
                             width: 1.0,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: isDark ? 0.20 : 0.03),
+                              color: context.scheme.shadow.withValues(alpha: isDark ? 0.20 : 0.03),
                               blurRadius: 10,
                               offset: const Offset(0, 3),
                             ),
@@ -335,9 +335,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           controller: _searchController,
                           decoration: InputDecoration(
                             hintText: 'Search merchant, title, notes...',
-                            hintStyle: const TextStyle(
-                              fontSize: 13.5,
-                              color: WalletMeltColors.textMuted,
+                            hintStyle: TextStyle(
+                              fontSize: 14,
+                              color: context.scheme.onSurfaceVariant,
                               fontWeight: FontWeight.w500,
                             ),
                             prefixIcon: const Icon(Icons.search_rounded, size: 20),
@@ -367,7 +367,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           Container(
                             padding: const EdgeInsets.all(3),
                             decoration: BoxDecoration(
-                              color: isDark ? const Color(0xFF0C0E14) : const Color(0xFFECEFF3),
+                              color: context.scheme.surfaceContainerHigh,
                               borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
                             ),
                             child: Row(
@@ -385,10 +385,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             height: 36,
                             padding: const EdgeInsets.symmetric(horizontal: 10),
                             decoration: BoxDecoration(
-                              color: isDark ? WalletMeltColors.darkSurface : Colors.white,
+                              color: context.scheme.surfaceContainer,
                               borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                               border: Border.all(
-                                color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder,
+                                color: context.scheme.outlineVariant,
                                 width: 1.0,
                               ),
                             ),
@@ -400,11 +400,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                   fontFamily: 'PlusJakartaSans',
                                   fontSize: 12,
                                   fontWeight: FontWeight.w700,
-                                  color: isDark ? Colors.white : WalletMeltColors.textPrimary,
+                                  color: context.scheme.onSurface,
                                 ),
-                                dropdownColor: isDark
-                                    ? WalletMeltColors.darkSurface
-                                    : Colors.white,
+                                dropdownColor: context.scheme.surfaceContainer,
                                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                                 items: const [
                                   DropdownMenuItem(
@@ -466,28 +464,28 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(Icons.calendar_today_outlined,
-                                    size: 48, color: WalletMeltColors.textMuted),
+                                Icon(Icons.calendar_today_outlined,
+                                    size: 48, color: context.scheme.onSurfaceVariant),
                                 const SizedBox(height: 14),
                                 const Text('No expenses this month',
                                     style: TextStyle(
-                                        fontSize: 16, fontWeight: FontWeight.w700)),
+                                        fontSize: 17, fontWeight: FontWeight.w700)),
                                 const SizedBox(height: 6),
                                 Text(
                                     'You have $_hiddenOlderCount older expenses saved.',
-                                    style: const TextStyle(
-                                        fontSize: 13,
-                                        color: WalletMeltColors.textMuted)),
+                                    style: TextStyle(
+                                        fontSize: 12,
+                                        color: context.scheme.onSurfaceVariant)),
                                 const SizedBox(height: 16),
                                 FilledButton.icon(
                                   style: FilledButton.styleFrom(
-                                    backgroundColor: WalletMeltColors.brand,
+                                    backgroundColor: context.scheme.primary,
                                     foregroundColor: Colors.white,
                                     minimumSize: const Size(0, 48),
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 24, vertical: 12),
                                     elevation: 2,
-                                    shadowColor: WalletMeltColors.brand
+                                    shadowColor: context.scheme.primary
                                         .withValues(alpha: isDark ? 0.40 : 0.25),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(
@@ -538,12 +536,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           padding: const EdgeInsets.only(top: 22, bottom: 8, left: 4),
                           child: Text(
                             item.label.toUpperCase(),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontFamily: 'PlusJakartaSans',
                               fontSize: 11,
                               fontWeight: FontWeight.w800,
                               letterSpacing: 1.0,
-                              color: WalletMeltColors.textMuted,
+                              color: context.scheme.onSurfaceVariant,
                             ),
                           ),
                         );
@@ -555,13 +553,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
                               padding: const EdgeInsets.symmetric(vertical: 20),
                               child: FilledButton.icon(
                                 style: FilledButton.styleFrom(
-                                  backgroundColor: WalletMeltColors.brand,
+                                  backgroundColor: context.scheme.primary,
                                   foregroundColor: Colors.white,
                                   minimumSize: const Size(0, 48),
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 24, vertical: 12),
                                   elevation: 2,
-                                  shadowColor: WalletMeltColors.brand
+                                  shadowColor: context.scheme.primary
                                       .withValues(alpha: isDark ? 0.40 : 0.25),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(
@@ -599,9 +597,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                         AppSpacing.radiusPill),
                                   ),
                                   side: BorderSide(
-                                    color: isDark
-                                        ? WalletMeltColors.darkBorder
-                                        : WalletMeltColors.lightBorder,
+                                    color: context.scheme.outlineVariant,
                                     width: 1.2,
                                   ),
                                 ),
@@ -703,7 +699,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
           color: isSelected
-              ? (isDark ? WalletMeltColors.brand : WalletMeltColors.textPrimary)
+              ? (context.scheme.primary)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(999),
         ),
@@ -713,8 +709,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
             fontSize: 11,
             fontWeight: FontWeight.w700,
             color: isSelected
-                ? (isDark ? Colors.black : Colors.white)
-                : (isDark ? WalletMeltColors.darkTextSecondary : WalletMeltColors.textSecondary),
+                ? (context.scheme.onPrimary)
+                : (context.scheme.onSurfaceVariant),
           ),
         ),
       ),
@@ -735,7 +731,7 @@ class _CategoryAllChip extends StatelessWidget {
     final fill = selected
         ? color.withValues(alpha: 0.28)
         : (isDark
-            ? WalletMeltColors.darkSurface.withValues(alpha: 0.48)
+            ? context.scheme.surfaceContainer.withValues(alpha: 0.48)
             : Colors.white.withValues(alpha: 0.42));
     final border = selected
         ? color

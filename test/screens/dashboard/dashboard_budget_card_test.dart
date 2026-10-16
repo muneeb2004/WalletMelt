@@ -166,7 +166,7 @@ void main() {
       await tester.pumpWidget(buildDashboardHarness(appState: appState));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byType(WMDarkHeroCard));
+      await tester.tap(find.byKey(const Key('dashboard_hero')));
       await tester.pumpAndSettle();
 
       expect(find.text('Edit Monthly Budget'), findsOneWidget);
@@ -183,22 +183,25 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
-      expect(find.text('Good'), findsOneWidget);
       expect(
         find.byWidgetPredicate(
-          (w) => w is Text && (w.data == 'Morning' || w.data == 'Afternoon' || w.data == 'Evening'),
+          (w) =>
+              w is Text &&
+              (w.data == 'Good morning' ||
+                  w.data == 'Good afternoon' ||
+                  w.data == 'Good evening'),
         ),
         findsOneWidget,
       );
     });
 
-    testWidgets('Dashboard hero card displays TOTAL SPEND without redundant month mention',
+    testWidgets('Dashboard hero card displays Total spend without redundant month mention',
         (tester) async {
       final appState = createAppState(monthlyBudget: 5000.0);
       await tester.pumpWidget(buildDashboardHarness(appState: appState));
       await tester.pumpAndSettle();
 
-      expect(find.text('TOTAL SPEND'), findsOneWidget);
+      expect(find.text('Total spend'), findsOneWidget);
       // Redundant month label like "JUNE 2026 SPEND" must NOT be present
       expect(find.textContaining('JUNE 2026 SPEND'), findsNothing);
     });

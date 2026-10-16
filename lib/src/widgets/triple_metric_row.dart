@@ -27,9 +27,8 @@ class TripleMetricRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final separatorColor =
-        isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder;
+        context.scheme.outlineVariant;
 
     return Row(
       children: [
@@ -39,9 +38,9 @@ class TripleMetricRow extends StatelessWidget {
             children: [
               Text(
                 label1,
-                style: const TextStyle(
-                  fontSize: 9.0,
-                  color: WalletMeltColors.textMuted,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: context.scheme.onSurfaceVariant,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -54,7 +53,7 @@ class TripleMetricRow extends StatelessWidget {
                   maxLines: 1,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 14.0,
+                    fontSize: 14,
                     color: color1,
                     fontFeatures: const [FontFeature.tabularFigures()],
                   ),
@@ -76,9 +75,9 @@ class TripleMetricRow extends StatelessWidget {
             children: [
               Text(
                 label2,
-                style: const TextStyle(
-                  fontSize: 9.0,
-                  color: WalletMeltColors.textMuted,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: context.scheme.onSurfaceVariant,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -91,7 +90,7 @@ class TripleMetricRow extends StatelessWidget {
                   maxLines: 1,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 14.0,
+                    fontSize: 14,
                     color: color2,
                     fontFeatures: const [FontFeature.tabularFigures()],
                   ),
@@ -113,9 +112,9 @@ class TripleMetricRow extends StatelessWidget {
             children: [
               Text(
                 label3,
-                style: const TextStyle(
-                  fontSize: 9.0,
-                  color: WalletMeltColors.textMuted,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: context.scheme.onSurfaceVariant,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -128,7 +127,7 @@ class TripleMetricRow extends StatelessWidget {
                   maxLines: 1,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 14.0,
+                    fontSize: 14,
                     color: color3,
                     fontFeatures: const [FontFeature.tabularFigures()],
                   ),

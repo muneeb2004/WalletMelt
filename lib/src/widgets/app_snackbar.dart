@@ -137,8 +137,8 @@ class _AppToastWidgetState extends State<AppToastWidget> with SingleTickerProvid
     final isDark = theme.brightness == Brightness.dark;
 
     final accentColor = widget.isError
-        ? WalletMeltColors.danger
-        : WalletMeltColors.positive;
+        ? context.scheme.error
+        : context.money.incomeText;
 
     return Positioned(
       top: MediaQuery.of(context).padding.top + 16,
@@ -164,7 +164,7 @@ class _AppToastWidgetState extends State<AppToastWidget> with SingleTickerProvid
                   child: Container(
                     decoration: BoxDecoration(
                       color: isDark 
-                          ? WalletMeltColors.darkSurface.withValues(alpha: 0.90) 
+                          ? context.scheme.surfaceContainer.withValues(alpha: 0.90) 
                           : Colors.white.withValues(alpha: 0.90),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
@@ -209,7 +209,7 @@ class _AppToastWidgetState extends State<AppToastWidget> with SingleTickerProvid
                                   widget.message,
                                   style: theme.textTheme.bodyMedium?.copyWith(
                                     fontWeight: FontWeight.w600,
-                                    fontSize: 13.5,
+                                    fontSize: 14,
                                   ),
                                 ),
                               ),

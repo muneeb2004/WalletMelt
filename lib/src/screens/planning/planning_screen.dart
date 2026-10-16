@@ -71,7 +71,7 @@ class _PlanningScreenState extends State<PlanningScreen>
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                            fontSize: 24,
+                            fontSize: 22,
                             fontWeight: FontWeight.w900,
                           ),
                         ),
@@ -81,8 +81,8 @@ class _PlanningScreenState extends State<PlanningScreen>
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 13,
-                            color: WalletMeltColors.textMuted,
+                            fontSize: 12,
+                            color: context.scheme.onSurfaceVariant,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -95,10 +95,10 @@ class _PlanningScreenState extends State<PlanningScreen>
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: isDark ? WalletMeltColors.darkSurface : Colors.white,
+                      color: context.scheme.surfaceContainer,
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder,
+                        color: context.scheme.outlineVariant,
                         width: 1.0,
                       ),
                     ),
@@ -126,7 +126,7 @@ class _PlanningScreenState extends State<PlanningScreen>
                             ? Icons.edit_rounded
                             : Icons.add_rounded,
                         size: 20,
-                        color: isDark ? Colors.white : WalletMeltColors.textPrimary,
+                        color: context.scheme.onSurface,
                       ),
                     ),
                   ),
@@ -140,7 +140,7 @@ class _PlanningScreenState extends State<PlanningScreen>
               child: Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF161922) : const Color(0xFFECEFF3),
+                  color: context.scheme.surfaceContainerHigh,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: TabBar(
@@ -148,23 +148,23 @@ class _PlanningScreenState extends State<PlanningScreen>
                   indicatorSize: TabBarIndicatorSize.tab,
                   dividerColor: Colors.transparent,
                   indicator: BoxDecoration(
-                    color: isDark ? WalletMeltColors.brand : WalletMeltColors.textPrimary,
+                    color: context.scheme.primary,
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.06),
+                        color: context.scheme.shadow.withValues(alpha: isDark ? 0.15 : 0.06),
                         blurRadius: 6,
                         offset: const Offset(0, 2),
                       ),
                     ],
                   ),
-                  labelColor: isDark ? Colors.black : Colors.white,
+                  labelColor: context.scheme.onPrimary,
                   unselectedLabelColor:
-                      isDark ? WalletMeltColors.darkTextSecondary : WalletMeltColors.textSecondary,
+                      context.scheme.onSurfaceVariant,
                   labelStyle: const TextStyle(
-                      fontWeight: FontWeight.w800, fontSize: 11.5),
+                      fontWeight: FontWeight.w800, fontSize: 11),
                   unselectedLabelStyle: const TextStyle(
-                      fontWeight: FontWeight.w600, fontSize: 11.5),
+                      fontWeight: FontWeight.w600, fontSize: 11),
                   tabs: const [
                     Tab(child: FittedBox(fit: BoxFit.scaleDown, child: Text('Budgets'))),
                     Tab(child: FittedBox(fit: BoxFit.scaleDown, child: Text('Subscriptions'))),

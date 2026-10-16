@@ -78,10 +78,10 @@ class BudgetScreen extends StatefulWidget {
                             Text(
                               'ADJUSTMENT PREVIEW',
                               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                    fontSize: 10,
+                                    fontSize: 11,
                                     fontWeight: FontWeight.w800,
                                     letterSpacing: 0.8,
-                                    color: WalletMeltColors.textMuted,
+                                    color: context.scheme.onSurfaceVariant,
                                   ),
                             ),
                             const SizedBox(height: 10),
@@ -93,12 +93,12 @@ class BudgetScreen extends StatefulWidget {
                                   children: [
                                     Text('Current Budget',
                                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                            color: WalletMeltColors.textMuted, fontSize: 11)),
+                                            color: context.scheme.onSurfaceVariant, fontSize: 11)),
                                     Text(
                                       currentAmount != null
                                           ? formatMoney(currentAmount, state.settings.currency)
                                           : 'None',
-                                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
                                     ),
                                   ],
                                 ),
@@ -107,10 +107,10 @@ class BudgetScreen extends StatefulWidget {
                                   children: [
                                     Text('Actual Spent',
                                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                            color: WalletMeltColors.textMuted, fontSize: 11)),
+                                            color: context.scheme.onSurfaceVariant, fontSize: 11)),
                                     Text(
                                       formatMoney(totalSpent, state.settings.currency),
-                                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
                                     ),
                                   ],
                                 ),
@@ -125,7 +125,7 @@ class BudgetScreen extends StatefulWidget {
                                   children: [
                                     Text('New Budget',
                                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                            color: WalletMeltColors.textMuted, fontSize: 11)),
+                                            color: context.scheme.onSurfaceVariant, fontSize: 11)),
                                     Text(
                                       formatMoney(parsed, state.settings.currency),
                                       style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
@@ -137,7 +137,7 @@ class BudgetScreen extends StatefulWidget {
                                   children: [
                                     Text('New Remaining',
                                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                            color: WalletMeltColors.textMuted, fontSize: 11)),
+                                            color: context.scheme.onSurfaceVariant, fontSize: 11)),
                                     Text(
                                       isOver
                                           ? 'Over by ${formatMoney(-remaining, state.settings.currency)}'
@@ -146,8 +146,8 @@ class BudgetScreen extends StatefulWidget {
                                         fontWeight: FontWeight.w900,
                                         fontSize: 14,
                                         color: isOver
-                                            ? WalletMeltColors.danger
-                                            : (parsed > 0 ? WalletMeltColors.positive : null),
+                                            ? context.scheme.error
+                                            : (parsed > 0 ? context.money.incomeText : null),
                                       ),
                                     ),
                                   ],
@@ -320,7 +320,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                   'Month Ceiling',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                 ),
               ),
               const SizedBox(width: 8),
@@ -337,7 +337,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                   ),
                   Text(
                     readableMonth(selectedMonth),
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 13),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 12),
                   ),
                   IconButton(
                     visualDensity: VisualDensity.compact,
@@ -482,15 +482,15 @@ class _BudgetScreenState extends State<BudgetScreen> {
                       ],
                     ),
                   ),
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'clear',
                     child: Row(
                       children: [
                         Icon(Icons.delete_outline_rounded,
-                            size: 18, color: WalletMeltColors.danger),
+                            size: 18, color: context.scheme.error),
                         SizedBox(width: 8),
                         Text('Clear Budget',
-                            style: TextStyle(color: WalletMeltColors.danger)),
+                            style: TextStyle(color: context.scheme.error)),
                       ],
                     ),
                   ),
@@ -511,7 +511,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                     : EdgeInsets.zero,
                 decoration: isOverBudget
                     ? BoxDecoration(
-                        color: WalletMeltColors.danger.withValues(alpha: 0.14),
+                        color: context.scheme.error.withValues(alpha: 0.14),
                         borderRadius: BorderRadius.circular(8),
                       )
                     : null,
@@ -553,7 +553,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
             Text(
               'You exceeded your budget this month.',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: WalletMeltColors.danger,
+                    color: context.scheme.error,
                   ),
             ),
           ],
@@ -575,7 +575,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                   value: isOverBudget
                       ? formatMoney(-remaining, currency)
                       : formatMoney(remaining, currency),
-                  valueColor: isOverBudget ? WalletMeltColors.danger : WalletMeltColors.positive,
+                  valueColor: isOverBudget ? context.scheme.error : context.money.incomeText,
                 ),
               ),
             ],
@@ -610,11 +610,11 @@ class _BudgetScreenState extends State<BudgetScreen> {
                 value: isOverBudget
                     ? 'No allowance remaining'
                     : '${formatMoney(allowanceResult.dailyAllowance, currency)} / day',
-                valueColor: isOverBudget ? WalletMeltColors.danger : WalletMeltColors.positive,
+                valueColor: isOverBudget ? context.scheme.error : context.money.incomeText,
                 trailing: Icon(
                   Icons.info_outline_rounded,
                   size: 15,
-                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                  color: context.scheme.onSurfaceVariant,
                 ),
                 onTap: () => context.push('/settings/metrics'),
               );
@@ -656,7 +656,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
           Icon(
             icon,
             size: 17,
-            color: valueColor ?? (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+            color: valueColor ?? (context.scheme.onSurfaceVariant),
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -667,7 +667,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
               style: tt.labelMedium?.copyWith(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                color: context.scheme.onSurfaceVariant,
               ),
             ),
           ),
@@ -679,7 +679,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
               value,
               maxLines: 1,
               style: tt.titleMedium?.copyWith(
-                fontSize: 13.5,
+                fontSize: 14,
                 fontWeight: FontWeight.w800,
                 color: valueColor,
                 fontFeatures: const [FontFeature.tabularFigures()],
@@ -775,7 +775,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
     final categoryName = category?.name ?? 'Unknown';
     final categoryColor = category != null
         ? colorFromHex(category.color)
-        : WalletMeltColors.brand;
+        : context.scheme.primary;
 
     final remaining = budget.amount - spent;
     final isOverBudget = remaining < 0;
@@ -817,7 +817,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                       ? 'Over by ${formatMoney(-remaining, currency)}'
                       : '${formatMoney(remaining, currency)} left',
                   style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: isOverBudget ? WalletMeltColors.danger : null,
+                        color: isOverBudget ? context.scheme.error : null,
                         fontSize: 12,
                        ),
                 ),
@@ -916,8 +916,8 @@ class _BudgetScreenState extends State<BudgetScreen> {
                         ),
                         if (isEdit)
                           IconButton(
-                            icon: const Icon(Icons.delete_outline_rounded,
-                                color: WalletMeltColors.danger),
+                            icon: Icon(Icons.delete_outline_rounded,
+                                color: context.scheme.error),
                             onPressed: () => _confirmDeleteCategoryBudget(
                                 context, state, existingBudget),
                           ),
@@ -930,7 +930,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                       initialValue: categoryId,
                       decoration: const InputDecoration(labelText: 'Category'),
                       dropdownColor: Theme.of(context).brightness == Brightness.dark
-                          ? WalletMeltColors.darkSurface
+                          ? context.scheme.surfaceContainer
                           : Colors.white,
                       borderRadius: BorderRadius.circular(20),
                       items: [

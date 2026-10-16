@@ -1,103 +1,96 @@
-import 'dart:ui';
-
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
-import 'app_spacing.dart';
-import 'app_motion.dart';
-import '../utils/haptics.dart';
 
-export 'app_spacing.dart';
-export 'app_motion.dart';
+import '../utils/haptics.dart';
+import 'app_spacing.dart';
+import 'wm_card.dart';
+import 'wm_palette.dart';
+import 'wm_type.dart';
+
+export '../utils/haptics.dart';
 export '../widgets/app_bottom_sheet.dart';
 export '../widgets/confirm_dialog.dart';
-export '../utils/haptics.dart';
+export 'app_motion.dart';
+export 'app_spacing.dart';
+export 'wm_card.dart';
+export 'wm_palette.dart';
+export 'wm_type.dart';
 
+/// Legacy colour constants (ADR-0010).
+///
+/// Neutral and brand values follow the Tonal palette. Status constants keep
+/// their *fill* values. New code must use `Theme.of(context).colorScheme` and
+/// `context.money` instead of these; they remain only so unmigrated screens
+/// keep compiling (see TD-010).
 class WalletMeltColors {
   const WalletMeltColors._();
 
-  // Primary backgrounds (warm calm off-white in light mode, true-black OLED in dark mode)
-  static const background = Color(0xFFF7F8FA);
-  static const backgroundGradientStart = Color(0xFFFAFBFD);
-  static const backgroundGradientEnd = Color(0xFFF0F2F6);
+  static const background = Color(0xFFFCF8FF);
+  static const backgroundGradientStart = background;
+  static const backgroundGradientEnd = background;
 
-  // Text hierarchy
-  static const textPrimary = Color(0xFF0F172A);
-  static const textSecondary = Color(0xFF64748B);
-  static const textMuted = Color(0xFF94A3B8);
+  static const textPrimary = Color(0xFF1B1B21);
+  static const textSecondary = Color(0xFF4A4A55);
+  static const textMuted = Color(0xFF66636F);
 
-  // Brand Accent (Refined Electric Indigo)
-  static const brand = Color(0xFF6366F1);
-  static const brandSoft = Color(0xFFEEF2FF);
-  static const brandDeep = Color(0xFF4338CA);
+  static const brand = Color(0xFF4B45C9);
+  static const brandSoft = Color(0xFFE1E0FF);
+  static const brandDeep = Color(0xFF16137A);
 
-  // Semantic Status Colors (WCAG AA compliant)
-  static const positive = Color(0xFF10B981); // Emerald Green
-  static const warning = Color(0xFFF59E0B);  // Warm Amber / Gold
-  static const danger = Color(0xFFEF4444);   // Modern Crimson Red
+  static const positive = Color(0xFF10B981);
+  static const warning = Color(0xFFF59E0B);
+  static const danger = Color(0xFFEF4444);
 
-  // Dark Mode Surfaces (True-black OLED foundation)
   static const darkBackground = Color(0xFF000000);
-  static const darkSurface = Color(0xFF0C0E14);
-  static const darkBackgroundContainer = Color(0xFF141722);
-  static const darkBackgroundAlt = Color(0xFF08090D);
-  static const darkTextPrimary = Color(0xFFF8FAFC);
-  static const darkTextSecondary = Color(0xFF94A3B8);
+  static const darkSurface = Color(0xFF121118);
+  static const darkBackgroundContainer = Color(0xFF1D1C26);
+  static const darkBackgroundAlt = Color(0xFF0A0A10);
+  static const darkTextPrimary = Color(0xFFE7E3EC);
+  static const darkTextSecondary = Color(0xFFBDBAC8);
 
-  // 1px Hairline Borders & Dividers
-  static const darkBorder = Color(0x1FFFFFFF);
-  static const lightBorder = Color(0x0F000000);
+  static const darkBorder = Color(0xFF2E2D3A);
+  static const lightBorder = Color(0xFFD8D4E3);
 
-  // Premium Hero Card Gradients (for FinSight-style Dark Financial Cards)
-  static const darkHeroStart = Color(0xFF0C0E14);
-  static const darkHeroEnd = Color(0xFF181C28);
+  static const darkHeroStart = darkSurface;
+  static const darkHeroEnd = darkBackgroundContainer;
 }
 
 // ── Budget threshold color aliases ──────────────────────────────────────────
-// These are the ONLY raw Color literals permitted in budget-progress logic.
-// All other budget-color code must reference these constants.
+// Fill colours for budget bars. Prefer `context.money.budget(ratio)`.
 const Color kBudgetSafe = WalletMeltColors.positive; // < 70 %
-const Color kBudgetWarning = WalletMeltColors.warning; // 70–90 %
+const Color kBudgetWarning = WalletMeltColors.warning; // 70–100 %
 const Color kBudgetDanger = WalletMeltColors.warning; // 90–100 %
 const Color kBudgetOverrun = WalletMeltColors.danger; // > 100 %
 
 class WalletMeltTheme {
   const WalletMeltTheme._();
 
-  static ThemeData light() {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: WalletMeltColors.brand,
-      brightness: Brightness.light,
-      primary: WalletMeltColors.textPrimary,
-      surface: WalletMeltColors.background,
-      error: WalletMeltColors.danger,
-    );
-    return _base(scheme).copyWith(
-      scaffoldBackgroundColor: WalletMeltColors.background,
-      textTheme: _textTheme(Brightness.light),
-    );
-  }
+  static ThemeData light() => _build(WMPalette.light, WMMoneyColors.light);
 
-  static ThemeData dark() {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: WalletMeltColors.brand,
-      brightness: Brightness.dark,
-      primary: WalletMeltColors.brand,
-      surface: WalletMeltColors.darkSurface,
-      error: WalletMeltColors.danger,
-    );
-    return _base(scheme).copyWith(
-      scaffoldBackgroundColor: WalletMeltColors.darkBackground,
-      textTheme: _textTheme(Brightness.dark),
-    );
-  }
+  static ThemeData dark() => _build(WMPalette.dark, WMMoneyColors.dark);
 
-  static ThemeData _base(ColorScheme scheme) {
+  static ThemeData _build(ColorScheme scheme, WMMoneyColors money) {
+    final textTheme = WMType.textTheme(scheme);
     final isDark = scheme.brightness == Brightness.dark;
+    final hairline = BorderSide(color: scheme.outlineVariant, width: 1.0);
+    final controlShape = RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppSpacing.buttonRadius));
+    OutlineInputBorder inputBorder(Color color, [double width = 1.0]) =>
+        OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+          borderSide: BorderSide(color: color, width: width),
+        );
+
     return ThemeData(
       useMaterial3: true,
       brightness: scheme.brightness,
       colorScheme: scheme,
-      fontFamily: 'PlusJakartaSans',
+      scaffoldBackgroundColor: scheme.surface,
+      canvasColor: scheme.surface,
+      fontFamily: WMType.family,
+      textTheme: textTheme,
+      extensions: [money],
+      splashFactory: InkSparkle.splashFactory,
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
           TargetPlatform.android: SharedAxisPageTransitionsBuilder(
@@ -108,86 +101,123 @@ class WalletMeltTheme {
           ),
         },
       ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: scheme.surface,
+        foregroundColor: scheme.onSurface,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: false,
+        titleTextStyle: textTheme.titleLarge,
+      ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: isDark
-            ? const Color(0xFF10131B)
-            : Colors.white,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          borderSide: BorderSide(
-            color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder,
-            width: 1.0,
-          ),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          borderSide: BorderSide(
-            color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder,
-            width: 1.0,
-          ),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          borderSide: BorderSide(
-            color: isDark ? WalletMeltColors.brand : WalletMeltColors.textPrimary,
-            width: 1.5,
-          ),
-        ),
+        fillColor: scheme.surfaceContainer,
+        border: inputBorder(scheme.outlineVariant),
+        enabledBorder: inputBorder(scheme.outlineVariant),
+        focusedBorder: inputBorder(scheme.primary, 1.5),
+        errorBorder: inputBorder(scheme.error),
+        focusedErrorBorder: inputBorder(scheme.error, 1.5),
+        labelStyle: textTheme.bodyMedium,
+        hintStyle: textTheme.bodyMedium?.copyWith(color: scheme.outline),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: isDark ? WalletMeltColors.brand : WalletMeltColors.textPrimary,
-          foregroundColor: isDark ? Colors.black : Colors.white,
+          backgroundColor: scheme.primary,
+          foregroundColor: scheme.onPrimary,
           minimumSize: const Size.fromHeight(52),
           elevation: 0,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.buttonRadius)),
-          textStyle: const TextStyle(
-            fontFamily: 'PlusJakartaSans',
-            fontWeight: FontWeight.w800,
-            fontSize: 15,
-            fontFeatures: [FontFeature.tabularFigures()],
-          ),
+          shape: controlShape,
+          textStyle: textTheme.labelLarge,
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: scheme.primary,
+          foregroundColor: scheme.onPrimary,
+          minimumSize: const Size.fromHeight(52),
+          elevation: 0,
+          shape: controlShape,
+          textStyle: textTheme.labelLarge,
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: scheme.primary,
-          side: BorderSide(
-            color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder,
-            width: 1.2,
-          ),
+          side: hairline,
           minimumSize: const Size.fromHeight(52),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.buttonRadius)),
-          textStyle: const TextStyle(
-            fontFamily: 'PlusJakartaSans',
-            fontWeight: FontWeight.w700,
-            fontSize: 14,
-            fontFeatures: [FontFeature.tabularFigures()],
-          ),
+          shape: controlShape,
+          textStyle: textTheme.labelLarge,
         ),
       ),
-      filledButtonTheme: FilledButtonThemeData(
-        style: FilledButton.styleFrom(
-          backgroundColor: isDark ? WalletMeltColors.brand : WalletMeltColors.textPrimary,
-          foregroundColor: isDark ? Colors.black : Colors.white,
-          minimumSize: const Size.fromHeight(52),
-          elevation: 0,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.buttonRadius)),
-          textStyle: const TextStyle(
-            fontFamily: 'PlusJakartaSans',
-            fontWeight: FontWeight.w800,
-            fontSize: 15,
-            fontFeatures: [FontFeature.tabularFigures()],
-          ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: scheme.primary,
+          textStyle: textTheme.labelLarge,
+        ),
+      ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: scheme.primary,
+        foregroundColor: scheme.onPrimary,
+        elevation: 0,
+        focusElevation: 0,
+        hoverElevation: 0,
+        highlightElevation: 0,
+        extendedTextStyle: textTheme.labelLarge,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        ),
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        height: 68,
+        backgroundColor: scheme.surfaceContainer,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        indicatorColor: scheme.primaryContainer,
+        indicatorShape: const StadiumBorder(),
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+        iconTheme: WidgetStateProperty.resolveWith((states) => IconThemeData(
+              size: 24,
+              color: states.contains(WidgetState.selected)
+                  ? scheme.onPrimaryContainer
+                  : scheme.onSurfaceVariant,
+            )),
+        labelTextStyle: WidgetStateProperty.resolveWith(
+            (states) => textTheme.labelMedium!.copyWith(
+                  color: states.contains(WidgetState.selected)
+                      ? scheme.onSurface
+                      : scheme.onSurfaceVariant,
+                  fontWeight: states.contains(WidgetState.selected)
+                      ? FontWeight.w700
+                      : FontWeight.w600,
+                )),
+      ),
+      tabBarTheme: TabBarThemeData(
+        labelColor: scheme.onSurface,
+        unselectedLabelColor: scheme.onSurfaceVariant,
+        indicatorColor: scheme.primary,
+        dividerColor: scheme.outlineVariant,
+        labelStyle: textTheme.labelLarge,
+        unselectedLabelStyle:
+            textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: Colors.transparent,
+        selectedColor: scheme.primaryContainer,
+        side: BorderSide(color: scheme.outlineVariant),
+        labelStyle: textTheme.labelMedium?.copyWith(color: scheme.onSurface),
+        secondaryLabelStyle:
+            textTheme.labelMedium?.copyWith(color: scheme.onPrimaryContainer),
+        checkmarkColor: scheme.onPrimaryContainer,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
         ),
       ),
       bottomSheetTheme: BottomSheetThemeData(
-        backgroundColor: isDark ? WalletMeltColors.darkSurface : Colors.white,
-        modalBackgroundColor: isDark ? WalletMeltColors.darkSurface : Colors.white,
+        backgroundColor: scheme.surfaceContainer,
+        modalBackgroundColor: scheme.surfaceContainer,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         modalElevation: 0,
@@ -195,152 +225,54 @@ class WalletMeltTheme {
           borderRadius: const BorderRadius.vertical(
             top: Radius.circular(AppSpacing.radiusLg),
           ),
-          side: BorderSide(
-            color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder,
-            width: 1.0,
-          ),
+          side: hairline,
         ),
         clipBehavior: Clip.antiAlias,
         showDragHandle: true,
-        dragHandleColor: isDark
-            ? Colors.white.withValues(alpha: 0.20)
-            : Colors.black.withValues(alpha: 0.20),
+        dragHandleColor: scheme.outlineVariant,
         dragHandleSize: const Size(32, 4),
       ),
       dialogTheme: DialogThemeData(
-        backgroundColor: isDark ? WalletMeltColors.darkSurface : Colors.white,
+        backgroundColor: scheme.surfaceContainer,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-          side: BorderSide(
-            color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder,
-            width: 1.0,
-          ),
+          side: hairline,
         ),
-        titleTextStyle: TextStyle(
-          fontFamily: 'PlusJakartaSans',
-          fontSize: 19,
-          fontWeight: FontWeight.w800,
-          color: isDark ? WalletMeltColors.darkTextPrimary : WalletMeltColors.textPrimary,
-        ),
-        contentTextStyle: TextStyle(
-          fontFamily: 'PlusJakartaSans',
-          fontSize: 13.5,
-          fontWeight: FontWeight.w500,
-          color: isDark ? WalletMeltColors.darkTextSecondary : WalletMeltColors.textSecondary,
-        ),
+        titleTextStyle: textTheme.titleLarge,
+        contentTextStyle: textTheme.bodyMedium,
       ),
-      floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: isDark ? WalletMeltColors.brand : WalletMeltColors.textPrimary,
-        foregroundColor: Colors.white,
+      dividerTheme: DividerThemeData(
+        color: scheme.outlineVariant,
+        thickness: 1,
+        space: 1,
+      ),
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: scheme.primary,
+        linearTrackColor: money.track,
+        circularTrackColor: money.track,
+      ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: scheme.inverseSurface,
+        contentTextStyle:
+            textTheme.bodyMedium?.copyWith(color: scheme.onInverseSurface),
+        behavior: SnackBarBehavior.floating,
         elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        ),
       ),
-    );
-  }
-
-  static TextTheme _textTheme(Brightness brightness) {
-    final primary = brightness == Brightness.dark
-        ? WalletMeltColors.darkTextPrimary
-        : WalletMeltColors.textPrimary;
-    final secondary = brightness == Brightness.dark
-        ? WalletMeltColors.darkTextSecondary
-        : WalletMeltColors.textSecondary;
-    const tabular = [FontFeature.tabularFigures()];
-
-    return TextTheme(
-      displaySmall: TextStyle(
-          fontFamily: 'PlusJakartaSans',
-          fontSize: 38,
-          fontWeight: FontWeight.w900,
-          fontVariations: const [FontVariation('wght', 900)],
-          color: primary,
-          letterSpacing: -0.6,
-          height: 1.05,
-          fontFeatures: tabular),
-      headlineMedium: TextStyle(
-          fontFamily: 'PlusJakartaSans',
-          fontSize: 24,
-          fontWeight: FontWeight.w800,
-          fontVariations: const [FontVariation('wght', 800)],
-          color: primary,
-          letterSpacing: -0.4,
-          height: 1.1,
-          fontFeatures: tabular),
-      titleLarge: TextStyle(
-          fontFamily: 'PlusJakartaSans',
-          fontSize: 19,
-          fontWeight: FontWeight.w800,
-          fontVariations: const [FontVariation('wght', 800)],
-          color: primary,
-          letterSpacing: -0.3,
-          fontFeatures: tabular),
-      titleMedium: TextStyle(
-          fontFamily: 'PlusJakartaSans',
-          fontSize: 15.5,
-          fontWeight: FontWeight.w700,
-          fontVariations: const [FontVariation('wght', 700)],
-          color: primary,
-          fontFeatures: tabular),
-      bodyLarge: TextStyle(
-          fontFamily: 'PlusJakartaSans',
-          fontSize: 14.5,
-          fontWeight: FontWeight.w500,
-          fontVariations: const [FontVariation('wght', 500)],
-          color: primary,
-          fontFeatures: tabular),
-      bodyMedium: TextStyle(
-          fontFamily: 'PlusJakartaSans',
-          fontSize: 13.0,
-          fontWeight: FontWeight.w500,
-          fontVariations: const [FontVariation('wght', 500)],
-          color: secondary,
-          height: 1.35,
-          fontFeatures: tabular),
-      labelLarge: TextStyle(
-          fontFamily: 'PlusJakartaSans',
-          fontSize: 12.5,
-          fontWeight: FontWeight.w800,
-          fontVariations: const [FontVariation('wght', 800)],
-          color: primary,
-          letterSpacing: 0.2,
-          fontFeatures: tabular),
-      labelMedium: TextStyle(
-          fontFamily: 'PlusJakartaSans',
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
-          fontVariations: const [FontVariation('wght', 700)],
-          color: secondary,
-          letterSpacing: 0.4,
-          fontFeatures: tabular),
-      labelSmall: TextStyle(
-          fontFamily: 'PlusJakartaSans',
-          fontSize: 10,
-          fontWeight: FontWeight.w700,
-          fontVariations: const [FontVariation('wght', 700)],
-          color: secondary,
-          letterSpacing: 0.5,
-          fontFeatures: tabular),
-      titleSmall: TextStyle(
-          fontFamily: 'PlusJakartaSans',
-          fontSize: 13.5,
-          fontWeight: FontWeight.w700,
-          fontVariations: const [FontVariation('wght', 700)],
-          color: primary,
-          fontFeatures: tabular),
-      bodySmall: TextStyle(
-          fontFamily: 'PlusJakartaSans',
-          fontSize: 11.5,
-          fontWeight: FontWeight.w400,
-          fontVariations: const [FontVariation('wght', 400)],
-          color: secondary,
-          height: 1.4,
-          fontFeatures: tabular),
+      switchTheme: SwitchThemeData(
+        trackOutlineColor: WidgetStatePropertyAll(
+          isDark ? scheme.outlineVariant : scheme.outline,
+        ),
+      ),
     );
   }
 }
 
-Color colorFromHex(String value, {Color fallback = const Color(0xFF64748B)}) {
+Color colorFromHex(String value, {Color fallback = const Color(0xFF66636F)}) {
   final clean = value.replaceAll('#', '').replaceAll(' ', '').trim();
   if (clean.length == 6) {
     final parsed = int.tryParse('FF$clean', radix: 16);
@@ -359,15 +291,18 @@ Color colorFromHex(String value, {Color fallback = const Color(0xFF64748B)}) {
 }
 
 String hexFromColor(Color color, {bool includeHash = true}) {
-  final r = ((color.r * 255.0).round() & 0xff).toRadixString(16).padLeft(2, '0');
-  final g = ((color.g * 255.0).round() & 0xff).toRadixString(16).padLeft(2, '0');
-  final b = ((color.b * 255.0).round() & 0xff).toRadixString(16).padLeft(2, '0');
+  final r =
+      ((color.r * 255.0).round() & 0xff).toRadixString(16).padLeft(2, '0');
+  final g =
+      ((color.g * 255.0).round() & 0xff).toRadixString(16).padLeft(2, '0');
+  final b =
+      ((color.b * 255.0).round() & 0xff).toRadixString(16).padLeft(2, '0');
   final prefix = includeHash ? '#' : '';
   return '$prefix$r$g$b'.toUpperCase();
 }
 
-/// Shared budget progress color based on spend ratio thresholds.
-/// Used by DashboardScreen and BudgetScreen to stay consistent.
+/// Shared budget progress fill colour based on spend ratio thresholds.
+/// Prefer `context.money.budget(ratio)` in new code.
 Color budgetProgressColor(double ratio) {
   if (ratio < 0.70) return WalletMeltColors.positive;
   if (ratio < 0.90) return WalletMeltColors.warning;
@@ -377,6 +312,10 @@ Color budgetProgressColor(double ratio) {
 
 enum WMRenderTier { tier1, tier2, tier3 }
 
+// ── Legacy card wrappers ────────────────────────────────────────────────────
+// All delegate to [WMCard]. Do not use in new code (ADR-0010).
+
+/// Legacy alias for [WMCard]. Tiers map to tones; no blur or shadows.
 class WMGlassSurface extends StatelessWidget {
   const WMGlassSurface({
     required this.child,
@@ -399,14 +338,15 @@ class WMGlassSurface extends StatelessWidget {
     EdgeInsetsGeometry padding = const EdgeInsets.all(AppSpacing.md),
     double radius = AppSpacing.radiusLg,
     VoidCallback? onTap,
-  }) => WMGlassSurface(
-    key: key,
-    padding: padding,
-    radius: radius,
-    tier: WMRenderTier.tier1,
-    onTap: onTap,
-    child: child,
-  );
+  }) =>
+      WMGlassSurface(
+        key: key,
+        padding: padding,
+        radius: radius,
+        tier: WMRenderTier.tier1,
+        onTap: onTap,
+        child: child,
+      );
 
   factory WMGlassSurface.tier2({
     required Widget child,
@@ -414,14 +354,15 @@ class WMGlassSurface extends StatelessWidget {
     EdgeInsetsGeometry padding = const EdgeInsets.all(AppSpacing.md),
     double radius = AppSpacing.radiusLg,
     VoidCallback? onTap,
-  }) => WMGlassSurface(
-    key: key,
-    padding: padding,
-    radius: radius,
-    tier: WMRenderTier.tier2,
-    onTap: onTap,
-    child: child,
-  );
+  }) =>
+      WMGlassSurface(
+        key: key,
+        padding: padding,
+        radius: radius,
+        tier: WMRenderTier.tier2,
+        onTap: onTap,
+        child: child,
+      );
 
   factory WMGlassSurface.tier3({
     required Widget child,
@@ -429,161 +370,26 @@ class WMGlassSurface extends StatelessWidget {
     EdgeInsetsGeometry padding = const EdgeInsets.all(AppSpacing.md),
     double radius = AppSpacing.radiusLg,
     VoidCallback? onTap,
-  }) => WMGlassSurface(
-    key: key,
-    padding: padding,
-    radius: radius,
-    tier: WMRenderTier.tier3,
-    onTap: onTap,
-    child: child,
-  );
+  }) =>
+      WMGlassSurface(
+        key: key,
+        padding: padding,
+        radius: radius,
+        tier: WMRenderTier.tier3,
+        onTap: onTap,
+        child: child,
+      );
 
   @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    
-    // Auto-downgrade to Tier 1 when inside a Scrollable container to maintain smooth scrolling (Directive 2)
-    final isScrollable = Scrollable.maybeOf(context) != null;
-    final activeTier = isScrollable ? WMRenderTier.tier1 : tier;
-
-    if (activeTier == WMRenderTier.tier1) {
-      // Tier 1: Flat translucent fill, no shadows, no blur, 1px hairline border. 120fps GPU friendly.
-      return Container(
-        decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF0C0E14) : const Color(0xFFF4F5F8),
-          borderRadius: BorderRadius.circular(radius),
-          border: Border.all(
-            color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder,
-            width: 1.0,
-          ),
-        ),
-        child: onTap == null
-            ? Padding(padding: padding, child: child)
-            : Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(radius - 1.0),
-                  onTap: () {
-                    WMHaptics.light();
-                    onTap!();
-                  },
-                  child: Padding(padding: padding, child: child),
-                ),
-              ),
+  Widget build(BuildContext context) => WMCard(
+        padding: padding,
+        radius: radius,
+        onTap: onTap,
+        child: child,
       );
-    }
-
-    if (activeTier == WMRenderTier.tier2) {
-      // Tier 2: Solid carbon surface, subtle soft shadow, 1px hairline border.
-      return Container(
-        decoration: BoxDecoration(
-          color: isDark ? WalletMeltColors.darkSurface : Colors.white,
-          borderRadius: BorderRadius.circular(radius),
-          border: Border.all(
-            color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder,
-            width: 1.0,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.03),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: onTap == null
-            ? Padding(padding: padding, child: child)
-            : Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(radius - 1.0),
-                  onTap: () {
-                    WMHaptics.light();
-                    onTap!();
-                  },
-                  child: Padding(padding: padding, child: child),
-                ),
-              ),
-      );
-    }
-
-    // Tier 3: Translucent surface, optional BackdropFilter blur, dual shadows. Used only on static non-scrollable surfaces.
-    final fillGradient = isDark
-        ? LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              WalletMeltColors.darkSurface.withValues(alpha: 0.85),
-              const Color(0xFF06070A).withValues(alpha: 0.65),
-            ],
-          )
-        : LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Colors.white.withValues(alpha: 0.85),
-              Colors.white.withValues(alpha: 0.50),
-            ],
-          );
-
-    final innerContainer = Container(
-      decoration: BoxDecoration(
-        gradient: fillGradient,
-        borderRadius: BorderRadius.circular(radius - 1.0),
-        border: Border.all(
-          color: isDark ? const Color(0x28FFFFFF) : const Color(0x18000000),
-          width: 1.0,
-        ),
-      ),
-      child: onTap == null
-          ? Padding(padding: padding, child: child)
-          : Material(
-              color: Colors.transparent,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(radius - 1.0),
-                onTap: () {
-                  WMHaptics.light();
-                  onTap!();
-                },
-                child: Padding(padding: padding, child: child),
-              ),
-            ),
-    );
-
-    // Apply BackdropFilter blur (sigma = 16) only on static surfaces
-    final Widget glassContent = ClipRRect(
-      borderRadius: BorderRadius.circular(radius),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(
-          sigmaX: 16.0,
-          sigmaY: 16.0,
-          tileMode: TileMode.decal,
-        ),
-        child: innerContainer,
-      ),
-    );
-
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(radius),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.30 : 0.04),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.02),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: glassContent,
-    );
-  }
 }
 
+/// Legacy alias for [WMCard].
 class FlatCard extends StatelessWidget {
   const FlatCard({
     required this.child,
@@ -599,61 +405,15 @@ class FlatCard extends StatelessWidget {
   final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context) {
-    return WMGlassSurface.tier1(
-      padding: padding,
-      radius: radius,
-      onTap: onTap,
-      child: child,
-    );
-  }
+  Widget build(BuildContext context) => WMCard(
+        padding: padding,
+        radius: radius,
+        onTap: onTap,
+        child: child,
+      );
 }
 
-class FlatNavBar extends StatelessWidget {
-  const FlatNavBar({
-    required this.child,
-    super.key,
-    this.padding = const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-    this.radius = AppSpacing.radiusPill,
-  });
-
-  final Widget child;
-  final EdgeInsetsGeometry padding;
-  final double radius;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      decoration: BoxDecoration(
-        color: isDark ? WalletMeltColors.darkSurface : Colors.white,
-        borderRadius: BorderRadius.circular(radius),
-        border: Border.all(
-          color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder,
-          width: 1.0,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(radius),
-        child: Material(
-          color: Colors.transparent,
-          child: Padding(
-            padding: padding,
-            child: child,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
+/// Legacy alias for [WMCard]. The `blur` argument is ignored.
 class LiquidGlass extends StatelessWidget {
   const LiquidGlass({
     required this.child,
@@ -671,18 +431,15 @@ class LiquidGlass extends StatelessWidget {
   final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context) {
-    return WMGlassSurface(
-      padding: padding,
-      radius: radius,
-      tier: blur > 0.0 ? WMRenderTier.tier3 : WMRenderTier.tier2,
-      onTap: onTap,
-      child: child,
-    );
-  }
+  Widget build(BuildContext context) => WMCard(
+        padding: padding,
+        radius: radius,
+        onTap: onTap,
+        child: child,
+      );
 }
 
-/// Premium Dark Hero Financial Card (FinSight inspired)
+/// Legacy alias for `WMCard(tone: WMCardTone.brand)`.
 class WMDarkHeroCard extends StatelessWidget {
   const WMDarkHeroCard({
     required this.child,
@@ -698,87 +455,17 @@ class WMDarkHeroCard extends StatelessWidget {
   final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    final cardContent = Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(radius),
-        gradient: isDark
-            ? const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF1E293B),
-                  Color(0xFF0F172A),
-                  Color(0xFF020617),
-                ],
-                stops: [0.0, 0.6, 1.0],
-              )
-            : const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFFFFFFFF),
-                  Color(0xFFF8FAFC),
-                  Color(0xFFF1F5F9),
-                ],
-                stops: [0.0, 0.5, 1.0],
-              ),
-        border: Border.all(
-          color: isDark ? const Color(0x28FFFFFF) : const Color(0xFFE2E8F0),
-          width: 1.2,
-        ),
-        boxShadow: isDark
-            ? [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.45),
-                  blurRadius: 24,
-                  offset: const Offset(0, 10),
-                ),
-                BoxShadow(
-                  color: WalletMeltColors.brand.withValues(alpha: 0.06),
-                  blurRadius: 32,
-                  offset: const Offset(0, 4),
-                ),
-              ]
-            : [
-                BoxShadow(
-                  color: const Color(0xFF0F172A).withValues(alpha: 0.08),
-                  blurRadius: 20,
-                  offset: const Offset(0, 8),
-                ),
-                BoxShadow(
-                  color: const Color(0xFF0F172A).withValues(alpha: 0.03),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(radius),
-          onTap: onTap != null
-              ? () {
-                  WMHaptics.light();
-                  onTap!();
-                }
-              : null,
-          child: Padding(
-            padding: padding,
-            child: child,
-          ),
-        ),
-      ),
-    );
-
-    return cardContent;
-  }
+  Widget build(BuildContext context) => WMCard(
+        tone: WMCardTone.brand,
+        padding: padding,
+        radius: radius,
+        onTap: onTap,
+        child: child,
+      );
 }
 
-/// Compact circular / pill action button with micro scale on press
-class WMQuickActionButton extends StatefulWidget {
+/// Compact quick-action tile. Filled when [isPrimary], tonal otherwise.
+class WMQuickActionButton extends StatelessWidget {
   const WMQuickActionButton({
     required this.icon,
     required this.label,
@@ -793,94 +480,47 @@ class WMQuickActionButton extends StatefulWidget {
   final bool isPrimary;
 
   @override
-  State<WMQuickActionButton> createState() => _WMQuickActionButtonState();
-}
-
-class _WMQuickActionButtonState extends State<WMQuickActionButton> {
-  double _scale = 1.0;
-
-  @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
+    final scheme = Theme.of(context).colorScheme;
+    final bg = isPrimary ? scheme.primary : scheme.surfaceContainer;
+    final fg = isPrimary ? scheme.onPrimary : scheme.onSurface;
     return Expanded(
-      child: GestureDetector(
-        onTapDown: (_) => setState(() => _scale = AppMotion.buttonPressScale),
-        onTapUp: (_) {
-          setState(() => _scale = 1.0);
-          WMHaptics.selection();
-          widget.onTap();
-        },
-        onTapCancel: () => setState(() => _scale = 1.0),
-        child: AnimatedScale(
-          scale: _scale,
-          duration: AppMotion.fast,
-          curve: AppMotion.entrance,
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-            decoration: BoxDecoration(
-              color: widget.isPrimary
-                  ? (isDark ? WalletMeltColors.brand : WalletMeltColors.textPrimary)
-                  : (isDark ? WalletMeltColors.darkSurface : Colors.white),
-              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-              border: Border.all(
-                color: widget.isPrimary
-                    ? Colors.transparent
-                    : (isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder),
-                width: 1.0,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.03),
-                  blurRadius: 8,
-                  offset: const Offset(0, 3),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 34,
-                  height: 34,
-                  decoration: BoxDecoration(
-                    color: widget.isPrimary
-                        ? (isDark ? Colors.black.withValues(alpha: 0.15) : Colors.white.withValues(alpha: 0.15))
-                        : (isDark ? Colors.white.withValues(alpha: 0.08) : const Color(0xFF0F172A).withValues(alpha: 0.06)),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    widget.icon,
-                    size: 17,
-                    color: widget.isPrimary
-                        ? (isDark ? Colors.black : Colors.white)
-                        : (isDark ? Colors.white : WalletMeltColors.textPrimary),
-                  ),
-                ),
-                const SizedBox(height: 5),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 2),
-                  child: FittedBox(
+      child: Semantics(
+        button: true,
+        label: label,
+        child: Material(
+          color: bg,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: () {
+              WMHaptics.selection();
+              onTap();
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(icon, size: 22, color: fg),
+                  const SizedBox(height: AppSpacing.xs),
+                  FittedBox(
                     fit: BoxFit.scaleDown,
                     child: Text(
-                      widget.label,
-                      style: TextStyle(
-                        fontFamily: 'PlusJakartaSans',
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: -0.2,
-                        color: widget.isPrimary
-                            ? (isDark ? Colors.black : Colors.white)
-                            : (isDark ? WalletMeltColors.darkTextPrimary : WalletMeltColors.textPrimary),
-                      ),
+                      label,
                       maxLines: 1,
+                      style: Theme.of(context)
+                          .textTheme
+                          .labelMedium
+                          ?.copyWith(color: fg, fontWeight: FontWeight.w700),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-
         ),
       ),
     );

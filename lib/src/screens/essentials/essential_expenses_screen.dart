@@ -86,19 +86,19 @@ class _EssentialExpensesScreenState extends State<EssentialExpensesScreen> {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.account_balance_wallet_rounded,
-                        size: 18, color: WalletMeltColors.brand),
+                    Icon(Icons.account_balance_wallet_rounded,
+                        size: 18, color: context.scheme.primary),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         'MONTHLY ESSENTIALS (${readableMonth(state.selectedMonth)})',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w800,
                           letterSpacing: 0.8,
-                          color: WalletMeltColors.textMuted,
+                          color: context.scheme.onSurfaceVariant,
                         ),
                       ),
                     ),
@@ -111,9 +111,9 @@ class _EssentialExpensesScreenState extends State<EssentialExpensesScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'Expected / Budget',
-                            style: TextStyle(fontSize: 12, color: WalletMeltColors.textMuted),
+                            style: TextStyle(fontSize: 12, color: context.scheme.onSurfaceVariant),
                           ),
                           const SizedBox(height: 4),
                           Text(
@@ -126,16 +126,16 @@ class _EssentialExpensesScreenState extends State<EssentialExpensesScreen> {
                         ],
                       ),
                     ),
-                    Container(width: 1, height: 36, color: WalletMeltColors.textMuted.withValues(alpha: 0.2)),
+                    Container(width: 1, height: 36, color: context.scheme.onSurfaceVariant.withValues(alpha: 0.2)),
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.only(left: 16),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'Actual Spent',
-                              style: TextStyle(fontSize: 12, color: WalletMeltColors.textMuted),
+                              style: TextStyle(fontSize: 12, color: context.scheme.onSurfaceVariant),
                             ),
                             const SizedBox(height: 4),
                             Text(
@@ -144,8 +144,8 @@ class _EssentialExpensesScreenState extends State<EssentialExpensesScreen> {
                                 fontSize: 17,
                                 fontWeight: FontWeight.w800,
                                 color: actualTotal > expectedTotal && expectedTotal > 0
-                                    ? WalletMeltColors.warning
-                                    : WalletMeltColors.brand,
+                                    ? context.money.cautionText
+                                    : context.scheme.primary,
                               ),
                             ),
                           ],
@@ -170,19 +170,19 @@ class _EssentialExpensesScreenState extends State<EssentialExpensesScreen> {
                   child: Column(
                     children: [
                       Icon(Icons.checklist_rtl_rounded,
-                          size: 54, color: WalletMeltColors.textMuted.withValues(alpha: 0.5)),
+                          size: 54, color: context.scheme.onSurfaceVariant.withValues(alpha: 0.5)),
                       const SizedBox(height: 12),
                       const Text(
                         'No recurring essentials added yet',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                       ),
                       const SizedBox(height: 6),
-                      const Padding(
+                      Padding(
                         padding: EdgeInsets.symmetric(horizontal: 32),
                         child: Text(
                           'Track recurring essentials like Rent, Fuel, Electricity, and Internet with clear estimates vs actual spending.',
                           textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 12, color: WalletMeltColors.textMuted),
+                          style: TextStyle(fontSize: 12, color: context.scheme.onSurfaceVariant),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -217,15 +217,15 @@ class _EssentialExpensesScreenState extends State<EssentialExpensesScreen> {
                           Icon(
                             _showInactive ? Icons.expand_less_rounded : Icons.expand_more_rounded,
                             size: 20,
-                            color: WalletMeltColors.textMuted,
+                            color: context.scheme.onSurfaceVariant,
                           ),
                           const SizedBox(width: 8),
                           Text(
                             'Paused Essentials (${inactiveTemplates.length})',
-                            style: const TextStyle(
-                              fontSize: 13,
+                            style: TextStyle(
+                              fontSize: 12,
                               fontWeight: FontWeight.bold,
-                              color: WalletMeltColors.textMuted,
+                              color: context.scheme.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -324,7 +324,7 @@ class _EssentialTemplateTile extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: category != null
                         ? parseHexColor(category.color).withValues(alpha: 0.16)
-                        : WalletMeltColors.brand.withValues(alpha: 0.16),
+                        : context.scheme.primary.withValues(alpha: 0.16),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Center(
@@ -333,7 +333,7 @@ class _EssentialTemplateTile extends StatelessWidget {
                       size: 20,
                       color: category != null
                           ? parseHexColor(category.color)
-                          : WalletMeltColors.brand,
+                          : context.scheme.primary,
                       defaultIcon: template.isFuel
                           ? Icons.local_gas_station_rounded
                           : Icons.category_rounded,
@@ -347,20 +347,20 @@ class _EssentialTemplateTile extends StatelessWidget {
                     children: [
                       Text(
                         template.name,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                       ),
                       const SizedBox(height: 2),
                       Row(
                         children: [
                           Text(
                             category?.name ?? 'Essential',
-                            style: const TextStyle(fontSize: 12, color: WalletMeltColors.textSecondary),
+                            style: TextStyle(fontSize: 12, color: context.scheme.onSurfaceVariant),
                           ),
                           if (template.expectedDay != null) ...[
-                            const Text(' • ', style: TextStyle(color: WalletMeltColors.textMuted)),
+                            Text(' • ', style: TextStyle(color: context.scheme.onSurfaceVariant)),
                             Text(
                               'Due: ${_formatDay(template.expectedDay!)}',
-                              style: const TextStyle(fontSize: 11, color: WalletMeltColors.textMuted),
+                              style: TextStyle(fontSize: 11, color: context.scheme.onSurfaceVariant),
                             ),
                           ],
                         ],
@@ -377,12 +377,12 @@ class _EssentialTemplateTile extends StatelessWidget {
                     ),
                     Text(
                       '/${template.frequency}',
-                      style: const TextStyle(fontSize: 11, color: WalletMeltColors.textMuted),
+                      style: TextStyle(fontSize: 11, color: context.scheme.onSurfaceVariant),
                     ),
                   ],
                 ),
                 PopupMenuButton<String>(
-                  icon: const Icon(Icons.more_vert_rounded, size: 20, color: WalletMeltColors.textMuted),
+                  icon: Icon(Icons.more_vert_rounded, size: 20, color: context.scheme.onSurfaceVariant),
                   padding: EdgeInsets.zero,
                   onSelected: (val) {
                     if (val == 'record') onRecord();
@@ -397,9 +397,9 @@ class _EssentialTemplateTile extends StatelessWidget {
                       value: 'toggle',
                       child: Text(template.isActive ? 'Pause' : 'Activate'),
                     ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'delete',
-                      child: Text('Delete', style: TextStyle(color: WalletMeltColors.danger)),
+                      child: Text('Delete', style: TextStyle(color: context.scheme.error)),
                     ),
                   ],
                 ),
@@ -417,15 +417,15 @@ class _EssentialTemplateTile extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: WalletMeltColors.brand.withValues(alpha: 0.08),
+                        color: context.scheme.primary.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
                         '${comp.expectedLitres.toStringAsFixed(comp.expectedLitres % 1 == 0 ? 0 : 1)}L ${comp.fuelType.displayName} @ ${formatMoney(comp.expectedPricePerLitre, currency)}/L',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
-                          color: WalletMeltColors.brand,
+                          color: context.scheme.primary,
                         ),
                       ),
                     ),
@@ -437,7 +437,7 @@ class _EssentialTemplateTile extends StatelessWidget {
               const SizedBox(height: 6),
               Text(
                 template.notes!,
-                style: const TextStyle(fontSize: 11, color: WalletMeltColors.textMuted, fontStyle: FontStyle.italic),
+                style: TextStyle(fontSize: 11, color: context.scheme.onSurfaceVariant, fontStyle: FontStyle.italic),
               ),
             ],
           ],
@@ -615,13 +615,13 @@ class _AddEditEssentialSheetState extends State<_AddEditEssentialSheet> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'EXPECTED FUEL BREAKDOWN',
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 0.8,
-                      color: WalletMeltColors.textMuted,
+                      color: context.scheme.onSurfaceVariant,
                     ),
                   ),
                   TextButton.icon(
@@ -676,7 +676,7 @@ class _AddEditEssentialSheetState extends State<_AddEditEssentialSheet> {
                             const Spacer(),
                             Text(
                               formatMoney(_fuelComponents[i].estimatedAmount, currency),
-                              style: const TextStyle(fontWeight: FontWeight.bold, color: WalletMeltColors.brand),
+                              style: TextStyle(fontWeight: FontWeight.bold, color: context.scheme.primary),
                             ),
                             if (_fuelComponents.length > 1) ...[
                               const SizedBox(width: 8),
@@ -744,7 +744,7 @@ class _AddEditEssentialSheetState extends State<_AddEditEssentialSheet> {
                     const Text('Estimated Total / Month', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                     Text(
                       formatMoney(_computedFuelTotal, currency),
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: WalletMeltColors.brand),
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: context.scheme.primary),
                     ),
                   ],
                 ),

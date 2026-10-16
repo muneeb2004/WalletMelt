@@ -87,7 +87,7 @@ class ExpenseDetailScreen extends StatelessWidget {
                           fontSize: 11,
                           fontWeight: FontWeight.w800,
                           letterSpacing: 1.1,
-                          color: WalletMeltColors.textMuted,
+                          color: context.scheme.onSurfaceVariant,
                         ),
                       ),
                       Container(
@@ -95,7 +95,7 @@ class ExpenseDetailScreen extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: category != null
                               ? colorFromHex(category.color).withValues(alpha: 0.14)
-                              : const Color(0xFFF1F3F7),
+                              : context.scheme.surfaceContainerHigh,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Row(
@@ -126,25 +126,25 @@ class ExpenseDetailScreen extends StatelessWidget {
                   Text(
                     formatMoney(expense.amount, expense.currency),
                     style: TextStyle(
-                      fontSize: 36,
+                      fontSize: 34,
                       fontWeight: FontWeight.w900,
                       letterSpacing: -0.6,
                       color: Theme.of(context).brightness == Brightness.dark
                           ? Colors.white
-                          : WalletMeltColors.textPrimary,
+                          : context.scheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 18),
-                  const Divider(height: 1, color: Color(0x18000000)),
+                  const Divider(height: 1),
                   const SizedBox(height: 14),
 
                   // Structured receipt rows
-                  _buildReceiptRow('Date', '${parseIsoDate(expense.date).day} ${readableMonth(parseIsoDate(expense.date))}'),
+                  _buildReceiptRow(context, 'Date', '${parseIsoDate(expense.date).day} ${readableMonth(parseIsoDate(expense.date))}'),
                   if (expense.vendor != null && expense.vendor!.isNotEmpty)
-                    _buildReceiptRow('Merchant / Vendor', expense.vendor!),
+                    _buildReceiptRow(context, 'Merchant / Vendor', expense.vendor!),
                   if (expense.taxAmount != null && expense.taxAmount! > 0) ...[
-                    _buildReceiptRow('Subtotal', formatMoney(expense.subtotalAmount ?? (expense.amount - expense.taxAmount!), expense.currency)),
-                    _buildReceiptRow('Tax Amount', formatMoney(expense.taxAmount!, expense.currency), isTax: true),
+                    _buildReceiptRow(context, 'Subtotal', formatMoney(expense.subtotalAmount ?? (expense.amount - expense.taxAmount!), expense.currency)),
+                    _buildReceiptRow(context, 'Tax Amount', formatMoney(expense.taxAmount!, expense.currency), isTax: true),
                   ],
                   if (expense.notes != null && expense.notes!.isNotEmpty) ...[
                     const SizedBox(height: 6),
@@ -153,13 +153,13 @@ class ExpenseDetailScreen extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
-                        color: WalletMeltColors.textMuted,
+                        color: context.scheme.onSurfaceVariant,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       expense.notes!,
-                      style: const TextStyle(fontSize: 13, height: 1.35),
+                      style: const TextStyle(fontSize: 12, height: 1.35),
                     ),
                   ],
                 ],
@@ -194,7 +194,7 @@ class ExpenseDetailScreen extends StatelessWidget {
                               errorBuilder: (_, __, ___) => Container(
                                 height: 180,
                                 alignment: Alignment.center,
-                                color: Colors.black.withValues(alpha: 0.08),
+                                color: context.scheme.shadow.withValues(alpha: 0.08),
                                 child: const Text(
                                     'Receipt file is missing or unreadable.'),
                               ),
@@ -240,7 +240,7 @@ class ExpenseDetailScreen extends StatelessWidget {
                   Expanded(
                     child: OutlinedButton.icon(
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: WalletMeltColors.danger,
+                        foregroundColor: context.scheme.error,
                       ),
                       onPressed: () =>
                           _confirmPermanentDelete(context, state, expense),
@@ -263,7 +263,7 @@ class ExpenseDetailScreen extends StatelessWidget {
   );
   }
 
-  Widget _buildReceiptRow(String label, String value, {bool isTax = false}) {
+  Widget _buildReceiptRow(BuildContext context, String label, String value, {bool isTax = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
@@ -271,18 +271,18 @@ class ExpenseDetailScreen extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 13,
+            style: TextStyle(
+              fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: WalletMeltColors.textSecondary,
+              color: context.scheme.onSurfaceVariant,
             ),
           ),
           Text(
             value,
             style: TextStyle(
-              fontSize: 13.5,
+              fontSize: 14,
               fontWeight: FontWeight.w800,
-              color: isTax ? WalletMeltColors.danger : null,
+              color: isTax ? context.scheme.error : null,
             ),
           ),
         ],
@@ -370,7 +370,7 @@ class _FuelDetailsCardState extends State<_FuelDetailsCard> {
                     padding: const EdgeInsets.symmetric(vertical: 4.0),
                     child: Row(
                       children: [
-                        Icon(comp.fuelType.icon, size: 18, color: WalletMeltColors.brand),
+                        Icon(comp.fuelType.icon, size: 18, color: context.scheme.primary),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Column(
@@ -378,18 +378,18 @@ class _FuelDetailsCardState extends State<_FuelDetailsCard> {
                             children: [
                               Text(
                                 comp.fuelType.displayName,
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                               ),
                               Text(
                                 '${comp.quantityLitres.toStringAsFixed(comp.quantityLitres % 1 == 0 ? 0 : 2)} L @ ${formatMoney(comp.pricePerLitre, widget.currency)}/L',
-                                style: const TextStyle(fontSize: 12, color: WalletMeltColors.textSecondary),
+                                style: TextStyle(fontSize: 12, color: context.scheme.onSurfaceVariant),
                               ),
                             ],
                           ),
                         ),
                         Text(
                           formatMoney(comp.subtotal, widget.currency),
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                         ),
                       ],
                     ),
@@ -405,7 +405,7 @@ class _FuelDetailsCardState extends State<_FuelDetailsCard> {
                     if (tx.odometerReading != null)
                       Text(
                         'Odometer: ${tx.odometerReading! % 1 == 0 ? tx.odometerReading!.toInt() : tx.odometerReading} km',
-                        style: const TextStyle(fontSize: 12, color: WalletMeltColors.textSecondary),
+                        style: TextStyle(fontSize: 12, color: context.scheme.onSurfaceVariant),
                       ),
                   ],
                 ),

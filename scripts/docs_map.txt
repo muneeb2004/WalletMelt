@@ -6,3 +6,4 @@
 ^pubspec\.yaml$ => Current-Project-State.md
 ^scripts/build_apks => Build-and-Release-Pipeline.md
 ^\.claude/|\.githooks/ => AI-Engineering-Protocol.md
+^lib/src/theme/ => Design-System-and-UX.md

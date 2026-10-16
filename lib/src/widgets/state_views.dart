@@ -36,17 +36,17 @@ class AppErrorState extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
-                color: WalletMeltColors.danger.withValues(alpha: isDark ? 0.18 : 0.12),
+                color: context.scheme.error.withValues(alpha: isDark ? 0.18 : 0.12),
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: WalletMeltColors.danger.withValues(alpha: 0.3),
+                  color: context.scheme.error.withValues(alpha: 0.3),
                   width: 1.5,
                 ),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.error_outline_rounded,
                 size: 38,
-                color: WalletMeltColors.danger,
+                color: context.scheme.error,
               ),
             ),
             const SizedBox(height: AppSpacing.md + 4),
@@ -64,7 +64,7 @@ class AppErrorState extends StatelessWidget {
               child: Text(
                 message,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: WalletMeltColors.textMuted,
+                  color: context.scheme.onSurfaceVariant,
                   height: 1.4,
                 ),
                 textAlign: TextAlign.center,
@@ -75,10 +75,10 @@ class AppErrorState extends StatelessWidget {
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size(160, 44),
-                  backgroundColor: isDark ? WalletMeltColors.darkSurface : Colors.white,
-                  foregroundColor: isDark ? Colors.white : WalletMeltColors.textPrimary,
+                  backgroundColor: context.scheme.surfaceContainer,
+                  foregroundColor: context.scheme.onSurface,
                   side: BorderSide(
-                    color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder,
+                    color: context.scheme.outlineVariant,
                   ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
@@ -91,7 +91,7 @@ class AppErrorState extends StatelessWidget {
                 icon: const Icon(Icons.refresh_rounded, size: 16),
                 label: Text(
                   retryLabel,
-                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
                 ),
               ),
             ],
@@ -133,17 +133,17 @@ class AppOfflineState extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
-                color: WalletMeltColors.warning.withValues(alpha: isDark ? 0.18 : 0.12),
+                color: context.money.cautionText.withValues(alpha: isDark ? 0.18 : 0.12),
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: WalletMeltColors.warning.withValues(alpha: 0.3),
+                  color: context.money.cautionText.withValues(alpha: 0.3),
                   width: 1.5,
                 ),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.wifi_off_rounded,
                 size: 38,
-                color: WalletMeltColors.warning,
+                color: context.money.cautionText,
               ),
             ),
             const SizedBox(height: AppSpacing.md + 4),
@@ -161,7 +161,7 @@ class AppOfflineState extends StatelessWidget {
               child: Text(
                 message,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: WalletMeltColors.textMuted,
+                  color: context.scheme.onSurfaceVariant,
                   height: 1.4,
                 ),
                 textAlign: TextAlign.center,
@@ -172,10 +172,10 @@ class AppOfflineState extends StatelessWidget {
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size(160, 44),
-                  backgroundColor: isDark ? WalletMeltColors.darkSurface : Colors.white,
-                  foregroundColor: isDark ? Colors.white : WalletMeltColors.textPrimary,
+                  backgroundColor: context.scheme.surfaceContainer,
+                  foregroundColor: context.scheme.onSurface,
                   side: BorderSide(
-                    color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder,
+                    color: context.scheme.outlineVariant,
                   ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
@@ -188,7 +188,7 @@ class AppOfflineState extends StatelessWidget {
                 icon: const Icon(Icons.refresh_rounded, size: 16),
                 label: const Text(
                   'Check Connection',
-                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
                 ),
               ),
             ],

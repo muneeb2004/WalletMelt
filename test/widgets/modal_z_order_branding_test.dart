@@ -32,8 +32,10 @@ void main() {
       final lightTheme = WalletMeltTheme.light();
       final sheetTheme = lightTheme.bottomSheetTheme;
 
-      expect(sheetTheme.backgroundColor, equals(Colors.white));
-      expect(sheetTheme.modalBackgroundColor, equals(Colors.white));
+      expect(sheetTheme.backgroundColor,
+          equals(lightTheme.colorScheme.surfaceContainer));
+      expect(sheetTheme.modalBackgroundColor,
+          equals(lightTheme.colorScheme.surfaceContainer));
       expect(sheetTheme.surfaceTintColor, equals(Colors.transparent));
       expect(sheetTheme.elevation, equals(0));
       expect(sheetTheme.showDragHandle, isTrue);

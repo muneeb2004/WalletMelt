@@ -19,7 +19,7 @@ related:
 graph TD
     subgraph UI ["Presentation Layer (Flutter)"]
         Screens["Screens (Home, History, Planning[Budgets/Subscriptions/Essentials], Debts; Settings and Insights are top-level routes)"]
-        Components["Reusable Glass Components (WMGlassSurface, CategoryIcon)"]
+        Components["Reusable Components (WMCard, CategoryIcon)"]
         AppRouter["GoRouter (StatefulShellRoute / Nav Guard)"]
     end
 

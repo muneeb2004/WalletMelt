@@ -75,10 +75,10 @@ class EmptyState extends StatelessWidget {
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-                  color: WalletMeltColors.brand,
+                  color: context.scheme.primary,
                   boxShadow: [
                     BoxShadow(
-                      color: WalletMeltColors.brand.withValues(alpha: 0.25),
+                      color: context.scheme.primary.withValues(alpha: 0.25),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
@@ -87,8 +87,8 @@ class EmptyState extends StatelessWidget {
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(180, 46),
-                    backgroundColor: WalletMeltColors.brand,
-                    foregroundColor: WalletMeltColors.textPrimary,
+                    backgroundColor: context.scheme.primary,
+                    foregroundColor: context.scheme.onSurface,
                     shadowColor: Colors.transparent,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(AppSpacing.radiusPill),

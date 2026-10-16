@@ -20,7 +20,7 @@ related:
 ## 2. Directory Taxonomy
 - `lib/src/analytics/`: Mathematical financial calculation engines and snapshot models.
 - `lib/src/app/`: Application bootstrap, root widgets, and router setup.
-- `lib/src/components/`: Reusable, dumb or semi-smart presentation components (`WMGlassSurface`, `CategoryIcon`).
+- `lib/src/components/`: Reusable, dumb or semi-smart presentation components (`WMCard`, `CategoryIcon`).
 - `lib/src/constants/`: App constants, standard category definitions.
 - `lib/src/data/local/`: Database tables, Drift database definitions, connections.
 - `lib/src/data/repositories/drift/`: Repository implementations mapping Drift classes to domain entities.
@@ -29,12 +29,13 @@ related:
 - `lib/src/security/`: PIN hashing, lock state controller, biometric interface, root detection.
 - `lib/src/services/`: Platform services (receipts, export/restore, SVG customization).
 - `lib/src/state/`: AppState ChangeNotifier managing UI state.
-- `lib/src/theme/`: Colors, typography, glass styling tokens.
+- `lib/src/theme/`: Tonal palette (`wm_palette.dart`), type scale (`wm_type.dart`), `WMCard`, spacing, motion, `ThemeData`.
 - `lib/src/types/`: Domain entity models.
 - `lib/src/utils/`: Currency formatters, date utilities, validators.
 
 ## 3. UI & Styling Rules
-- Always use `WMGlassSurface.tier1()`, `tier2()`, or `tier3()` for card panels.
-- Do not hardcode arbitrary hex colors; consume `WalletMeltColors`.
+- Use `WMCard` for every card panel. `WMGlassSurface`, `FlatCard`, `LiquidGlass`, `WMDarkHeroCard` and `AppCard` are legacy wrappers; never use them in new code.
+- Never hardcode colours or font sizes. Use `Theme.of(context).colorScheme`, `context.money` (status colours) and `textTheme` (six-step scale). See [[Design-System-and-UX]] and [[ADR-0010-Tonal-Material3-Design-System-and-Brand]].
+- `test/theme/design_token_guard_test.dart` enforces a ratchet; do not raise its baselines.
 - Category icon rendering must consume `CategoryIcon` to ensure user-defined SVG overrides reflect globally.
 - Form inputs must validate non-empty and non-zero positive amounts where appropriate.

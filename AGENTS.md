@@ -52,3 +52,10 @@ Opus advises (before committing to an approach and before declaring done). Sonne
 - `.claude/agents/haiku-explorer.md`: Haiku, tools limited to Read/Grep/Glob (read-only, cannot write).
 - `.claude/agent_guard.py` (PreToolUse on `Agent`): denies any sub-agent other than `haiku-explorer`, `Explore`, `claude-code-guide`, and any non-haiku model. Opus is never a sub-agent. Override only with `WALLETMELT_ALLOW_ANY_AGENT=1` when the user explicitly asks.
 - Call the advisor (Opus) before committing to an approach and before declaring done.
+
+## Brand & Design System Guard
+
+- Brand and UI standard: `WalletMelt/01-Product/Design-System-and-UX.md` (decision: `ADR-0010`). One brand (indigo), Tonal Material 3.
+- In `lib/`, never write raw colours (`Color(0x…)`, `Colors.*`) or ad hoc `fontSize` values. Use `Theme.of(context).colorScheme`, `context.money` for status colours, `textTheme` (six-step scale: 34/22/17/14/12/11), `AppSpacing`, and `WMCard` for cards. New hex values go in `lib/src/theme/wm_palette.dart` only, with a vault update first.
+- `test/theme/design_token_guard_test.dart` is a ratchet over legacy raw colours and small fonts. Lower its baselines when you migrate code; never raise them.
+- UI copy is sentence case, verb-first for buttons; the product name is "WalletMelt".

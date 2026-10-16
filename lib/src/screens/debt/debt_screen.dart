@@ -36,12 +36,12 @@ class DebtScreen extends StatefulWidget {
               ),
               const SizedBox(height: 14),
               if (active.isEmpty)
-                const Padding(
+                Padding(
                   padding: EdgeInsets.symmetric(vertical: 24),
                   child: Center(
                     child: Text(
                       'No active debts or loans found.',
-                      style: TextStyle(color: WalletMeltColors.textMuted),
+                      style: TextStyle(color: context.scheme.onSurfaceVariant),
                     ),
                   ),
                 )
@@ -54,7 +54,7 @@ class DebtScreen extends StatefulWidget {
                     itemBuilder: (ctx, idx) {
                       final debt = active[idx];
                       final isReceivable = debt.type == DebtType.owedToMe || debt.type == DebtType.loanGiven;
-                      final typeColor = isReceivable ? WalletMeltColors.positive : WalletMeltColors.danger;
+                      final typeColor = isReceivable ? context.money.incomeText : context.scheme.error;
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 8),
                         child: WMGlassSurface.tier2(
@@ -79,11 +79,11 @@ class DebtScreen extends StatefulWidget {
                                   children: [
                                     Text(
                                       state.payeeNameFor(debt),
-                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                                     ),
                                     Text(
                                       debt.type.displayUpper,
-                                      style: TextStyle(fontSize: 9, color: typeColor, fontWeight: FontWeight.bold),
+                                      style: TextStyle(fontSize: 11, color: typeColor, fontWeight: FontWeight.bold),
                                     ),
 
                                   ],
@@ -91,7 +91,7 @@ class DebtScreen extends StatefulWidget {
                               ),
                               Text(
                                 '${debt.remainingAmount.toStringAsFixed(debt.remainingAmount % 1 == 0 ? 0 : 2)} ${debt.currency}',
-                                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
                               ),
                             ],
                           ),
@@ -154,7 +154,7 @@ class DebtScreen extends StatefulWidget {
                                 elevation: 4.0,
                                 borderRadius: BorderRadius.circular(12),
                                 color: Theme.of(context).brightness == Brightness.dark
-                                    ? WalletMeltColors.darkSurface
+                                    ? context.scheme.surfaceContainer
                                     : Colors.white,
                                 child: Container(
                                   width: MediaQuery.of(context).size.width - 40,
@@ -166,7 +166,7 @@ class DebtScreen extends StatefulWidget {
                                     itemBuilder: (BuildContext context, int index) {
                                       final payee = options.elementAt(index);
                                       return ListTile(
-                                        title: Text(payee.name, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                                        title: Text(payee.name, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                                         subtitle: payee.phone != null && payee.phone!.isNotEmpty
                                             ? Text(payee.phone!, style: const TextStyle(fontSize: 11))
                                             : null,
@@ -211,7 +211,7 @@ class DebtScreen extends StatefulWidget {
                                 initialValue: selectedType,
                                 decoration: const InputDecoration(labelText: 'Type'),
                                 dropdownColor: Theme.of(builderContext).brightness == Brightness.dark
-                                    ? WalletMeltColors.darkSurface
+                                    ? context.scheme.surfaceContainer
                                     : Colors.white,
                                 borderRadius: BorderRadius.circular(20),
                                 items: const [
@@ -259,14 +259,14 @@ class DebtScreen extends StatefulWidget {
                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                           child: Row(
                             children: [
-                              const Icon(Icons.calendar_month_rounded, color: WalletMeltColors.brandDeep, size: 18),
+                              Icon(Icons.calendar_month_rounded, color: context.scheme.primary, size: 18),
                               AppSpacing.gapSm,
                               Expanded(
                                 child: Text(
                                   selectedDueDate == null
                                       ? 'Set Due Date (Optional)'
                                       : 'Due Date: ${selectedDueDate!.toIso8601String().substring(0, 10)}',
-                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                                 ),
                               ),
                               if (selectedDueDate != null)
@@ -277,7 +277,7 @@ class DebtScreen extends StatefulWidget {
                                   },
                                 )
                               else
-                                const Icon(Icons.chevron_right_rounded, size: 18, color: WalletMeltColors.textMuted),
+                                Icon(Icons.chevron_right_rounded, size: 18, color: context.scheme.onSurfaceVariant),
                             ],
                           ),
                         ),
@@ -415,7 +415,7 @@ class DebtScreen extends StatefulWidget {
                                     Text(
                                       state.payeeNameFor(debt),
                                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                            fontSize: 20,
+                                            fontSize: 22,
                                             fontWeight: FontWeight.w900,
                                           ),
                                     ),
@@ -423,12 +423,12 @@ class DebtScreen extends StatefulWidget {
                                     Text(
                                       debt.type.displayUpper,
                                       style: TextStyle(
-                                        fontSize: 10,
+                                        fontSize: 11,
                                         fontWeight: FontWeight.bold,
                                         letterSpacing: 0.5,
                                         color: isReceivable
-                                            ? WalletMeltColors.positive
-                                            : WalletMeltColors.danger,
+                                            ? context.money.incomeText
+                                            : context.scheme.error,
                                       ),
                                     ),
                                   ],
@@ -437,19 +437,19 @@ class DebtScreen extends StatefulWidget {
                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                   decoration: BoxDecoration(
                                     color: debt.isSettled
-                                        ? WalletMeltColors.positive.withValues(alpha: 0.12)
-                                        : WalletMeltColors.brand.withValues(alpha: 0.12),
+                                        ? context.money.incomeText.withValues(alpha: 0.12)
+                                        : context.scheme.primary.withValues(alpha: 0.12),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Text(
                                     debt.status.displayUpper,
                                     style: TextStyle(
-                                      fontSize: 10,
+                                      fontSize: 11,
                                       fontWeight: FontWeight.bold,
                                       letterSpacing: 0.5,
                                       color: debt.isSettled
-                                          ? WalletMeltColors.positive
-                                          : WalletMeltColors.brand,
+                                          ? context.money.incomeText
+                                          : context.scheme.primary,
                                     ),
                                   ),
                                 ),
@@ -466,7 +466,7 @@ class DebtScreen extends StatefulWidget {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        const Text('PRINCIPAL', style: TextStyle(fontSize: 9, color: WalletMeltColors.textMuted, fontWeight: FontWeight.bold)),
+                                        Text('PRINCIPAL', style: TextStyle(fontSize: 11, color: context.scheme.onSurfaceVariant, fontWeight: FontWeight.bold)),
                                         const SizedBox(height: 2),
                                         Text('${debt.principalAmount.toStringAsFixed(debt.principalAmount % 1 == 0 ? 0 : 2)} ${debt.currency}', style: const TextStyle(fontWeight: FontWeight.w900)),
                                       ],
@@ -480,9 +480,9 @@ class DebtScreen extends StatefulWidget {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        const Text('OUTSTANDING', style: TextStyle(fontSize: 9, color: WalletMeltColors.textMuted, fontWeight: FontWeight.bold)),
+                                        Text('OUTSTANDING', style: TextStyle(fontSize: 11, color: context.scheme.onSurfaceVariant, fontWeight: FontWeight.bold)),
                                         const SizedBox(height: 2),
-                                        Text('${debt.remainingAmount.toStringAsFixed(debt.remainingAmount % 1 == 0 ? 0 : 2)} ${debt.currency}', style: const TextStyle(fontWeight: FontWeight.w900, color: WalletMeltColors.brandDeep)),
+                                        Text('${debt.remainingAmount.toStringAsFixed(debt.remainingAmount % 1 == 0 ? 0 : 2)} ${debt.currency}', style: TextStyle(fontWeight: FontWeight.w900, color: context.scheme.primary)),
                                       ],
                                     ),
                                   ),
@@ -494,17 +494,17 @@ class DebtScreen extends StatefulWidget {
                             if (debt.description != null) ...[
                               Text(
                                 debt.description!,
-                                style: const TextStyle(fontSize: 13, height: 1.3),
+                                style: const TextStyle(fontSize: 12, height: 1.3),
                               ),
                               const SizedBox(height: 10),
                             ],
                             if (debt.notes != null) ...[
-                              const Text('Notes', style: TextStyle(fontSize: 10, color: WalletMeltColors.textMuted, fontWeight: FontWeight.bold)),
+                              Text('Notes', style: TextStyle(fontSize: 11, color: context.scheme.onSurfaceVariant, fontWeight: FontWeight.bold)),
                               Text(debt.notes!, style: const TextStyle(fontSize: 12)),
                               const SizedBox(height: 14),
                             ],
 
-                            const Divider(height: 1, color: Color(0x1Fffffff)),
+                            const Divider(height: 1),
                             const SizedBox(height: 14),
 
                             const Text(
@@ -524,7 +524,7 @@ class DebtScreen extends StatefulWidget {
                                   date: debt.createdAt.length >= 10 ? debt.createdAt.substring(0, 10) : debt.createdAt,
                                   amount: '${isReceiv ? "+" : "-"}${debt.principalAmount.toStringAsFixed(debt.principalAmount % 1 == 0 ? 0 : 2)} ${debt.currency}',
                                   icon: Icons.add_circle_outline_rounded,
-                                  iconColor: isReceiv ? WalletMeltColors.positive : WalletMeltColors.danger,
+                                  iconColor: isReceiv ? context.money.incomeText : context.scheme.error,
                                   isLast: false,
                                 ),
                               );
@@ -538,7 +538,7 @@ class DebtScreen extends StatefulWidget {
                                     date: pay.createdAt.length >= 10 ? pay.createdAt.substring(0, 10) : pay.createdAt,
                                     amount: '${isReceiv ? "-" : "+"}${pay.amount.toStringAsFixed(pay.amount % 1 == 0 ? 0 : 2)} ${debt.currency}',
                                     icon: Icons.payment_rounded,
-                                    iconColor: WalletMeltColors.positive,
+                                    iconColor: context.money.incomeText,
                                     isLast: false,
                                   ),
                                 );
@@ -553,7 +553,7 @@ class DebtScreen extends StatefulWidget {
                                     date: settledDate.length >= 10 ? settledDate.substring(0, 10) : settledDate,
                                     amount: '0 ${debt.currency}',
                                     icon: Icons.check_circle_rounded,
-                                    iconColor: WalletMeltColors.positive,
+                                    iconColor: context.money.incomeText,
                                     isLast: true,
                                   ),
                                 );
@@ -568,7 +568,7 @@ class DebtScreen extends StatefulWidget {
                                     date: debt.createdAt.length >= 10 ? debt.createdAt.substring(0, 10) : debt.createdAt,
                                     amount: '${isReceiv ? "+" : "-"}${debt.principalAmount.toStringAsFixed(debt.principalAmount % 1 == 0 ? 0 : 2)} ${debt.currency}',
                                     icon: Icons.add_circle_outline_rounded,
-                                    iconColor: isReceiv ? WalletMeltColors.positive : WalletMeltColors.danger,
+                                    iconColor: isReceiv ? context.money.incomeText : context.scheme.error,
                                     isLast: true,
                                   );
                                 } else {
@@ -579,7 +579,7 @@ class DebtScreen extends StatefulWidget {
                                     date: lastPay.createdAt.length >= 10 ? lastPay.createdAt.substring(0, 10) : lastPay.createdAt,
                                     amount: '${isReceiv ? "-" : "+"}${lastPay.amount.toStringAsFixed(lastPay.amount % 1 == 0 ? 0 : 2)} ${debt.currency}',
                                     icon: Icons.payment_rounded,
-                                    iconColor: WalletMeltColors.positive,
+                                    iconColor: context.money.incomeText,
                                     isLast: true,
                                   );
                                 }
@@ -678,7 +678,7 @@ class DebtScreen extends StatefulWidget {
 
                             TextButton.icon(
                               style: TextButton.styleFrom(
-                                foregroundColor: WalletMeltColors.danger,
+                                foregroundColor: context.scheme.error,
                                 minimumSize: const Size.fromHeight(48),
                               ),
                               icon: const Icon(Icons.delete_outline_rounded),
@@ -744,8 +744,8 @@ class DebtScreen extends StatefulWidget {
                 width: 2,
                 height: 36,
                 color: Theme.of(context).brightness == Brightness.dark
-                    ? WalletMeltColors.darkBorder
-                    : WalletMeltColors.lightBorder,
+                    ? context.scheme.outlineVariant
+                    : context.scheme.outlineVariant,
               ),
           ],
         ),
@@ -759,18 +759,18 @@ class DebtScreen extends StatefulWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
                   ),
                   Text(
                     amount,
-                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
                   ),
                 ],
               ),
               const SizedBox(height: 2),
               Text(
                 date,
-                style: const TextStyle(fontSize: 11, color: WalletMeltColors.textMuted),
+                style: TextStyle(fontSize: 11, color: context.scheme.onSurfaceVariant),
               ),
               const SizedBox(height: 12),
             ],
@@ -909,21 +909,21 @@ class _DebtScreenState extends State<DebtScreen> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      side: const BorderSide(color: WalletMeltColors.brand),
+                      side: BorderSide(color: context.scheme.primary),
                     ),
                     onPressed: () => DebtScreen.showAddDebtSheet(context),
-                    child: const Row(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.add_rounded, size: 18, color: WalletMeltColors.brand),
+                        Icon(Icons.add_rounded, size: 18, color: context.scheme.primary),
                         SizedBox(width: 6),
                         Flexible(
                           child: FittedBox(
                             fit: BoxFit.scaleDown,
                             child: Text(
                               'Add Obligation',
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                             ),
                           ),
                         ),
@@ -939,21 +939,21 @@ class _DebtScreenState extends State<DebtScreen> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      side: const BorderSide(color: WalletMeltColors.positive),
+                      side: BorderSide(color: context.money.incomeText),
                     ),
                     onPressed: () => DebtScreen.showQuickRepaymentSelector(context),
-                    child: const Row(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.payment_rounded, size: 18, color: WalletMeltColors.positive),
+                        Icon(Icons.payment_rounded, size: 18, color: context.money.incomeText),
                         SizedBox(width: 6),
                         Flexible(
                           child: FittedBox(
                             fit: BoxFit.scaleDown,
                             child: Text(
                               'Record Repayment',
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                             ),
                           ),
                         ),
@@ -980,8 +980,8 @@ class _DebtScreenState extends State<DebtScreen> {
                             Container(
                               width: 8,
                               height: 8,
-                              decoration: const BoxDecoration(
-                                color: WalletMeltColors.brand,
+                              decoration: BoxDecoration(
+                                color: context.scheme.primary,
                                 shape: BoxShape.circle,
                               ),
                             ),
@@ -995,7 +995,7 @@ class _DebtScreenState extends State<DebtScreen> {
                                   fontSize: 11,
                                   fontWeight: FontWeight.w800,
                                   letterSpacing: 1.1,
-                                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                  color: context.scheme.onSurfaceVariant,
                                 ),
                               ),
                             ),
@@ -1006,15 +1006,15 @@ class _DebtScreenState extends State<DebtScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                         decoration: BoxDecoration(
-                          color: (netPosition >= 0 ? WalletMeltColors.positive : WalletMeltColors.danger).withValues(alpha: 0.18),
+                          color: (netPosition >= 0 ? context.money.incomeText : context.scheme.error).withValues(alpha: 0.18),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
                           netPosition >= 0 ? 'NET ASSET' : 'NET LIABILITY',
                           style: TextStyle(
-                            fontSize: 10,
+                            fontSize: 11,
                             fontWeight: FontWeight.w800,
-                            color: netPosition >= 0 ? WalletMeltColors.positive : WalletMeltColors.danger,
+                            color: netPosition >= 0 ? context.money.incomeText : context.scheme.error,
                           ),
                         ),
                       ),
@@ -1029,7 +1029,7 @@ class _DebtScreenState extends State<DebtScreen> {
                       style: TextStyle(
                         fontSize: 34,
                         fontWeight: FontWeight.w900,
-                        color: netPosition >= 0 ? WalletMeltColors.positive : WalletMeltColors.danger,
+                        color: netPosition >= 0 ? context.money.incomeText : context.scheme.error,
                         letterSpacing: -0.6,
                         height: 1.05,
                       ),
@@ -1039,14 +1039,10 @@ class _DebtScreenState extends State<DebtScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: isDark
-                          ? Colors.white.withValues(alpha: 0.05)
-                          : const Color(0xFF0F172A).withValues(alpha: 0.04),
+                      color: context.scheme.onSurface.withValues(alpha: 0.04),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: isDark
-                            ? Colors.white.withValues(alpha: 0.08)
-                            : const Color(0xFFE2E8F0),
+                        color: context.scheme.outlineVariant,
                         width: 1.0,
                       ),
                     ),
@@ -1059,19 +1055,19 @@ class _DebtScreenState extends State<DebtScreen> {
                               Text(
                                 'OWED TO YOU',
                                 style: TextStyle(
-                                  fontSize: 10,
+                                  fontSize: 11,
                                   fontWeight: FontWeight.w800,
                                   letterSpacing: 0.8,
-                                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                  color: context.scheme.onSurfaceVariant,
                                 ),
                               ),
                               const SizedBox(height: 3),
                               Text(
                                 '${owedToMe.toStringAsFixed(owedToMe % 1 == 0 ? 0 : 2)} $currency',
-                                style: const TextStyle(
-                                  fontSize: 15,
+                                style: TextStyle(
+                                  fontSize: 14,
                                   fontWeight: FontWeight.w900,
-                                  color: WalletMeltColors.positive,
+                                  color: context.money.incomeText,
                                 ),
                               ),
                             ],
@@ -1080,9 +1076,7 @@ class _DebtScreenState extends State<DebtScreen> {
                         Container(
                           width: 1,
                           height: 28,
-                          color: isDark
-                              ? Colors.white.withValues(alpha: 0.12)
-                              : const Color(0xFFCBD5E1),
+                          color: context.scheme.outlineVariant,
                         ),
                         const SizedBox(width: 16),
                         Expanded(
@@ -1092,19 +1086,19 @@ class _DebtScreenState extends State<DebtScreen> {
                               Text(
                                 'YOU OWE',
                                 style: TextStyle(
-                                  fontSize: 10,
+                                  fontSize: 11,
                                   fontWeight: FontWeight.w800,
                                   letterSpacing: 0.8,
-                                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                  color: context.scheme.onSurfaceVariant,
                                 ),
                               ),
                               const SizedBox(height: 3),
                               Text(
                                 '${iOwe.toStringAsFixed(iOwe % 1 == 0 ? 0 : 2)} $currency',
-                                style: const TextStyle(
-                                  fontSize: 15,
+                                style: TextStyle(
+                                  fontSize: 14,
                                   fontWeight: FontWeight.w900,
-                                  color: WalletMeltColors.danger,
+                                  color: context.scheme.error,
                                 ),
                               ),
                             ],
@@ -1124,15 +1118,15 @@ class _DebtScreenState extends State<DebtScreen> {
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF0C0E14) : Colors.white,
+                      color: context.scheme.surfaceContainer,
                       borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                       border: Border.all(
-                        color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder,
+                        color: context.scheme.outlineVariant,
                         width: 1.0,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: isDark ? 0.20 : 0.03),
+                          color: context.scheme.shadow.withValues(alpha: isDark ? 0.20 : 0.03),
                           blurRadius: 10,
                           offset: const Offset(0, 3),
                         ),
@@ -1143,9 +1137,9 @@ class _DebtScreenState extends State<DebtScreen> {
                       onChanged: (val) => setState(() => _searchQuery = val.trim()),
                       decoration: InputDecoration(
                         hintText: 'Search by person, notes...',
-                        hintStyle: const TextStyle(
-                          fontSize: 13.5,
-                          color: WalletMeltColors.textMuted,
+                        hintStyle: TextStyle(
+                          fontSize: 14,
+                          color: context.scheme.onSurfaceVariant,
                           fontWeight: FontWeight.w500,
                         ),
                         prefixIcon: const Icon(Icons.search_rounded, size: 20),
@@ -1173,13 +1167,13 @@ class _DebtScreenState extends State<DebtScreen> {
                   height: 48,
                   decoration: BoxDecoration(
                     color: _selectedTypesFilter.isNotEmpty || _selectedStatusesFilter.isNotEmpty
-                        ? WalletMeltColors.brand.withValues(alpha: 0.16)
-                        : (isDark ? const Color(0xFF0C0E14) : Colors.white),
+                        ? context.scheme.primary.withValues(alpha: 0.16)
+                        : (context.scheme.surfaceContainer),
                     borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                     border: Border.all(
                       color: _selectedTypesFilter.isNotEmpty || _selectedStatusesFilter.isNotEmpty
-                          ? WalletMeltColors.brand
-                          : (isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder),
+                          ? context.scheme.primary
+                          : (context.scheme.outlineVariant),
                       width: 1.0,
                     ),
                   ),
@@ -1190,8 +1184,8 @@ class _DebtScreenState extends State<DebtScreen> {
                       Icons.filter_list_rounded,
                       size: 20,
                       color: _selectedTypesFilter.isNotEmpty || _selectedStatusesFilter.isNotEmpty
-                          ? WalletMeltColors.brand
-                          : (isDark ? Colors.white : WalletMeltColors.textPrimary),
+                          ? context.scheme.primary
+                          : (context.scheme.onSurface),
                     ),
                     onPressed: () => setState(() => _isFiltersExpanded = !_isFiltersExpanded),
                   ),
@@ -1207,7 +1201,7 @@ class _DebtScreenState extends State<DebtScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Status Filter', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: WalletMeltColors.textMuted)),
+                    Text('Status Filter', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: context.scheme.onSurfaceVariant)),
                     const SizedBox(height: 6),
                     Wrap(
                       spacing: 8,
@@ -1242,7 +1236,7 @@ class _DebtScreenState extends State<DebtScreen> {
                       ],
                     ),
                     const SizedBox(height: 12),
-                    const Text('Type Filter', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: WalletMeltColors.textMuted)),
+                    Text('Type Filter', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: context.scheme.onSurfaceVariant)),
                     const SizedBox(height: 6),
                     Wrap(
                       spacing: 8,
@@ -1298,16 +1292,16 @@ class _DebtScreenState extends State<DebtScreen> {
               Center(
                 child: Column(
                   children: [
-                    const Icon(Icons.handshake_outlined, size: 64, color: WalletMeltColors.textMuted),
+                    Icon(Icons.handshake_outlined, size: 64, color: context.scheme.onSurfaceVariant),
                     const SizedBox(height: 16),
                     Text(
                       'No loans tracked yet',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 8),
-                    const Text(
+                    Text(
                       'Record money lent, borrowed, or dinner splits here.',
-                      style: TextStyle(color: WalletMeltColors.textMuted, fontSize: 13),
+                      style: TextStyle(color: context.scheme.onSurfaceVariant, fontSize: 12),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 24),
@@ -1324,7 +1318,7 @@ class _DebtScreenState extends State<DebtScreen> {
               Center(
                 child: Column(
                   children: [
-                    const Icon(Icons.filter_list_off_rounded, size: 48, color: WalletMeltColors.textMuted),
+                    Icon(Icons.filter_list_off_rounded, size: 48, color: context.scheme.onSurfaceVariant),
                     const SizedBox(height: 12),
                     const Text(
                       'No matching obligations found',
@@ -1347,7 +1341,7 @@ class _DebtScreenState extends State<DebtScreen> {
             ] else ...[
               // Overdue Section
               if (overdueDebts.isNotEmpty) ...[
-                _buildSectionHeader(context, 'Overdue Obligations', WalletMeltColors.danger),
+                _buildSectionHeader(context, 'Overdue Obligations', context.scheme.error),
                 const SizedBox(height: 10),
                 for (final debt in overdueDebts) _buildDebtTile(context, debt),
                 const SizedBox(height: 18),
@@ -1367,7 +1361,7 @@ class _DebtScreenState extends State<DebtScreen> {
 
               // Settled Section
               if (settledDebts.isNotEmpty) ...[
-                _buildSectionHeader(context, 'Settled History', WalletMeltColors.textMuted),
+                _buildSectionHeader(context, 'Settled History', context.scheme.onSurfaceVariant),
                 const SizedBox(height: 10),
                 for (final debt in settledDebts) _buildDebtTile(context, debt),
               ],
@@ -1393,7 +1387,7 @@ class _DebtScreenState extends State<DebtScreen> {
         Text(
           title,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontSize: 15,
+                fontSize: 14,
                 fontWeight: FontWeight.w800,
               ),
         ),
@@ -1407,7 +1401,7 @@ class _DebtScreenState extends State<DebtScreen> {
     final state = context.read<AppState>();
     // Determine type indicators
     final isReceivable = debt.type == DebtType.owedToMe || debt.type == DebtType.loanGiven;
-    final typeColor = isReceivable ? WalletMeltColors.positive : WalletMeltColors.danger;
+    final typeColor = isReceivable ? context.money.incomeText : context.scheme.error;
 
     String typeLabel = '';
     switch (debt.type) {
@@ -1451,18 +1445,18 @@ class _DebtScreenState extends State<DebtScreen> {
               height: 42,
               decoration: BoxDecoration(
                 color: isOverdue
-                    ? WalletMeltColors.danger.withValues(alpha: 0.12)
+                    ? context.scheme.error.withValues(alpha: 0.12)
                     : typeColor.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
                 border: isOverdue
-                    ? Border.all(color: WalletMeltColors.danger, width: 1.5)
+                    ? Border.all(color: context.scheme.error, width: 1.5)
                     : null,
               ),
               child: Icon(
                 isOverdue
                     ? Icons.warning_amber_rounded
                     : (isReceivable ? Icons.arrow_outward_rounded : Icons.call_received_rounded),
-                color: isOverdue ? WalletMeltColors.danger : typeColor,
+                color: isOverdue ? context.scheme.error : typeColor,
                 size: 20,
               ),
             ),
@@ -1477,7 +1471,7 @@ class _DebtScreenState extends State<DebtScreen> {
                       Expanded(
                         child: Text(
                           state.payeeNameFor(debt),
-                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
+                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -1486,16 +1480,16 @@ class _DebtScreenState extends State<DebtScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: WalletMeltColors.danger.withValues(alpha: 0.12),
+                            color: context.scheme.error.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(6),
-                            border: Border.all(color: WalletMeltColors.danger.withValues(alpha: 0.24)),
+                            border: Border.all(color: context.scheme.error.withValues(alpha: 0.24)),
                           ),
                           child: Text(
                             daysOverdue != null ? '$daysOverdue DAYS OVERDUE' : 'OVERDUE',
-                            style: const TextStyle(
-                              fontSize: 8,
+                            style: TextStyle(
+                              fontSize: 11,
                               fontWeight: FontWeight.w900,
-                              color: WalletMeltColors.danger,
+                              color: context.scheme.error,
                             ),
                           ),
                         ),
@@ -1515,7 +1509,7 @@ class _DebtScreenState extends State<DebtScreen> {
                       ),
                       if (debt.dueDate != null && !debt.isSettled) ...[
                         const SizedBox(width: 6),
-                        Container(width: 3, height: 3, color: WalletMeltColors.textMuted),
+                        Container(width: 3, height: 3, color: context.scheme.onSurfaceVariant),
                         const SizedBox(width: 6),
                         Flexible(
                           child: Text(
@@ -1524,7 +1518,7 @@ class _DebtScreenState extends State<DebtScreen> {
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontSize: 11,
-                              color: isOverdue ? WalletMeltColors.danger : WalletMeltColors.textMuted,
+                              color: isOverdue ? context.scheme.error : context.scheme.onSurfaceVariant,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -1544,17 +1538,17 @@ class _DebtScreenState extends State<DebtScreen> {
                   '${debt.remainingAmount.toStringAsFixed(debt.remainingAmount % 1 == 0 ? 0 : 2)} ${debt.currency}',
                   style: TextStyle(
                     fontWeight: FontWeight.w900,
-                    fontSize: 15,
-                    color: isOverdue ? WalletMeltColors.danger : null,
+                    fontSize: 14,
+                    color: isOverdue ? context.scheme.error : null,
                   ),
                 ),
                 if (debt.principalAmount != debt.remainingAmount) ...[
                   const SizedBox(height: 2),
                   Text(
                     'of ${debt.principalAmount.toStringAsFixed(debt.principalAmount % 1 == 0 ? 0 : 2)}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 11,
-                      color: WalletMeltColors.textMuted,
+                      color: context.scheme.onSurfaceVariant,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -1572,7 +1566,6 @@ class _DebtScreenState extends State<DebtScreen> {
 
 
   Widget _buildFilterChip(String label, bool selected, VoidCallback onTap) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return FilterChip(
       label: Text(
         label,
@@ -1580,21 +1573,21 @@ class _DebtScreenState extends State<DebtScreen> {
           fontSize: 11,
           fontWeight: FontWeight.w700,
           color: selected
-              ? (isDark ? Colors.black : Colors.white)
-              : (isDark ? WalletMeltColors.darkTextSecondary : WalletMeltColors.textSecondary),
+              ? (context.scheme.onPrimary)
+              : (context.scheme.onSurfaceVariant),
         ),
       ),
       selected: selected,
       onSelected: (_) => onTap(),
       backgroundColor: Colors.transparent,
-      selectedColor: isDark ? WalletMeltColors.brand : WalletMeltColors.textPrimary,
-      checkmarkColor: isDark ? Colors.black : Colors.white,
+      selectedColor: context.scheme.primary,
+      checkmarkColor: context.scheme.onPrimary,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
           color: selected
-              ? (isDark ? WalletMeltColors.brand : WalletMeltColors.textPrimary)
-              : (isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder),
+              ? (context.scheme.primary)
+              : (context.scheme.outlineVariant),
           width: 1,
         ),
       ),

@@ -24,7 +24,7 @@ class WalletCategoryChip extends StatelessWidget {
     final fill = selected
         ? color.withValues(alpha: 0.28)
         : (isDark
-            ? WalletMeltColors.darkSurface.withValues(alpha: 0.48)
+            ? context.scheme.surfaceContainer.withValues(alpha: 0.48)
             : Colors.white.withValues(alpha: 0.42));
     final border = selected
         ? color

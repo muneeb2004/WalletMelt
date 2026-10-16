@@ -368,7 +368,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                         children: [
                           Row(
                             children: [
-                              const Icon(Icons.tune_rounded, size: 20, color: WalletMeltColors.brandDeep),
+                              Icon(Icons.tune_rounded, size: 20, color: context.scheme.primary),
                               const SizedBox(width: 8),
                               Text(
                                 'Additional Details',
@@ -383,7 +383,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                             _showAdditionalDetails
                                 ? Icons.expand_less_rounded
                                 : Icons.expand_more_rounded,
-                            color: WalletMeltColors.textMuted,
+                            color: context.scheme.onSurfaceVariant,
                           ),
                         ],
                       ),
@@ -403,15 +403,15 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                         child: Row(
                           children: [
-                            const Icon(Icons.calendar_month_rounded, color: WalletMeltColors.brandDeep, size: 18),
+                            Icon(Icons.calendar_month_rounded, color: context.scheme.primary, size: 18),
                             const SizedBox(width: 10),
                             Expanded(
                               child: Text(
                                 'Date: ${_date.day}/${_date.month}/${_date.year}',
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                               ),
                             ),
-                            const Icon(Icons.chevron_right_rounded, size: 18, color: WalletMeltColors.textMuted),
+                            Icon(Icons.chevron_right_rounded, size: 18, color: context.scheme.onSurfaceVariant),
                           ],
                         ),
                       ),
@@ -466,7 +466,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                         children: [
                           Row(
                             children: [
-                              const Icon(Icons.tune_rounded, size: 20, color: WalletMeltColors.brandDeep),
+                              Icon(Icons.tune_rounded, size: 20, color: context.scheme.primary),
                               const SizedBox(width: 8),
                               Text(
                                 'Additional Details',
@@ -481,7 +481,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                             _showAdditionalDetails
                                 ? Icons.expand_less_rounded
                                 : Icons.expand_more_rounded,
-                            color: WalletMeltColors.textMuted,
+                            color: context.scheme.onSurfaceVariant,
                           ),
                         ],
                       ),
@@ -509,15 +509,15 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                         child: Row(
                           children: [
-                            const Icon(Icons.calendar_month_rounded, color: WalletMeltColors.brandDeep, size: 18),
+                            Icon(Icons.calendar_month_rounded, color: context.scheme.primary, size: 18),
                             const SizedBox(width: 10),
                             Expanded(
                               child: Text(
                                 'Date: ${_date.day}/${_date.month}/${_date.year}',
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                               ),
                             ),
-                            const Icon(Icons.chevron_right_rounded, size: 18, color: WalletMeltColors.textMuted),
+                            Icon(Icons.chevron_right_rounded, size: 18, color: context.scheme.onSurfaceVariant),
                           ],
                         ),
                       ),
@@ -557,13 +557,13 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                             fontSize: 11,
                             fontWeight: FontWeight.w800,
                             letterSpacing: 1.0,
-                            color: WalletMeltColors.textMuted,
+                            color: context.scheme.onSurfaceVariant,
                           ),
                         ),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
-                            color: isDark ? WalletMeltColors.darkBackgroundContainer : const Color(0xFFF1F3F7),
+                            color: context.scheme.surfaceContainerHigh,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
@@ -583,20 +583,20 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                       autofocus: !isEditing,
                       style: TextStyle(
                         fontFamily: 'PlusJakartaSans',
-                        fontSize: 36,
+                        fontSize: 34,
                         fontWeight: FontWeight.w900,
                         fontFeatures: const [FontFeature.tabularFigures()],
-                        color: isDark ? Colors.white : WalletMeltColors.textPrimary,
+                        color: context.scheme.onSurface,
                         letterSpacing: -0.5,
                       ),
                       decoration: InputDecoration(
                         hintText: '0.00',
                         hintStyle: TextStyle(
                           fontFamily: 'PlusJakartaSans',
-                          fontSize: 36,
+                          fontSize: 34,
                           fontWeight: FontWeight.w900,
                           fontFeatures: const [FontFeature.tabularFigures()],
-                          color: WalletMeltColors.textMuted.withValues(alpha: 0.4),
+                          color: context.scheme.onSurfaceVariant.withValues(alpha: 0.4),
                           letterSpacing: -0.5,
                         ),
                         filled: false,
@@ -617,7 +617,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
                 child: Row(
                   children: [
-                    const Icon(Icons.calendar_month_rounded, color: WalletMeltColors.brand, size: 20),
+                    Icon(Icons.calendar_month_rounded, color: context.scheme.primary, size: 20),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
@@ -632,10 +632,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                         ],
                       ),
                     ),
-                    const Icon(
+                    Icon(
                       Icons.chevron_right_rounded,
                       size: 20,
-                      color: WalletMeltColors.textMuted,
+                      color: context.scheme.onSurfaceVariant,
                     ),
                   ],
                 ),
@@ -650,18 +650,18 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.tune_rounded, size: 16, color: WalletMeltColors.brand),
+                        Icon(Icons.tune_rounded, size: 16, color: context.scheme.primary),
                         const SizedBox(width: 8),
                         Text(
                           'Add merchant, notes, tax & receipt',
                           style: TextStyle(
-                            fontSize: 13,
+                            fontSize: 12,
                             fontWeight: FontWeight.w700,
-                            color: isDark ? WalletMeltColors.brandSoft : WalletMeltColors.brandDeep,
+                            color: context.scheme.primary,
                           ),
                         ),
                         const SizedBox(width: 4),
-                        const Icon(Icons.keyboard_arrow_down_rounded, size: 18, color: WalletMeltColors.brand),
+                        Icon(Icons.keyboard_arrow_down_rounded, size: 18, color: context.scheme.primary),
                       ],
                     ),
                   ),
@@ -808,10 +808,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
         Text(
           label.toUpperCase(),
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontSize: 8,
+                fontSize: 11,
                 letterSpacing: 0.8,
                 fontWeight: FontWeight.w700,
-                color: WalletMeltColors.textMuted,
+                color: context.scheme.onSurfaceVariant,
               ),
         ),
         const SizedBox(height: 2),
@@ -819,8 +819,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
           value,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w800,
-                fontSize: isHighlight ? 13 : 11,
-                color: isHighlight ? WalletMeltColors.brandDeep : null,
+                fontSize: isHighlight ? 14 : 11,
+                color: isHighlight ? context.scheme.primary : null,
               ),
         ),
       ],
@@ -1279,8 +1279,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                           ? Icons.star_rounded
                           : (isSaved ? Icons.bookmark_added_rounded : Icons.star_outline_rounded),
                       color: isFavorite
-                          ? Colors.amber
-                          : (isSaved ? WalletMeltColors.brand : WalletMeltColors.textMuted),
+                          ? context.money.caution
+                          : (isSaved ? context.scheme.primary : context.scheme.onSurfaceVariant),
                     ),
                     onPressed: () => _toggleSaveCurrentMerchant(state),
                   )
@@ -1291,10 +1291,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
           const SizedBox(height: 8),
           Container(
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+              color: context.scheme.surfaceContainerHigh,
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
-                color: isDark ? Colors.white12 : Colors.black12,
+                color: context.scheme.outlineVariant,
               ),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -1307,7 +1307,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                     Icon(
                       Icons.lightbulb_outline_rounded,
                       size: 14,
-                      color: isDark ? WalletMeltColors.brandSoft : WalletMeltColors.brandDeep,
+                      color: context.scheme.primary,
                     ),
                     const SizedBox(width: 6),
                     Text(
@@ -1316,7 +1316,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 0.5,
-                        color: isDark ? WalletMeltColors.brandSoft : WalletMeltColors.brandDeep,
+                        color: context.scheme.primary,
                       ),
                     ),
                   ],
@@ -1338,8 +1338,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                 : (m.isSaved ? Icons.storefront_rounded : Icons.history_rounded),
                             size: 14,
                             color: m.isFavorite
-                                ? Colors.amber
-                                : (m.isSaved ? WalletMeltColors.brand : WalletMeltColors.textMuted),
+                                ? context.money.caution
+                                : (m.isSaved ? context.scheme.primary : context.scheme.onSurfaceVariant),
                           ),
                           label: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -1355,18 +1355,16 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 5, vertical: 2),
                                   decoration: BoxDecoration(
-                                    color: WalletMeltColors.brand
+                                    color: context.scheme.primary
                                         .withValues(alpha: 0.12),
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: Text(
                                     category.name,
                                     style: TextStyle(
-                                      fontSize: 10,
+                                      fontSize: 11,
                                       fontWeight: FontWeight.w600,
-                                      color: isDark
-                                          ? WalletMeltColors.brandSoft
-                                          : WalletMeltColors.brandDeep,
+                                      color: context.scheme.primary,
                                     ),
                                   ),
                                 ),
@@ -1374,18 +1372,16 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                             ],
                           ),
                           backgroundColor:
-                              isDark ? const Color(0xFF0F172A) : Colors.white,
+                              context.scheme.surfaceContainer,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                             side: BorderSide(
                               color: m.isFavorite
-                                  ? Colors.amber.withValues(alpha: 0.4)
+                                  ? context.money.caution.withValues(alpha: 0.4)
                                   : (m.isSaved
-                                      ? WalletMeltColors.brand
+                                      ? context.scheme.primary
                                           .withValues(alpha: 0.3)
-                                      : (isDark
-                                          ? Colors.white10
-                                          : Colors.black12)),
+                                      : (context.scheme.outlineVariant)),
                             ),
                           ),
                           onPressed: () => _selectMerchant(m, state),
@@ -1403,7 +1399,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   }
 
   Widget _buildTaxSection(BuildContext context, double subtotal) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final currency = context.read<AppState>().settings.currency;
     final tax = parseTolerantNumber(_taxController.text) ?? 0.0;
     final grandTotal = subtotal + tax;
@@ -1418,7 +1413,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1.1,
-                  color: WalletMeltColors.brandDeep,
+                  color: context.scheme.primary,
                 ),
           ),
           const SizedBox(height: 12),
@@ -1464,15 +1459,15 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
             },
           ),
           AppSpacing.gapMd,
-          Divider(height: 1, color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder),
+          Divider(height: 1, color: context.scheme.outlineVariant),
           AppSpacing.gapSm,
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Subtotal:', style: TextStyle(fontSize: 13, color: WalletMeltColors.textSecondary)),
+              Text('Subtotal:', style: TextStyle(fontSize: 12, color: context.scheme.onSurfaceVariant)),
               Text(
                 '${subtotal.toStringAsFixed(subtotal % 1 == 0 ? 0 : 2)} $currency',
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -1480,10 +1475,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Tax:', style: TextStyle(fontSize: 13, color: WalletMeltColors.textSecondary)),
+              Text('Tax:', style: TextStyle(fontSize: 12, color: context.scheme.onSurfaceVariant)),
               Text(
                 '${tax.toStringAsFixed(tax % 1 == 0 ? 0 : 2)} $currency',
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: WalletMeltColors.danger),
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: context.scheme.error),
               ),
             ],
           ),
@@ -1501,7 +1496,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                 '${grandTotal.toStringAsFixed(grandTotal % 1 == 0 ? 0 : 2)} $currency',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w900,
-                      color: WalletMeltColors.brandDeep,
+                      color: context.scheme.primary,
                     ),
               ),
             ],
@@ -1579,7 +1574,7 @@ class _ReceiptCard extends StatelessWidget {
                       return Container(
                         height: 150,
                         alignment: Alignment.center,
-                        color: Colors.black.withValues(alpha: 0.08),
+                        color: context.scheme.shadow.withValues(alpha: 0.08),
                         child: const Text('Receipt file is unavailable'),
                       );
                     },
@@ -1821,7 +1816,7 @@ class _BulkGroceryEditorState extends State<BulkGroceryEditor> {
                   children: [
                     // Update/Save Button
                     IconButton(
-                      icon: const Icon(Icons.save_rounded, size: 20, color: WalletMeltColors.positive),
+                      icon: Icon(Icons.save_rounded, size: 20, color: context.money.incomeText),
                       tooltip: 'Overwrite template',
                       onPressed: () async {
                         final names = _rows
@@ -1843,7 +1838,7 @@ class _BulkGroceryEditorState extends State<BulkGroceryEditor> {
                     ),
                     // Rename Button
                     IconButton(
-                      icon: const Icon(Icons.edit_rounded, size: 20, color: WalletMeltColors.brandDeep),
+                      icon: Icon(Icons.edit_rounded, size: 20, color: context.scheme.primary),
                       tooltip: 'Rename template',
                       onPressed: () async {
                         final renameController = TextEditingController(text: t.name);
@@ -1882,7 +1877,7 @@ class _BulkGroceryEditorState extends State<BulkGroceryEditor> {
                     ),
                     // Delete Button
                     IconButton(
-                      icon: const Icon(Icons.delete_outline_rounded, size: 20, color: WalletMeltColors.danger),
+                      icon: Icon(Icons.delete_outline_rounded, size: 20, color: context.scheme.error),
                       tooltip: 'Delete template',
                       onPressed: () async {
                         await state.deleteGroceryTemplate(t.id);
@@ -1956,7 +1951,7 @@ class _BulkGroceryEditorState extends State<BulkGroceryEditor> {
                 Text(
                   'Quick Grocery Entry',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontSize: 16,
+                        fontSize: 17,
                         fontWeight: FontWeight.bold,
                       ),
                 ),
@@ -2027,7 +2022,6 @@ class _BulkGroceryEditorState extends State<BulkGroceryEditor> {
   }
 
   Widget _buildMobileCard(int idx, _BulkGroceryRowData row) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final qty = parseTolerantNumber(row.qtyController.text) ?? 1.0;
     final price = parseTolerantNumber(row.priceController.text) ?? 0.0;
     final total = qty * price;
@@ -2045,14 +2039,14 @@ class _BulkGroceryEditorState extends State<BulkGroceryEditor> {
                 Text(
                   'ITEM #${idx + 1}',
                   style: TextStyle(
-                    fontSize: 10,
+                    fontSize: 11,
                     fontWeight: FontWeight.bold,
-                    color: WalletMeltColors.brandDeep.withValues(alpha: 0.8),
+                    color: context.scheme.primary.withValues(alpha: 0.8),
                     letterSpacing: 1.0,
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.delete_outline_rounded, size: 18, color: WalletMeltColors.danger),
+                  icon: Icon(Icons.delete_outline_rounded, size: 18, color: context.scheme.error),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
                   tooltip: 'Delete item',
@@ -2141,10 +2135,10 @@ class _BulkGroceryEditorState extends State<BulkGroceryEditor> {
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     height: 48,
                     decoration: BoxDecoration(
-                      color: isDark ? const Color(0x0Affffff) : const Color(0x0A000000),
+                      color: context.scheme.outlineVariant,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder,
+                        color: context.scheme.outlineVariant,
                         width: 1,
                       ),
                     ),
@@ -2152,16 +2146,16 @@ class _BulkGroceryEditorState extends State<BulkGroceryEditor> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text(
+                        Text(
                           'TOTAL',
-                          style: TextStyle(fontSize: 8, color: WalletMeltColors.textMuted, fontWeight: FontWeight.bold),
+                          style: TextStyle(fontSize: 11, color: context.scheme.onSurfaceVariant, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 1),
                         FittedBox(
                           fit: BoxFit.scaleDown,
                           child: Text(
                             total > 0 ? '${total.toStringAsFixed(total % 1 == 0 ? 0 : 2)} ${widget.currency}' : '0',
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: WalletMeltColors.brandDeep),
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: context.scheme.primary),
                           ),
                         ),
                       ],

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../theme/wallet_melt_theme.dart';
-
+/// Flat screen canvas (ADR-0010): scheme surface, centred, max 600dp wide.
 class AppBackground extends StatelessWidget {
   const AppBackground({
     required this.child,
@@ -14,97 +13,17 @@ class AppBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
-    
-    // Rich deep base gradients to avoid flat boring backgrounds
-    final baseGradient = dark
-        ? const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF000000), // True-black OLED foundation
-              Color(0xFF07080D), // Subtle deep carbon
-            ],
-          )
-        : const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              WalletMeltColors.backgroundGradientStart,
-              WalletMeltColors.background,
-              WalletMeltColors.backgroundGradientEnd,
-            ],
-          );
-
-    return Container(
-      decoration: BoxDecoration(gradient: baseGradient),
-      child: Stack(
-        children: [
-          // Glowing liquid orbs in the background layer (isolated with RepaintBoundary)
-          Positioned.fill(
-            child: RepaintBoundary(
-              child: CustomPaint(
-                painter: BackgroundOrbsPainter(isDark: dark),
-              ),
-            ),
+    return ColoredBox(
+      color: Theme.of(context).colorScheme.surface,
+      child: SafeArea(
+        bottom: false,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 600),
+            child: Padding(padding: padding, child: child),
           ),
-          // Screen content layer
-          Positioned.fill(
-            child: SafeArea(
-              bottom: false,
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 600),
-                  child: Padding(
-                    padding: padding,
-                    child: child,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
-}
-
-/// Custom painter to draw glowing, diffused radial gradient spheres (orbs)
-/// in the background, creating context for backdrop blurs to shine.
-class BackgroundOrbsPainter extends CustomPainter {
-  BackgroundOrbsPainter({required this.isDark});
-
-  final bool isDark;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..style = PaintingStyle.fill;
-
-    if (isDark) {
-      // Single top-right soft indigo glow
-      final center = Offset(size.width * 0.8, size.height * 0.25);
-      final radius = size.width * 0.8;
-      paint.shader = RadialGradient(
-        colors: [
-          const Color(0xFF6366F1).withValues(alpha: 0.12),
-          const Color(0xFF6366F1).withValues(alpha: 0.0),
-        ],
-      ).createShader(Rect.fromCircle(center: center, radius: radius));
-      canvas.drawCircle(center, radius, paint);
-    } else {
-      // Single top-right soft gold glow
-      final center = Offset(size.width * 0.8, size.height * 0.2);
-      final radius = size.width * 0.8;
-      paint.shader = RadialGradient(
-        colors: [
-          WalletMeltColors.warning.withValues(alpha: 0.18),
-          WalletMeltColors.warning.withValues(alpha: 0.0),
-        ],
-      ).createShader(Rect.fromCircle(center: center, radius: radius));
-      canvas.drawCircle(center, radius, paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant BackgroundOrbsPainter oldDelegate) => false;
 }

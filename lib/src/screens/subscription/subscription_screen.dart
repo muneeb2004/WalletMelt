@@ -82,21 +82,21 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
               _FilterChip(
                 label: 'Active',
                 selected: _selectedFilter == SubscriptionStatus.active,
-                color: WalletMeltColors.positive,
+                color: context.money.incomeText,
                 onTap: () => setState(() => _selectedFilter = SubscriptionStatus.active),
               ),
               const SizedBox(width: 8),
               _FilterChip(
                 label: 'Paused',
                 selected: _selectedFilter == SubscriptionStatus.paused,
-                color: WalletMeltColors.brand,
+                color: context.scheme.primary,
                 onTap: () => setState(() => _selectedFilter = SubscriptionStatus.paused),
               ),
               const SizedBox(width: 8),
               _FilterChip(
                 label: 'Cancelled',
                 selected: _selectedFilter == SubscriptionStatus.cancelled,
-                color: WalletMeltColors.danger,
+                color: context.scheme.error,
                 onTap: () => setState(() => _selectedFilter = SubscriptionStatus.cancelled),
               ),
             ],
@@ -186,7 +186,6 @@ class _FilterChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Expanded(
       child: GestureDetector(
@@ -199,23 +198,19 @@ class _FilterChip extends StatelessWidget {
           decoration: BoxDecoration(
             color: selected
                 ? color.withValues(alpha: 0.18)
-                : isDark
-                    ? Colors.white.withValues(alpha: 0.04)
-                    : Colors.black.withValues(alpha: 0.03),
+                : context.scheme.onSurface.withValues(alpha: 0.03),
             borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
             border: Border.all(
               color: selected
                   ? color.withValues(alpha: 0.35)
-                  : isDark
-                      ? Colors.white.withValues(alpha: 0.08)
-                      : Colors.black.withValues(alpha: 0.06),
+                  : context.scheme.onSurface.withValues(alpha: 0.06),
               width: 1.2,
             ),
           ),
           child: Text(
             label,
             style: theme.textTheme.labelMedium?.copyWith(
-              color: selected ? (isDark ? Colors.white : color) : theme.textTheme.bodyMedium?.color,
+              color: selected ? (color) : theme.textTheme.bodyMedium?.color,
               fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
             ),
             textHeightBehavior: const TextHeightBehavior(
@@ -265,9 +260,9 @@ class _SubscriptionCard extends StatelessWidget {
     
     // Status color
     final statusColor = switch (subscription.status) {
-      SubscriptionStatus.active => WalletMeltColors.positive,
-      SubscriptionStatus.paused => WalletMeltColors.brand,
-      SubscriptionStatus.cancelled => WalletMeltColors.danger,
+      SubscriptionStatus.active => context.money.incomeText,
+      SubscriptionStatus.paused => context.scheme.primary,
+      SubscriptionStatus.cancelled => context.scheme.error,
     };
 
     final billingCycleLabel = _getCycleLabel(subscription.billingCycle);
@@ -311,7 +306,7 @@ class _SubscriptionCard extends StatelessWidget {
                       child: Text(
                         subscription.name,
                         style: theme.textTheme.titleMedium?.copyWith(
-                          fontSize: 16,
+                          fontSize: 17,
                           fontWeight: FontWeight.bold,
                         ),
                         maxLines: 1,
@@ -329,7 +324,7 @@ class _SubscriptionCard extends StatelessWidget {
                       child: Text(
                         subscription.status.name.toUpperCase(),
                         style: TextStyle(
-                          fontSize: 9,
+                          fontSize: 11,
                           fontWeight: FontWeight.bold,
                           color: statusColor,
                         ),
@@ -343,7 +338,7 @@ class _SubscriptionCard extends StatelessWidget {
                     Text(
                       billingCycleLabel,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: WalletMeltColors.brandDeep,
+                        color: context.scheme.primary,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -385,13 +380,13 @@ class _SubscriptionCard extends StatelessWidget {
                 formatMoney(totalAmount, currency),
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w900,
-                  fontSize: 15,
+                  fontSize: 14,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 'Grand Total',
-                style: theme.textTheme.bodySmall?.copyWith(fontSize: 9, color: WalletMeltColors.textMuted),
+                style: theme.textTheme.bodySmall?.copyWith(fontSize: 11, color: context.scheme.onSurfaceVariant),
               ),
             ],
           ),
@@ -470,7 +465,6 @@ class _AddSubscriptionSheetState extends State<_AddSubscriptionSheet> {
     final currency = state.settings.currency;
     final categories = state.categories;
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     final parsedAmount = parseTolerantNumber(_amountController.text) ?? 0.0;
     final parsedTax = parseTolerantNumber(_taxController.text) ?? 0.0;
@@ -533,7 +527,7 @@ class _AddSubscriptionSheetState extends State<_AddSubscriptionSheet> {
                 // Category Selection
                 const Text(
                   'Category',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                 ),
                 const SizedBox(height: 8),
                 SizedBox(
@@ -597,25 +591,25 @@ class _AddSubscriptionSheetState extends State<_AddSubscriptionSheet> {
                           Text(
                             'TAX & BILLING SUMMARY',
                             style: TextStyle(
-                              fontSize: 10,
+                              fontSize: 11,
                               fontWeight: FontWeight.w800,
                               letterSpacing: 0.8,
-                              color: WalletMeltColors.textMuted,
+                              color: context.scheme.onSurfaceVariant,
                             ),
                           ),
                           if (parsedTax > 0)
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                               decoration: BoxDecoration(
-                                color: WalletMeltColors.brand.withValues(alpha: 0.15),
+                                color: context.scheme.primary.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
                                 'Tax Applied',
                                 style: TextStyle(
-                                  fontSize: 10,
+                                  fontSize: 11,
                                   fontWeight: FontWeight.w700,
-                                  color: isDark ? WalletMeltColors.brand : WalletMeltColors.brandDeep,
+                                  color: context.scheme.primary,
                                 ),
                               ),
                             ),
@@ -670,7 +664,7 @@ class _AddSubscriptionSheetState extends State<_AddSubscriptionSheet> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         decoration: BoxDecoration(
-                          color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.03),
+                          color: context.scheme.onSurface.withValues(alpha: 0.03),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Row(
@@ -681,7 +675,7 @@ class _AddSubscriptionSheetState extends State<_AddSubscriptionSheet> {
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color: isDark ? WalletMeltColors.darkTextPrimary : WalletMeltColors.textPrimary,
+                                color: context.scheme.onSurface,
                               ),
                             ),
                             Text(
@@ -689,7 +683,7 @@ class _AddSubscriptionSheetState extends State<_AddSubscriptionSheet> {
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w900,
-                                color: isDark ? WalletMeltColors.brand : WalletMeltColors.brandDeep,
+                                color: context.scheme.primary,
                               ),
                             ),
                           ],
@@ -705,7 +699,7 @@ class _AddSubscriptionSheetState extends State<_AddSubscriptionSheet> {
                 DropdownButtonFormField<String>(
                   initialValue: _billingCycle,
                   decoration: const InputDecoration(labelText: 'Billing Cycle'),
-                  dropdownColor: isDark ? WalletMeltColors.darkSurface : Colors.white,
+                  dropdownColor: context.scheme.surfaceContainer,
                   borderRadius: BorderRadius.circular(20),
                   items: const [
                     DropdownMenuItem(value: 'Monthly', child: Text('Monthly')),
@@ -781,7 +775,7 @@ class _AddSubscriptionSheetState extends State<_AddSubscriptionSheet> {
                 DropdownButtonFormField<int>(
                   initialValue: _notificationOffset,
                   decoration: const InputDecoration(labelText: 'Notification Reminder'),
-                  dropdownColor: isDark ? WalletMeltColors.darkSurface : Colors.white,
+                  dropdownColor: context.scheme.surfaceContainer,
                   borderRadius: BorderRadius.circular(20),
                   items: const [
                     DropdownMenuItem(value: 0, child: Text('On renewal day')),
@@ -892,7 +886,6 @@ class _SubscriptionActionsSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.read<AppState>();
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -907,7 +900,7 @@ class _SubscriptionActionsSheet extends StatelessWidget {
         children: [
           Text(
             subscription.name,
-            style: theme.textTheme.headlineMedium?.copyWith(fontSize: 20),
+            style: theme.textTheme.headlineMedium?.copyWith(fontSize: 22),
           ),
           const SizedBox(height: 4),
           Text(
@@ -921,7 +914,7 @@ class _SubscriptionActionsSheet extends StatelessWidget {
             _ActionButton(
               icon: Icons.pause_rounded,
               label: 'Pause Subscription',
-              color: WalletMeltColors.brand,
+              color: context.scheme.primary,
               onTap: () async {
                 final updated = subscription.copyWith(
                   status: SubscriptionStatus.paused,
@@ -936,7 +929,7 @@ class _SubscriptionActionsSheet extends StatelessWidget {
             _ActionButton(
               icon: Icons.play_arrow_rounded,
               label: 'Resume Subscription',
-              color: WalletMeltColors.positive,
+              color: context.money.incomeText,
               onTap: () async {
                 final updated = subscription.copyWith(
                   status: SubscriptionStatus.active,
@@ -953,7 +946,7 @@ class _SubscriptionActionsSheet extends StatelessWidget {
             _ActionButton(
               icon: Icons.cancel_outlined,
               label: 'Cancel Subscription',
-              color: WalletMeltColors.danger,
+              color: context.scheme.error,
               onTap: () async {
                 final updated = subscription.copyWith(
                   status: SubscriptionStatus.cancelled,
@@ -979,13 +972,13 @@ class _SubscriptionActionsSheet extends StatelessWidget {
 
           Divider(
             height: 24,
-            color: isDark ? WalletMeltColors.darkBorder : WalletMeltColors.lightBorder,
+            color: context.scheme.outlineVariant,
           ),
 
           _ActionButton(
             icon: Icons.delete_forever_rounded,
             label: 'Delete Template',
-            color: WalletMeltColors.danger,
+            color: context.scheme.error,
             isDestructive: true,
             onTap: () async {
               final confirm = await showConfirmDialog(
@@ -1026,7 +1019,6 @@ class _SubscriptionActionsSheet extends StatelessWidget {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
-            final isDark = Theme.of(context).brightness == Brightness.dark;
             final amount = parseTolerantNumber(amountController.text) ?? 0.0;
             final tax = parseTolerantNumber(taxController.text) ?? 0.0;
             final total = amount + tax;
@@ -1111,7 +1103,7 @@ class _SubscriptionActionsSheet extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       decoration: BoxDecoration(
-                        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.03),
+                        color: context.scheme.onSurface.withValues(alpha: 0.03),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Row(
@@ -1126,7 +1118,7 @@ class _SubscriptionActionsSheet extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w900,
-                              color: isDark ? WalletMeltColors.brand : WalletMeltColors.brandDeep,
+                              color: context.scheme.primary,
                             ),
                           ),
                         ],
@@ -1198,14 +1190,14 @@ class _ActionButton extends StatelessWidget {
                 ? color.withValues(alpha: 0.08)
                 : theme.brightness == Brightness.dark
                     ? Colors.white.withValues(alpha: 0.03)
-                    : Colors.black.withValues(alpha: 0.02),
+                    : context.scheme.shadow.withValues(alpha: 0.02),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
               color: isDestructive
                   ? color.withValues(alpha: 0.18)
                   : theme.brightness == Brightness.dark
                       ? Colors.white.withValues(alpha: 0.06)
-                      : Colors.black.withValues(alpha: 0.04),
+                      : context.scheme.shadow.withValues(alpha: 0.04),
               width: 1,
             ),
           ),

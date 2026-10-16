@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'src/app/wallet_melt_app.dart';
-import 'src/utils/shader_warmup.dart';
 
 void _registerFontLicenses() {
   LicenseRegistry.addLicense(() async* {
@@ -17,7 +16,6 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   _registerFontLicenses();
   GoogleFonts.config.allowRuntimeFetching = false;
-  await prewarmAppShaders();
 
   runApp(const WalletMeltBootstrap());
 }

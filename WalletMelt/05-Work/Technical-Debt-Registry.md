@@ -3,7 +3,7 @@ type: registry
 status: active
 priority: high
 created: 2026-09-13
-updated: 2026-10-15
+updated: 2026-10-17
 domain: engineering
 related:
   - "[[Current-Project-State]]"
@@ -73,6 +73,14 @@ related:
 - Non-atomic renewal loop (duplicate expenses on partial failure) and no in-flight guard on `refresh()`: **in progress**.
 - Debt repayments use `double` math and never write `*MinorUnits`: **in progress**.
 
+
+### TD-010: Legacy raw colours and small fonts outside the theme
+- **Problem**: After [[ADR-0010-Tonal-Material3-Design-System-and-Brand]] the theme, shell, dashboard and card primitive follow the Tonal system, but about 687 raw colour literals and 26 font sizes below 11 remain (down from 1,080 and 50). History, Add expense, Planning, Budget, Subscriptions, Essentials and Debts are migrated except white foregrounds on category-coloured actions; Settings, Insights, Security, Onboarding, Receipt viewer, Merchants, Payees and What's new are not.
+- **Impact**: Some screens still look slightly off-system, especially dark-mode text that uses fixed `WalletMeltColors` status constants instead of `context.money` text colours.
+- **Also**: `test/screenshots/publication_screenshot_test.dart` hangs 10 minutes after its first capture, verified identical on pristine HEAD (not caused by the redesign). Publication screenshots in `walletmelt_screenshots/` still show the old UI until that is fixed and they are regenerated.
+- **Guard**: `test/theme/design_token_guard_test.dart` fails if either count rises (ratchet). Lower the baselines when migrating.
+- **Priority**: Medium. Migrate screen by screen (History, Add expense, Planning, Debts, Settings), not in one sweep.
+- **Related Code**: `lib/src/screens/`, `lib/src/widgets/`, `lib/src/components/`
 
 ---
 

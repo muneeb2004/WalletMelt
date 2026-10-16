@@ -3,7 +3,7 @@ type: index
 status: stable
 priority: high
 created: 2026-09-13
-updated: 2026-10-15
+updated: 2026-10-17
 domain: control
 related: []
 ---
@@ -27,7 +27,7 @@ Welcome to the **WalletMelt Engineering Control Plane**. This Obsidian vault ser
 
 ### 2. Product & UX
 - [[Product-Requirements]]: Core functional requirements, scope definitions, and out-of-scope boundaries.
-- [[Design-System-and-UX]]: Warm Liquid Glass design system, color tokens, and navigation shell rules.
+- [[Design-System-and-UX]]: Brand and Tonal Material 3 design system: colour roles, type scale, components, voice, and rules for future work.
 
 - [[Student-Market-Strategy]]: *(proposed)* Pakistan-first, then international student finance strategy.
 - [[Gap-Analysis-vs-Code]]: Verified gaps between the strategy and the current code.
@@ -54,6 +54,7 @@ Welcome to the **WalletMelt Engineering Control Plane**. This Obsidian vault ser
 - [[ADR-0007-SVG-Customization-and-Global-Overrides]]: Disk-persisted SVG overrides with global real-time reflection.
 - [[ADR-0008-Deterministic-Financial-Metrics-Engine]]: Pure mathematical engine and explicit transparency menu.
 - [[ADR-0009-Complete-Backup-v2-and-Safe-Full-Replace]]: Complete checksummed backup v2 and safe, verified Full Replace.
+- [[ADR-0010-Tonal-Material3-Design-System-and-Brand]]: Tonal Material 3 system, single indigo brand, one card, one type scale, token guard.
 
 ### 6. Work & Knowledge
 - [[Work-Tracker]]: Current status (Now, Next, Later, Blocked).

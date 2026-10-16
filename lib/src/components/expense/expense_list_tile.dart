@@ -33,7 +33,7 @@ class ExpenseListTile extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final color = category == null
-        ? WalletMeltColors.textMuted
+        ? context.scheme.onSurfaceVariant
         : colorFromHex(category!.color);
 
     final displayTitle = expense.title.isNotEmpty ? expense.title : (category?.name ?? 'Expense');
@@ -95,9 +95,9 @@ class ExpenseListTile extends StatelessWidget {
                         displayTitle,
                         style: TextStyle(
                           fontFamily: 'PlusJakartaSans',
-                          fontSize: 14.5,
+                          fontSize: 14,
                           fontWeight: FontWeight.w700,
-                          color: isDark ? WalletMeltColors.darkTextPrimary : WalletMeltColors.textPrimary,
+                          color: context.scheme.onSurface,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -109,7 +109,7 @@ class ExpenseListTile extends StatelessWidget {
                           fontFamily: 'PlusJakartaSans',
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
-                          color: isDark ? WalletMeltColors.darkTextSecondary : WalletMeltColors.textSecondary,
+                          color: context.scheme.onSurfaceVariant,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -130,10 +130,10 @@ class ExpenseListTile extends StatelessWidget {
                           '-${formatMoney(expense.amount, expense.currency)}',
                           style: TextStyle(
                             fontFamily: 'PlusJakartaSans',
-                            fontSize: 14.5,
+                            fontSize: 14,
                             fontWeight: FontWeight.w800,
                             fontFeatures: const [FontFeature.tabularFigures()],
-                            color: isDark ? WalletMeltColors.darkTextPrimary : WalletMeltColors.textPrimary,
+                            color: context.scheme.onSurface,
                           ),
                         ),
                       ],
@@ -142,12 +142,12 @@ class ExpenseListTile extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(
                         '+${expense.taxAmount!.toStringAsFixed(expense.taxAmount! % 1 == 0 ? 0 : 2)} tax',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: 'PlusJakartaSans',
-                          fontSize: 10,
+                          fontSize: 11,
                           fontWeight: FontWeight.w600,
                           fontFeatures: [FontFeature.tabularFigures()],
-                          color: WalletMeltColors.textMuted,
+                          color: context.scheme.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -193,7 +193,7 @@ class ExpenseListTile extends StatelessWidget {
                         WMHaptics.light();
                         onEdit!();
                       },
-                      backgroundColor: WalletMeltColors.brand,
+                      backgroundColor: context.scheme.primary,
                       foregroundColor: Colors.white,
                       icon: Icons.edit_rounded,
                       label: 'Edit',
@@ -211,7 +211,7 @@ class ExpenseListTile extends StatelessWidget {
                         WMHaptics.medium();
                         onRestore!();
                       },
-                      backgroundColor: WalletMeltColors.positive,
+                      backgroundColor: context.money.incomeText,
                       foregroundColor: Colors.white,
                       icon: Icons.restore_from_trash_rounded,
                       label: 'Restore',
@@ -222,7 +222,7 @@ class ExpenseListTile extends StatelessWidget {
                         WMHaptics.heavy();
                         onDelete!();
                       },
-                      backgroundColor: WalletMeltColors.danger,
+                      backgroundColor: context.scheme.error,
                       foregroundColor: Colors.white,
                       icon: Icons.delete_outline_rounded,
                       label: 'Delete',

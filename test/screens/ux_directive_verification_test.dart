@@ -82,62 +82,33 @@ void main() {
 
   group('UX Directive Verification & Regression Suite', () {
     // ── Item 1: Hero Card Theming ──────────────────────────────────────────
-    testWidgets('Item 1: WMDarkHeroCard renders theme-aware debit-card gradient with elevation',
+    testWidgets('Item 1: WMDarkHeroCard is a flat tonal brand card with no shadow or gradient',
         (tester) async {
-      // Light Mode Check
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: WalletMeltTheme.light(),
-          home: const Scaffold(
-            body: WMDarkHeroCard(
-              child: Text('Hero Card Content'),
-            ),
-          ),
-        ),
-      );
-
-      final lightContainer = tester.widget<Container>(
-        find.descendant(
-          of: find.byType(WMDarkHeroCard),
-          matching: find.byType(Container).first,
-        ),
-      );
-
-      final lightDecoration = lightContainer.decoration as BoxDecoration;
-      expect(lightDecoration.gradient, isA<LinearGradient>());
-      final lightGradient = lightDecoration.gradient as LinearGradient;
-      expect(lightGradient.colors.first, const Color(0xFFFFFFFF));
-      expect(lightDecoration.boxShadow, isNotEmpty);
-      expect(lightDecoration.border, isNotNull);
-
-      // Dark Mode Check
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: WalletMeltTheme.light(),
-          home: Scaffold(
-            body: Theme(
-              data: WalletMeltTheme.dark(),
-              child: const WMDarkHeroCard(
+      for (final theme in [WalletMeltTheme.light(), WalletMeltTheme.dark()]) {
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: theme,
+            home: const Scaffold(
+              body: WMDarkHeroCard(
                 child: Text('Hero Card Content'),
               ),
             ),
           ),
-        ),
-      );
+        );
+        await tester.pumpAndSettle();
 
-      final darkContainer = tester.widget<Container>(
-        find.descendant(
-          of: find.byType(WMDarkHeroCard),
-          matching: find.byType(Container).first,
-        ),
-      );
-
-      final darkDecoration = darkContainer.decoration as BoxDecoration;
-      expect(darkDecoration.gradient, isA<LinearGradient>());
-      final darkGradient = darkDecoration.gradient as LinearGradient;
-      expect(darkGradient.colors.first, const Color(0xFF1E293B));
-      expect(darkDecoration.boxShadow, isNotEmpty);
-      expect(darkDecoration.border, isNotNull);
+        final material = tester.widget<Material>(
+          find
+              .descendant(
+                of: find.byType(WMCard),
+                matching: find.byType(Material),
+              )
+              .first,
+        );
+        expect(material.color, theme.colorScheme.primaryContainer);
+        expect(material.elevation, 0);
+        expect(material.shadowColor, isNull);
+      }
     });
 
     // ── Item 2 & 0: Greeting Row at 360dp & Touch Targets ─────────────────
@@ -333,13 +304,15 @@ void main() {
     });
 
     // ── Item 8: FAB Theming ───────────────────────────────────────────────
-    testWidgets('Item 8: FloatingActionButtonThemeData has white foreground',
+    testWidgets('Item 8: FloatingActionButtonThemeData uses onPrimary foreground',
         (tester) async {
       final lightTheme = WalletMeltTheme.light();
       final darkTheme = WalletMeltTheme.dark();
 
-      expect(lightTheme.floatingActionButtonTheme.foregroundColor, Colors.white);
-      expect(darkTheme.floatingActionButtonTheme.foregroundColor, Colors.white);
+      expect(lightTheme.floatingActionButtonTheme.foregroundColor,
+          lightTheme.colorScheme.onPrimary);
+      expect(darkTheme.floatingActionButtonTheme.foregroundColor,
+          darkTheme.colorScheme.onPrimary);
     });
 
     // ── Item 9: Stat Tile & Triple Metric Row Digit Wrap ──────────────────
@@ -444,7 +417,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('DAILY ALLOWANCE'), findsOneWidget);
+      expect(find.text('Daily allowance'), findsOneWidget);
       expect(find.textContaining('/ day'), findsOneWidget);
 
       // Over-budget condition
@@ -543,7 +516,7 @@ void main() {
       expect(find.text('Home Page'), findsOneWidget);
 
       // Tap on Planning tab
-      await tester.tap(find.byIcon(Icons.account_balance_wallet_rounded));
+      await tester.tap(find.text('Planning'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 125)); // Mid-transition
       expect(tester.takeException(), isNull);
