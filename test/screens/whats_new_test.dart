@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:wallet_melt/src/constants/app_version.dart';
 import 'package:wallet_melt/src/widgets/whats_new_dialog.dart';
 
 void main() {
-  group("What's New in v1.1 Widget & Content Tests", () {
-    testWidgets('renders v1.1 non-technical items and v1.2 teaser correctly', (tester) async {
+  group("What's New Widget & Content Tests", () {
+    testWidgets('renders release notes for every version and the next-release teaser', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
@@ -15,6 +16,14 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+
+      // Check for v1.2.0 section badge & items
+      expect(find.text('VERSION 1.2.0 UPDATES'), findsOneWidget);
+      expect(find.text('A fresh, consistent look'), findsOneWidget);
+      expect(find.text('Simpler navigation'), findsOneWidget);
+      expect(find.text('Easier to read'), findsOneWidget);
+      expect(find.text('Safer backups'), findsOneWidget);
+      expect(find.text('More reliable renewals'), findsOneWidget);
 
       // Check for v1.1.2 section badge & items
       expect(find.text('VERSION 1.1.2 UPDATES'), findsOneWidget);
@@ -36,7 +45,7 @@ void main() {
       expect(find.text('Forgiving Number Entry'), findsOneWidget);
 
       // Check for v1.2 teaser
-      expect(find.text('SNEAK PEEK • COMING IN V1.2'), findsOneWidget);
+      expect(find.text('SNEAK PEEK • COMING NEXT'), findsOneWidget);
       expect(find.textContaining('manage their budget according to their bank balance', findRichText: true), findsNothing);
       expect(find.textContaining('bank balance and roll over leftover savings', findRichText: true), findsOneWidget);
     });
@@ -58,14 +67,14 @@ void main() {
       await tester.tap(find.text('Open'));
       await tester.pumpAndSettle();
 
-      expect(find.text("What's New in v1.1.2"), findsOneWidget);
+      expect(find.text("What's New in ${AppVersion.displayVersion}"), findsOneWidget);
       expect(find.byTooltip('Close'), findsOneWidget);
 
       // Tap close button in header
       await tester.tap(find.byTooltip('Close'));
       await tester.pumpAndSettle();
 
-      expect(find.text("What's New in v1.1.2"), findsNothing);
+      expect(find.text("What's New in ${AppVersion.displayVersion}"), findsNothing);
     });
   });
 }

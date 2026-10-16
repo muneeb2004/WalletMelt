@@ -3,7 +3,7 @@ type: work-tracker
 status: active
 priority: high
 created: 2026-09-13
-updated: 2026-10-15
+updated: 2026-10-17
 domain: work
 related:
   - "[[Current-Project-State]]"
@@ -11,7 +11,10 @@ related:
 
 # Active Work & Roadmap Registry
 
-## Now (Current Release v1.1.2)
+## Now (Current Release v1.2.0)
+- [x] v1.2.0 (build 7): Tonal Material 3 design system, single indigo brand, simpler navigation, higher-contrast text, safer backups, atomic renewals; What's New updated ([[ADR-0010-Tonal-Material3-Design-System-and-Brand]]).
+
+## Previous Release (v1.1.2)
 - [x] Across-the-board SVG customization & live override reflection (`v1.1.2`).
 - [x] Deterministic financial metrics engine (`FinancialMetricsCalculator`).
 - [x] Explicit metric calculations transparency menu in Settings.

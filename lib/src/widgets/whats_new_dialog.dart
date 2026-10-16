@@ -96,7 +96,7 @@ class WhatsNewContent extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        'SVG vector customization, transparent financial metrics & enhanced controls',
+                        'A fresh look, simpler navigation and safer backups',
                         style: TextStyle(
                           fontSize: 12,
                           color: context.scheme.onSurfaceVariant,
@@ -123,9 +123,67 @@ class WhatsNewContent extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Version 1.1.2 Highlights
+              // Version 1.2.0 Highlights
               _buildSectionBadge(
                 label: 'VERSION ${AppVersion.version} UPDATES',
+                color: context.scheme.primary,
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.palette_rounded,
+                iconColor: context.scheme.primary,
+                title: 'A fresh, consistent look',
+                description:
+                    'Every screen now shares one design: a calm indigo brand, soft tonal surfaces, clearer text sizes and a true-black dark mode.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.space_dashboard_rounded,
+                iconColor: context.scheme.secondary,
+                title: 'Simpler navigation',
+                description:
+                    'A standard bottom bar with Home, History, Planning and Debts, and a single Add button wherever you add things.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.visibility_rounded,
+                iconColor: context.money.income,
+                title: 'Easier to read',
+                description:
+                    'Higher-contrast text, no more tiny labels, and budget colours that stay clear in both light and dark mode.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.verified_user_rounded,
+                iconColor: context.money.caution,
+                title: 'Safer backups',
+                description:
+                    'Backups now include everything, from debts and subscriptions to receipts, and are checksummed. Full Replace restores are verified before they are applied.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.autorenew_rounded,
+                iconColor: context.scheme.primary,
+                title: 'More reliable renewals',
+                description:
+                    'Subscription renewals are applied all or nothing, so a failure never leaves half-created expenses behind.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 24),
+
+              // Version 1.1.2 Highlights
+              _buildSectionBadge(
+                label: 'VERSION 1.1.2 UPDATES',
                 color: context.scheme.primary,
                 isDark: isDark,
               ),
@@ -247,7 +305,7 @@ class WhatsNewContent extends StatelessWidget {
               ),
               const SizedBox(height: 24),
 
-              // Sneak Peek at v1.2 Card (Teaser)
+              // Sneak Peek at the next release (Teaser)
               WMGlassSurface.tier2(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -271,7 +329,7 @@ class WhatsNewContent extends StatelessWidget {
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                            'SNEAK PEEK • COMING IN V1.2',
+                            'SNEAK PEEK • COMING NEXT',
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w900,
@@ -284,7 +342,7 @@ class WhatsNewContent extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      "We hear you! Many of you asked to tie monthly budgets directly to your real-world bank balance and roll over leftover savings from month to month.\n\nBecause personal financial workflows vary so widely, we are designing a comprehensive, flexible balance & savings engine to handle every scenario without complexity. It's actively in the oven for the big v1.2 release!",
+                      "We hear you! Many of you asked to tie monthly budgets directly to your real-world bank balance and roll over leftover savings from month to month.\n\nBecause personal financial workflows vary so widely, we are designing a comprehensive, flexible balance & savings engine to handle every scenario without complexity. It's actively in the oven for an upcoming release!",
                       style: TextStyle(
                         fontSize: 12,
                         height: 1.45,

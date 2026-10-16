@@ -1170,7 +1170,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               ),
                             ),
                             Text(
-                              'SVG vector customization, transparent financial metrics & UI polish',
+                              'A fresh look, simpler navigation and safer backups',
                               style: TextStyle(
                                 fontSize: 11,
                                 color: context.scheme.onSurfaceVariant,
@@ -1186,30 +1186,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   const SizedBox(height: 12),
                   _buildSettingsWhatsNewBullet(
                     context,
-                    title: 'SVG Vector Customization',
+                    title: 'A fresh, consistent look',
                     subtitle:
-                        'Customize any category with vector SVGs, presets, tints, and live overrides.',
+                        'One calm indigo design across every screen, with true-black dark mode.',
                   ),
                   _buildSettingsWhatsNewBullet(
                     context,
-                    title: 'Transparent Financial Metrics',
+                    title: 'Simpler navigation',
                     subtitle:
-                        'Inspect deterministic formulas and calculation auditing in Settings.',
+                        'Standard bottom bar and a single Add button where it matters.',
                   ),
                   _buildSettingsWhatsNewBullet(
                     context,
-                    title: 'Dynamic Monthly Budgets',
+                    title: 'Easier to read',
                     subtitle:
-                        'Month-specific budget ceilings with single-tap leftover rollover.',
+                        'Higher-contrast text and clearer budget colours in light and dark.',
                   ),
                   _buildSettingsWhatsNewBullet(
                     context,
-                    title: 'Refined Navigation & Controls',
+                    title: 'Safer backups',
                     subtitle:
-                        'Fluid back gestures, forgiving number entry, and expanded card spacing.',
+                        'Complete, checksummed backups with verified Full Replace restores.',
                   ),
                   const SizedBox(height: 10),
-                  // Sneak Peek at v1.2 Card
+                  // Sneak Peek at the next release
                   Container(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 12, vertical: 10),
@@ -1228,11 +1228,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            'Sneak peek at v1.2: We are designing a dedicated workflow to link budgets directly to bank balances and carry forward unspent savings. Coming soon!',
+                            'Sneak peek: We are designing a dedicated workflow to link budgets directly to bank balances and carry forward unspent savings. Coming soon!',
                             style: TextStyle(
                               fontSize: 11,
                               height: 1.35,
-                              color: context.scheme.surfaceContainer,
+                              color: context.scheme.primary,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
