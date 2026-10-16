@@ -19,7 +19,7 @@ Authority for how WalletMelt looks, sounds and is named. Decided in [[ADR-0010-T
 - **Name**: WalletMelt, one word, capital W and M. Never "Wallet Melt" or "walletmelt" in UI copy.
 - **Brand colour**: indigo. Primary `#4B45C9` (light) and `#BFC2FF` (dark). One accent per screen: the primary action or the hero, not both competing.
 - **Personality**: calm, precise, on the user's side. Money is shown exactly; status is explained, never alarmed.
-- **Logo and icon**: `assets/brand/generated/walletmelt_app_icon_launcher.png`; adaptive background `#121218`. Do not recolour or add effects.
+- **Logo and icon** (2026-10-17): a rounded wallet body in primary indigo `#4B45C9` with a lavender `#BFC2FF` droplet melting from its flap, separated by a transparent halo. Source art came from a Gemini render, re-keyed to the exact brand tokens by script (two flat colours, transparent background). Assets: `assets/brand/generated/walletmelt_app_icon_launcher.png` (opaque, legacy and iOS), `walletmelt_app_icon_foreground.png` (transparent adaptive foreground, mark at 50% of the canvas for the circular safe zone), and `assets/brand/optimized/walletmelt_*` (transparent, in-app). Adaptive and launcher background is `#15141A`. Regenerate platform icons with `dart run flutter_launcher_icons`. Do not recolour, outline or add effects.
 
 ## 2. Colour roles
 Use `Theme.of(context).colorScheme` and `context.money`. Raw hex is forbidden outside `lib/src/theme/`.

@@ -81,3 +81,5 @@ Backups are format v2 (checksummed, all tables) with Full Replace restricted to 
 ## 8. Design system (2026-10-17)
 UI follows the Tonal Material 3 system with a single indigo brand ([[ADR-0010-Tonal-Material3-Design-System-and-Brand]], [[Design-System-and-UX]]). Bottom navigation is a Material 3 `NavigationBar`; the contextual add action is an extended FAB; cards use `WMCard`. All screens and shared widgets now consume colour roles and the six-step type scale; only intentional literals remain (TD-010).
 
+## 9. Logo (2026-10-17)
+New logo (wallet and droplet) in brand tokens; launcher background `#15141A`. See [[Design-System-and-UX]] section 1.
