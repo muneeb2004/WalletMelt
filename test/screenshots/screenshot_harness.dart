@@ -102,12 +102,20 @@ class ScreenshotHarness {
         throw StateError('Failed to find RenderRepaintBoundary for $relativePath');
       }
 
-      final image = await boundary.toImage(pixelRatio: 3.0);
-      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-      if (byteData == null) {
-        throw StateError('Failed to encode PNG ByteData for $relativePath');
+      // toImage / toByteData are real engine futures: they must run outside
+      // the test's fake-async zone, otherwise the test never finishes.
+      final bytes = await tester.runAsync<Uint8List?>(() async {
+        final image = await boundary.toImage(pixelRatio: 3.0);
+        try {
+          final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+          return byteData?.buffer.asUint8List();
+        } finally {
+          image.dispose();
+        }
+      });
+      if (bytes == null) {
+        throw StateError('Failed to encode PNG for $relativePath');
       }
-      final bytes = byteData.buffer.asUint8List();
 
       final outputFile = File('walletmelt_screenshots/$relativePath');
       outputFile.parent.createSync(recursive: true);

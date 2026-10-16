@@ -42,3 +42,6 @@ org.gradle.parallel=false
 
 ## 4. Single Source of Truth for Version (2026-10-16)
 `pubspec.yaml` `version:` is the only place the version is edited. `lib/src/constants/app_version.dart` (`AppVersion`, shown in Settings, the What's New trigger/title and backup metadata) is **generated** from it by `scripts/sync_version.ps1` (`.sh` twin), which both `build_apks` scripts run first. Previously `AppVersion` was a hand-edited copy, so APKs carried the new `versionName` while the in-app UI stayed on the old version. A bare `flutter build apk` skips the sync; run `scripts/sync_version.ps1` first or use the build scripts. The "Version X Highlights" headings use `AppVersion.version`, but the changelog item text is still hand-written per release.
+
+## Concurrency warning (2026-10-17)
+Run nothing else that invokes the Flutter tool (`flutter test`, `flutter analyze`, `flutter pub get`) while `build_apks` runs; a concurrent run regenerated `GeneratedPluginRegistrant.java` with `integration_test` and failed the production release compile. Re-run the build after fixing.

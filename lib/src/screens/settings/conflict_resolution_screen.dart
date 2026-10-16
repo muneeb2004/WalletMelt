@@ -219,7 +219,7 @@ class _ConflictResolutionScreenState extends State<ConflictResolutionScreen> {
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: context.scheme.primary,
-                    foregroundColor: Colors.white,
+                    foregroundColor: context.scheme.onPrimary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),

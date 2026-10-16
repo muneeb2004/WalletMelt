@@ -88,7 +88,7 @@ class EmptyState extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(180, 46),
                     backgroundColor: context.scheme.primary,
-                    foregroundColor: context.scheme.onSurface,
+                    foregroundColor: context.scheme.onPrimary,
                     shadowColor: Colors.transparent,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(AppSpacing.radiusPill),

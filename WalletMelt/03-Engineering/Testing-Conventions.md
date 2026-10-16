@@ -30,3 +30,7 @@ related:
 - Long settings lists build lazily: scroll first with the `_reveal` helper in `settings_screen_test.dart` before `ensureVisible`/`expect`.
 - `test/screenshots/publication_screenshot_test.dart` rewrites tracked PNGs in `walletmelt_screenshots/` and is slow; exclude it from routine runs and `git checkout -- walletmelt_screenshots` afterwards.
 - Run the full suite in the background writing to a file (do not pipe through `Select-Object -Last`, which prints nothing until exit).
+
+## Screenshot tests
+- `RepaintBoundary.toImage` and `Image.toByteData` are real engine futures. Always call them inside `tester.runAsync`, otherwise the test never completes. See `test/screenshots/screenshot_harness.dart`.
+- Do not run `flutter test` or `flutter analyze` while a release APK build is running: `flutter test` regenerates `GeneratedPluginRegistrant.java` with dev-only plugins (`integration_test`) and breaks the Gradle build.

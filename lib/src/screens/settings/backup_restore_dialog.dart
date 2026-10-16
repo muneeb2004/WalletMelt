@@ -686,7 +686,7 @@ class _BackupRestoreDialogState extends State<BackupRestoreDialog> {
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: _selectedMode == RestoreMode.fullReplace ? context.scheme.error : context.scheme.primary,
-                        foregroundColor: Colors.white,
+                        foregroundColor: context.scheme.onPrimary,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       onPressed: _isRestoring ||

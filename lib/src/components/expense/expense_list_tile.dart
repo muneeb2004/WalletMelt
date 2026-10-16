@@ -194,7 +194,7 @@ class ExpenseListTile extends StatelessWidget {
                         onEdit!();
                       },
                       backgroundColor: context.scheme.primary,
-                      foregroundColor: Colors.white,
+                      foregroundColor: context.scheme.onPrimary,
                       icon: Icons.edit_rounded,
                       label: 'Edit',
                     ),
@@ -212,7 +212,7 @@ class ExpenseListTile extends StatelessWidget {
                         onRestore!();
                       },
                       backgroundColor: context.money.incomeText,
-                      foregroundColor: Colors.white,
+                      foregroundColor: context.scheme.surface,
                       icon: Icons.restore_from_trash_rounded,
                       label: 'Restore',
                     )
@@ -223,7 +223,7 @@ class ExpenseListTile extends StatelessWidget {
                         onDelete!();
                       },
                       backgroundColor: context.scheme.error,
-                      foregroundColor: Colors.white,
+                      foregroundColor: context.scheme.onError,
                       icon: Icons.delete_outline_rounded,
                       label: 'Delete',
                     ),

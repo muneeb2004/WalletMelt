@@ -29,9 +29,9 @@ class _PrimaryButtonState extends State<PrimaryButton> {
     final isEnabled = !widget.isLoading && widget.onPressed != null;
 
     final Widget child = widget.isLoading
-        ? const SizedBox.square(
+        ? SizedBox.square(
             dimension: 18,
-            child: CircularProgressIndicator(strokeWidth: 2.2, color: Colors.white),
+            child: CircularProgressIndicator(strokeWidth: 2.2, color: context.scheme.onPrimary),
           )
         : widget.icon != null
             ? Row(

@@ -147,7 +147,7 @@ class _RestoreSummaryDialogState extends State<RestoreSummaryDialog> {
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: context.scheme.primary,
-                    foregroundColor: Colors.white,
+                    foregroundColor: context.scheme.onPrimary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),

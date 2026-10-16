@@ -480,7 +480,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                 FilledButton.icon(
                                   style: FilledButton.styleFrom(
                                     backgroundColor: context.scheme.primary,
-                                    foregroundColor: Colors.white,
+                                    foregroundColor: context.scheme.onPrimary,
                                     minimumSize: const Size(0, 48),
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 24, vertical: 12),
@@ -554,7 +554,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                               child: FilledButton.icon(
                                 style: FilledButton.styleFrom(
                                   backgroundColor: context.scheme.primary,
-                                  foregroundColor: Colors.white,
+                                  foregroundColor: context.scheme.onPrimary,
                                   minimumSize: const Size(0, 48),
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 24, vertical: 12),

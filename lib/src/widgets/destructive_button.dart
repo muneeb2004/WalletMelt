@@ -30,9 +30,9 @@ class _DestructiveButtonState extends State<DestructiveButton> {
     final isEnabled = !widget.isLoading && widget.onPressed != null;
 
     final Widget child = widget.isLoading
-        ? const SizedBox.square(
+        ? SizedBox.square(
             dimension: 18,
-            child: CircularProgressIndicator(strokeWidth: 2.2, color: Colors.white),
+            child: CircularProgressIndicator(strokeWidth: 2.2, color: context.scheme.onError),
           )
         : widget.icon != null
             ? Row(
@@ -65,7 +65,7 @@ class _DestructiveButtonState extends State<DestructiveButton> {
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: error,
-              foregroundColor: Colors.white,
+              foregroundColor: context.scheme.onError,
               minimumSize: const Size.fromHeight(52),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppSpacing.buttonRadius),

@@ -61,7 +61,7 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
           FilledButton(
             style: FilledButton.styleFrom(
               backgroundColor: context.scheme.error,
-              foregroundColor: Colors.white,
+              foregroundColor: context.scheme.onError,
             ),
             onPressed: () {
               Navigator.pop(dialogContext);
@@ -387,7 +387,7 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
                             FilledButton(
                               style: FilledButton.styleFrom(
                                 backgroundColor: context.scheme.primary,
-                                foregroundColor: context.scheme.onSurface,
+                                foregroundColor: context.scheme.onPrimary,
                                 padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 24),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(16),
