@@ -42,6 +42,9 @@ if (Test-Path "pubspec.yaml") {
 
 Write-Host "  Target App Version: $pubspecVersion`n" -ForegroundColor Magenta
 
+# pubspec.yaml is the single source of truth: regenerate the in-app AppVersion from it
+& (Join-Path $PSScriptRoot "sync_version.ps1")
+
 $outputDir = "build/app/outputs/flutter-apk"
 
 # Ensure old APK outputs are cleared so results are guaranteed fresh

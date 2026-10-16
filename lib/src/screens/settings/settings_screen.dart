@@ -1164,7 +1164,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Version 1.1.2 Highlights',
+                              'Version ${AppVersion.version} Highlights',
                               style: theme.textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.w800,
                                 fontSize: 15,

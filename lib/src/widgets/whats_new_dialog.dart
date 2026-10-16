@@ -126,7 +126,7 @@ class WhatsNewContent extends StatelessWidget {
             children: [
               // Version 1.1.2 Highlights
               _buildSectionBadge(
-                label: 'VERSION 1.1.2 UPDATES',
+                label: 'VERSION ${AppVersion.version} UPDATES',
                 color: WalletMeltColors.brand,
                 isDark: isDark,
               ),

@@ -1,4 +1,7 @@
 /// Central source of truth for the application version metadata.
+///
+/// GENERATED from pubspec.yaml by scripts/sync_version.ps1 (run by the build
+/// scripts). Edit the version in pubspec.yaml, not here.
 abstract final class AppVersion {
   /// The major.minor.patch version string.
   static const String version = '1.1.2';

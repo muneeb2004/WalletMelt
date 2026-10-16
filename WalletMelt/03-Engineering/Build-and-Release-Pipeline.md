@@ -39,3 +39,6 @@ org.gradle.parallel=false
 *(Prevents Windows cross-drive file lock collisions during Flutter/Kotlin builds).*
 
 > Clarification (2026-10-15): the pipeline runs **3 Gradle invocations** (universal, split-per-ABI, screenshots) producing **5 APKs**; scripts also clear `*.apk` and `build/app/intermediates` first, and copy production APKs to legacy `app-*-release.apk` names.
+
+## 4. Single Source of Truth for Version (2026-10-16)
+`pubspec.yaml` `version:` is the only place the version is edited. `lib/src/constants/app_version.dart` (`AppVersion`, shown in Settings, the What's New trigger/title and backup metadata) is **generated** from it by `scripts/sync_version.ps1` (`.sh` twin), which both `build_apks` scripts run first. Previously `AppVersion` was a hand-edited copy, so APKs carried the new `versionName` while the in-app UI stayed on the old version. A bare `flutter build apk` skips the sync; run `scripts/sync_version.ps1` first or use the build scripts. The "Version X Highlights" headings use `AppVersion.version`, but the changelog item text is still hand-written per release.

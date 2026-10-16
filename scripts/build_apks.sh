@@ -7,6 +7,9 @@ TARGET_VERSION=$(grep "^version:" pubspec.yaml | head -n 1 | awk '{print $2}')
 echo "  Target App Version: $TARGET_VERSION"
 echo "======================================================="
 
+# pubspec.yaml is the single source of truth: regenerate the in-app AppVersion from it
+bash "$(dirname "${BASH_SOURCE[0]}")/sync_version.sh"
+
 OUTPUT_DIR="build/app/outputs/flutter-apk"
 
 # Ensure old APK outputs are cleared so results are guaranteed fresh
