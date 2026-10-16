@@ -96,7 +96,7 @@ class WhatsNewContent extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        'A fresh look, simpler navigation and safer backups',
+                        'Edit any icon, 29 new defaults and more',
                         style: TextStyle(
                           fontSize: 12,
                           color: context.scheme.onSurfaceVariant,
@@ -123,9 +123,57 @@ class WhatsNewContent extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Version 1.2.0 Highlights
+              // Version 1.2.1 Highlights
               _buildSectionBadge(
                 label: 'VERSION ${AppVersion.version} UPDATES',
+                color: context.scheme.primary,
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.tune_rounded,
+                iconColor: context.scheme.primary,
+                title: 'Edit any icon',
+                description:
+                    'Open any built-in or custom icon and change its colour, line weight, outline or filled style, rotation, flip and size. Undo and redo as you go.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.copy_rounded,
+                iconColor: context.money.income,
+                title: 'Save as a new icon',
+                description:
+                    'Keep the original untouched: save your modified version as a separate custom icon and use it on any category.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.grid_view_rounded,
+                iconColor: context.money.caution,
+                title: '29 more default icons',
+                description:
+                    'Coffee, mobile, books, clothing, medicine, insurance, bus, flights, movies, bank, wallet and more: 41 ready-made icons in total.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.check_circle_rounded,
+                iconColor: context.scheme.secondary,
+                title: 'Edits show everywhere',
+                description:
+                    'Changing a built-in icon now updates the matching default category too, such as Electricity and Internet.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 24),
+
+              // Version 1.2.0 Highlights
+              _buildSectionBadge(
+                label: 'VERSION 1.2.0 UPDATES',
                 color: context.scheme.primary,
                 isDark: isDark,
               ),

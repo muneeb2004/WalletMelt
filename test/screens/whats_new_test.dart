@@ -17,6 +17,13 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      // Check for v1.2.1 section badge & items
+      expect(find.text('VERSION 1.2.1 UPDATES'), findsOneWidget);
+      expect(find.text('Edit any icon'), findsOneWidget);
+      expect(find.text('Save as a new icon'), findsOneWidget);
+      expect(find.text('29 more default icons'), findsOneWidget);
+      expect(find.text('Edits show everywhere'), findsOneWidget);
+
       // Check for v1.2.0 section badge & items
       expect(find.text('VERSION 1.2.0 UPDATES'), findsOneWidget);
       expect(find.text('A fresh, consistent look'), findsOneWidget);

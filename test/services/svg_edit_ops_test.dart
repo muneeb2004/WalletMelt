@@ -194,6 +194,23 @@ void main() {
       expect(loaded, contains('rotate(90 12 12)'));
     });
 
+    test('editing a built-in icon also restyles its default-category alias', () async {
+      final service = SvgCustomizationService.instance;
+      await service.saveOverride(
+        rawId: 'electricity',
+        svgContent: SvgEditOps.setColor(_outline, '#F59E0B'),
+      );
+      // Default "Electricity" category stores the id 'bolt'.
+      expect(service.isCustomized('bolt'), isTrue);
+      expect(service.getOverrideSync('bolt'), contains('#F59E0B'));
+
+      await service.saveOverride(rawId: 'wifi', svgContent: _outline);
+      expect(service.isCustomized('internet'), isTrue);
+
+      await service.resetToDefault('bolt');
+      expect(service.isCustomized('electricity'), isFalse);
+    });
+
     test('rejects invalid markup', () async {
       expect(
         () => SvgCustomizationService.instance.createCustomIcon('<svg><script/></svg>x'),

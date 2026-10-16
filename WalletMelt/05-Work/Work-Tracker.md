@@ -11,7 +11,10 @@ related:
 
 # Active Work & Roadmap Registry
 
-## Now (Current Release v1.2.0)
+## Now (Current Release v1.2.1)
+- [x] v1.2.1 (build 8): SVG modify tools, save-as-new, 29 more default icons, built-in icon edits now apply to default categories (alias keys). See [[ADR-0007-SVG-Customization-and-Global-Overrides]].
+
+## Previous Release (v1.2.0)
 - [x] v1.2.0 (build 7): Tonal Material 3 design system, single indigo brand, simpler navigation, higher-contrast text, safer backups, atomic renewals; What's New updated ([[ADR-0010-Tonal-Material3-Design-System-and-Brand]]).
 
 ## Previous Release (v1.1.2)

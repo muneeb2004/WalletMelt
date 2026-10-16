@@ -1170,7 +1170,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               ),
                             ),
                             Text(
-                              'A fresh look, simpler navigation and safer backups',
+                              'Edit any icon, 29 new defaults and more',
                               style: TextStyle(
                                 fontSize: 11,
                                 color: context.scheme.onSurfaceVariant,
@@ -1186,27 +1186,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   const SizedBox(height: 12),
                   _buildSettingsWhatsNewBullet(
                     context,
+                    title: 'Edit any icon',
+                    subtitle:
+                        'Change colour, line weight, style, rotation and size, with undo.',
+                  ),
+                  _buildSettingsWhatsNewBullet(
+                    context,
+                    title: 'Save as a new icon',
+                    subtitle:
+                        'Keep the original and use your modified copy on any category.',
+                  ),
+                  _buildSettingsWhatsNewBullet(
+                    context,
+                    title: '29 more default icons',
+                    subtitle: '41 ready-made icons for everyday spending.',
+                  ),
+                  _buildSettingsWhatsNewBullet(
+                    context,
                     title: 'A fresh, consistent look',
                     subtitle:
                         'One calm indigo design across every screen, with true-black dark mode.',
-                  ),
-                  _buildSettingsWhatsNewBullet(
-                    context,
-                    title: 'Simpler navigation',
-                    subtitle:
-                        'Standard bottom bar and a single Add button where it matters.',
-                  ),
-                  _buildSettingsWhatsNewBullet(
-                    context,
-                    title: 'Easier to read',
-                    subtitle:
-                        'Higher-contrast text and clearer budget colours in light and dark.',
-                  ),
-                  _buildSettingsWhatsNewBullet(
-                    context,
-                    title: 'Safer backups',
-                    subtitle:
-                        'Complete, checksummed backups with verified Full Replace restores.',
                   ),
                   const SizedBox(height: 10),
                   // Sneak Peek at the next release

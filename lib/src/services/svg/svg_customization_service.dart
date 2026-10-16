@@ -126,8 +126,23 @@ class SvgCustomizationService extends ChangeNotifier {
     if (trimmed.startsWith('preset:')) {
       return trimmed.substring('preset:'.length);
     }
-    return trimmed.toLowerCase();
+    final lower = trimmed.toLowerCase();
+    // Default categories store Material-style aliases ('bolt', 'wifi', ...).
+    // They share one override with the built-in icon the manager edits.
+    return _standardAliases[lower] ?? lower;
   }
+
+  static const Map<String, String> _standardAliases = {
+    'bolt': 'electricity',
+    'local_fire_department': 'gas',
+    'shopping_basket': 'grocery',
+    'wifi': 'internet',
+    'water_drop': 'water',
+    'home': 'rent',
+    'build': 'maintenance',
+    'local_gas_station': 'fuel',
+    'more_horiz': 'other',
+  };
 
   /// Synchronously gets overridden SVG XML if cached in memory.
   String? getOverrideSync(String rawId) {
