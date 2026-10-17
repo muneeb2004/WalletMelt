@@ -1171,17 +1171,26 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                         icon: const Icon(Icons.tune_rounded, size: 16),
                         label: const Text('Edit Selected SVG', style: TextStyle(fontSize: 12)),
                         onPressed: () async {
+                          final libraryName = categoryPresets
+                              .where((p) => p.id == selectedIcon)
+                              .map((p) => p.label)
+                              .firstOrNull;
                           final item = SvgIconItem(
                             id: selectedIcon,
-                            label: nameController.text.trim().isNotEmpty
-                                ? nameController.text.trim()
-                                : 'Selected Icon',
+                            label: libraryName ?? 'Custom icon',
                             type: selectedIcon.startsWith('custom:')
                                 ? SvgIconType.custom
                                 : SvgIconType.preset,
                           );
-                          await SvgEditorDialog.show(context, item);
+                          final categoryName = nameController.text.trim();
+                          final result = await SvgEditorDialog.show(
+                            context,
+                            item,
+                            usedBy: categoryName.isEmpty ? null : categoryName,
+                          );
                           if (!context.mounted) return;
+                          final newId = result?.useIconId;
+                          if (newId != null) selectedIcon = newId;
                           setSheetState(() {});
                         },
                       ),

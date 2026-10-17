@@ -121,37 +121,134 @@ void main() {
   });
 
   group('SvgEditorDialog - Widget Tests', () {
-    testWidgets('renders preview, quick color palette, and XML editor',
-        (tester) async {
-      tester.view.physicalSize = const Size(800, 1600);
+    const item = SvgIconItem(
+      id: 'electricity',
+      label: 'Electricity / Power',
+      type: SvgIconType.standard,
+    );
+
+    void phone(WidgetTester tester) {
+      tester.view.physicalSize = const Size(360, 800);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(() {
         tester.view.resetPhysicalSize();
         tester.view.resetDevicePixelRatio();
       });
+    }
 
-      const item = SvgIconItem(
-        id: 'electricity',
-        label: 'Electricity / Power',
-        type: SvgIconType.standard,
-      );
+    const strokeSvg =
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">'
+        '<path d="M4 4h16v16H4z" fill="none" stroke="currentColor" stroke-width="2"/></svg>';
 
+    // Seeding an override keeps the editor off the asset bundle, which is
+    // unreliable under fake async across tests.
+    Future<void> seed(WidgetTester tester) => tester.runAsync(() =>
+        SvgCustomizationService.instance
+            .saveOverride(rawId: 'electricity', svgContent: strokeSvg));
+
+    Future<void> openEditor(WidgetTester tester, {String? usedBy}) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: SvgEditorDialog(iconItem: item),
+        MaterialApp(
+          home: Builder(
+            builder: (context) => Scaffold(
+              body: Center(
+                child: TextButton(
+                  onPressed: () =>
+                      SvgEditorDialog.show(context, item, usedBy: usedBy),
+                  child: const Text('open'),
+                ),
+              ),
+            ),
           ),
         ),
       );
+      await tester.tap(find.text('open'));
       await tester.pump();
-      // Allow async _loadInitialContent to complete and setState
-      await tester.pump(const Duration(milliseconds: 200));
+      // Let the real asset/file load finish, then rebuild.
+      for (var i = 0; i < 40 && find.text('Edit icon').evaluate().isEmpty; i++) {
+        await tester.runAsync(
+            () => Future<void>.delayed(const Duration(milliseconds: 100)));
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      await tester.pump(const Duration(milliseconds: 500));
+    }
+
+    testWidgets('shows header actions, preview and style tools', (tester) async {
+      phone(tester);
+      await seed(tester);
+      await openEditor(tester);
 
       expect(find.text('Electricity / Power'), findsOneWidget);
-      expect(find.text('LIVE PREVIEW (SCALED RENDERING)'), findsOneWidget);
-      expect(find.text('QUICK COLOR ACCENT'), findsOneWidget);
-      expect(find.text('SVG MARKUP (XML EDITOR)'), findsOneWidget);
-      expect(find.text('Save & Reflect Everywhere'), findsOneWidget);
+      expect(find.text('Save'), findsOneWidget);
+      expect(find.byTooltip('Undo'), findsOneWidget);
+      expect(find.byTooltip('Redo'), findsOneWidget);
+      expect(find.text('Theme colour'), findsOneWidget);
+      expect(find.text('Used by: Food'), findsNothing);
+      expect(find.text('Edited'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('shows the used-by line when opened from a category',
+        (tester) async {
+      phone(tester);
+      await seed(tester);
+      await openEditor(tester, usedBy: 'Food');
+
+      expect(find.text('Used by: Food'), findsOneWidget);
+      expect(find.text('Electricity / Power'), findsOneWidget);
+    });
+
+    testWidgets('edited icon stays editable and Save is reachable at 360px',
+        (tester) async {
+      phone(tester);
+      await seed(tester);
+      await openEditor(tester);
+
+      expect(find.text('Edited'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+
+      // Make a change: Save becomes enabled and sits fully on screen.
+      await tester.tap(find.text('Transform'));
+      await tester.pump();
+      await tester.tap(find.text('Rotate right'));
+      await tester.pump();
+
+      final save = find.widgetWithText(FilledButton, 'Save');
+      expect(tester.widget<FilledButton>(save).onPressed, isNotNull);
+      final rect = tester.getRect(save);
+      expect(rect.right, lessThanOrEqualTo(360));
+      expect(rect.height, greaterThanOrEqualTo(40));
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('asks before discarding unsaved changes', (tester) async {
+      phone(tester);
+      await seed(tester);
+      await openEditor(tester);
+
+      await tester.tap(find.text('Transform'));
+      await tester.pump();
+      await tester.tap(find.text('Rotate right'));
+      await tester.pump();
+
+      await tester.tap(find.byTooltip('Close'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.text('Discard changes?'), findsOneWidget);
+
+      await tester.tap(find.text('Keep editing'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.text('Discard changes?'), findsNothing);
+      expect(find.text('Edit icon'), findsOneWidget);
+
+      await tester.tap(find.byTooltip('Close'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      await tester.tap(find.text('Discard'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(find.text('Edit icon'), findsNothing);
     });
   });
 }

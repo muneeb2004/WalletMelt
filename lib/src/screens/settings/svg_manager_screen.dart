@@ -4,11 +4,13 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 
 import '../../components/category/category_icon.dart';
 import '../../components/glass/app_background.dart';
 import '../../services/svg/svg_customization_service.dart';
 import '../../services/svg/svg_safeguard_service.dart';
+import '../../state/app_state.dart';
 import '../../theme/wallet_melt_theme.dart';
 import '../../widgets/app_snackbar.dart';
 import 'svg_editor_dialog.dart';
@@ -51,6 +53,24 @@ class _SvgManagerScreenState extends State<SvgManagerScreen> {
         _allIcons = icons;
         _isLoading = false;
       });
+    }
+  }
+
+  /// Names of categories using [iconId], or null when no AppState is in
+  /// scope (for example in isolated widget tests) or none use it.
+  String? _usedBy(String iconId) {
+    try {
+      final state = Provider.of<AppState>(context, listen: false);
+      final key = SvgCustomizationService.instance.normalizeKey(iconId);
+      final names = state.categories
+          .where((c) =>
+              c.icon == iconId ||
+              SvgCustomizationService.instance.normalizeKey(c.icon) == key)
+          .map((c) => c.name)
+          .toList();
+      return names.isEmpty ? null : names.join(', ');
+    } catch (_) {
+      return null;
     }
   }
 
@@ -104,7 +124,7 @@ class _SvgManagerScreenState extends State<SvgManagerScreen> {
               type: SvgIconType.custom,
             ),
           );
-          SvgEditorDialog.show(context, newItem);
+          SvgEditorDialog.show(context, newItem, usedBy: _usedBy(newItem.id));
         }
       }
     } catch (e) {
@@ -299,11 +319,12 @@ class _SvgManagerScreenState extends State<SvgManagerScreen> {
                   final item = filtered[index];
                   final isCustomized = SvgCustomizationService.instance
                       .isCustomized(item.id);
+                  final usedBy = _usedBy(item.id);
 
                   return WMGlassSurface.tier2(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 14, vertical: 12),
-                    onTap: () => SvgEditorDialog.show(context, item),
+                    onTap: () => SvgEditorDialog.show(context, item, usedBy: usedBy),
                     child: Row(
                       children: [
                         Container(
@@ -342,9 +363,11 @@ class _SvgManagerScreenState extends State<SvgManagerScreen> {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                item.type == SvgIconType.custom
-                                    ? 'Custom user SVG'
-                                    : 'Identifier: ${item.id}',
+                                usedBy != null
+                                    ? 'Used by: $usedBy'
+                                    : (item.type == SvgIconType.custom
+                                        ? 'Custom user SVG'
+                                        : 'Identifier: ${item.id}'),
                                 style: TextStyle(
                                   fontSize: 11,
                                   color: context.scheme.onSurfaceVariant,

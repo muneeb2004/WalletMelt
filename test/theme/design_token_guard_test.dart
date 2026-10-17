@@ -10,7 +10,7 @@ import 'package:wallet_melt/src/theme/wallet_melt_theme.dart';
 /// (TD-010). The baselines below are a ratchet: lower them when you migrate
 /// code, never raise them. New code must use `colorScheme`, `context.money`
 /// and `textTheme`.
-const int kRawColorBaseline = 96;
+const int kRawColorBaseline = 69;
 const int kSmallFontBaseline = 2;
 
 final _rawColor = RegExp(r'Color\(\s*0x[0-9A-Fa-f]{6,8}\s*\)|Colors\.(?!transparent\b)\w+');
