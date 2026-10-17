@@ -74,6 +74,6 @@ flutter_launcher_icons:
   android: true
   ios: true
   image_path: "assets/brand/generated/walletmelt_app_icon_launcher.png"
-  adaptive_icon_background: "#15141A"
+  adaptive_icon_background: "#0E0D14"
   adaptive_icon_foreground: "assets/brand/generated/walletmelt_app_icon_foreground.png"
   remove_alpha_ios: true

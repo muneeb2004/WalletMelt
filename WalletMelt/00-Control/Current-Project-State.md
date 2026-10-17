@@ -82,7 +82,7 @@ Backups are format v2 (checksummed, all tables) with Full Replace restricted to 
 UI follows the Tonal Material 3 system with a single indigo brand ([[ADR-0010-Tonal-Material3-Design-System-and-Brand]], [[Design-System-and-UX]]). Bottom navigation is a Material 3 `NavigationBar`; the contextual add action is an extended FAB; cards use `WMCard`. All screens and shared widgets now consume colour roles and the six-step type scale; only intentional literals remain (TD-010).
 
 ## 9. Logo (2026-10-17)
-Logo replaced with the user-supplied gradient wallet-and-drips master (`assets/brand/source/`); all icons derived by `scripts/generate_brand_assets.py`; launcher background `#0E0D14`. See [[Design-System-and-UX]] section 1.
+Logo replaced with the user-supplied gradient wallet-and-drips master (`assets/brand/source/`); all icons derived by `scripts/generate_brand_assets.py`; launcher background `#0E0D14`. See [[Design-System-and-UX]] section 1. Regenerate with `python scripts/generate_brand_assets.py` then `dart run flutter_launcher_icons`.
 
 ## 10. SVG editing (2026-10-17)
 Icons can now be modified (tint, line weight, outline/filled, rotate, flip, zoom, undo) and saved as new custom icons; 41 default presets. See [[ADR-0007-SVG-Customization-and-Global-Overrides]].

@@ -39,4 +39,4 @@ Three mockup directions were compared (A Tonal, B Ledger, C Bento). User decisio
 - Light and dark are two palettes of the same roles; dark uses true black (`#000000`) as canvas.
 - Screens not yet migrated keep working through the legacy `WalletMeltColors` constants, whose neutral and brand values now follow the new palette; semantic status constants (`positive`, `warning`, `danger`) keep their fill values so tests and bars stay stable.
 - Any new screen or widget must follow [[Design-System-and-UX]]; reviewers reject raw colours and ad hoc font sizes.
-- The launcher icon background (`#121218`) is unchanged.
+- The launcher icon background is now `#0E0D14` (the revised logo master's ground; see [[Design-System-and-UX]]).
