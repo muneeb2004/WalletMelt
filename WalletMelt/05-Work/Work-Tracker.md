@@ -49,3 +49,7 @@ related:
 - **Done 2026-10-17**: Settings, Insights, Security, Onboarding, Merchants, Payees, Privacy, What's new and shared widgets migrated; app-wide design-system migration complete.
 - **Next**: Fix screenshot suite hang (pre-existing, see TD-010); lower the baselines in `design_token_guard_test.dart` ([[Technical-Debt-Registry]] TD-010). Update screenshot harness expectations.
 
+## Added 2026-10-17 (accounts)
+- **Done**: Phase 1 of [[Balance-Income-and-Auto-Capture-Exploration]] implemented per [[ADR-0011-Accounts-Derived-Balance-and-Transfers]]: schema v10, `DriftAccountRepository`, `BalanceCalculator`, backup support, Accounts screen (`/accounts`), Dashboard balance card, expense account picker.
+- **Next**: Phase 2 ADR (income, recurring income, pay-cycle budget). Add a What's New entry and a screenshots demo account when the next release is cut.
+- **Later**: Link debt repayments to accounts; Phase 3 opt-in notification capture (needs Play-policy check and its own ADR).

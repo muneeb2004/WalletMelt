@@ -70,6 +70,7 @@ class DriftExpenseRepository {
       updatedAt: now,
       subtotalAmount: draft.subtotalAmount,
       taxAmount: draft.taxAmount,
+      accountId: draft.accountId,
     );
 
     String? storeId;
@@ -328,6 +329,7 @@ class DriftExpenseRepository {
       amountMinorUnits: Value(toMinorUnits(expense.amount)),
       subtotalAmountMinorUnits: Value(_minorOrNull(expense.subtotalAmount)),
       taxAmountMinorUnits: Value(_minorOrNull(expense.taxAmount)),
+      accountId: Value(expense.accountId),
     );
   }
 
@@ -354,6 +356,7 @@ class DriftExpenseRepository {
       amountMinorUnits: Value(toMinorUnits(expense.amount)),
       subtotalAmountMinorUnits: Value(_minorOrNull(expense.subtotalAmount)),
       taxAmountMinorUnits: Value(_minorOrNull(expense.taxAmount)),
+      accountId: Value(expense.accountId),
     );
   }
 
@@ -376,6 +379,7 @@ class DriftExpenseRepository {
       deletedAt: row.deletedAt,
       subtotalAmount: row.subtotalAmount,
       taxAmount: row.taxAmount,
+      accountId: row.accountId,
     );
   }
 

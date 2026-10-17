@@ -1,0 +1,59 @@
+import 'package:flutter/material.dart';
+
+import '../../theme/app_spacing.dart';
+import '../../types/account.dart';
+
+/// Optional account selector for the expense form (ADR-0011).
+///
+/// Only accounts in [currency] are offered, so a derived balance never mixes
+/// currencies. `null` means "No account" (the expense stays unassigned).
+class AccountPickerField extends StatelessWidget {
+  const AccountPickerField({
+    required this.accounts,
+    required this.currency,
+    required this.value,
+    required this.onChanged,
+    super.key,
+  });
+
+  final List<Account> accounts;
+  final String currency;
+  final String? value;
+  final ValueChanged<String?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final eligible = [
+      for (final a in accounts)
+        if (a.currency == currency && (!a.isArchived || a.id == value)) a,
+    ];
+    if (eligible.isEmpty) return const SizedBox.shrink();
+    final selected = eligible.any((a) => a.id == value) ? value : null;
+    final textTheme = Theme.of(context).textTheme;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+      child: DropdownButtonFormField<String?>(
+        key: const ValueKey('expense-account-picker'),
+        initialValue: selected,
+        isExpanded: true,
+        decoration: const InputDecoration(
+          labelText: 'Paid from',
+          prefixIcon: Icon(Icons.account_balance_wallet_outlined),
+        ),
+        style: textTheme.bodyLarge,
+        items: [
+          const DropdownMenuItem<String?>(
+            value: null,
+            child: Text('No account'),
+          ),
+          for (final a in eligible)
+            DropdownMenuItem<String?>(
+              value: a.id,
+              child: Text(a.name, overflow: TextOverflow.ellipsis),
+            ),
+        ],
+        onChanged: onChanged,
+      ),
+    );
+  }
+}

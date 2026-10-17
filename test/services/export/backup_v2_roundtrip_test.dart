@@ -43,6 +43,8 @@ const _tables = [
   'receipts',
   'fuel_transactions',
   'fuel_components',
+  'accounts',
+  'account_movements',
 ];
 
 Future<void> _seed(local.WalletMeltDatabase db) async {
@@ -64,7 +66,15 @@ Future<void> _seed(local.WalletMeltDatabase db) async {
   await sql(
       "INSERT INTO item_aliases (id, itemId, alias, normalizedAlias, createdAt) VALUES ('ia1','i1','Chawal','chawal','$_ts');");
   await sql(
-      "INSERT INTO expenses (id, amount, currency, categoryId, title, storeId, date, isRecurring, itemTotalMismatchApproved, createdAt, updatedAt) VALUES ('e1',1200,'PKR','c1','Groceries','s1','2026-06-02T00:00:00.000',0,0,'$_ts','$_ts');");
+      "INSERT INTO accounts (id, name, type, currency, openingBalanceMinorUnits, openingDate, createdAt, updatedAt) VALUES ('a1','Bank','bank','PKR',500000,'2026-06-01T00:00:00.000','$_ts','$_ts');");
+  await sql(
+      "INSERT INTO accounts (id, name, type, currency, openingBalanceMinorUnits, openingDate, createdAt, updatedAt) VALUES ('a2','Wallet','wallet','PKR',0,'2026-06-01T00:00:00.000','$_ts','$_ts');");
+  await sql(
+      "INSERT INTO account_movements (id, accountId, kind, amountMinorUnits, date, transferGroupId, createdAt, updatedAt) VALUES ('m1','a1','transfer_out',-100000,'2026-06-04T00:00:00.000','tg1','$_ts','$_ts');");
+  await sql(
+      "INSERT INTO account_movements (id, accountId, kind, amountMinorUnits, date, transferGroupId, createdAt, updatedAt) VALUES ('m2','a2','transfer_in',100000,'2026-06-04T00:00:00.000','tg1','$_ts','$_ts');");
+  await sql(
+      "INSERT INTO expenses (id, amount, currency, categoryId, title, storeId, accountId, date, isRecurring, itemTotalMismatchApproved, createdAt, updatedAt) VALUES ('e1',1200,'PKR','c1','Groceries','s1','a1','2026-06-02T00:00:00.000',0,0,'$_ts','$_ts');");
   await sql(
       "INSERT INTO expenses (id, amount, currency, categoryId, title, date, isRecurring, itemTotalMismatchApproved, createdAt, updatedAt) VALUES ('e2',3000,'PKR','c1','Petrol','2026-06-03T00:00:00.000',0,0,'$_ts','$_ts');");
   await sql(
@@ -107,7 +117,19 @@ Future<Map<String, int>> _counts(local.WalletMeltDatabase db) async {
   return result;
 }
 
-Future<String> _exportV2(local.WalletMeltDatabase db) async {
+/// [legacyExtended] drops the schema-v10 keys to mimic a pre-accounts v2 file.
+Future<String> _exportV2(local.WalletMeltDatabase db,
+    {bool legacyExtended = false}) async {
+  final extended = await BackupExtendedTables.export(db);
+  if (legacyExtended) {
+    final tables = Map<String, Object?>.from(extended['tables']! as Map);
+    tables
+      ..remove('accounts')
+      ..remove('account_movements');
+    extended
+      ..['tables'] = tables
+      ..remove('expense_account_links');
+  }
   final categories = await db.select(db.categories).get();
   final expenses = await db.select(db.expenses).get();
   final grocery = await db.select(db.groceryItems).get();
@@ -177,7 +199,7 @@ Future<String> _exportV2(local.WalletMeltDatabase db) async {
     settings: WalletMeltSettings.defaults,
     exportedAt: DateTime(2026, 6, 14),
     appVersion: '1.1.2+6',
-    extended: await BackupExtendedTables.export(db),
+    extended: extended,
     schemaVersion: local.WalletMeltDatabase.currentSchemaVersion,
   );
 }
@@ -382,5 +404,87 @@ void main() {
     final debt = await dst.customSelect("SELECT payeeId FROM debt_records WHERE id='d1'").getSingle();
     expect(debt.read<String>('payeeId'), 'p_local', reason: 'FK remapped to existing payee');
     expect(await dst.customSelect('PRAGMA foreign_key_check;').get(), isEmpty);
+  });
+
+  test('accounts, movements and expense-account links round-trip', () async {
+    final src = local.WalletMeltDatabase(NativeDatabase.memory());
+    final replaceDst = local.WalletMeltDatabase(NativeDatabase.memory());
+    final mergeDst = local.WalletMeltDatabase(NativeDatabase.memory());
+    addTearDown(src.close);
+    addTearDown(replaceDst.close);
+    addTearDown(mergeDst.close);
+    await _seed(src);
+    final json = await _exportV2(src);
+    expect(const WalletMeltJsonBackupValidator().validate(json).isValid, isTrue);
+
+    for (final entry in {
+      replaceDst: RestoreMode.fullReplace,
+      mergeDst: RestoreMode.safeMerge,
+    }.entries) {
+      final result = await _restore(entry.key, tmp, json, entry.value);
+      expect(result.success, isTrue, reason: result.errorMessage);
+      expect(await _counts(entry.key), await _counts(src));
+      final link = await entry.key
+          .customSelect("SELECT accountId FROM expenses WHERE id='e1'")
+          .getSingle();
+      expect(link.read<String?>('accountId'), 'a1');
+      final other = await entry.key
+          .customSelect("SELECT accountId FROM expenses WHERE id='e2'")
+          .getSingle();
+      expect(other.read<String?>('accountId'), isNull);
+      expect(
+          await entry.key.customSelect('PRAGMA foreign_key_check;').get(),
+          isEmpty);
+    }
+  });
+
+  test('full replace over a DB with accounts replaces them without FK errors',
+      () async {
+    final src = local.WalletMeltDatabase(NativeDatabase.memory());
+    final dst = local.WalletMeltDatabase(NativeDatabase.memory());
+    addTearDown(src.close);
+    addTearDown(dst.close);
+    await _seed(src);
+    final json = await _exportV2(src);
+
+    await dst.customStatement(
+        "INSERT INTO accounts (id, name, type, currency, openingBalanceMinorUnits, openingDate, createdAt, updatedAt) VALUES ('a_old','Old','cash','PKR',1,'2026-06-01T00:00:00.000','$_ts','$_ts');");
+    await dst.customStatement(
+        "INSERT INTO categories (id, name, icon, color, isDefault, createdAt, updatedAt) VALUES ('c_o','O','i','#000',0,'$_ts','$_ts');");
+    await dst.customStatement(
+        "INSERT INTO expenses (id, amount, currency, categoryId, title, accountId, date, isRecurring, itemTotalMismatchApproved, createdAt, updatedAt) VALUES ('e_o',9,'PKR','c_o','Old','a_old','2026-06-01',0,0,'$_ts','$_ts');");
+    await dst.customStatement(
+        "INSERT INTO account_movements (id, accountId, kind, amountMinorUnits, date, createdAt, updatedAt) VALUES ('m_o','a_old','adjustment',5,'2026-06-02','$_ts','$_ts');");
+
+    final result = await _restore(dst, tmp, json, RestoreMode.fullReplace);
+    expect(result.success, isTrue, reason: result.errorMessage);
+    expect(await _counts(dst), await _counts(src));
+    final old = await dst
+        .customSelect("SELECT COUNT(*) c FROM accounts WHERE id='a_old'")
+        .getSingle();
+    expect(old.read<int>('c'), 0);
+  });
+
+  test('a pre-accounts v2 backup (no account keys) still validates and restores',
+      () async {
+    final src = local.WalletMeltDatabase(NativeDatabase.memory());
+    final dst = local.WalletMeltDatabase(NativeDatabase.memory());
+    addTearDown(src.close);
+    addTearDown(dst.close);
+    await _seed(src);
+    final json = await _exportV2(src, legacyExtended: true);
+    expect(json, isNot(contains('expense_account_links')));
+    expect(const WalletMeltJsonBackupValidator().validate(json).isValid, isTrue);
+
+    final result = await _restore(dst, tmp, json, RestoreMode.fullReplace);
+    expect(result.success, isTrue, reason: result.errorMessage);
+    final counts = await _counts(dst);
+    expect(counts['accounts'], 0);
+    expect(counts['account_movements'], 0);
+    expect(counts['expenses'], 2);
+    final link = await dst
+        .customSelect("SELECT accountId FROM expenses WHERE id='e1'")
+        .getSingle();
+    expect(link.read<String?>('accountId'), isNull);
   });
 }

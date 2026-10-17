@@ -19,6 +19,9 @@ class BackupExtendedTables {
     _spec('units', (d) => d.units, local.Unit.fromJson, {'baseUnitId': 'unit'}),
     _spec('payees', (d) => d.payees, local.Payee.fromJson, {},
         naturalKey: 'normalizedName'),
+    _spec('accounts', (d) => d.accounts, local.Account.fromJson, {}),
+    _spec('account_movements', (d) => d.accountMovements,
+        local.AccountMovement.fromJson, {'accountId': 'account'}),
     _spec('stores', (d) => d.stores, local.Store.fromJson,
         {'defaultCategoryId': 'cat'},
         naturalKey: 'normalizedName'),
@@ -57,6 +60,10 @@ class BackupExtendedTables {
         local.FuelComponent.fromJson, {'fuelTransactionId': 'ft'}),
   ];
 
+  /// Tables added after the first v2 release. Backups written before schema
+  /// v10 lack them; a missing key means "no rows", never a validation error.
+  static const Set<String> _optionalTables = {'accounts', 'account_movements'};
+
   /// Names of the tables covered by the extended section (parent-first).
   static List<String> get tableNames =>
       _specs.map((s) => s.name).toList(growable: false);
@@ -72,6 +79,10 @@ class BackupExtendedTables {
         .customSelect(
             'SELECT id, storeId FROM expenses WHERE storeId IS NOT NULL ORDER BY id')
         .get();
+    final accountLinks = await db
+        .customSelect(
+            'SELECT id, accountId FROM expenses WHERE accountId IS NOT NULL ORDER BY id')
+        .get();
     return {
       'tables': tables,
       'expense_store_links': [
@@ -79,6 +90,13 @@ class BackupExtendedTables {
           {
             'expense_id': row.read<String>('id'),
             'store_id': row.read<String>('storeId'),
+          },
+      ],
+      'expense_account_links': [
+        for (final row in accountLinks)
+          {
+            'expense_id': row.read<String>('id'),
+            'account_id': row.read<String>('accountId'),
           },
       ],
     };
@@ -92,7 +110,11 @@ class BackupExtendedTables {
     if (tables is! Map) return result;
     for (final name in tableNames) {
       final rows = tables[name];
-      if (rows is List) result[name] = rows.length;
+      if (rows is List) {
+        result[name] = rows.length;
+      } else if (_optionalTables.contains(name)) {
+        result[name] = 0;
+      }
     }
     return result;
   }
@@ -104,6 +126,7 @@ class BackupExtendedTables {
     if (tables is! Map) return 'extended.tables is not a JSON object.';
     for (final name in tableNames) {
       final rows = tables[name];
+      if (rows == null && _optionalTables.contains(name)) continue;
       if (rows is! List) return 'extended.tables.$name is not an array.';
       for (final row in rows) {
         if (row is! Map) {
@@ -116,6 +139,10 @@ class BackupExtendedTables {
     }
     if (section['expense_store_links'] is! List) {
       return 'extended.expense_store_links is not an array.';
+    }
+    final accountLinks = section['expense_account_links'];
+    if (accountLinks != null && accountLinks is! List) {
+      return 'extended.expense_account_links is not an array.';
     }
     return null;
   }
@@ -139,6 +166,7 @@ class BackupExtendedTables {
       'cat': categoryMap,
       'exp': expenseMap,
       'unit': {},
+      'account': {},
       'payee': {},
       'store': {},
       'item': {},
@@ -232,6 +260,25 @@ class BackupExtendedTables {
       linked++;
     }
     inserted['expense_store_links'] = linked;
+
+    // Expense -> account links (accounts are restored after expenses).
+    final accountLinks = (section['expense_account_links'] as List?) ?? const [];
+    var accountLinked = 0;
+    for (final raw in accountLinks) {
+      final link = Map<String, dynamic>.from(raw as Map);
+      final sourceExpense = link['expense_id'] as String;
+      final targetExpense = expenseMap[sourceExpense] ?? sourceExpense;
+      if (!replace && !importedExpenseIds.contains(targetExpense)) continue;
+      final sourceAccount = link['account_id'] as String;
+      final accountId = maps['account']![sourceAccount] ?? sourceAccount;
+      if (!await _exists(db, 'accounts', 'id', accountId)) continue;
+      if (!await _exists(db, 'expenses', 'id', targetExpense)) continue;
+      await db.customStatement(
+          'UPDATE expenses SET accountId = ? WHERE id = ?;',
+          [accountId, targetExpense]);
+      accountLinked++;
+    }
+    inserted['expense_account_links'] = accountLinked;
     return inserted;
   }
 
@@ -241,6 +288,7 @@ class BackupExtendedTables {
       String table, String source, String target) {
     final key = switch (table) {
       'units' => 'unit',
+      'accounts' => 'account',
       'payees' => 'payee',
       'stores' => 'store',
       'items' => 'item',

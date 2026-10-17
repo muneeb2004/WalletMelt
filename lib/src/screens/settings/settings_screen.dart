@@ -865,6 +865,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       label: const Text('Manage Payees & Contacts'),
                     ),
                   ),
+                  if (context.read<AppState>().accountsAvailable) ...[
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: () => context.push('/accounts'),
+                        icon: const Icon(Icons.account_balance_wallet_outlined,
+                            size: 18),
+                        label: const Text('Manage accounts and balances'),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

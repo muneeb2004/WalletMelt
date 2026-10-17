@@ -22,6 +22,7 @@ class Expense {
     this.deletedAt,
     this.subtotalAmount,
     this.taxAmount,
+    this.accountId,
   });
 
   final String id;
@@ -41,6 +42,9 @@ class Expense {
   final String? deletedAt;
   final double? subtotalAmount;
   final double? taxAmount;
+
+  /// Optional owning account (ADR-0011). Null means unassigned.
+  final String? accountId;
 
   bool get isDeleted => deletedAt != null;
 
@@ -67,6 +71,8 @@ class Expense {
     bool clearSubtotalAmount = false,
     double? taxAmount,
     bool clearTaxAmount = false,
+    String? accountId,
+    bool clearAccountId = false,
   }) {
     return Expense(
       id: id ?? this.id,
@@ -87,6 +93,7 @@ class Expense {
       deletedAt: clearDeletedAt ? null : deletedAt ?? this.deletedAt,
       subtotalAmount: clearSubtotalAmount ? null : subtotalAmount ?? this.subtotalAmount,
       taxAmount: clearTaxAmount ? null : taxAmount ?? this.taxAmount,
+      accountId: clearAccountId ? null : accountId ?? this.accountId,
     );
   }
 
@@ -164,7 +171,8 @@ class Expense {
           updatedAt == other.updatedAt &&
           deletedAt == other.deletedAt &&
           subtotalAmount == other.subtotalAmount &&
-          taxAmount == other.taxAmount;
+          taxAmount == other.taxAmount &&
+          accountId == other.accountId;
 
   @override
   int get hashCode => Object.hashAll([
@@ -185,6 +193,7 @@ class Expense {
         deletedAt,
         subtotalAmount,
         taxAmount,
+        accountId,
       ]);
 }
 
@@ -202,6 +211,7 @@ class ExpenseDraft {
     this.fuelTransaction,
     this.subtotalAmount,
     this.taxAmount,
+    this.accountId,
   });
 
   final double amount;
@@ -216,4 +226,5 @@ class ExpenseDraft {
   final FuelTransactionDraft? fuelTransaction;
   final double? subtotalAmount;
   final double? taxAmount;
+  final String? accountId;
 }

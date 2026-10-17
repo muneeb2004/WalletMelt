@@ -959,6 +959,698 @@ class StoresCompanion extends UpdateCompanion<Store> {
   }
 }
 
+class $AccountsTable extends Accounts with TableInfo<$AccountsTable, Account> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AccountsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _typeMeta = const VerificationMeta('type');
+  @override
+  late final GeneratedColumn<String> type = GeneratedColumn<String>(
+      'type', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _currencyMeta =
+      const VerificationMeta('currency');
+  @override
+  late final GeneratedColumn<String> currency = GeneratedColumn<String>(
+      'currency', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _openingBalanceMinorUnitsMeta =
+      const VerificationMeta('openingBalanceMinorUnits');
+  @override
+  late final GeneratedColumn<int> openingBalanceMinorUnits =
+      GeneratedColumn<int>('openingBalanceMinorUnits', aliasedName, false,
+          type: DriftSqlType.int,
+          requiredDuringInsert: false,
+          defaultValue: const Constant(0));
+  static const VerificationMeta _openingDateMeta =
+      const VerificationMeta('openingDate');
+  @override
+  late final GeneratedColumn<String> openingDate = GeneratedColumn<String>(
+      'openingDate', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _iconKeyMeta =
+      const VerificationMeta('iconKey');
+  @override
+  late final GeneratedColumn<String> iconKey = GeneratedColumn<String>(
+      'iconKey', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _colorRoleMeta =
+      const VerificationMeta('colorRole');
+  @override
+  late final GeneratedColumn<String> colorRole = GeneratedColumn<String>(
+      'colorRole', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _sortOrderMeta =
+      const VerificationMeta('sortOrder');
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+      'sortOrder', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _isArchivedMeta =
+      const VerificationMeta('isArchived');
+  @override
+  late final GeneratedColumn<bool> isArchived = GeneratedColumn<bool>(
+      'isArchived', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("isArchived" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _includeInTotalMeta =
+      const VerificationMeta('includeInTotal');
+  @override
+  late final GeneratedColumn<bool> includeInTotal = GeneratedColumn<bool>(
+      'includeInTotal', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("includeInTotal" IN (0, 1))'),
+      defaultValue: const Constant(true));
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+      'createdAt', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<String> updatedAt = GeneratedColumn<String>(
+      'updatedAt', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _deletedAtMeta =
+      const VerificationMeta('deletedAt');
+  @override
+  late final GeneratedColumn<String> deletedAt = GeneratedColumn<String>(
+      'deletedAt', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        name,
+        type,
+        currency,
+        openingBalanceMinorUnits,
+        openingDate,
+        iconKey,
+        colorRole,
+        sortOrder,
+        isArchived,
+        includeInTotal,
+        createdAt,
+        updatedAt,
+        deletedAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'accounts';
+  @override
+  VerificationContext validateIntegrity(Insertable<Account> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('type')) {
+      context.handle(
+          _typeMeta, type.isAcceptableOrUnknown(data['type']!, _typeMeta));
+    } else if (isInserting) {
+      context.missing(_typeMeta);
+    }
+    if (data.containsKey('currency')) {
+      context.handle(_currencyMeta,
+          currency.isAcceptableOrUnknown(data['currency']!, _currencyMeta));
+    } else if (isInserting) {
+      context.missing(_currencyMeta);
+    }
+    if (data.containsKey('openingBalanceMinorUnits')) {
+      context.handle(
+          _openingBalanceMinorUnitsMeta,
+          openingBalanceMinorUnits.isAcceptableOrUnknown(
+              data['openingBalanceMinorUnits']!,
+              _openingBalanceMinorUnitsMeta));
+    }
+    if (data.containsKey('openingDate')) {
+      context.handle(
+          _openingDateMeta,
+          openingDate.isAcceptableOrUnknown(
+              data['openingDate']!, _openingDateMeta));
+    } else if (isInserting) {
+      context.missing(_openingDateMeta);
+    }
+    if (data.containsKey('iconKey')) {
+      context.handle(_iconKeyMeta,
+          iconKey.isAcceptableOrUnknown(data['iconKey']!, _iconKeyMeta));
+    }
+    if (data.containsKey('colorRole')) {
+      context.handle(_colorRoleMeta,
+          colorRole.isAcceptableOrUnknown(data['colorRole']!, _colorRoleMeta));
+    }
+    if (data.containsKey('sortOrder')) {
+      context.handle(_sortOrderMeta,
+          sortOrder.isAcceptableOrUnknown(data['sortOrder']!, _sortOrderMeta));
+    }
+    if (data.containsKey('isArchived')) {
+      context.handle(
+          _isArchivedMeta,
+          isArchived.isAcceptableOrUnknown(
+              data['isArchived']!, _isArchivedMeta));
+    }
+    if (data.containsKey('includeInTotal')) {
+      context.handle(
+          _includeInTotalMeta,
+          includeInTotal.isAcceptableOrUnknown(
+              data['includeInTotal']!, _includeInTotalMeta));
+    }
+    if (data.containsKey('createdAt')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['createdAt']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updatedAt')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updatedAt']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deletedAt')) {
+      context.handle(_deletedAtMeta,
+          deletedAt.isAcceptableOrUnknown(data['deletedAt']!, _deletedAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Account map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Account(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      type: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}type'])!,
+      currency: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}currency'])!,
+      openingBalanceMinorUnits: attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}openingBalanceMinorUnits'])!,
+      openingDate: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}openingDate'])!,
+      iconKey: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}iconKey']),
+      colorRole: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}colorRole']),
+      sortOrder: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}sortOrder'])!,
+      isArchived: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}isArchived'])!,
+      includeInTotal: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}includeInTotal'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}createdAt'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}updatedAt'])!,
+      deletedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}deletedAt']),
+    );
+  }
+
+  @override
+  $AccountsTable createAlias(String alias) {
+    return $AccountsTable(attachedDatabase, alias);
+  }
+}
+
+class Account extends DataClass implements Insertable<Account> {
+  final String id;
+  final String name;
+  final String type;
+  final String currency;
+  final int openingBalanceMinorUnits;
+  final String openingDate;
+  final String? iconKey;
+  final String? colorRole;
+  final int sortOrder;
+  final bool isArchived;
+  final bool includeInTotal;
+  final String createdAt;
+  final String updatedAt;
+  final String? deletedAt;
+  const Account(
+      {required this.id,
+      required this.name,
+      required this.type,
+      required this.currency,
+      required this.openingBalanceMinorUnits,
+      required this.openingDate,
+      this.iconKey,
+      this.colorRole,
+      required this.sortOrder,
+      required this.isArchived,
+      required this.includeInTotal,
+      required this.createdAt,
+      required this.updatedAt,
+      this.deletedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    map['type'] = Variable<String>(type);
+    map['currency'] = Variable<String>(currency);
+    map['openingBalanceMinorUnits'] = Variable<int>(openingBalanceMinorUnits);
+    map['openingDate'] = Variable<String>(openingDate);
+    if (!nullToAbsent || iconKey != null) {
+      map['iconKey'] = Variable<String>(iconKey);
+    }
+    if (!nullToAbsent || colorRole != null) {
+      map['colorRole'] = Variable<String>(colorRole);
+    }
+    map['sortOrder'] = Variable<int>(sortOrder);
+    map['isArchived'] = Variable<bool>(isArchived);
+    map['includeInTotal'] = Variable<bool>(includeInTotal);
+    map['createdAt'] = Variable<String>(createdAt);
+    map['updatedAt'] = Variable<String>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deletedAt'] = Variable<String>(deletedAt);
+    }
+    return map;
+  }
+
+  AccountsCompanion toCompanion(bool nullToAbsent) {
+    return AccountsCompanion(
+      id: Value(id),
+      name: Value(name),
+      type: Value(type),
+      currency: Value(currency),
+      openingBalanceMinorUnits: Value(openingBalanceMinorUnits),
+      openingDate: Value(openingDate),
+      iconKey: iconKey == null && nullToAbsent
+          ? const Value.absent()
+          : Value(iconKey),
+      colorRole: colorRole == null && nullToAbsent
+          ? const Value.absent()
+          : Value(colorRole),
+      sortOrder: Value(sortOrder),
+      isArchived: Value(isArchived),
+      includeInTotal: Value(includeInTotal),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+    );
+  }
+
+  factory Account.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Account(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      type: serializer.fromJson<String>(json['type']),
+      currency: serializer.fromJson<String>(json['currency']),
+      openingBalanceMinorUnits:
+          serializer.fromJson<int>(json['openingBalanceMinorUnits']),
+      openingDate: serializer.fromJson<String>(json['openingDate']),
+      iconKey: serializer.fromJson<String?>(json['iconKey']),
+      colorRole: serializer.fromJson<String?>(json['colorRole']),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
+      isArchived: serializer.fromJson<bool>(json['isArchived']),
+      includeInTotal: serializer.fromJson<bool>(json['includeInTotal']),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+      updatedAt: serializer.fromJson<String>(json['updatedAt']),
+      deletedAt: serializer.fromJson<String?>(json['deletedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'type': serializer.toJson<String>(type),
+      'currency': serializer.toJson<String>(currency),
+      'openingBalanceMinorUnits':
+          serializer.toJson<int>(openingBalanceMinorUnits),
+      'openingDate': serializer.toJson<String>(openingDate),
+      'iconKey': serializer.toJson<String?>(iconKey),
+      'colorRole': serializer.toJson<String?>(colorRole),
+      'sortOrder': serializer.toJson<int>(sortOrder),
+      'isArchived': serializer.toJson<bool>(isArchived),
+      'includeInTotal': serializer.toJson<bool>(includeInTotal),
+      'createdAt': serializer.toJson<String>(createdAt),
+      'updatedAt': serializer.toJson<String>(updatedAt),
+      'deletedAt': serializer.toJson<String?>(deletedAt),
+    };
+  }
+
+  Account copyWith(
+          {String? id,
+          String? name,
+          String? type,
+          String? currency,
+          int? openingBalanceMinorUnits,
+          String? openingDate,
+          Value<String?> iconKey = const Value.absent(),
+          Value<String?> colorRole = const Value.absent(),
+          int? sortOrder,
+          bool? isArchived,
+          bool? includeInTotal,
+          String? createdAt,
+          String? updatedAt,
+          Value<String?> deletedAt = const Value.absent()}) =>
+      Account(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        type: type ?? this.type,
+        currency: currency ?? this.currency,
+        openingBalanceMinorUnits:
+            openingBalanceMinorUnits ?? this.openingBalanceMinorUnits,
+        openingDate: openingDate ?? this.openingDate,
+        iconKey: iconKey.present ? iconKey.value : this.iconKey,
+        colorRole: colorRole.present ? colorRole.value : this.colorRole,
+        sortOrder: sortOrder ?? this.sortOrder,
+        isArchived: isArchived ?? this.isArchived,
+        includeInTotal: includeInTotal ?? this.includeInTotal,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+      );
+  Account copyWithCompanion(AccountsCompanion data) {
+    return Account(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      type: data.type.present ? data.type.value : this.type,
+      currency: data.currency.present ? data.currency.value : this.currency,
+      openingBalanceMinorUnits: data.openingBalanceMinorUnits.present
+          ? data.openingBalanceMinorUnits.value
+          : this.openingBalanceMinorUnits,
+      openingDate:
+          data.openingDate.present ? data.openingDate.value : this.openingDate,
+      iconKey: data.iconKey.present ? data.iconKey.value : this.iconKey,
+      colorRole: data.colorRole.present ? data.colorRole.value : this.colorRole,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+      isArchived:
+          data.isArchived.present ? data.isArchived.value : this.isArchived,
+      includeInTotal: data.includeInTotal.present
+          ? data.includeInTotal.value
+          : this.includeInTotal,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Account(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('type: $type, ')
+          ..write('currency: $currency, ')
+          ..write('openingBalanceMinorUnits: $openingBalanceMinorUnits, ')
+          ..write('openingDate: $openingDate, ')
+          ..write('iconKey: $iconKey, ')
+          ..write('colorRole: $colorRole, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('isArchived: $isArchived, ')
+          ..write('includeInTotal: $includeInTotal, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id,
+      name,
+      type,
+      currency,
+      openingBalanceMinorUnits,
+      openingDate,
+      iconKey,
+      colorRole,
+      sortOrder,
+      isArchived,
+      includeInTotal,
+      createdAt,
+      updatedAt,
+      deletedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Account &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.type == this.type &&
+          other.currency == this.currency &&
+          other.openingBalanceMinorUnits == this.openingBalanceMinorUnits &&
+          other.openingDate == this.openingDate &&
+          other.iconKey == this.iconKey &&
+          other.colorRole == this.colorRole &&
+          other.sortOrder == this.sortOrder &&
+          other.isArchived == this.isArchived &&
+          other.includeInTotal == this.includeInTotal &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt);
+}
+
+class AccountsCompanion extends UpdateCompanion<Account> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<String> type;
+  final Value<String> currency;
+  final Value<int> openingBalanceMinorUnits;
+  final Value<String> openingDate;
+  final Value<String?> iconKey;
+  final Value<String?> colorRole;
+  final Value<int> sortOrder;
+  final Value<bool> isArchived;
+  final Value<bool> includeInTotal;
+  final Value<String> createdAt;
+  final Value<String> updatedAt;
+  final Value<String?> deletedAt;
+  final Value<int> rowid;
+  const AccountsCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.type = const Value.absent(),
+    this.currency = const Value.absent(),
+    this.openingBalanceMinorUnits = const Value.absent(),
+    this.openingDate = const Value.absent(),
+    this.iconKey = const Value.absent(),
+    this.colorRole = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.isArchived = const Value.absent(),
+    this.includeInTotal = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  AccountsCompanion.insert({
+    required String id,
+    required String name,
+    required String type,
+    required String currency,
+    this.openingBalanceMinorUnits = const Value.absent(),
+    required String openingDate,
+    this.iconKey = const Value.absent(),
+    this.colorRole = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.isArchived = const Value.absent(),
+    this.includeInTotal = const Value.absent(),
+    required String createdAt,
+    required String updatedAt,
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        name = Value(name),
+        type = Value(type),
+        currency = Value(currency),
+        openingDate = Value(openingDate),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt);
+  static Insertable<Account> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<String>? type,
+    Expression<String>? currency,
+    Expression<int>? openingBalanceMinorUnits,
+    Expression<String>? openingDate,
+    Expression<String>? iconKey,
+    Expression<String>? colorRole,
+    Expression<int>? sortOrder,
+    Expression<bool>? isArchived,
+    Expression<bool>? includeInTotal,
+    Expression<String>? createdAt,
+    Expression<String>? updatedAt,
+    Expression<String>? deletedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (type != null) 'type': type,
+      if (currency != null) 'currency': currency,
+      if (openingBalanceMinorUnits != null)
+        'openingBalanceMinorUnits': openingBalanceMinorUnits,
+      if (openingDate != null) 'openingDate': openingDate,
+      if (iconKey != null) 'iconKey': iconKey,
+      if (colorRole != null) 'colorRole': colorRole,
+      if (sortOrder != null) 'sortOrder': sortOrder,
+      if (isArchived != null) 'isArchived': isArchived,
+      if (includeInTotal != null) 'includeInTotal': includeInTotal,
+      if (createdAt != null) 'createdAt': createdAt,
+      if (updatedAt != null) 'updatedAt': updatedAt,
+      if (deletedAt != null) 'deletedAt': deletedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  AccountsCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? name,
+      Value<String>? type,
+      Value<String>? currency,
+      Value<int>? openingBalanceMinorUnits,
+      Value<String>? openingDate,
+      Value<String?>? iconKey,
+      Value<String?>? colorRole,
+      Value<int>? sortOrder,
+      Value<bool>? isArchived,
+      Value<bool>? includeInTotal,
+      Value<String>? createdAt,
+      Value<String>? updatedAt,
+      Value<String?>? deletedAt,
+      Value<int>? rowid}) {
+    return AccountsCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      type: type ?? this.type,
+      currency: currency ?? this.currency,
+      openingBalanceMinorUnits:
+          openingBalanceMinorUnits ?? this.openingBalanceMinorUnits,
+      openingDate: openingDate ?? this.openingDate,
+      iconKey: iconKey ?? this.iconKey,
+      colorRole: colorRole ?? this.colorRole,
+      sortOrder: sortOrder ?? this.sortOrder,
+      isArchived: isArchived ?? this.isArchived,
+      includeInTotal: includeInTotal ?? this.includeInTotal,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
+    }
+    if (currency.present) {
+      map['currency'] = Variable<String>(currency.value);
+    }
+    if (openingBalanceMinorUnits.present) {
+      map['openingBalanceMinorUnits'] =
+          Variable<int>(openingBalanceMinorUnits.value);
+    }
+    if (openingDate.present) {
+      map['openingDate'] = Variable<String>(openingDate.value);
+    }
+    if (iconKey.present) {
+      map['iconKey'] = Variable<String>(iconKey.value);
+    }
+    if (colorRole.present) {
+      map['colorRole'] = Variable<String>(colorRole.value);
+    }
+    if (sortOrder.present) {
+      map['sortOrder'] = Variable<int>(sortOrder.value);
+    }
+    if (isArchived.present) {
+      map['isArchived'] = Variable<bool>(isArchived.value);
+    }
+    if (includeInTotal.present) {
+      map['includeInTotal'] = Variable<bool>(includeInTotal.value);
+    }
+    if (createdAt.present) {
+      map['createdAt'] = Variable<String>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updatedAt'] = Variable<String>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deletedAt'] = Variable<String>(deletedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AccountsCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('type: $type, ')
+          ..write('currency: $currency, ')
+          ..write('openingBalanceMinorUnits: $openingBalanceMinorUnits, ')
+          ..write('openingDate: $openingDate, ')
+          ..write('iconKey: $iconKey, ')
+          ..write('colorRole: $colorRole, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('isArchived: $isArchived, ')
+          ..write('includeInTotal: $includeInTotal, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $ExpensesTable extends Expenses with TableInfo<$ExpensesTable, Expense> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -1104,6 +1796,15 @@ class $ExpensesTable extends Expenses with TableInfo<$ExpensesTable, Expense> {
   late final GeneratedColumn<int> taxAmountMinorUnits = GeneratedColumn<int>(
       'taxAmountMinorUnits', aliasedName, true,
       type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _accountIdMeta =
+      const VerificationMeta('accountId');
+  @override
+  late final GeneratedColumn<String> accountId = GeneratedColumn<String>(
+      'accountId', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES accounts (id) ON DELETE RESTRICT'));
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -1127,7 +1828,8 @@ class $ExpensesTable extends Expenses with TableInfo<$ExpensesTable, Expense> {
         taxAmount,
         amountMinorUnits,
         subtotalAmountMinorUnits,
-        taxAmountMinorUnits
+        taxAmountMinorUnits,
+        accountId
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1264,6 +1966,10 @@ class $ExpensesTable extends Expenses with TableInfo<$ExpensesTable, Expense> {
           taxAmountMinorUnits.isAcceptableOrUnknown(
               data['taxAmountMinorUnits']!, _taxAmountMinorUnitsMeta));
     }
+    if (data.containsKey('accountId')) {
+      context.handle(_accountIdMeta,
+          accountId.isAcceptableOrUnknown(data['accountId']!, _accountIdMeta));
+    }
     return context;
   }
 
@@ -1318,6 +2024,8 @@ class $ExpensesTable extends Expenses with TableInfo<$ExpensesTable, Expense> {
           DriftSqlType.int, data['${effectivePrefix}subtotalAmountMinorUnits']),
       taxAmountMinorUnits: attachedDatabase.typeMapping.read(
           DriftSqlType.int, data['${effectivePrefix}taxAmountMinorUnits']),
+      accountId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}accountId']),
     );
   }
 
@@ -1350,6 +2058,7 @@ class Expense extends DataClass implements Insertable<Expense> {
   final int? amountMinorUnits;
   final int? subtotalAmountMinorUnits;
   final int? taxAmountMinorUnits;
+  final String? accountId;
   const Expense(
       {required this.id,
       required this.amount,
@@ -1372,7 +2081,8 @@ class Expense extends DataClass implements Insertable<Expense> {
       this.taxAmount,
       this.amountMinorUnits,
       this.subtotalAmountMinorUnits,
-      this.taxAmountMinorUnits});
+      this.taxAmountMinorUnits,
+      this.accountId});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1423,6 +2133,9 @@ class Expense extends DataClass implements Insertable<Expense> {
     if (!nullToAbsent || taxAmountMinorUnits != null) {
       map['taxAmountMinorUnits'] = Variable<int>(taxAmountMinorUnits);
     }
+    if (!nullToAbsent || accountId != null) {
+      map['accountId'] = Variable<String>(accountId);
+    }
     return map;
   }
 
@@ -1472,6 +2185,9 @@ class Expense extends DataClass implements Insertable<Expense> {
       taxAmountMinorUnits: taxAmountMinorUnits == null && nullToAbsent
           ? const Value.absent()
           : Value(taxAmountMinorUnits),
+      accountId: accountId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(accountId),
     );
   }
 
@@ -1506,6 +2222,7 @@ class Expense extends DataClass implements Insertable<Expense> {
           serializer.fromJson<int?>(json['subtotalAmountMinorUnits']),
       taxAmountMinorUnits:
           serializer.fromJson<int?>(json['taxAmountMinorUnits']),
+      accountId: serializer.fromJson<String?>(json['accountId']),
     );
   }
   @override
@@ -1536,6 +2253,7 @@ class Expense extends DataClass implements Insertable<Expense> {
       'subtotalAmountMinorUnits':
           serializer.toJson<int?>(subtotalAmountMinorUnits),
       'taxAmountMinorUnits': serializer.toJson<int?>(taxAmountMinorUnits),
+      'accountId': serializer.toJson<String?>(accountId),
     };
   }
 
@@ -1561,7 +2279,8 @@ class Expense extends DataClass implements Insertable<Expense> {
           Value<double?> taxAmount = const Value.absent(),
           Value<int?> amountMinorUnits = const Value.absent(),
           Value<int?> subtotalAmountMinorUnits = const Value.absent(),
-          Value<int?> taxAmountMinorUnits = const Value.absent()}) =>
+          Value<int?> taxAmountMinorUnits = const Value.absent(),
+          Value<String?> accountId = const Value.absent()}) =>
       Expense(
         id: id ?? this.id,
         amount: amount ?? this.amount,
@@ -1599,6 +2318,7 @@ class Expense extends DataClass implements Insertable<Expense> {
         taxAmountMinorUnits: taxAmountMinorUnits.present
             ? taxAmountMinorUnits.value
             : this.taxAmountMinorUnits,
+        accountId: accountId.present ? accountId.value : this.accountId,
       );
   Expense copyWithCompanion(ExpensesCompanion data) {
     return Expense(
@@ -1642,6 +2362,7 @@ class Expense extends DataClass implements Insertable<Expense> {
       taxAmountMinorUnits: data.taxAmountMinorUnits.present
           ? data.taxAmountMinorUnits.value
           : this.taxAmountMinorUnits,
+      accountId: data.accountId.present ? data.accountId.value : this.accountId,
     );
   }
 
@@ -1669,7 +2390,8 @@ class Expense extends DataClass implements Insertable<Expense> {
           ..write('taxAmount: $taxAmount, ')
           ..write('amountMinorUnits: $amountMinorUnits, ')
           ..write('subtotalAmountMinorUnits: $subtotalAmountMinorUnits, ')
-          ..write('taxAmountMinorUnits: $taxAmountMinorUnits')
+          ..write('taxAmountMinorUnits: $taxAmountMinorUnits, ')
+          ..write('accountId: $accountId')
           ..write(')'))
         .toString();
   }
@@ -1697,7 +2419,8 @@ class Expense extends DataClass implements Insertable<Expense> {
         taxAmount,
         amountMinorUnits,
         subtotalAmountMinorUnits,
-        taxAmountMinorUnits
+        taxAmountMinorUnits,
+        accountId
       ]);
   @override
   bool operator ==(Object other) =>
@@ -1724,7 +2447,8 @@ class Expense extends DataClass implements Insertable<Expense> {
           other.taxAmount == this.taxAmount &&
           other.amountMinorUnits == this.amountMinorUnits &&
           other.subtotalAmountMinorUnits == this.subtotalAmountMinorUnits &&
-          other.taxAmountMinorUnits == this.taxAmountMinorUnits);
+          other.taxAmountMinorUnits == this.taxAmountMinorUnits &&
+          other.accountId == this.accountId);
 }
 
 class ExpensesCompanion extends UpdateCompanion<Expense> {
@@ -1750,6 +2474,7 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
   final Value<int?> amountMinorUnits;
   final Value<int?> subtotalAmountMinorUnits;
   final Value<int?> taxAmountMinorUnits;
+  final Value<String?> accountId;
   final Value<int> rowid;
   const ExpensesCompanion({
     this.id = const Value.absent(),
@@ -1774,6 +2499,7 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
     this.amountMinorUnits = const Value.absent(),
     this.subtotalAmountMinorUnits = const Value.absent(),
     this.taxAmountMinorUnits = const Value.absent(),
+    this.accountId = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ExpensesCompanion.insert({
@@ -1799,6 +2525,7 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
     this.amountMinorUnits = const Value.absent(),
     this.subtotalAmountMinorUnits = const Value.absent(),
     this.taxAmountMinorUnits = const Value.absent(),
+    this.accountId = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         amount = Value(amount),
@@ -1831,6 +2558,7 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
     Expression<int>? amountMinorUnits,
     Expression<int>? subtotalAmountMinorUnits,
     Expression<int>? taxAmountMinorUnits,
+    Expression<String>? accountId,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1860,6 +2588,7 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
         'subtotalAmountMinorUnits': subtotalAmountMinorUnits,
       if (taxAmountMinorUnits != null)
         'taxAmountMinorUnits': taxAmountMinorUnits,
+      if (accountId != null) 'accountId': accountId,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1887,6 +2616,7 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
       Value<int?>? amountMinorUnits,
       Value<int?>? subtotalAmountMinorUnits,
       Value<int?>? taxAmountMinorUnits,
+      Value<String?>? accountId,
       Value<int>? rowid}) {
     return ExpensesCompanion(
       id: id ?? this.id,
@@ -1913,6 +2643,7 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
       subtotalAmountMinorUnits:
           subtotalAmountMinorUnits ?? this.subtotalAmountMinorUnits,
       taxAmountMinorUnits: taxAmountMinorUnits ?? this.taxAmountMinorUnits,
+      accountId: accountId ?? this.accountId,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1988,6 +2719,9 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
     if (taxAmountMinorUnits.present) {
       map['taxAmountMinorUnits'] = Variable<int>(taxAmountMinorUnits.value);
     }
+    if (accountId.present) {
+      map['accountId'] = Variable<String>(accountId.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2019,6 +2753,7 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
           ..write('amountMinorUnits: $amountMinorUnits, ')
           ..write('subtotalAmountMinorUnits: $subtotalAmountMinorUnits, ')
           ..write('taxAmountMinorUnits: $taxAmountMinorUnits, ')
+          ..write('accountId: $accountId, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -10981,11 +11716,529 @@ class MonthlyBudgetsCompanion extends UpdateCompanion<MonthlyBudget> {
   }
 }
 
+class $AccountMovementsTable extends AccountMovements
+    with TableInfo<$AccountMovementsTable, AccountMovement> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AccountMovementsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _accountIdMeta =
+      const VerificationMeta('accountId');
+  @override
+  late final GeneratedColumn<String> accountId = GeneratedColumn<String>(
+      'accountId', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES accounts (id) ON DELETE RESTRICT'));
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+      'kind', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _amountMinorUnitsMeta =
+      const VerificationMeta('amountMinorUnits');
+  @override
+  late final GeneratedColumn<int> amountMinorUnits = GeneratedColumn<int>(
+      'amountMinorUnits', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _dateMeta = const VerificationMeta('date');
+  @override
+  late final GeneratedColumn<String> date = GeneratedColumn<String>(
+      'date', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _transferGroupIdMeta =
+      const VerificationMeta('transferGroupId');
+  @override
+  late final GeneratedColumn<String> transferGroupId = GeneratedColumn<String>(
+      'transferGroupId', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+      'notes', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+      'createdAt', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<String> updatedAt = GeneratedColumn<String>(
+      'updatedAt', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _deletedAtMeta =
+      const VerificationMeta('deletedAt');
+  @override
+  late final GeneratedColumn<String> deletedAt = GeneratedColumn<String>(
+      'deletedAt', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        accountId,
+        kind,
+        amountMinorUnits,
+        date,
+        transferGroupId,
+        notes,
+        createdAt,
+        updatedAt,
+        deletedAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'account_movements';
+  @override
+  VerificationContext validateIntegrity(Insertable<AccountMovement> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('accountId')) {
+      context.handle(_accountIdMeta,
+          accountId.isAcceptableOrUnknown(data['accountId']!, _accountIdMeta));
+    } else if (isInserting) {
+      context.missing(_accountIdMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+          _kindMeta, kind.isAcceptableOrUnknown(data['kind']!, _kindMeta));
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('amountMinorUnits')) {
+      context.handle(
+          _amountMinorUnitsMeta,
+          amountMinorUnits.isAcceptableOrUnknown(
+              data['amountMinorUnits']!, _amountMinorUnitsMeta));
+    } else if (isInserting) {
+      context.missing(_amountMinorUnitsMeta);
+    }
+    if (data.containsKey('date')) {
+      context.handle(
+          _dateMeta, date.isAcceptableOrUnknown(data['date']!, _dateMeta));
+    } else if (isInserting) {
+      context.missing(_dateMeta);
+    }
+    if (data.containsKey('transferGroupId')) {
+      context.handle(
+          _transferGroupIdMeta,
+          transferGroupId.isAcceptableOrUnknown(
+              data['transferGroupId']!, _transferGroupIdMeta));
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+          _notesMeta, notes.isAcceptableOrUnknown(data['notes']!, _notesMeta));
+    }
+    if (data.containsKey('createdAt')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['createdAt']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updatedAt')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updatedAt']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deletedAt')) {
+      context.handle(_deletedAtMeta,
+          deletedAt.isAcceptableOrUnknown(data['deletedAt']!, _deletedAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  AccountMovement map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AccountMovement(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      accountId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}accountId'])!,
+      kind: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}kind'])!,
+      amountMinorUnits: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}amountMinorUnits'])!,
+      date: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}date'])!,
+      transferGroupId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}transferGroupId']),
+      notes: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}notes']),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}createdAt'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}updatedAt'])!,
+      deletedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}deletedAt']),
+    );
+  }
+
+  @override
+  $AccountMovementsTable createAlias(String alias) {
+    return $AccountMovementsTable(attachedDatabase, alias);
+  }
+}
+
+class AccountMovement extends DataClass implements Insertable<AccountMovement> {
+  final String id;
+  final String accountId;
+  final String kind;
+  final int amountMinorUnits;
+  final String date;
+  final String? transferGroupId;
+  final String? notes;
+  final String createdAt;
+  final String updatedAt;
+  final String? deletedAt;
+  const AccountMovement(
+      {required this.id,
+      required this.accountId,
+      required this.kind,
+      required this.amountMinorUnits,
+      required this.date,
+      this.transferGroupId,
+      this.notes,
+      required this.createdAt,
+      required this.updatedAt,
+      this.deletedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['accountId'] = Variable<String>(accountId);
+    map['kind'] = Variable<String>(kind);
+    map['amountMinorUnits'] = Variable<int>(amountMinorUnits);
+    map['date'] = Variable<String>(date);
+    if (!nullToAbsent || transferGroupId != null) {
+      map['transferGroupId'] = Variable<String>(transferGroupId);
+    }
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
+    map['createdAt'] = Variable<String>(createdAt);
+    map['updatedAt'] = Variable<String>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deletedAt'] = Variable<String>(deletedAt);
+    }
+    return map;
+  }
+
+  AccountMovementsCompanion toCompanion(bool nullToAbsent) {
+    return AccountMovementsCompanion(
+      id: Value(id),
+      accountId: Value(accountId),
+      kind: Value(kind),
+      amountMinorUnits: Value(amountMinorUnits),
+      date: Value(date),
+      transferGroupId: transferGroupId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(transferGroupId),
+      notes:
+          notes == null && nullToAbsent ? const Value.absent() : Value(notes),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+    );
+  }
+
+  factory AccountMovement.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AccountMovement(
+      id: serializer.fromJson<String>(json['id']),
+      accountId: serializer.fromJson<String>(json['accountId']),
+      kind: serializer.fromJson<String>(json['kind']),
+      amountMinorUnits: serializer.fromJson<int>(json['amountMinorUnits']),
+      date: serializer.fromJson<String>(json['date']),
+      transferGroupId: serializer.fromJson<String?>(json['transferGroupId']),
+      notes: serializer.fromJson<String?>(json['notes']),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+      updatedAt: serializer.fromJson<String>(json['updatedAt']),
+      deletedAt: serializer.fromJson<String?>(json['deletedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'accountId': serializer.toJson<String>(accountId),
+      'kind': serializer.toJson<String>(kind),
+      'amountMinorUnits': serializer.toJson<int>(amountMinorUnits),
+      'date': serializer.toJson<String>(date),
+      'transferGroupId': serializer.toJson<String?>(transferGroupId),
+      'notes': serializer.toJson<String?>(notes),
+      'createdAt': serializer.toJson<String>(createdAt),
+      'updatedAt': serializer.toJson<String>(updatedAt),
+      'deletedAt': serializer.toJson<String?>(deletedAt),
+    };
+  }
+
+  AccountMovement copyWith(
+          {String? id,
+          String? accountId,
+          String? kind,
+          int? amountMinorUnits,
+          String? date,
+          Value<String?> transferGroupId = const Value.absent(),
+          Value<String?> notes = const Value.absent(),
+          String? createdAt,
+          String? updatedAt,
+          Value<String?> deletedAt = const Value.absent()}) =>
+      AccountMovement(
+        id: id ?? this.id,
+        accountId: accountId ?? this.accountId,
+        kind: kind ?? this.kind,
+        amountMinorUnits: amountMinorUnits ?? this.amountMinorUnits,
+        date: date ?? this.date,
+        transferGroupId: transferGroupId.present
+            ? transferGroupId.value
+            : this.transferGroupId,
+        notes: notes.present ? notes.value : this.notes,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+      );
+  AccountMovement copyWithCompanion(AccountMovementsCompanion data) {
+    return AccountMovement(
+      id: data.id.present ? data.id.value : this.id,
+      accountId: data.accountId.present ? data.accountId.value : this.accountId,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      amountMinorUnits: data.amountMinorUnits.present
+          ? data.amountMinorUnits.value
+          : this.amountMinorUnits,
+      date: data.date.present ? data.date.value : this.date,
+      transferGroupId: data.transferGroupId.present
+          ? data.transferGroupId.value
+          : this.transferGroupId,
+      notes: data.notes.present ? data.notes.value : this.notes,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AccountMovement(')
+          ..write('id: $id, ')
+          ..write('accountId: $accountId, ')
+          ..write('kind: $kind, ')
+          ..write('amountMinorUnits: $amountMinorUnits, ')
+          ..write('date: $date, ')
+          ..write('transferGroupId: $transferGroupId, ')
+          ..write('notes: $notes, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, accountId, kind, amountMinorUnits, date,
+      transferGroupId, notes, createdAt, updatedAt, deletedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AccountMovement &&
+          other.id == this.id &&
+          other.accountId == this.accountId &&
+          other.kind == this.kind &&
+          other.amountMinorUnits == this.amountMinorUnits &&
+          other.date == this.date &&
+          other.transferGroupId == this.transferGroupId &&
+          other.notes == this.notes &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt);
+}
+
+class AccountMovementsCompanion extends UpdateCompanion<AccountMovement> {
+  final Value<String> id;
+  final Value<String> accountId;
+  final Value<String> kind;
+  final Value<int> amountMinorUnits;
+  final Value<String> date;
+  final Value<String?> transferGroupId;
+  final Value<String?> notes;
+  final Value<String> createdAt;
+  final Value<String> updatedAt;
+  final Value<String?> deletedAt;
+  final Value<int> rowid;
+  const AccountMovementsCompanion({
+    this.id = const Value.absent(),
+    this.accountId = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.amountMinorUnits = const Value.absent(),
+    this.date = const Value.absent(),
+    this.transferGroupId = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  AccountMovementsCompanion.insert({
+    required String id,
+    required String accountId,
+    required String kind,
+    required int amountMinorUnits,
+    required String date,
+    this.transferGroupId = const Value.absent(),
+    this.notes = const Value.absent(),
+    required String createdAt,
+    required String updatedAt,
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        accountId = Value(accountId),
+        kind = Value(kind),
+        amountMinorUnits = Value(amountMinorUnits),
+        date = Value(date),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt);
+  static Insertable<AccountMovement> custom({
+    Expression<String>? id,
+    Expression<String>? accountId,
+    Expression<String>? kind,
+    Expression<int>? amountMinorUnits,
+    Expression<String>? date,
+    Expression<String>? transferGroupId,
+    Expression<String>? notes,
+    Expression<String>? createdAt,
+    Expression<String>? updatedAt,
+    Expression<String>? deletedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (accountId != null) 'accountId': accountId,
+      if (kind != null) 'kind': kind,
+      if (amountMinorUnits != null) 'amountMinorUnits': amountMinorUnits,
+      if (date != null) 'date': date,
+      if (transferGroupId != null) 'transferGroupId': transferGroupId,
+      if (notes != null) 'notes': notes,
+      if (createdAt != null) 'createdAt': createdAt,
+      if (updatedAt != null) 'updatedAt': updatedAt,
+      if (deletedAt != null) 'deletedAt': deletedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  AccountMovementsCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? accountId,
+      Value<String>? kind,
+      Value<int>? amountMinorUnits,
+      Value<String>? date,
+      Value<String?>? transferGroupId,
+      Value<String?>? notes,
+      Value<String>? createdAt,
+      Value<String>? updatedAt,
+      Value<String?>? deletedAt,
+      Value<int>? rowid}) {
+    return AccountMovementsCompanion(
+      id: id ?? this.id,
+      accountId: accountId ?? this.accountId,
+      kind: kind ?? this.kind,
+      amountMinorUnits: amountMinorUnits ?? this.amountMinorUnits,
+      date: date ?? this.date,
+      transferGroupId: transferGroupId ?? this.transferGroupId,
+      notes: notes ?? this.notes,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (accountId.present) {
+      map['accountId'] = Variable<String>(accountId.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (amountMinorUnits.present) {
+      map['amountMinorUnits'] = Variable<int>(amountMinorUnits.value);
+    }
+    if (date.present) {
+      map['date'] = Variable<String>(date.value);
+    }
+    if (transferGroupId.present) {
+      map['transferGroupId'] = Variable<String>(transferGroupId.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (createdAt.present) {
+      map['createdAt'] = Variable<String>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updatedAt'] = Variable<String>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deletedAt'] = Variable<String>(deletedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AccountMovementsCompanion(')
+          ..write('id: $id, ')
+          ..write('accountId: $accountId, ')
+          ..write('kind: $kind, ')
+          ..write('amountMinorUnits: $amountMinorUnits, ')
+          ..write('date: $date, ')
+          ..write('transferGroupId: $transferGroupId, ')
+          ..write('notes: $notes, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$WalletMeltDatabase extends GeneratedDatabase {
   _$WalletMeltDatabase(QueryExecutor e) : super(e);
   $WalletMeltDatabaseManager get managers => $WalletMeltDatabaseManager(this);
   late final $CategoriesTable categories = $CategoriesTable(this);
   late final $StoresTable stores = $StoresTable(this);
+  late final $AccountsTable accounts = $AccountsTable(this);
   late final $ExpensesTable expenses = $ExpensesTable(this);
   late final $GroceryItemsTable groceryItems = $GroceryItemsTable(this);
   late final $CategoryBudgetsTable categoryBudgets =
@@ -11011,6 +12264,8 @@ abstract class _$WalletMeltDatabase extends GeneratedDatabase {
       $FuelTransactionsTable(this);
   late final $FuelComponentsTable fuelComponents = $FuelComponentsTable(this);
   late final $MonthlyBudgetsTable monthlyBudgets = $MonthlyBudgetsTable(this);
+  late final $AccountMovementsTable accountMovements =
+      $AccountMovementsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -11018,6 +12273,7 @@ abstract class _$WalletMeltDatabase extends GeneratedDatabase {
   List<DatabaseSchemaEntity> get allSchemaEntities => [
         categories,
         stores,
+        accounts,
         expenses,
         groceryItems,
         categoryBudgets,
@@ -11037,7 +12293,8 @@ abstract class _$WalletMeltDatabase extends GeneratedDatabase {
         fuelTemplateComponents,
         fuelTransactions,
         fuelComponents,
-        monthlyBudgets
+        monthlyBudgets,
+        accountMovements
       ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
@@ -12344,6 +13601,469 @@ typedef $$StoresTableProcessedTableManager = ProcessedTableManager<
     Store,
     PrefetchHooks Function(
         {bool defaultCategoryId, bool expensesRefs, bool expenseItemsRefs})>;
+typedef $$AccountsTableCreateCompanionBuilder = AccountsCompanion Function({
+  required String id,
+  required String name,
+  required String type,
+  required String currency,
+  Value<int> openingBalanceMinorUnits,
+  required String openingDate,
+  Value<String?> iconKey,
+  Value<String?> colorRole,
+  Value<int> sortOrder,
+  Value<bool> isArchived,
+  Value<bool> includeInTotal,
+  required String createdAt,
+  required String updatedAt,
+  Value<String?> deletedAt,
+  Value<int> rowid,
+});
+typedef $$AccountsTableUpdateCompanionBuilder = AccountsCompanion Function({
+  Value<String> id,
+  Value<String> name,
+  Value<String> type,
+  Value<String> currency,
+  Value<int> openingBalanceMinorUnits,
+  Value<String> openingDate,
+  Value<String?> iconKey,
+  Value<String?> colorRole,
+  Value<int> sortOrder,
+  Value<bool> isArchived,
+  Value<bool> includeInTotal,
+  Value<String> createdAt,
+  Value<String> updatedAt,
+  Value<String?> deletedAt,
+  Value<int> rowid,
+});
+
+final class $$AccountsTableReferences
+    extends BaseReferences<_$WalletMeltDatabase, $AccountsTable, Account> {
+  $$AccountsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$ExpensesTable, List<Expense>> _expensesRefsTable(
+          _$WalletMeltDatabase db) =>
+      MultiTypedResultKey.fromTable(db.expenses,
+          aliasName: 'accounts__id__expenses__accountId');
+
+  $$ExpensesTableProcessedTableManager get expensesRefs {
+    final manager = $$ExpensesTableTableManager($_db, $_db.expenses)
+        .filter((f) => f.accountId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_expensesRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
+  static MultiTypedResultKey<$AccountMovementsTable, List<AccountMovement>>
+      _accountMovementsRefsTable(_$WalletMeltDatabase db) =>
+          MultiTypedResultKey.fromTable(db.accountMovements,
+              aliasName: 'accounts__id__account_movements__accountId');
+
+  $$AccountMovementsTableProcessedTableManager get accountMovementsRefs {
+    final manager = $$AccountMovementsTableTableManager(
+            $_db, $_db.accountMovements)
+        .filter((f) => f.accountId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache =
+        $_typedResult.readTableOrNull(_accountMovementsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+}
+
+class $$AccountsTableFilterComposer
+    extends Composer<_$WalletMeltDatabase, $AccountsTable> {
+  $$AccountsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get type => $composableBuilder(
+      column: $table.type, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get currency => $composableBuilder(
+      column: $table.currency, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get openingBalanceMinorUnits => $composableBuilder(
+      column: $table.openingBalanceMinorUnits,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get openingDate => $composableBuilder(
+      column: $table.openingDate, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get iconKey => $composableBuilder(
+      column: $table.iconKey, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get colorRole => $composableBuilder(
+      column: $table.colorRole, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+      column: $table.sortOrder, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isArchived => $composableBuilder(
+      column: $table.isArchived, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get includeInTotal => $composableBuilder(
+      column: $table.includeInTotal,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnFilters(column));
+
+  Expression<bool> expensesRefs(
+      Expression<bool> Function($$ExpensesTableFilterComposer f) f) {
+    final $$ExpensesTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.expenses,
+        getReferencedColumn: (t) => t.accountId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ExpensesTableFilterComposer(
+              $db: $db,
+              $table: $db.expenses,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<bool> accountMovementsRefs(
+      Expression<bool> Function($$AccountMovementsTableFilterComposer f) f) {
+    final $$AccountMovementsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.accountMovements,
+        getReferencedColumn: (t) => t.accountId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$AccountMovementsTableFilterComposer(
+              $db: $db,
+              $table: $db.accountMovements,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+}
+
+class $$AccountsTableOrderingComposer
+    extends Composer<_$WalletMeltDatabase, $AccountsTable> {
+  $$AccountsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get type => $composableBuilder(
+      column: $table.type, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get currency => $composableBuilder(
+      column: $table.currency, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get openingBalanceMinorUnits => $composableBuilder(
+      column: $table.openingBalanceMinorUnits,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get openingDate => $composableBuilder(
+      column: $table.openingDate, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get iconKey => $composableBuilder(
+      column: $table.iconKey, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get colorRole => $composableBuilder(
+      column: $table.colorRole, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+      column: $table.sortOrder, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isArchived => $composableBuilder(
+      column: $table.isArchived, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get includeInTotal => $composableBuilder(
+      column: $table.includeInTotal,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$AccountsTableAnnotationComposer
+    extends Composer<_$WalletMeltDatabase, $AccountsTable> {
+  $$AccountsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<String> get currency =>
+      $composableBuilder(column: $table.currency, builder: (column) => column);
+
+  GeneratedColumn<int> get openingBalanceMinorUnits => $composableBuilder(
+      column: $table.openingBalanceMinorUnits, builder: (column) => column);
+
+  GeneratedColumn<String> get openingDate => $composableBuilder(
+      column: $table.openingDate, builder: (column) => column);
+
+  GeneratedColumn<String> get iconKey =>
+      $composableBuilder(column: $table.iconKey, builder: (column) => column);
+
+  GeneratedColumn<String> get colorRole =>
+      $composableBuilder(column: $table.colorRole, builder: (column) => column);
+
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  GeneratedColumn<bool> get isArchived => $composableBuilder(
+      column: $table.isArchived, builder: (column) => column);
+
+  GeneratedColumn<bool> get includeInTotal => $composableBuilder(
+      column: $table.includeInTotal, builder: (column) => column);
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  Expression<T> expensesRefs<T extends Object>(
+      Expression<T> Function($$ExpensesTableAnnotationComposer a) f) {
+    final $$ExpensesTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.expenses,
+        getReferencedColumn: (t) => t.accountId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ExpensesTableAnnotationComposer(
+              $db: $db,
+              $table: $db.expenses,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<T> accountMovementsRefs<T extends Object>(
+      Expression<T> Function($$AccountMovementsTableAnnotationComposer a) f) {
+    final $$AccountMovementsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.accountMovements,
+        getReferencedColumn: (t) => t.accountId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$AccountMovementsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.accountMovements,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+}
+
+class $$AccountsTableTableManager extends RootTableManager<
+    _$WalletMeltDatabase,
+    $AccountsTable,
+    Account,
+    $$AccountsTableFilterComposer,
+    $$AccountsTableOrderingComposer,
+    $$AccountsTableAnnotationComposer,
+    $$AccountsTableCreateCompanionBuilder,
+    $$AccountsTableUpdateCompanionBuilder,
+    (Account, $$AccountsTableReferences),
+    Account,
+    PrefetchHooks Function({bool expensesRefs, bool accountMovementsRefs})> {
+  $$AccountsTableTableManager(_$WalletMeltDatabase db, $AccountsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AccountsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AccountsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AccountsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<String> type = const Value.absent(),
+            Value<String> currency = const Value.absent(),
+            Value<int> openingBalanceMinorUnits = const Value.absent(),
+            Value<String> openingDate = const Value.absent(),
+            Value<String?> iconKey = const Value.absent(),
+            Value<String?> colorRole = const Value.absent(),
+            Value<int> sortOrder = const Value.absent(),
+            Value<bool> isArchived = const Value.absent(),
+            Value<bool> includeInTotal = const Value.absent(),
+            Value<String> createdAt = const Value.absent(),
+            Value<String> updatedAt = const Value.absent(),
+            Value<String?> deletedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              AccountsCompanion(
+            id: id,
+            name: name,
+            type: type,
+            currency: currency,
+            openingBalanceMinorUnits: openingBalanceMinorUnits,
+            openingDate: openingDate,
+            iconKey: iconKey,
+            colorRole: colorRole,
+            sortOrder: sortOrder,
+            isArchived: isArchived,
+            includeInTotal: includeInTotal,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String name,
+            required String type,
+            required String currency,
+            Value<int> openingBalanceMinorUnits = const Value.absent(),
+            required String openingDate,
+            Value<String?> iconKey = const Value.absent(),
+            Value<String?> colorRole = const Value.absent(),
+            Value<int> sortOrder = const Value.absent(),
+            Value<bool> isArchived = const Value.absent(),
+            Value<bool> includeInTotal = const Value.absent(),
+            required String createdAt,
+            required String updatedAt,
+            Value<String?> deletedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              AccountsCompanion.insert(
+            id: id,
+            name: name,
+            type: type,
+            currency: currency,
+            openingBalanceMinorUnits: openingBalanceMinorUnits,
+            openingDate: openingDate,
+            iconKey: iconKey,
+            colorRole: colorRole,
+            sortOrder: sortOrder,
+            isArchived: isArchived,
+            includeInTotal: includeInTotal,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) =>
+                  (e.readTable(table), $$AccountsTableReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: (
+              {expensesRefs = false, accountMovementsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (expensesRefs) db.expenses,
+                if (accountMovementsRefs) db.accountMovements
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (expensesRefs)
+                    await $_getPrefetchedData<Account, $AccountsTable, Expense>(
+                        currentTable: table,
+                        referencedTable:
+                            $$AccountsTableReferences._expensesRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$AccountsTableReferences(db, table, p0)
+                                .expensesRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.accountId == item.id),
+                        typedResults: items),
+                  if (accountMovementsRefs)
+                    await $_getPrefetchedData<Account, $AccountsTable,
+                            AccountMovement>(
+                        currentTable: table,
+                        referencedTable: $$AccountsTableReferences
+                            ._accountMovementsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$AccountsTableReferences(db, table, p0)
+                                .accountMovementsRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.accountId == item.id),
+                        typedResults: items)
+                ];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$AccountsTableProcessedTableManager = ProcessedTableManager<
+    _$WalletMeltDatabase,
+    $AccountsTable,
+    Account,
+    $$AccountsTableFilterComposer,
+    $$AccountsTableOrderingComposer,
+    $$AccountsTableAnnotationComposer,
+    $$AccountsTableCreateCompanionBuilder,
+    $$AccountsTableUpdateCompanionBuilder,
+    (Account, $$AccountsTableReferences),
+    Account,
+    PrefetchHooks Function({bool expensesRefs, bool accountMovementsRefs})>;
 typedef $$ExpensesTableCreateCompanionBuilder = ExpensesCompanion Function({
   required String id,
   required double amount,
@@ -12367,6 +14087,7 @@ typedef $$ExpensesTableCreateCompanionBuilder = ExpensesCompanion Function({
   Value<int?> amountMinorUnits,
   Value<int?> subtotalAmountMinorUnits,
   Value<int?> taxAmountMinorUnits,
+  Value<String?> accountId,
   Value<int> rowid,
 });
 typedef $$ExpensesTableUpdateCompanionBuilder = ExpensesCompanion Function({
@@ -12392,6 +14113,7 @@ typedef $$ExpensesTableUpdateCompanionBuilder = ExpensesCompanion Function({
   Value<int?> amountMinorUnits,
   Value<int?> subtotalAmountMinorUnits,
   Value<int?> taxAmountMinorUnits,
+  Value<String?> accountId,
   Value<int> rowid,
 });
 
@@ -12422,6 +14144,20 @@ final class $$ExpensesTableReferences
     final manager = $$StoresTableTableManager($_db, $_db.stores)
         .filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_storeIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static $AccountsTable _accountIdTable(_$WalletMeltDatabase db) =>
+      db.accounts.createAlias('expenses__accountId__accounts__id');
+
+  $$AccountsTableProcessedTableManager? get accountId {
+    final $_column = $_itemColumn<String>('accountId');
+    if ($_column == null) return null;
+    final manager = $$AccountsTableTableManager($_db, $_db.accounts)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_accountIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: [item]));
@@ -12595,6 +14331,26 @@ class $$ExpensesTableFilterComposer
             $$StoresTableFilterComposer(
               $db: $db,
               $table: $db.stores,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$AccountsTableFilterComposer get accountId {
+    final $$AccountsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.accountId,
+        referencedTable: $db.accounts,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$AccountsTableFilterComposer(
+              $db: $db,
+              $table: $db.accounts,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -12804,6 +14560,26 @@ class $$ExpensesTableOrderingComposer
             ));
     return composer;
   }
+
+  $$AccountsTableOrderingComposer get accountId {
+    final $$AccountsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.accountId,
+        referencedTable: $db.accounts,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$AccountsTableOrderingComposer(
+              $db: $db,
+              $table: $db.accounts,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
 }
 
 class $$ExpensesTableAnnotationComposer
@@ -12915,6 +14691,26 @@ class $$ExpensesTableAnnotationComposer
     return composer;
   }
 
+  $$AccountsTableAnnotationComposer get accountId {
+    final $$AccountsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.accountId,
+        referencedTable: $db.accounts,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$AccountsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.accounts,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
   Expression<T> groceryItemsRefs<T extends Object>(
       Expression<T> Function($$GroceryItemsTableAnnotationComposer a) f) {
     final $$GroceryItemsTableAnnotationComposer composer = $composerBuilder(
@@ -13014,6 +14810,7 @@ class $$ExpensesTableTableManager extends RootTableManager<
     PrefetchHooks Function(
         {bool categoryId,
         bool storeId,
+        bool accountId,
         bool groceryItemsRefs,
         bool expenseItemsRefs,
         bool receiptsRefs,
@@ -13051,6 +14848,7 @@ class $$ExpensesTableTableManager extends RootTableManager<
             Value<int?> amountMinorUnits = const Value.absent(),
             Value<int?> subtotalAmountMinorUnits = const Value.absent(),
             Value<int?> taxAmountMinorUnits = const Value.absent(),
+            Value<String?> accountId = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               ExpensesCompanion(
@@ -13076,6 +14874,7 @@ class $$ExpensesTableTableManager extends RootTableManager<
             amountMinorUnits: amountMinorUnits,
             subtotalAmountMinorUnits: subtotalAmountMinorUnits,
             taxAmountMinorUnits: taxAmountMinorUnits,
+            accountId: accountId,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -13101,6 +14900,7 @@ class $$ExpensesTableTableManager extends RootTableManager<
             Value<int?> amountMinorUnits = const Value.absent(),
             Value<int?> subtotalAmountMinorUnits = const Value.absent(),
             Value<int?> taxAmountMinorUnits = const Value.absent(),
+            Value<String?> accountId = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               ExpensesCompanion.insert(
@@ -13126,6 +14926,7 @@ class $$ExpensesTableTableManager extends RootTableManager<
             amountMinorUnits: amountMinorUnits,
             subtotalAmountMinorUnits: subtotalAmountMinorUnits,
             taxAmountMinorUnits: taxAmountMinorUnits,
+            accountId: accountId,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
@@ -13135,6 +14936,7 @@ class $$ExpensesTableTableManager extends RootTableManager<
           prefetchHooksCallback: (
               {categoryId = false,
               storeId = false,
+              accountId = false,
               groceryItemsRefs = false,
               expenseItemsRefs = false,
               receiptsRefs = false,
@@ -13178,6 +14980,16 @@ class $$ExpensesTableTableManager extends RootTableManager<
                         $$ExpensesTableReferences._storeIdTable(db),
                     referencedColumn:
                         $$ExpensesTableReferences._storeIdTable(db).id,
+                  ) as T;
+                }
+                if (accountId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.accountId,
+                    referencedTable:
+                        $$ExpensesTableReferences._accountIdTable(db),
+                    referencedColumn:
+                        $$ExpensesTableReferences._accountIdTable(db).id,
                   ) as T;
                 }
 
@@ -13257,6 +15069,7 @@ typedef $$ExpensesTableProcessedTableManager = ProcessedTableManager<
     PrefetchHooks Function(
         {bool categoryId,
         bool storeId,
+        bool accountId,
         bool groceryItemsRefs,
         bool expenseItemsRefs,
         bool receiptsRefs,
@@ -20084,6 +21897,362 @@ typedef $$MonthlyBudgetsTableProcessedTableManager = ProcessedTableManager<
     ),
     MonthlyBudget,
     PrefetchHooks Function()>;
+typedef $$AccountMovementsTableCreateCompanionBuilder
+    = AccountMovementsCompanion Function({
+  required String id,
+  required String accountId,
+  required String kind,
+  required int amountMinorUnits,
+  required String date,
+  Value<String?> transferGroupId,
+  Value<String?> notes,
+  required String createdAt,
+  required String updatedAt,
+  Value<String?> deletedAt,
+  Value<int> rowid,
+});
+typedef $$AccountMovementsTableUpdateCompanionBuilder
+    = AccountMovementsCompanion Function({
+  Value<String> id,
+  Value<String> accountId,
+  Value<String> kind,
+  Value<int> amountMinorUnits,
+  Value<String> date,
+  Value<String?> transferGroupId,
+  Value<String?> notes,
+  Value<String> createdAt,
+  Value<String> updatedAt,
+  Value<String?> deletedAt,
+  Value<int> rowid,
+});
+
+final class $$AccountMovementsTableReferences extends BaseReferences<
+    _$WalletMeltDatabase, $AccountMovementsTable, AccountMovement> {
+  $$AccountMovementsTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static $AccountsTable _accountIdTable(_$WalletMeltDatabase db) =>
+      db.accounts.createAlias('account_movements__accountId__accounts__id');
+
+  $$AccountsTableProcessedTableManager get accountId {
+    final $_column = $_itemColumn<String>('accountId')!;
+
+    final manager = $$AccountsTableTableManager($_db, $_db.accounts)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_accountIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$AccountMovementsTableFilterComposer
+    extends Composer<_$WalletMeltDatabase, $AccountMovementsTable> {
+  $$AccountMovementsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get kind => $composableBuilder(
+      column: $table.kind, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get amountMinorUnits => $composableBuilder(
+      column: $table.amountMinorUnits,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get date => $composableBuilder(
+      column: $table.date, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get transferGroupId => $composableBuilder(
+      column: $table.transferGroupId,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get notes => $composableBuilder(
+      column: $table.notes, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnFilters(column));
+
+  $$AccountsTableFilterComposer get accountId {
+    final $$AccountsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.accountId,
+        referencedTable: $db.accounts,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$AccountsTableFilterComposer(
+              $db: $db,
+              $table: $db.accounts,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$AccountMovementsTableOrderingComposer
+    extends Composer<_$WalletMeltDatabase, $AccountMovementsTable> {
+  $$AccountMovementsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+      column: $table.kind, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get amountMinorUnits => $composableBuilder(
+      column: $table.amountMinorUnits,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get date => $composableBuilder(
+      column: $table.date, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get transferGroupId => $composableBuilder(
+      column: $table.transferGroupId,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+      column: $table.notes, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
+
+  $$AccountsTableOrderingComposer get accountId {
+    final $$AccountsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.accountId,
+        referencedTable: $db.accounts,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$AccountsTableOrderingComposer(
+              $db: $db,
+              $table: $db.accounts,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$AccountMovementsTableAnnotationComposer
+    extends Composer<_$WalletMeltDatabase, $AccountMovementsTable> {
+  $$AccountMovementsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<int> get amountMinorUnits => $composableBuilder(
+      column: $table.amountMinorUnits, builder: (column) => column);
+
+  GeneratedColumn<String> get date =>
+      $composableBuilder(column: $table.date, builder: (column) => column);
+
+  GeneratedColumn<String> get transferGroupId => $composableBuilder(
+      column: $table.transferGroupId, builder: (column) => column);
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  $$AccountsTableAnnotationComposer get accountId {
+    final $$AccountsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.accountId,
+        referencedTable: $db.accounts,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$AccountsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.accounts,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$AccountMovementsTableTableManager extends RootTableManager<
+    _$WalletMeltDatabase,
+    $AccountMovementsTable,
+    AccountMovement,
+    $$AccountMovementsTableFilterComposer,
+    $$AccountMovementsTableOrderingComposer,
+    $$AccountMovementsTableAnnotationComposer,
+    $$AccountMovementsTableCreateCompanionBuilder,
+    $$AccountMovementsTableUpdateCompanionBuilder,
+    (AccountMovement, $$AccountMovementsTableReferences),
+    AccountMovement,
+    PrefetchHooks Function({bool accountId})> {
+  $$AccountMovementsTableTableManager(
+      _$WalletMeltDatabase db, $AccountMovementsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AccountMovementsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AccountMovementsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AccountMovementsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> accountId = const Value.absent(),
+            Value<String> kind = const Value.absent(),
+            Value<int> amountMinorUnits = const Value.absent(),
+            Value<String> date = const Value.absent(),
+            Value<String?> transferGroupId = const Value.absent(),
+            Value<String?> notes = const Value.absent(),
+            Value<String> createdAt = const Value.absent(),
+            Value<String> updatedAt = const Value.absent(),
+            Value<String?> deletedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              AccountMovementsCompanion(
+            id: id,
+            accountId: accountId,
+            kind: kind,
+            amountMinorUnits: amountMinorUnits,
+            date: date,
+            transferGroupId: transferGroupId,
+            notes: notes,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String accountId,
+            required String kind,
+            required int amountMinorUnits,
+            required String date,
+            Value<String?> transferGroupId = const Value.absent(),
+            Value<String?> notes = const Value.absent(),
+            required String createdAt,
+            required String updatedAt,
+            Value<String?> deletedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              AccountMovementsCompanion.insert(
+            id: id,
+            accountId: accountId,
+            kind: kind,
+            amountMinorUnits: amountMinorUnits,
+            date: date,
+            transferGroupId: transferGroupId,
+            notes: notes,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$AccountMovementsTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: ({accountId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (accountId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.accountId,
+                    referencedTable:
+                        $$AccountMovementsTableReferences._accountIdTable(db),
+                    referencedColumn: $$AccountMovementsTableReferences
+                        ._accountIdTable(db)
+                        .id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$AccountMovementsTableProcessedTableManager = ProcessedTableManager<
+    _$WalletMeltDatabase,
+    $AccountMovementsTable,
+    AccountMovement,
+    $$AccountMovementsTableFilterComposer,
+    $$AccountMovementsTableOrderingComposer,
+    $$AccountMovementsTableAnnotationComposer,
+    $$AccountMovementsTableCreateCompanionBuilder,
+    $$AccountMovementsTableUpdateCompanionBuilder,
+    (AccountMovement, $$AccountMovementsTableReferences),
+    AccountMovement,
+    PrefetchHooks Function({bool accountId})>;
 
 class $WalletMeltDatabaseManager {
   final _$WalletMeltDatabase _db;
@@ -20092,6 +22261,8 @@ class $WalletMeltDatabaseManager {
       $$CategoriesTableTableManager(_db, _db.categories);
   $$StoresTableTableManager get stores =>
       $$StoresTableTableManager(_db, _db.stores);
+  $$AccountsTableTableManager get accounts =>
+      $$AccountsTableTableManager(_db, _db.accounts);
   $$ExpensesTableTableManager get expenses =>
       $$ExpensesTableTableManager(_db, _db.expenses);
   $$GroceryItemsTableTableManager get groceryItems =>
@@ -20134,4 +22305,6 @@ class $WalletMeltDatabaseManager {
       $$FuelComponentsTableTableManager(_db, _db.fuelComponents);
   $$MonthlyBudgetsTableTableManager get monthlyBudgets =>
       $$MonthlyBudgetsTableTableManager(_db, _db.monthlyBudgets);
+  $$AccountMovementsTableTableManager get accountMovements =>
+      $$AccountMovementsTableTableManager(_db, _db.accountMovements);
 }

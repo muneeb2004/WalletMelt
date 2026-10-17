@@ -7,6 +7,7 @@ import 'dart:io' as io;
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../../components/account/account_picker_field.dart';
 import '../../components/category/category_chip.dart';
 import '../../components/category/category_icon.dart';
 import '../../services/svg/svg_safeguard_service.dart';
@@ -52,6 +53,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   FuelTransactionDraft? _fuelTransactionDraft;
 
   String? _categoryId;
+  String? _accountId;
+  bool _accountResolved = false;
   String? _pendingInitialCategoryId;
   bool _initialCategoryResolved = false;
   bool _categoryManuallySelected = false;
@@ -174,6 +177,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     super.didChangeDependencies();
     final state = context.read<AppState>();
     _resolveInitialCategory(state);
+    _resolveInitialAccount(state);
 
     if (_hydrated || widget.expenseId == null) return;
     final expense = state.expenses
@@ -188,6 +192,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       _vendorController.text = expense.vendor ?? '';
       _notesController.text = expense.notes ?? '';
       _categoryId = expense.categoryId;
+      _accountId = expense.accountId;
+      _accountResolved = true;
       _categoryManuallySelected = true;
       _date = DateTime.parse(expense.date);
       _receiptUri = expense.receiptImageUri;
@@ -334,6 +340,14 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                       style: TextStyle(
                           color: theme.colorScheme.error))),
             const SizedBox(height: 20),
+
+            if (state.accountsAvailable)
+              AccountPickerField(
+                accounts: context.select((AppState s) => s.accounts),
+                currency: currency,
+                value: _accountId,
+                onChanged: (id) => setState(() => _accountId = id),
+              ),
 
             if (isGroceryMode) ...[
               // ── Dedicated Bulk Grocery Mode ──────────────────────
@@ -839,6 +853,26 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     setState(() => _date = picked);
   }
 
+  /// New expenses default to the account of the most recent expense in the
+  /// current currency, so the common case needs no extra tap.
+  void _resolveInitialAccount(AppState state) {
+    if (_accountResolved || widget.expenseId != null) return;
+    if (!state.accountsAvailable || state.accountBalances.isEmpty) return;
+    _accountResolved = true;
+    final currency = state.settings.currency;
+    final eligible = {
+      for (final a in state.accounts)
+        if (a.currency == currency && !a.isArchived) a.id,
+    };
+    for (final e in state.expenses) {
+      final id = e.accountId;
+      if (id != null && eligible.contains(id)) {
+        _accountId = id;
+        return;
+      }
+    }
+  }
+
   Future<void> _loadGroceryItems(String expenseId) async {
     final items =
         await context.read<AppState>().groceryItemsForExpense(expenseId);
@@ -935,6 +969,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
           fuelTransaction: isFuelMode ? _fuelTransactionDraft : null,
           subtotalAmount: subtotalVal,
           taxAmount: taxVal,
+          accountId: _effectiveAccountId(state, existing?.accountId),
         ),
       );
     } else {
@@ -951,12 +986,28 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
           clearReceipt: _receiptUri == null,
           subtotalAmount: subtotalVal,
           taxAmount: taxVal,
+          accountId: _effectiveAccountId(state, existing.accountId),
+          clearAccountId: _effectiveAccountId(state, existing.accountId) == null,
         ),
         groceryItems: _groceryItems,
         fuelTransaction: isFuelMode ? _fuelTransactionDraft : null,
       );
     }
     router.go(existing == null ? '/' : '/expense/${existing.id}');
+  }
+
+  /// The chosen account only counts if it still matches the expense currency
+  /// (the form always saves in the app currency).
+  String? _effectiveAccountId(AppState state, String? originalAccountId) {
+    final id = _accountId;
+    if (id == null) return null;
+    for (final a in state.accounts) {
+      if (a.id == id && a.currency == state.settings.currency &&
+          (!a.isArchived || a.id == originalAccountId)) {
+        return id;
+      }
+    }
+    return null;
   }
 
   Future<void> _showAddCategorySheet(BuildContext context) async {

@@ -53,6 +53,62 @@ class Expenses extends Table {
   IntColumn get amountMinorUnits => integer().named('amountMinorUnits').nullable()();
   IntColumn get subtotalAmountMinorUnits => integer().named('subtotalAmountMinorUnits').nullable()();
   IntColumn get taxAmountMinorUnits => integer().named('taxAmountMinorUnits').nullable()();
+  TextColumn get accountId => text()
+      .named('accountId')
+      .nullable()
+      .references(Accounts, #id, onDelete: KeyAction.restrict)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// Money containers (cash, bank, wallet, card). Balance is always derived
+/// (ADR-0011); nothing here stores a running total.
+class Accounts extends Table {
+  @override
+  String get tableName => 'accounts';
+
+  TextColumn get id => text()();
+  TextColumn get name => text()();
+  TextColumn get type => text()(); // cash | bank | wallet | card | other
+  TextColumn get currency => text()();
+  IntColumn get openingBalanceMinorUnits =>
+      integer().named('openingBalanceMinorUnits').withDefault(const Constant(0))();
+  TextColumn get openingDate => text().named('openingDate')();
+  TextColumn get iconKey => text().named('iconKey').nullable()();
+  TextColumn get colorRole => text().named('colorRole').nullable()();
+  IntColumn get sortOrder =>
+      integer().named('sortOrder').withDefault(const Constant(0))();
+  BoolColumn get isArchived =>
+      boolean().named('isArchived').withDefault(const Constant(false))();
+  BoolColumn get includeInTotal =>
+      boolean().named('includeInTotal').withDefault(const Constant(true))();
+  TextColumn get createdAt => text().named('createdAt')();
+  TextColumn get updatedAt => text().named('updatedAt')();
+  TextColumn get deletedAt => text().named('deletedAt').nullable()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// Non-expense balance movements: reconcile adjustments and transfer legs.
+/// `amountMinorUnits` is signed (positive adds to the account).
+class AccountMovements extends Table {
+  @override
+  String get tableName => 'account_movements';
+
+  TextColumn get id => text()();
+  TextColumn get accountId => text()
+      .named('accountId')
+      .references(Accounts, #id, onDelete: KeyAction.restrict)();
+  TextColumn get kind => text()(); // adjustment | transfer_in | transfer_out
+  IntColumn get amountMinorUnits => integer().named('amountMinorUnits')();
+  TextColumn get date => text()();
+  TextColumn get transferGroupId => text().named('transferGroupId').nullable()();
+  TextColumn get notes => text().nullable()();
+  TextColumn get createdAt => text().named('createdAt')();
+  TextColumn get updatedAt => text().named('updatedAt')();
+  TextColumn get deletedAt => text().named('deletedAt').nullable()();
 
   @override
   Set<Column<Object>> get primaryKey => {id};
@@ -513,13 +569,15 @@ class V1MigrationMetrics {
     FuelTransactions,
     FuelComponents,
     MonthlyBudgets,
+    Accounts,
+    AccountMovements,
   ],
 )
 class WalletMeltDatabase extends _$WalletMeltDatabase {
   WalletMeltDatabase(super.executor, {this.preMigrationBackupPath});
   WalletMeltDatabase.memory() : this(openInMemoryConnection());
 
-  static const currentSchemaVersion = 9;
+  static const currentSchemaVersion = 10;
 
   final String? preMigrationBackupPath;
 
@@ -609,6 +667,9 @@ class WalletMeltDatabase extends _$WalletMeltDatabase {
           if (from < 9 && to >= 9) {
             await _upgradeFromV8ToV9(m, from, to);
           }
+          if (from < 10 && to >= 10) {
+            await _upgradeFromV9ToV10(m, from, to);
+          }
         },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON;');
@@ -628,6 +689,9 @@ class WalletMeltDatabase extends _$WalletMeltDatabase {
             'CREATE INDEX IF NOT EXISTS fuel_components_fuelTransactionId_idx ON fuel_components (fuelTransactionId);',
             'CREATE INDEX IF NOT EXISTS fuel_template_components_templateId_idx ON fuel_template_components (templateId);',
             'CREATE INDEX IF NOT EXISTS essential_templates_categoryId_idx ON essential_expense_templates (categoryId);',
+            'CREATE INDEX IF NOT EXISTS expenses_accountId_date_idx ON expenses (accountId, date);',
+            'CREATE INDEX IF NOT EXISTS account_movements_accountId_date_idx ON account_movements (accountId, date);',
+            'CREATE INDEX IF NOT EXISTS account_movements_transferGroupId_idx ON account_movements (transferGroupId);',
             'CREATE INDEX IF NOT EXISTS stores_isSaved_idx ON stores (isSaved);',
             'CREATE INDEX IF NOT EXISTS stores_lastUsedAt_idx ON stores (lastUsedAt);',
           ]) {
@@ -834,6 +898,52 @@ class WalletMeltDatabase extends _$WalletMeltDatabase {
   }
 
 
+
+  Future<void> _upgradeFromV9ToV10(Migrator m, int from, int to) async {
+    final hasAudit = await _tableExists('migration_audit');
+    final auditId = 'audit_v9_v10_${DateTime.now().millisecondsSinceEpoch}';
+    final startedAt = DateTime.now().toIso8601String();
+    if (hasAudit && from >= 9) {
+      await customStatement(
+        'INSERT INTO migration_audit (id, fromVersion, toVersion, startedAt, status, preMigrationBackupPath) VALUES (?, ?, ?, ?, ?, ?);',
+        [auditId, from, to, startedAt, 'in_progress', preMigrationBackupPath],
+      );
+    }
+
+    try {
+      if (!await _tableExists('accounts')) {
+        await m.createTable(accounts);
+      }
+      if (!await _tableExists('account_movements')) {
+        await m.createTable(accountMovements);
+      }
+      if (await _tableExists('expenses') &&
+          !await _columnExists('expenses', 'accountId')) {
+        await m.addColumn(expenses, expenses.accountId);
+      }
+      await customStatement(
+          'CREATE INDEX IF NOT EXISTS expenses_accountId_date_idx ON expenses (accountId, date);');
+      await customStatement(
+          'CREATE INDEX IF NOT EXISTS account_movements_accountId_date_idx ON account_movements (accountId, date);');
+      await customStatement(
+          'CREATE INDEX IF NOT EXISTS account_movements_transferGroupId_idx ON account_movements (transferGroupId);');
+
+      if (hasAudit && from >= 9) {
+        await customStatement(
+          'UPDATE migration_audit SET status = ?, completedAt = ? WHERE id = ?;',
+          ['completed', DateTime.now().toIso8601String(), auditId],
+        );
+      }
+    } catch (e) {
+      if (hasAudit && from >= 9) {
+        await customStatement(
+          'UPDATE migration_audit SET status = ?, completedAt = ?, errorMessage = ? WHERE id = ?;',
+          ['failed', DateTime.now().toIso8601String(), e.toString(), auditId],
+        );
+      }
+      rethrow;
+    }
+  }
 
   Future<void> _upgradeFromV6ToV7(Migrator m, int from, int to) async {
     if (!await _tableExists('stores')) {

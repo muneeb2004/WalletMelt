@@ -43,3 +43,11 @@ All financial metrics are calculated via [`FinancialMetricsCalculator`](file:///
 
 ## Subscription Renewal Dates (changed 2026-10-15)
 `Subscription.calculateNextRenewalDate` advances month-based cycles (monthly 1, quarterly 3, semi-annual 6, annual 12 months) from the **anchor day** taken from `startDate`, clamped to the last day of the target month. Jan 31 -> Feb 28/29 -> Mar 31 (no permanent drift, no skipped February). `custom_N` adds N calendar days via `DateTime(y, m, d + N)` (no DST hour shift); `N <= 0` falls back to 30. Renewals are saved **atomically per subscription** (`DriftSubscriptionRepository.applyRenewals`: all renewal expenses + the advanced date in one transaction) and concurrent runs share one in-flight Future. Regression tests: `test/subscription_renewal_test.dart`.
+
+## Account balance (2026-10-17, [[ADR-0011-Accounts-Derived-Balance-and-Transfers]])
+`balance = openingBalance - expenseOutflow + movementNet`, in integer minor units (`BalanceCalculator`, `lib/src/analytics/balance_calculator.dart`).
+- `expenseOutflow` sums non-deleted expenses with `accountId = account`, `expense.currency = account.currency` and `expense.date >= account.openingDate` (uses `amountMinorUnits`, falling back to `ROUND(amount * 100)` for legacy rows).
+- `movementNet` sums non-deleted `account_movements` dated on/after `openingDate` (signed: transfer out and negative adjustments reduce it).
+- Totals are one figure per currency over accounts that are included, not archived and not deleted; there is no FX conversion.
+- Reconcile writes one `adjustment` of `actual - current`; history is never rewritten. Transfers and adjustments are not spending: budgets, daily allowance and Insights read only `Expenses` and are unchanged.
+- Minor units use the existing fixed exponent 2 (`toMinorUnits`), consistent with every stored `*MinorUnits` row.

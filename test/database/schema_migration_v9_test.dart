@@ -58,7 +58,7 @@ void main() {
     // Verify user_version is now 9
     final versionResult = await driftDb.customSelect('PRAGMA user_version;').getSingle();
     final currentVersion = versionResult.read<int>('user_version');
-    expect(currentVersion, 9);
+    expect(currentVersion, WalletMeltDatabase.currentSchemaVersion);
 
     // Verify monthly_budgets table exists
     final tableCheck = await driftDb.customSelect(
@@ -74,7 +74,7 @@ void main() {
 
     // Verify migration_audit has entry for 8 -> 9
     final auditCheck = await driftDb.customSelect(
-      'SELECT * FROM migration_audit WHERE fromVersion = 8 AND toVersion = 9;',
+      'SELECT * FROM migration_audit WHERE fromVersion = 8 AND toVersion = ${WalletMeltDatabase.currentSchemaVersion};',
     ).getSingleOrNull();
     expect(auditCheck, isNotNull);
     expect(auditCheck?.read<String>('status'), 'completed');

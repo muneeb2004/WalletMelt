@@ -36,3 +36,6 @@ select file -> decrypt/unzip -> validate (format 1|2, v2: checksum + schema + ex
 
 ## 5. Preview (2026-10-15)
 `WalletMeltBackupPreview.extendedCounts` carries per-table row counts of the v2 `extended` section; the restore dialog shows debts, subscriptions, payees, essentials and fuel logs. Full Replace is disabled in the dialog for v1 backups. ZIP `metadata.json` records the real Drift `schema_version`.
+
+## 6. Accounts (2026-10-17)
+Schema v10 adds `accounts`, `account_movements` and `expense_account_links` to the extended section as **optional** keys, so pre-v10 v2 backups still validate and restore. Full Replace deletes `account_movements` and `accounts` after `expenses` (RESTRICT keys). Details: [[Backup-Format-Specification]] section 4, [[ADR-0011-Accounts-Derived-Balance-and-Transfers]].

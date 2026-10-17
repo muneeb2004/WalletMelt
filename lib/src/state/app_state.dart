@@ -46,6 +46,9 @@ import '../types/merchant.dart';
 import '../data/repositories/drift/drift_store_repository.dart';
 import '../data/repositories/drift/drift_monthly_budget_repository.dart';
 import '../types/monthly_budget.dart';
+import '../analytics/balance_calculator.dart';
+import '../data/repositories/drift/drift_account_repository.dart';
+import '../types/account.dart' as wm_account;
 
 class AppState extends ChangeNotifier {
   AppState({
@@ -60,6 +63,7 @@ class AppState extends ChangeNotifier {
     DriftEssentialExpenseRepository? driftEssentialExpenseRepository,
     DriftFuelRepository? driftFuelRepository,
     DriftStoreRepository? driftStoreRepository,
+    DriftAccountRepository? driftAccountRepository,
     local.WalletMeltDatabase? driftDatabase,
     SettingsService? settingsService,
     ReceiptStorageService? receiptStorageService,
@@ -81,6 +85,8 @@ class AppState extends ChangeNotifier {
     _driftEssentialExpenseRepository = driftEssentialExpenseRepository ?? _FakeDriftEssentialExpenseRepository();
     _driftFuelRepository = driftFuelRepository ?? _FakeDriftFuelRepository();
     _driftStoreRepository = driftStoreRepository ?? (driftDatabase != null ? DriftStoreRepository(driftDatabase) : _FakeDriftStoreRepository());
+    _accountRepository = driftAccountRepository ??
+        (driftDatabase != null ? DriftAccountRepository(driftDatabase) : null);
   }
 
   AppState.test({
@@ -95,6 +101,7 @@ class AppState extends ChangeNotifier {
     DriftEssentialExpenseRepository? driftEssentialExpenseRepository,
     DriftFuelRepository? driftFuelRepository,
     DriftStoreRepository? driftStoreRepository,
+    DriftAccountRepository? driftAccountRepository,
     SettingsService? settingsService,
     ReceiptStorageService? receiptStorageService,
     WalletMeltSettings? settings,
@@ -120,6 +127,7 @@ class AppState extends ChangeNotifier {
     _driftEssentialExpenseRepository = driftEssentialExpenseRepository ?? _FakeDriftEssentialExpenseRepository();
     _driftFuelRepository = driftFuelRepository ?? _FakeDriftFuelRepository();
     _driftStoreRepository = driftStoreRepository ?? _FakeDriftStoreRepository();
+    _accountRepository = driftAccountRepository;
     isLoading = false;
   }
 
@@ -139,6 +147,18 @@ class AppState extends ChangeNotifier {
   late DriftEssentialExpenseRepository _driftEssentialExpenseRepository;
   late DriftFuelRepository _driftFuelRepository;
   late DriftStoreRepository _driftStoreRepository;
+  DriftAccountRepository? _accountRepository;
+
+  /// Accounts need the Drift runtime; the legacy fallback has none (ADR-0011).
+  bool get accountsAvailable => _accountRepository != null;
+  List<wm_account.AccountBalance> accountBalances = const [];
+  int unassignedExpenseCount = 0;
+
+  List<wm_account.Account> get accounts =>
+      [for (final b in accountBalances) b.account];
+
+  List<wm_account.CurrencyTotal> get accountTotals =>
+      BalanceCalculator.totalsByCurrency(accountBalances);
 
   MonthlyBudget? _currentMonthlyBudget;
   final Map<String, MonthlyBudget?> _monthlyBudgetCache = {};
@@ -349,7 +369,108 @@ class AppState extends ChangeNotifier {
     payees = await _driftPayeeRepository.listAll();
     essentialTemplates = await _driftEssentialExpenseRepository.listAll();
     savedMerchants = await _driftStoreRepository.listSavedMerchants();
+    await _refreshAccounts();
 
+    notifyListeners();
+  }
+
+  Future<void> _refreshAccounts() async {
+    final repo = _accountRepository;
+    if (repo == null) {
+      accountBalances = const [];
+      unassignedExpenseCount = 0;
+      return;
+    }
+    accountBalances = await repo.listBalances(includeArchived: true);
+    unassignedExpenseCount =
+        accountBalances.isEmpty ? 0 : await repo.countUnassignedExpenses();
+  }
+
+  DriftAccountRepository get _accountsOrThrow {
+    final repo = _accountRepository;
+    if (repo == null) {
+      throw StateError('Accounts are unavailable on this storage backend.');
+    }
+    return repo;
+  }
+
+  Future<wm_account.Account> createAccount({
+    required String name,
+    required wm_account.AccountType type,
+    required String currency,
+    int openingBalanceMinorUnits = 0,
+    DateTime? openingDate,
+    bool includeInTotal = true,
+  }) async {
+    final account = await _accountsOrThrow.create(
+      name: name,
+      type: type,
+      currency: currency,
+      openingBalanceMinorUnits: openingBalanceMinorUnits,
+      openingDate: openingDate,
+      includeInTotal: includeInTotal,
+    );
+    await _refreshAccounts();
+    notifyListeners();
+    return account;
+  }
+
+  Future<bool> accountHasTransactions(String id) =>
+      _accountsOrThrow.hasLinkedRows(id);
+
+  Future<void> updateAccount(wm_account.Account account) async {
+    await _accountsOrThrow.update(account);
+    await _refreshAccounts();
+    notifyListeners();
+  }
+
+  /// Returns true when the account was deleted, false when archived.
+  Future<bool> deleteOrArchiveAccount(String id) async {
+    final deleted = await _accountsOrThrow.deleteOrArchive(id);
+    await _refreshAccounts();
+    notifyListeners();
+    return deleted;
+  }
+
+  Future<void> transferBetweenAccounts({
+    required String fromAccountId,
+    required String toAccountId,
+    required int amountMinorUnits,
+    int? receivedMinorUnits,
+    DateTime? date,
+    String? notes,
+  }) async {
+    await _accountsOrThrow.transfer(
+      fromAccountId: fromAccountId,
+      toAccountId: toAccountId,
+      amountMinorUnits: amountMinorUnits,
+      receivedMinorUnits: receivedMinorUnits,
+      date: date,
+      notes: notes,
+    );
+    await _refreshAccounts();
+    notifyListeners();
+  }
+
+  Future<void> reconcileAccount(String accountId, int actualMinorUnits) async {
+    await _accountsOrThrow.reconcile(accountId, actualMinorUnits);
+    await _refreshAccounts();
+    notifyListeners();
+  }
+
+  Future<int> assignUnassignedExpensesTo(String accountId) async {
+    final changed = await _accountsOrThrow.assignUnassignedExpenses(accountId);
+    await refresh();
+    return changed;
+  }
+
+  Future<List<wm_account.AccountMovement>> accountMovements(
+          String accountId) =>
+      _accountsOrThrow.listMovements(accountId);
+
+  Future<void> deleteAccountMovement(String movementId) async {
+    await _accountsOrThrow.deleteMovement(movementId);
+    await _refreshAccounts();
     notifyListeners();
   }
 

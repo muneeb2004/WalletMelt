@@ -3,7 +3,7 @@ type: product
 status: verified
 priority: high
 created: 2026-10-15
-updated: 2026-10-15
+updated: 2026-10-17
 domain: product
 related:
   - "[[Student-Market-Strategy]]"
@@ -17,7 +17,7 @@ Findings from read-only code audits against `lib/src/**`. Re-run when schema/rou
 | Capability | In code? | Evidence |
 |---|---|---|
 | Income / inflows | **No** | No income table/column in `wallet_melt_database.dart` (22 tables) |
-| Payment method / account / wallet | **No** | No column on Expenses |
+| Payment method / account / wallet | **Yes (2026-10-17)** | `Accounts`, `AccountMovements`, `Expenses.accountId` (schema v10, [[ADR-0011-Accounts-Derived-Balance-and-Transfers]]) |
 | Tags | **No** | — |
 | Split / shared expenses | **No** | Nearest: DebtRecords + Payees |
 | Savings goals / BC committee | **No** | — |
@@ -37,3 +37,5 @@ Findings from read-only code audits against `lib/src/**`. Re-run when schema/rou
 - Working tree is **not** clean (uncommitted v1.1.2 follow-ups); the old note claimed clean.
 - Build pipeline = 3 Gradle invocations producing 5 APKs (AGENTS.md says "three targets"; consistent, but older notes said "5-target").
 - Migration guide says every migration writes `MigrationAudit`; code only audits v1→v2, v7→v8, v8→v9.
+
+> Update 2026-10-17: accounts, derived balance, transfers and reconcile now exist. Income / inflows and recurring income remain missing (Phase 2 in [[Balance-Income-and-Auto-Capture-Exploration]]).
