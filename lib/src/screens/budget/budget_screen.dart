@@ -65,6 +65,28 @@ class BudgetScreen extends StatefulWidget {
                         hintText: 'e.g. 50000',
                       ),
                     ),
+                    if (state.suggestedMonthlyBudget != null) ...[
+                      const SizedBox(height: AppSpacing.sm),
+                      Builder(builder: (context) {
+                        final suggestion = state.suggestedMonthlyBudget!;
+                        return Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                'Suggested from your income: ${formatMoney(suggestion, state.settings.currency)}',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () => setSheetState(() {
+                                controller.text = suggestion.toStringAsFixed(0);
+                              }),
+                              child: const Text('Use'),
+                            ),
+                          ],
+                        );
+                      }),
+                    ],
                     const SizedBox(height: AppSpacing.md),
                     Builder(builder: (context) {
                       final parsed = parseTolerantNumber(controller.text) ?? 0.0;

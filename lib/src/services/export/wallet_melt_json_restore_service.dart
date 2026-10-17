@@ -1113,6 +1113,8 @@ class WalletMeltJsonRestoreService {
       'fuel_transactions',
       'grocery_items',
       'account_movements',
+      'incomes',
+      'income_schedules',
       'expenses',
       'accounts',
       'fuel_template_components',

@@ -24,7 +24,7 @@ related:
   "metadata": {
     "format": "walletmelt.local_json_backup",
     "format_version": 2,
-    "schema_version": 10,
+    "schema_version": 11,
     "app_version": "1.1.2+6",
     "exported_at": "2026-10-15T12:00:00.000",
     "includes": ["expenses", "grocery_items", "categories", "budgets", "monthly_budgets", "settings", "extended"],
@@ -38,7 +38,8 @@ related:
                 "subscriptions": [], "essential_expense_templates": [],
                 "fuel_template_components": [], "expense_items": [], "receipts": [],
                 "fuel_transactions": [], "fuel_components": [],
-                "accounts": [], "account_movements": [] },
+                "accounts": [], "account_movements": [],
+                "incomes": [], "income_schedules": [] },
     "expense_store_links": [{ "expense_id": "...", "store_id": "..." }],
     "expense_account_links": [{ "expense_id": "...", "account_id": "..." }]
   }
@@ -52,10 +53,13 @@ related:
 
 ## 3. Restore rules
 1. **Safe Merge**: expenses/categories/budgets by existing conflict rules; monthly budgets skipped if the month exists; extended rows: PK collision keeps local row; natural-key (`normalizedName`) collision maps to the existing row and children are re-pointed; expense-scoped children (expense items, receipts, fuel) only for expenses newly inserted by this restore; derived rows (expense item per grocery item, `legacy_receipt_*`) are deduplicated by id or by (expense, name, total) / (expense, uri). Commit is refused if foreign-key violations increase.
-2. **Full Replace** (v2 only): deletes all 23 data tables child-first (`account_movements` then `accounts` after `expenses`), re-inserts parent-first with foreign keys ON, `foreign_key_check` must be clean, then back-fills minor units. Any failure rolls back everything.
+2. **Full Replace** (v2 only): deletes all 25 data tables child-first (`account_movements`, `incomes`, `income_schedules` before `expenses`; `accounts` after it), re-inserts parent-first with foreign keys ON, `foreign_key_check` must be clean, then back-fills minor units. Any failure rolls back everything.
 3. Receipts: file copy only from ZIP backups; JSON backups carry text references.
 
 ## 4. Accounts (schema v10, 2026-10-17)
 - `accounts` and `account_movements` are **optional** extended tables and `expense_account_links` is an optional list: a v2 file written before v10 lacks them and still validates and restores (accounts empty, expenses unassigned). Missing keys mean "no rows", never an error. Format version stays 2.
 - Expenses are serialized by the core encoder, which has no `accountId`; the link is carried by `expense_account_links` and applied after accounts are inserted (mirrors `expense_store_links`). Safe Merge applies a link only for expenses newly inserted by that restore. Accounts merge by id (PK collision keeps the local row); movements follow the same rule.
 - Tests: `test/services/export/backup_v2_roundtrip_test.dart` (round trip, replace over existing accounts, pre-accounts v2 file).
+
+## 5. Income (schema v11, 2026-10-17)
+`incomes` and `income_schedules` are optional extended tables like the account tables (absence = no rows; pre-v11 v2 files still validate and restore). `accountId` on both is remapped through the `account` map. Restore order: accounts, account_movements, incomes, income_schedules. Test: `test/services/export/backup_v2_roundtrip_test.dart`.

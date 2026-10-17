@@ -45,9 +45,15 @@ All financial metrics are calculated via [`FinancialMetricsCalculator`](file:///
 `Subscription.calculateNextRenewalDate` advances month-based cycles (monthly 1, quarterly 3, semi-annual 6, annual 12 months) from the **anchor day** taken from `startDate`, clamped to the last day of the target month. Jan 31 -> Feb 28/29 -> Mar 31 (no permanent drift, no skipped February). `custom_N` adds N calendar days via `DateTime(y, m, d + N)` (no DST hour shift); `N <= 0` falls back to 30. Renewals are saved **atomically per subscription** (`DriftSubscriptionRepository.applyRenewals`: all renewal expenses + the advanced date in one transaction) and concurrent runs share one in-flight Future. Regression tests: `test/subscription_renewal_test.dart`.
 
 ## Account balance (2026-10-17, [[ADR-0011-Accounts-Derived-Balance-and-Transfers]])
-`balance = openingBalance - expenseOutflow + movementNet`, in integer minor units (`BalanceCalculator`, `lib/src/analytics/balance_calculator.dart`).
+`balance = openingBalance - expenseOutflow + movementNet + incomeInflow`, in integer minor units (`BalanceCalculator`, `lib/src/analytics/balance_calculator.dart`).
 - `expenseOutflow` sums non-deleted expenses with `accountId = account`, `expense.currency = account.currency` and `expense.date >= account.openingDate` (uses `amountMinorUnits`, falling back to `ROUND(amount * 100)` for legacy rows).
 - `movementNet` sums non-deleted `account_movements` dated on/after `openingDate` (signed: transfer out and negative adjustments reduce it).
 - Totals are one figure per currency over accounts that are included, not archived and not deleted; there is no FX conversion.
 - Reconcile writes one `adjustment` of `actual - current`; history is never rewritten. Transfers and adjustments are not spending: budgets, daily allowance and Insights read only `Expenses` and are unchanged.
 - Minor units use the existing fixed exponent 2 (`toMinorUnits`), consistent with every stored `*MinorUnits` row.
+
+## Income planning (2026-10-17, [[ADR-0012-Income-Schedules-and-Budget-Suggestion]])
+- `incomeInflow` sums non-deleted `incomes` with `accountId = account`, same currency, `date >= openingDate`. Income with no account affects no balance.
+- `IncomePlanner` (`lib/src/analytics/income_planner.dart`, pure): **expected income for a month** = received incomes dated in the month + every active schedule occurrence in the month counted from the schedule's current `nextDueDate` (an overdue, unconfirmed occurrence still counts), per currency.
+- **Suggested budget** (advisory, major units) = `expectedIncome - sum(monthly subscriptions) - sum(monthly essentials)`, floored at 0, null when no income is expected. Essentials' monthly equivalent: weekly x 52/12, quarterly /3, yearly /12, `custom_N` x 30/N. The user's own monthly budget is never overwritten.
+- Recurrence arithmetic lives in `lib/src/utils/recurrence.dart` (`advanceByCycle`), shared with subscriptions. Weekly now advances 7 days (subscriptions previously treated an unknown/weekly cycle as monthly).

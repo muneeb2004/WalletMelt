@@ -39,3 +39,6 @@ select file -> decrypt/unzip -> validate (format 1|2, v2: checksum + schema + ex
 
 ## 6. Accounts (2026-10-17)
 Schema v10 adds `accounts`, `account_movements` and `expense_account_links` to the extended section as **optional** keys, so pre-v10 v2 backups still validate and restore. Full Replace deletes `account_movements` and `accounts` after `expenses` (RESTRICT keys). Details: [[Backup-Format-Specification]] section 4, [[ADR-0011-Accounts-Derived-Balance-and-Transfers]].
+
+## 7. Income (2026-10-17)
+Schema v11 adds `incomes` and `income_schedules` to the optional extended keys; Full Replace deletes them before `expenses` and `accounts`. See [[Backup-Format-Specification]] section 5, [[ADR-0012-Income-Schedules-and-Budget-Suggestion]].

@@ -16,12 +16,12 @@ Findings from read-only code audits against `lib/src/**`. Re-run when schema/rou
 
 | Capability | In code? | Evidence |
 |---|---|---|
-| Income / inflows | **No** | No income table/column in `wallet_melt_database.dart` (22 tables) |
+| Income / inflows | **Yes (2026-10-17)** | `Incomes`, `IncomeSchedules` (schema v11, [[ADR-0012-Income-Schedules-and-Budget-Suggestion]]) |
 | Payment method / account / wallet | **Yes (2026-10-17)** | `Accounts`, `AccountMovements`, `Expenses.accountId` (schema v10, [[ADR-0011-Accounts-Derived-Balance-and-Transfers]]) |
 | Tags | **No** | — |
 | Split / shared expenses | **No** | Nearest: DebtRecords + Payees |
 | Savings goals / BC committee | **No** | — |
-| Recurring income | **No** | Recurrence only on Expenses and Subscriptions |
+| Recurring income | **Yes (2026-10-17)** | `IncomeSchedules` with confirm-on-arrival |
 | Currency per expense | Yes | `Expenses.currency` (also budgets, debts, subs) |
 | FX conversion | **No** | — |
 | PKR default + ~146 currencies | Yes | `types/settings.dart:49`, `constants/currencies.dart` |
@@ -39,3 +39,5 @@ Findings from read-only code audits against `lib/src/**`. Re-run when schema/rou
 - Migration guide says every migration writes `MigrationAudit`; code only audits v1→v2, v7→v8, v8→v9.
 
 > Update 2026-10-17: accounts, derived balance, transfers and reconcile now exist. Income / inflows and recurring income remain missing (Phase 2 in [[Balance-Income-and-Auto-Capture-Exploration]]).
+
+> Update 2026-10-17: income and recurring income exist. Still missing: pay-cycle / semester budgets, savings goals, FX, localisation.

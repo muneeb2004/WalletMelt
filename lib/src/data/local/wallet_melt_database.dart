@@ -114,6 +114,57 @@ class AccountMovements extends Table {
   Set<Column<Object>> get primaryKey => {id};
 }
 
+/// Received income (a fact). Optional account link feeds the derived balance.
+class Incomes extends Table {
+  @override
+  String get tableName => 'incomes';
+
+  TextColumn get id => text()();
+  TextColumn get accountId => text()
+      .named('accountId')
+      .nullable()
+      .references(Accounts, #id, onDelete: KeyAction.restrict)();
+  TextColumn get scheduleId => text().named('scheduleId').nullable()();
+  TextColumn get title => text()();
+  TextColumn get source => text()();
+  IntColumn get amountMinorUnits => integer().named('amountMinorUnits')();
+  TextColumn get currency => text()();
+  TextColumn get date => text()();
+  TextColumn get notes => text().nullable()();
+  TextColumn get createdAt => text().named('createdAt')();
+  TextColumn get updatedAt => text().named('updatedAt')();
+  TextColumn get deletedAt => text().named('deletedAt').nullable()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// Expected recurring income (an expectation). Never changes a balance alone.
+class IncomeSchedules extends Table {
+  @override
+  String get tableName => 'income_schedules';
+
+  TextColumn get id => text()();
+  TextColumn get title => text()();
+  TextColumn get source => text()();
+  IntColumn get amountMinorUnits => integer().named('amountMinorUnits')();
+  TextColumn get currency => text()();
+  TextColumn get accountId => text()
+      .named('accountId')
+      .nullable()
+      .references(Accounts, #id, onDelete: KeyAction.restrict)();
+  TextColumn get cycle => text()();
+  TextColumn get startDate => text().named('startDate')();
+  TextColumn get nextDueDate => text().named('nextDueDate')();
+  TextColumn get status => text().withDefault(const Constant('active'))();
+  TextColumn get createdAt => text().named('createdAt')();
+  TextColumn get updatedAt => text().named('updatedAt')();
+  TextColumn get deletedAt => text().named('deletedAt').nullable()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
 class GroceryItems extends Table {
   @override
   String get tableName => 'grocery_items';
@@ -571,13 +622,15 @@ class V1MigrationMetrics {
     MonthlyBudgets,
     Accounts,
     AccountMovements,
+    Incomes,
+    IncomeSchedules,
   ],
 )
 class WalletMeltDatabase extends _$WalletMeltDatabase {
   WalletMeltDatabase(super.executor, {this.preMigrationBackupPath});
   WalletMeltDatabase.memory() : this(openInMemoryConnection());
 
-  static const currentSchemaVersion = 10;
+  static const currentSchemaVersion = 11;
 
   final String? preMigrationBackupPath;
 
@@ -670,6 +723,9 @@ class WalletMeltDatabase extends _$WalletMeltDatabase {
           if (from < 10 && to >= 10) {
             await _upgradeFromV9ToV10(m, from, to);
           }
+          if (from < 11 && to >= 11) {
+            await _upgradeFromV10ToV11(m, from, to);
+          }
         },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON;');
@@ -692,6 +748,8 @@ class WalletMeltDatabase extends _$WalletMeltDatabase {
             'CREATE INDEX IF NOT EXISTS expenses_accountId_date_idx ON expenses (accountId, date);',
             'CREATE INDEX IF NOT EXISTS account_movements_accountId_date_idx ON account_movements (accountId, date);',
             'CREATE INDEX IF NOT EXISTS account_movements_transferGroupId_idx ON account_movements (transferGroupId);',
+            'CREATE INDEX IF NOT EXISTS incomes_accountId_date_idx ON incomes (accountId, date);',
+            'CREATE INDEX IF NOT EXISTS income_schedules_status_idx ON income_schedules (status, nextDueDate);',
             'CREATE INDEX IF NOT EXISTS stores_isSaved_idx ON stores (isSaved);',
             'CREATE INDEX IF NOT EXISTS stores_lastUsedAt_idx ON stores (lastUsedAt);',
           ]) {
@@ -936,6 +994,43 @@ class WalletMeltDatabase extends _$WalletMeltDatabase {
       }
     } catch (e) {
       if (hasAudit && from >= 9) {
+        await customStatement(
+          'UPDATE migration_audit SET status = ?, completedAt = ?, errorMessage = ? WHERE id = ?;',
+          ['failed', DateTime.now().toIso8601String(), e.toString(), auditId],
+        );
+      }
+      rethrow;
+    }
+  }
+
+  Future<void> _upgradeFromV10ToV11(Migrator m, int from, int to) async {
+    final hasAudit = await _tableExists('migration_audit');
+    final auditId = 'audit_v10_v11_${DateTime.now().millisecondsSinceEpoch}';
+    if (hasAudit && from >= 10) {
+      await customStatement(
+        'INSERT INTO migration_audit (id, fromVersion, toVersion, startedAt, status, preMigrationBackupPath) VALUES (?, ?, ?, ?, ?, ?);',
+        [auditId, from, to, DateTime.now().toIso8601String(), 'in_progress', preMigrationBackupPath],
+      );
+    }
+    try {
+      // Income tables reference accounts, so make sure it exists (idempotent).
+      if (!await _tableExists('accounts')) await m.createTable(accounts);
+      if (!await _tableExists('incomes')) await m.createTable(incomes);
+      if (!await _tableExists('income_schedules')) {
+        await m.createTable(incomeSchedules);
+      }
+      await customStatement(
+          'CREATE INDEX IF NOT EXISTS incomes_accountId_date_idx ON incomes (accountId, date);');
+      await customStatement(
+          'CREATE INDEX IF NOT EXISTS income_schedules_status_idx ON income_schedules (status, nextDueDate);');
+      if (hasAudit && from >= 10) {
+        await customStatement(
+          'UPDATE migration_audit SET status = ?, completedAt = ? WHERE id = ?;',
+          ['completed', DateTime.now().toIso8601String(), auditId],
+        );
+      }
+    } catch (e) {
+      if (hasAudit && from >= 10) {
         await customStatement(
           'UPDATE migration_audit SET status = ?, completedAt = ?, errorMessage = ? WHERE id = ?;',
           ['failed', DateTime.now().toIso8601String(), e.toString(), auditId],

@@ -45,6 +45,8 @@ const _tables = [
   'fuel_components',
   'accounts',
   'account_movements',
+  'incomes',
+  'income_schedules',
 ];
 
 Future<void> _seed(local.WalletMeltDatabase db) async {
@@ -73,6 +75,10 @@ Future<void> _seed(local.WalletMeltDatabase db) async {
       "INSERT INTO account_movements (id, accountId, kind, amountMinorUnits, date, transferGroupId, createdAt, updatedAt) VALUES ('m1','a1','transfer_out',-100000,'2026-06-04T00:00:00.000','tg1','$_ts','$_ts');");
   await sql(
       "INSERT INTO account_movements (id, accountId, kind, amountMinorUnits, date, transferGroupId, createdAt, updatedAt) VALUES ('m2','a2','transfer_in',100000,'2026-06-04T00:00:00.000','tg1','$_ts','$_ts');");
+  await sql(
+      "INSERT INTO incomes (id, accountId, scheduleId, title, source, amountMinorUnits, currency, date, createdAt, updatedAt) VALUES ('in1','a1','is1','Salary','salary',5000000,'PKR','2026-06-05T00:00:00.000','$_ts','$_ts');");
+  await sql(
+      "INSERT INTO income_schedules (id, title, source, amountMinorUnits, currency, accountId, cycle, startDate, nextDueDate, status, createdAt, updatedAt) VALUES ('is1','Salary','salary',5000000,'PKR','a1','monthly','2026-06-05T00:00:00.000','2026-07-05T00:00:00.000','active','$_ts','$_ts');");
   await sql(
       "INSERT INTO expenses (id, amount, currency, categoryId, title, storeId, accountId, date, isRecurring, itemTotalMismatchApproved, createdAt, updatedAt) VALUES ('e1',1200,'PKR','c1','Groceries','s1','a1','2026-06-02T00:00:00.000',0,0,'$_ts','$_ts');");
   await sql(
@@ -125,7 +131,9 @@ Future<String> _exportV2(local.WalletMeltDatabase db,
     final tables = Map<String, Object?>.from(extended['tables']! as Map);
     tables
       ..remove('accounts')
-      ..remove('account_movements');
+      ..remove('account_movements')
+      ..remove('incomes')
+      ..remove('income_schedules');
     extended
       ..['tables'] = tables
       ..remove('expense_account_links');
@@ -481,6 +489,8 @@ void main() {
     final counts = await _counts(dst);
     expect(counts['accounts'], 0);
     expect(counts['account_movements'], 0);
+    expect(counts['incomes'], 0);
+    expect(counts['income_schedules'], 0);
     expect(counts['expenses'], 2);
     final link = await dst
         .customSelect("SELECT accountId FROM expenses WHERE id='e1'")

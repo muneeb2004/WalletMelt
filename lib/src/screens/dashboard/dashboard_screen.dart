@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 import '../../components/account/dashboard_balance_card.dart';
+import '../../components/account/due_income_card.dart';
 import '../../components/expense/expense_list_tile.dart';
 import '../../components/glass/app_background.dart';
 import '../../screens/budget/budget_screen.dart';
@@ -394,6 +395,7 @@ class DashboardScreen extends StatelessWidget {
               const SizedBox(height: AppSpacing.lg),
 
               // ── Account balance (opt-in, ADR-0011) ───────────────────────
+              DueIncomeCard(state: state),
               DashboardBalanceCard(state: state),
 
               // ── Recent activity ──────────────────────────────────────────

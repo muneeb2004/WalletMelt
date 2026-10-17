@@ -47,6 +47,9 @@ import '../data/repositories/drift/drift_store_repository.dart';
 import '../data/repositories/drift/drift_monthly_budget_repository.dart';
 import '../types/monthly_budget.dart';
 import '../analytics/balance_calculator.dart';
+import '../analytics/income_planner.dart';
+import '../data/repositories/drift/drift_income_repository.dart';
+import '../types/income.dart' as wm_income;
 import '../data/repositories/drift/drift_account_repository.dart';
 import '../types/account.dart' as wm_account;
 
@@ -64,6 +67,7 @@ class AppState extends ChangeNotifier {
     DriftFuelRepository? driftFuelRepository,
     DriftStoreRepository? driftStoreRepository,
     DriftAccountRepository? driftAccountRepository,
+    DriftIncomeRepository? driftIncomeRepository,
     local.WalletMeltDatabase? driftDatabase,
     SettingsService? settingsService,
     ReceiptStorageService? receiptStorageService,
@@ -87,6 +91,8 @@ class AppState extends ChangeNotifier {
     _driftStoreRepository = driftStoreRepository ?? (driftDatabase != null ? DriftStoreRepository(driftDatabase) : _FakeDriftStoreRepository());
     _accountRepository = driftAccountRepository ??
         (driftDatabase != null ? DriftAccountRepository(driftDatabase) : null);
+    _incomeRepository = driftIncomeRepository ??
+        (driftDatabase != null ? DriftIncomeRepository(driftDatabase) : null);
   }
 
   AppState.test({
@@ -102,6 +108,7 @@ class AppState extends ChangeNotifier {
     DriftFuelRepository? driftFuelRepository,
     DriftStoreRepository? driftStoreRepository,
     DriftAccountRepository? driftAccountRepository,
+    DriftIncomeRepository? driftIncomeRepository,
     SettingsService? settingsService,
     ReceiptStorageService? receiptStorageService,
     WalletMeltSettings? settings,
@@ -128,6 +135,7 @@ class AppState extends ChangeNotifier {
     _driftFuelRepository = driftFuelRepository ?? _FakeDriftFuelRepository();
     _driftStoreRepository = driftStoreRepository ?? _FakeDriftStoreRepository();
     _accountRepository = driftAccountRepository;
+    _incomeRepository = driftIncomeRepository;
     isLoading = false;
   }
 
@@ -148,6 +156,40 @@ class AppState extends ChangeNotifier {
   late DriftFuelRepository _driftFuelRepository;
   late DriftStoreRepository _driftStoreRepository;
   DriftAccountRepository? _accountRepository;
+  DriftIncomeRepository? _incomeRepository;
+
+  /// Income needs the Drift runtime like accounts (ADR-0012).
+  bool get incomeAvailable => _incomeRepository != null;
+  List<wm_income.Income> incomes = const [];
+  List<wm_income.IncomeSchedule> incomeSchedules = const [];
+
+  /// Active schedules whose next occurrence is today or earlier.
+  List<wm_income.IncomeSchedule> get dueIncomeSchedules {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    return [
+      for (final s in incomeSchedules)
+        if (s.isActive &&
+            (DateTime.tryParse(s.nextDueDate)?.compareTo(today) ?? 1) <= 0)
+          s,
+    ];
+  }
+
+  /// Expected income this calendar month in the app currency, minor units.
+  int get expectedIncomeThisMonthMinorUnits => IncomePlanner.expectedForMonth(
+        month: DateTime.now(),
+        currency: settings.currency,
+        received: incomes,
+        schedules: incomeSchedules,
+      );
+
+  /// Advisory budget (major units) from expected income minus commitments, or
+  /// null when no income is expected. Never applied automatically.
+  double? get suggestedMonthlyBudget => IncomePlanner.suggestedBudget(
+        expectedIncomeMinorUnits: expectedIncomeThisMonthMinorUnits,
+        subscriptions: subscriptions,
+        essentials: essentialTemplates,
+      );
 
   /// Accounts need the Drift runtime; the legacy fallback has none (ADR-0011).
   bool get accountsAvailable => _accountRepository != null;
@@ -370,8 +412,20 @@ class AppState extends ChangeNotifier {
     essentialTemplates = await _driftEssentialExpenseRepository.listAll();
     savedMerchants = await _driftStoreRepository.listSavedMerchants();
     await _refreshAccounts();
+    await _refreshIncome();
 
     notifyListeners();
+  }
+
+  Future<void> _refreshIncome() async {
+    final repo = _incomeRepository;
+    if (repo == null) {
+      incomes = const [];
+      incomeSchedules = const [];
+      return;
+    }
+    incomes = await repo.listIncomes();
+    incomeSchedules = await repo.listSchedules();
   }
 
   Future<void> _refreshAccounts() async {
@@ -413,6 +467,90 @@ class AppState extends ChangeNotifier {
     await _refreshAccounts();
     notifyListeners();
     return account;
+  }
+
+  DriftIncomeRepository get _incomeOrThrow {
+    final repo = _incomeRepository;
+    if (repo == null) {
+      throw StateError('Income is unavailable on this storage backend.');
+    }
+    return repo;
+  }
+
+  Future<void> _afterIncomeChange() async {
+    await _refreshIncome();
+    await _refreshAccounts();
+    notifyListeners();
+  }
+
+  Future<wm_income.Income> addIncome({
+    required String title,
+    required wm_income.IncomeSource source,
+    required int amountMinorUnits,
+    required DateTime date,
+    String? accountId,
+    String? notes,
+  }) async {
+    final income = await _incomeOrThrow.addIncome(
+      title: title,
+      source: source,
+      amountMinorUnits: amountMinorUnits,
+      currency: settings.currency,
+      date: date,
+      accountId: accountId,
+      notes: notes,
+    );
+    await _afterIncomeChange();
+    return income;
+  }
+
+  Future<void> deleteIncome(String id) async {
+    await _incomeOrThrow.softDeleteIncome(id);
+    await _afterIncomeChange();
+  }
+
+  Future<wm_income.IncomeSchedule> createIncomeSchedule({
+    required String title,
+    required wm_income.IncomeSource source,
+    required int amountMinorUnits,
+    required String cycle,
+    required DateTime firstDueDate,
+    String? accountId,
+  }) async {
+    final schedule = await _incomeOrThrow.createSchedule(
+      title: title,
+      source: source,
+      amountMinorUnits: amountMinorUnits,
+      currency: settings.currency,
+      cycle: cycle,
+      firstDueDate: firstDueDate,
+      accountId: accountId,
+    );
+    await _afterIncomeChange();
+    return schedule;
+  }
+
+  Future<void> setIncomeScheduleStatus(
+      String id, wm_income.IncomeScheduleStatus status) async {
+    await _incomeOrThrow.setScheduleStatus(id, status);
+    await _afterIncomeChange();
+  }
+
+  Future<void> deleteIncomeSchedule(String id) async {
+    await _incomeOrThrow.deleteSchedule(id);
+    await _afterIncomeChange();
+  }
+
+  Future<void> confirmIncomeReceived(String scheduleId,
+      {int? amountMinorUnits, DateTime? receivedOn}) async {
+    await _incomeOrThrow.confirmReceived(scheduleId,
+        amountMinorUnits: amountMinorUnits, receivedOn: receivedOn);
+    await _afterIncomeChange();
+  }
+
+  Future<void> skipIncomeOccurrence(String scheduleId) async {
+    await _incomeOrThrow.skipOccurrence(scheduleId);
+    await _afterIncomeChange();
   }
 
   Future<bool> accountHasTransactions(String id) =>

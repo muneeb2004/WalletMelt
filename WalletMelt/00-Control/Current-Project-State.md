@@ -23,12 +23,12 @@ related:
 ## 2. Active Architecture & Subsystems
 - **UI & Routing**:
   - `go_router` 17.5.0 with `StatefulShellRoute.indexedStack` managing 4 main branches: Dashboard (`/`), History (`/history`), Planning (`/planning`), Debt (`/debt`).
-  - Top-level modal/full-screen routes: `/settings`, `/settings/icons`, `/settings/metrics`, `/payees`, `/merchants`, `/insights`, `/expense/new`, `/expense/:id`, `/expense/:id/edit`, `/receipt/:id`, `/pin-lock`, `/privacy-consent`, `/privacy-policy`, `/onboarding`; redirects `/subscriptions` and `/essentials` -> `/planning?tab=...`. Bottom-nav labels: Home, History, Planning, Debts. Budget, Subscriptions and Essentials are Planning tabs, not routes.
+  - Top-level modal/full-screen routes: `/settings`, `/settings/icons`, `/settings/metrics`, `/accounts`, `/income`, `/payees`, `/merchants`, `/insights`, `/expense/new`, `/expense/:id`, `/expense/:id/edit`, `/receipt/:id`, `/pin-lock`, `/privacy-consent`, `/privacy-policy`, `/onboarding`; redirects `/subscriptions` and `/essentials` -> `/planning?tab=...`. Bottom-nav labels: Home, History, Planning, Debts. Budget, Subscriptions and Essentials are Planning tabs, not routes.
 - **State Management**:
   - `Provider` (`AppState`) is the primary UI state coordinator across all screens.
   - `Riverpod` (`ProviderScope`) wraps root to provide Drift repositories via dependency injection.
 - **Persistence**:
-  - **Drift**: Primary database engine (`WalletMeltDatabase`, schema version 10) with singleton lifecycle guard (`open()`).
+  - **Drift**: Primary database engine (`WalletMeltDatabase`, schema version 11) with singleton lifecycle guard (`open()`).
   - **sqflite**: Legacy fallback database (`AppDatabase`) preserved across all repositories.
   - **Receipt Files**: Local filesystem storage in app documents directory under `receipts/`.
   - **SVG Overrides**: Persisted in `custom_icons/overrides/<id>.svg` and managed by `SvgCustomizationService`.
@@ -36,8 +36,8 @@ related:
   - PIN storage using SHA-256 with salt in `flutter_secure_storage`.
   - `PinLockController` with 30-second background grace period, 5-attempt / 30-second lockout throttle, and `FLAG_SECURE` window protection.
 
-## 3. Database Schema State (Drift v10)
-24 Managed Tables (the 22 below plus `Accounts` and `AccountMovements`, see section 11):
+## 3. Database Schema State (Drift v11)
+26 Managed Tables (the 22 below plus `Accounts`, `AccountMovements`, `Incomes`, `IncomeSchedules`, see sections 11 and 12):
 1. `Categories`
 2. `Expenses` (supports subtotal, taxAmount, minor units, soft delete `deletedAt`)
 3. `GroceryItems` (itemized lines under expenses)
@@ -91,3 +91,6 @@ Edited icons now load at app start and keep their namespace and tint ([[ADR-0007
 
 ## 11. Accounts and balance (2026-10-17)
 Schema v10 adds `accounts`, `account_movements` and nullable `expenses.accountId`; balance is derived, never stored ([[ADR-0011-Accounts-Derived-Balance-and-Transfers]], [[Analytics-and-Calculations]]). Route `/accounts`; Dashboard balance card and expense "Paid from" picker; backup v2 carries accounts optionally ([[Backup-Format-Specification]]). Opt-in: no accounts exist by default.
+
+## 12. Income (2026-10-17)
+Schema v11 adds `incomes` and `income_schedules`; income raises the linked account balance, recurring income is confirmed (never auto-posted) from a Dashboard prompt, and the budget sheet shows an advisory suggestion ([[ADR-0012-Income-Schedules-and-Budget-Suggestion]], [[Analytics-and-Calculations]]). Route `/income`. Pay-cycle budgets are deferred.

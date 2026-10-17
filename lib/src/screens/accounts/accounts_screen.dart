@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../components/account/compact_button_style.dart';
 import '../../constants/currencies.dart';
 import '../../state/app_state.dart';
 import '../../theme/wallet_melt_theme.dart';
@@ -46,7 +48,17 @@ class AccountsScreen extends StatelessWidget {
     final archived = [for (final b in balances) if (b.account.isArchived) b];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Accounts')),
+      appBar: AppBar(
+        title: const Text('Accounts'),
+        actions: [
+          if (state.incomeAvailable)
+            TextButton.icon(
+              onPressed: () => context.push('/income'),
+              icon: const Icon(Icons.payments_outlined),
+              label: const Text('Income'),
+            ),
+        ],
+      ),
       floatingActionButton: state.accountsAvailable
           ? FloatingActionButton.extended(
               onPressed: () => showAccountEditorSheet(context),
@@ -427,8 +439,12 @@ class _AccountDetailState extends State<_AccountDetail> {
     _movements = widget.state.accountMovements(widget.accountId);
   }
 
-  void _reload() => setState(
-      () => _movements = widget.state.accountMovements(widget.accountId));
+  void _reload() {
+    final next = widget.state.accountMovements(widget.accountId);
+    setState(() {
+      _movements = next;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -461,6 +477,7 @@ class _AccountDetailState extends State<_AccountDetail> {
                 runSpacing: AppSpacing.sm,
                 children: [
                   FilledButton.tonalIcon(
+                    style: compactButtonStyle,
                     onPressed: account.isArchived
                         ? null
                         : () async {
@@ -472,6 +489,7 @@ class _AccountDetailState extends State<_AccountDetail> {
                     label: const Text('Update balance'),
                   ),
                   OutlinedButton.icon(
+                    style: compactButtonStyle,
                     onPressed: account.isArchived
                         ? null
                         : () async {
@@ -483,6 +501,7 @@ class _AccountDetailState extends State<_AccountDetail> {
                     label: const Text('Transfer'),
                   ),
                   OutlinedButton.icon(
+                    style: compactButtonStyle,
                     onPressed: () => showAccountEditorSheet(context,
                         account: account),
                     icon: const Icon(Icons.edit_outlined),
@@ -490,6 +509,7 @@ class _AccountDetailState extends State<_AccountDetail> {
                   ),
                   if (account.isArchived)
                     OutlinedButton.icon(
+                    style: compactButtonStyle,
                       onPressed: () async {
                         await widget.state
                             .updateAccount(account.copyWith(isArchived: false));
@@ -499,6 +519,7 @@ class _AccountDetailState extends State<_AccountDetail> {
                     )
                   else
                     OutlinedButton.icon(
+                    style: compactButtonStyle,
                       onPressed: () => _confirmRemove(context, account),
                       icon: const Icon(Icons.archive_outlined),
                       label: const Text('Remove'),

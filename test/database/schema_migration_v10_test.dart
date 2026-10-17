@@ -63,7 +63,7 @@ void main() {
     expect(
         (await db.customSelect('PRAGMA user_version;').getSingle())
             .read<int>('user_version'),
-        10);
+        WalletMeltDatabase.currentSchemaVersion);
     expect(await exists('table', 'accounts'), isTrue);
     expect(await exists('table', 'account_movements'), isTrue);
     expect(await exists('index', 'expenses_accountId_date_idx'), isTrue);
@@ -83,7 +83,7 @@ void main() {
 
     final audit = await db
         .customSelect(
-            'SELECT status FROM migration_audit WHERE fromVersion = 9 AND toVersion = 10;')
+            'SELECT status FROM migration_audit WHERE fromVersion = 9 AND toVersion = ${WalletMeltDatabase.currentSchemaVersion};')
         .getSingleOrNull();
     expect(audit?.read<String>('status'), 'completed');
   });

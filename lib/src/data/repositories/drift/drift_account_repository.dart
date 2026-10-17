@@ -111,7 +111,9 @@ class DriftAccountRepository {
   Future<bool> hasLinkedRows(String accountId) async {
     final row = await _db.customSelect(
       'SELECT (SELECT COUNT(*) FROM expenses WHERE accountId = ?1) + '
-      '(SELECT COUNT(*) FROM account_movements WHERE accountId = ?1) AS n;',
+      '(SELECT COUNT(*) FROM account_movements WHERE accountId = ?1) + '
+      '(SELECT COUNT(*) FROM incomes WHERE accountId = ?1) + '
+      '(SELECT COUNT(*) FROM income_schedules WHERE accountId = ?1) AS n;',
       variables: [Variable.withString(accountId)],
     ).getSingle();
     return row.read<int>('n') > 0;
@@ -148,6 +150,16 @@ class DriftAccountRepository {
       'AND m.deletedAt IS NULL AND m.date >= a.openingDate '
       'GROUP BY a.id;',
     ).get();
+    final incomeRows = await _db.customSelect(
+      'SELECT a.id AS id, COALESCE(SUM(i.amountMinorUnits), 0) AS total '
+      'FROM accounts a LEFT JOIN incomes i ON i.accountId = a.id '
+      'AND i.deletedAt IS NULL AND i.currency = a.currency '
+      'AND i.date >= a.openingDate '
+      'GROUP BY a.id;',
+    ).get();
+    final inflow = {
+      for (final r in incomeRows) r.read<String>('id'): r.read<int>('total'),
+    };
     final outflow = {
       for (final r in expenseRows) r.read<String>('id'): r.read<int>('total'),
     };
@@ -162,6 +174,7 @@ class DriftAccountRepository {
             openingBalanceMinorUnits: a.openingBalanceMinorUnits,
             expenseOutflowMinorUnits: outflow[a.id] ?? 0,
             movementNetMinorUnits: net[a.id] ?? 0,
+            incomeInflowMinorUnits: inflow[a.id] ?? 0,
           ),
         ),
     ];

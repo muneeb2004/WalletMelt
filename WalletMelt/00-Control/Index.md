@@ -56,6 +56,7 @@ Welcome to the **WalletMelt Engineering Control Plane**. This Obsidian vault ser
 - [[ADR-0009-Complete-Backup-v2-and-Safe-Full-Replace]]: Complete checksummed backup v2 and safe, verified Full Replace.
 - [[ADR-0010-Tonal-Material3-Design-System-and-Brand]]: Tonal Material 3 system, single indigo brand, one card, one type scale, token guard.
 - [[ADR-0011-Accounts-Derived-Balance-and-Transfers]]: (accepted) accounts, derived balance, transfers and reconcile; see [[Balance-Income-and-Auto-Capture-Exploration]].
+- [[ADR-0012-Income-Schedules-and-Budget-Suggestion]]: (accepted) income facts, confirm-on-arrival recurring income, advisory budget suggestion.
 
 ### 6. Work & Knowledge
 - [[Work-Tracker]]: Current status (Now, Next, Later, Blocked).

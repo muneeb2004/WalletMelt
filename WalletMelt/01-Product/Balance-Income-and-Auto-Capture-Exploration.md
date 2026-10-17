@@ -77,6 +77,9 @@ related:
 11. **Tags and search filters**, merchant auto-categorisation rules learned locally.
 12. **Subscription price-change and duplicate detection**.
 
+## 2a. Status (2026-10-17)
+Phase 1 shipped ([[ADR-0011-Accounts-Derived-Balance-and-Transfers]]). Phase 2 shipped except pay-cycle budgets and runway ([[ADR-0012-Income-Schedules-and-Budget-Suggestion]]).
+
 ## 3. Suggested order
 1. ADR: Accounts + balance + transfers (Phase 1), including backup v2 / migration (schema v10) and analytics exclusions for transfers.
 2. ADR: Income + recurring income + pay-cycle budget (Phase 2).

@@ -1,3 +1,5 @@
+import '../utils/recurrence.dart';
+
 enum SubscriptionStatus { active, paused, cancelled }
 
 class Subscription {
@@ -51,36 +53,8 @@ class Subscription {
     return parsed?.day ?? 31;
   }
 
-  static DateTime _addMonthsClamped(DateTime from, int months, int anchorDay) {
-    final total = from.year * 12 + (from.month - 1) + months;
-    final year = total ~/ 12;
-    final month = total % 12 + 1;
-    final lastDay = DateTime(year, month + 1, 0).day;
-    return DateTime(year, month, anchorDay > lastDay ? lastDay : anchorDay);
-  }
-
-  DateTime calculateNextRenewalDate(DateTime current) {
-    final cycle = billingCycle.toLowerCase().trim();
-    final anchor = _anchorDay;
-    if (cycle == 'monthly') {
-      return _addMonthsClamped(current, 1, anchor);
-    } else if (cycle == 'quarterly') {
-      return _addMonthsClamped(current, 3, anchor);
-    } else if (cycle == 'semi-annual' || cycle == 'semi_annual') {
-      return _addMonthsClamped(current, 6, anchor);
-    } else if (cycle == 'annual' || cycle == 'yearly') {
-      return _addMonthsClamped(current, 12, anchor);
-    } else if (cycle.startsWith('custom_')) {
-      final parts = cycle.split('_');
-      if (parts.length == 2) {
-        final parsedDays = int.tryParse(parts[1]) ?? 30;
-        // A non-positive interval would never advance the date; fall back to 30.
-        final days = parsedDays > 0 ? parsedDays : 30;
-        return DateTime(current.year, current.month, current.day + days);
-      }
-    }
-    return _addMonthsClamped(current, 1, anchor);
-  }
+  DateTime calculateNextRenewalDate(DateTime current) =>
+      advanceByCycle(billingCycle, current, _anchorDay);
 
   Subscription copyWith({
     String? id,

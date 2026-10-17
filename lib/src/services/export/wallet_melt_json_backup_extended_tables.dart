@@ -22,6 +22,10 @@ class BackupExtendedTables {
     _spec('accounts', (d) => d.accounts, local.Account.fromJson, {}),
     _spec('account_movements', (d) => d.accountMovements,
         local.AccountMovement.fromJson, {'accountId': 'account'}),
+    _spec('incomes', (d) => d.incomes, local.Income.fromJson,
+        {'accountId': 'account'}),
+    _spec('income_schedules', (d) => d.incomeSchedules,
+        local.IncomeSchedule.fromJson, {'accountId': 'account'}),
     _spec('stores', (d) => d.stores, local.Store.fromJson,
         {'defaultCategoryId': 'cat'},
         naturalKey: 'normalizedName'),
@@ -62,7 +66,12 @@ class BackupExtendedTables {
 
   /// Tables added after the first v2 release. Backups written before schema
   /// v10 lack them; a missing key means "no rows", never a validation error.
-  static const Set<String> _optionalTables = {'accounts', 'account_movements'};
+  static const Set<String> _optionalTables = {
+    'accounts',
+    'account_movements',
+    'incomes',
+    'income_schedules',
+  };
 
   /// Names of the tables covered by the extended section (parent-first).
   static List<String> get tableNames =>

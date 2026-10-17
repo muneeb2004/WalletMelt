@@ -53,3 +53,9 @@ related:
 - **Done**: Phase 1 of [[Balance-Income-and-Auto-Capture-Exploration]] implemented per [[ADR-0011-Accounts-Derived-Balance-and-Transfers]]: schema v10, `DriftAccountRepository`, `BalanceCalculator`, backup support, Accounts screen (`/accounts`), Dashboard balance card, expense account picker.
 - **Next**: Phase 2 ADR (income, recurring income, pay-cycle budget). Add a What's New entry and a screenshots demo account when the next release is cut.
 - **Later**: Link debt repayments to accounts; Phase 3 opt-in notification capture (needs Play-policy check and its own ADR).
+
+## Added 2026-10-17 (income, Phase 2)
+- **Done**: [[ADR-0012-Income-Schedules-and-Budget-Suggestion]] implemented: schema v11, `DriftIncomeRepository`, `IncomePlanner`, shared `recurrence.dart`, backup support, `/income` screen, Dashboard confirm-on-arrival card, budget-sheet suggestion.
+- **Done**: fixed two Phase 1 UI bugs found by new widget tests (infinite-width buttons in the account detail sheet; `setState` returning a Future).
+- **Next**: Pay-cycle / semester budget ADR; What's New entry and screenshot demo data (account, income) for the next release.
+- **Later**: Phase 3 opt-in notification capture; link debt repayments and subscription renewals to accounts.
