@@ -17,6 +17,15 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      // Check for the current version section badge & items
+      expect(find.text('VERSION ${AppVersion.version} UPDATES'), findsOneWidget);
+      expect(find.text('Know what you have'), findsOneWidget);
+      expect(find.text('Record your income'), findsOneWidget);
+      expect(find.text('Move money between accounts'), findsOneWidget);
+      expect(find.text('A budget idea from your income'), findsOneWidget);
+      expect(find.text('Say where you paid from'), findsOneWidget);
+      expect(find.text('Still private and offline'), findsOneWidget);
+
       // Check for v1.2.1 section badge & items
       expect(find.text('VERSION 1.2.1 UPDATES'), findsOneWidget);
       expect(find.text('Edit any icon'), findsOneWidget);
@@ -54,7 +63,7 @@ void main() {
       // Check for v1.2 teaser
       expect(find.text('SNEAK PEEK • COMING NEXT'), findsOneWidget);
       expect(find.textContaining('manage their budget according to their bank balance', findRichText: true), findsNothing);
-      expect(find.textContaining('bank balance and roll over leftover savings', findRichText: true), findsOneWidget);
+      expect(find.textContaining('planning around payday', findRichText: true), findsOneWidget);
     });
 
     testWidgets('showWhatsNewModal opens bottom sheet with close button', (tester) async {

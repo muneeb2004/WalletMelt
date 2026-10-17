@@ -96,7 +96,7 @@ class WhatsNewContent extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        'Edit any icon, 29 new defaults and more',
+                        'Your balance, your income, all in one place',
                         style: TextStyle(
                           fontSize: 12,
                           color: context.scheme.onSurfaceVariant,
@@ -123,9 +123,77 @@ class WhatsNewContent extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Version 1.2.1 Highlights
+              // Version 1.3.0 Highlights
               _buildSectionBadge(
                 label: 'VERSION ${AppVersion.version} UPDATES',
+                color: context.scheme.primary,
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.account_balance_wallet_rounded,
+                iconColor: context.scheme.primary,
+                title: 'Know what you have',
+                description:
+                    'Add your cash, bank and wallet accounts with what each one holds today. WalletMelt shows your total balance on Home and keeps it up to date as you log expenses.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.south_west_rounded,
+                iconColor: context.money.income,
+                title: 'Record your income',
+                description:
+                    'Add your salary, allowance or stipend and choose where it was paid. For money that repeats, WalletMelt asks you to confirm when it arrives, so your balance never changes by surprise.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.swap_horiz_rounded,
+                iconColor: context.scheme.secondary,
+                title: 'Move money between accounts',
+                description:
+                    'Withdraw cash or top up a wallet without it counting as spending. If your real balance is different, type it in and WalletMelt records the difference.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.lightbulb_rounded,
+                iconColor: context.money.caution,
+                title: 'A budget idea from your income',
+                description:
+                    'When you set your monthly budget, WalletMelt can suggest an amount based on the income you expect minus your subscriptions and regular bills. It is only a suggestion; your own budget always wins.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.credit_card_rounded,
+                iconColor: context.scheme.primary,
+                title: 'Say where you paid from',
+                description:
+                    'Pick an account when you add an expense. It is optional, and you can link older expenses to an account in one tap.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.lock_rounded,
+                iconColor: context.scheme.secondary,
+                title: 'Still private and offline',
+                description:
+                    'Everything stays on your phone. Your older backups still restore, and new backups include your accounts and income.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 24),
+
+              // Version 1.2.1 Highlights
+              _buildSectionBadge(
+                label: 'VERSION 1.2.1 UPDATES',
                 color: context.scheme.primary,
                 isDark: isDark,
               ),
@@ -390,7 +458,7 @@ class WhatsNewContent extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      "We hear you! Many of you asked to tie monthly budgets directly to your real-world bank balance and roll over leftover savings from month to month.\n\nBecause personal financial workflows vary so widely, we are designing a comprehensive, flexible balance & savings engine to handle every scenario without complexity. It's actively in the oven for an upcoming release!",
+                      'Next up: planning around payday or your semester, savings goals, and an optional way to add expenses from bank and wallet alerts on your phone. It will always be your choice and stay on your device.',
                       style: TextStyle(
                         fontSize: 12,
                         height: 1.45,

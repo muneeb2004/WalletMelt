@@ -11,7 +11,10 @@ related:
 
 # Active Work & Roadmap Registry
 
-## Now (Current Release v1.2.1)
+## Now (Current Release v1.3.0)
+- [x] v1.3.0 (build 9): accounts and derived balance, income and confirm-on-arrival recurring income, budget suggestion, optional backup keys; What's New written in plain language ([[ADR-0011-Accounts-Derived-Balance-and-Transfers]], [[ADR-0012-Income-Schedules-and-Budget-Suggestion]]).
+
+## Previous Release (v1.2.1)
 - [x] v1.2.1 (build 8): SVG modify tools, save-as-new, 29 more default icons, built-in icon edits now apply to default categories (alias keys). See [[ADR-0007-SVG-Customization-and-Global-Overrides]].
 
 ## Previous Release (v1.2.0)
@@ -59,3 +62,6 @@ related:
 - **Done**: fixed two Phase 1 UI bugs found by new widget tests (infinite-width buttons in the account detail sheet; `setState` returning a Future).
 - **Next**: Pay-cycle / semester budget ADR; What's New entry and screenshot demo data (account, income) for the next release.
 - **Later**: Phase 3 opt-in notification capture; link debt repayments and subscription renewals to accounts.
+
+## Release rule (2026-10-17)
+Every release bumps `pubspec.yaml` and ships a plain-language, non-technical What's New entry in `lib/src/widgets/whats_new_dialog.dart` (and its test) in the same commit.
