@@ -289,11 +289,18 @@ class CategoryIcon extends StatelessWidget {
         // 0. Check for customized override (reflects across the board)
         final overrideSvg = SvgCustomizationService.instance.getOverrideSync(raw);
         if (overrideSvg != null) {
+          // Edited icons keep a tint the user baked in; only `currentColor`
+          // artwork follows the surrounding colour. A blanket srcIn filter
+          // would erase the user's colour edit everywhere.
           return SvgPicture.string(
             overrideSvg,
             width: size,
             height: size,
-            colorFilter: colorFilter,
+            theme: SvgTheme(
+              currentColor: color ??
+                  IconTheme.of(context).color ??
+                  Theme.of(context).colorScheme.onSurface,
+            ),
             placeholderBuilder: (_) => Icon(defaultIcon, size: size, color: color),
           );
         }

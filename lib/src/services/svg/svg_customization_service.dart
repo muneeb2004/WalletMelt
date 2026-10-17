@@ -52,13 +52,16 @@ class SvgCustomizationService extends ChangeNotifier {
   final SvgSafeguardService _safeguard = const SvgSafeguardService();
   final Map<String, String> _overrideCache = {};
   bool _isInitialized = false;
+  Future<void>? _initializing;
   String? _docsPath;
 
   /// Visible for testing to configure base directory or mock state
   @visibleForTesting
   void setBaseDirForTesting(String path) {
     _docsPath = path;
-    _isInitialized = true;
+    _isInitialized = false;
+    _initializing = null;
+    _overrideCache.clear();
   }
 
   /// Visible for testing to reset singleton state
@@ -66,6 +69,7 @@ class SvgCustomizationService extends ChangeNotifier {
   void resetForTesting() {
     _overrideCache.clear();
     _isInitialized = false;
+    _initializing = null;
     _docsPath = null;
   }
 
@@ -95,23 +99,35 @@ class SvgCustomizationService extends ChangeNotifier {
   }
 
   /// Initializes the service and populates memory cache with existing overrides.
-  Future<void> initialize() async {
-    if (_isInitialized) return;
+  ///
+  /// Must complete before the first [CategoryIcon] renders, otherwise edited
+  /// icons show their stock artwork until the manager screen is opened. Safe
+  /// to call repeatedly and concurrently.
+  Future<void> initialize() {
+    if (_isInitialized) return Future.value();
+    return _initializing ??= _loadOverrides().whenComplete(() {
+      _initializing = null;
+    });
+  }
+
+  Future<void> _loadOverrides() async {
     try {
       final overridesDir = await _getOverridesDir();
-      if (overridesDir.existsSync()) {
-        final files = overridesDir.listSync();
-        for (final entity in files) {
-          if (entity is File && entity.path.endsWith('.svg')) {
-            final key = p.basenameWithoutExtension(entity.path);
-            final content = entity.readAsStringSync();
-            if (content.isNotEmpty) {
-              _overrideCache[key] = content;
-            }
+      for (final entity in overridesDir.listSync()) {
+        if (entity is File && entity.path.endsWith('.svg')) {
+          final key = p.basenameWithoutExtension(entity.path);
+          final content = entity.readAsStringSync();
+          if (content.isEmpty) continue;
+          // Re-validate so stale overrides (for example ones saved without an
+          // xmlns declaration) are healed rather than rendered broken.
+          final result = _safeguard.validate(content);
+          if (result.isValid && result.sanitizedContent != null) {
+            _overrideCache[key] = result.sanitizedContent!;
           }
         }
       }
       _isInitialized = true;
+      notifyListeners();
     } catch (e) {
       debugPrint('SvgCustomizationService init error: $e');
     }

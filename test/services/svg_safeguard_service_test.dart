@@ -100,6 +100,22 @@ void main() {
       expect(result.sanitizedContent, contains('rect'));
     });
 
+    test('keeps xmlns declarations but still strips remote hrefs', () {
+      const svg = '<svg xmlns="http://www.w3.org/2000/svg" '
+          'xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24">'
+          '<use xlink:href="http://evil.example/a.svg#x"/></svg>';
+      final out = const SvgSafeguardService().validate(svg).sanitizedContent!;
+      expect(out, contains('xmlns="http://www.w3.org/2000/svg"'));
+      expect(out, contains('xmlns:xlink='));
+      expect(out, isNot(contains('evil.example')));
+    });
+
+    test('restores a missing xmlns declaration', () {
+      const svg = '<svg viewBox="0 0 24 24"><circle r="4"/></svg>';
+      final out = const SvgSafeguardService().validate(svg).sanitizedContent!;
+      expect(out, contains('xmlns="http://www.w3.org/2000/svg"'));
+    });
+
     test('saveCustomSvg saves file and resolveCustomFile resolves it safely', () async {
       final tempDir = await Directory.systemTemp.createTemp('svg_test_');
       try {

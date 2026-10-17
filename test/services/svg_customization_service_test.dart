@@ -53,6 +53,22 @@ void main() {
       expect(diskFile.existsSync(), isTrue);
     });
 
+    test('initialize loads edits saved by a previous run', () async {
+      final dir = Directory(p.join(tempDir.path, 'custom_icons', 'overrides'))
+        ..createSync(recursive: true);
+      File(p.join(dir.path, 'food_dining.svg')).writeAsStringSync(
+          '<svg viewBox="0 0 24 24"><circle r="4" fill="#38BDF8"/></svg>');
+
+      final service = SvgCustomizationService.instance;
+      expect(service.isCustomized('food_dining'), isFalse);
+      await Future.wait([service.initialize(), service.initialize()]);
+
+      expect(service.isCustomized('preset:food_dining'), isTrue);
+      expect(service.getOverrideSync('food_dining'), contains('#38BDF8'));
+      // Healed: the namespace dropped by older versions is restored.
+      expect(service.getOverrideSync('food_dining'), contains('xmlns='));
+    });
+
     test('rejects malicious or invalid SVG override', () async {
       final service = SvgCustomizationService.instance;
       const maliciousSvg =

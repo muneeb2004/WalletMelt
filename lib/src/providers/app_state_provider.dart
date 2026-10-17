@@ -3,6 +3,7 @@ import 'package:wallet_melt/src/state/app_state.dart';
 import 'package:wallet_melt/src/providers/repository_providers.dart';
 import 'package:wallet_melt/src/providers/database_providers.dart';
 import '../services/settings/settings_service.dart';
+import '../services/svg/svg_customization_service.dart';
 import '../utils/security_utils.dart';
 import '../../dev/seed_screenshot_data.dart';
 import 'security_providers.dart';
@@ -42,6 +43,9 @@ final appStateProvider = FutureProvider<AppState>((ref) async {
   }
 
   await appState.initialize();
+
+  // Edited icons must be in memory before the first category tile renders.
+  await SvgCustomizationService.instance.initialize();
 
   // Load PIN settings securely before startup completes
   final pinLockController = ref.read(pinLockControllerProvider);

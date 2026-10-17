@@ -3,7 +3,7 @@ type: state
 status: stable
 priority: high
 created: 2026-09-13
-updated: 2026-10-15
+updated: 2026-10-17
 domain: control
 related:
   - "[[Project-Constitution]]"
@@ -82,7 +82,9 @@ Backups are format v2 (checksummed, all tables) with Full Replace restricted to 
 UI follows the Tonal Material 3 system with a single indigo brand ([[ADR-0010-Tonal-Material3-Design-System-and-Brand]], [[Design-System-and-UX]]). Bottom navigation is a Material 3 `NavigationBar`; the contextual add action is an extended FAB; cards use `WMCard`. All screens and shared widgets now consume colour roles and the six-step type scale; only intentional literals remain (TD-010).
 
 ## 9. Logo (2026-10-17)
-New logo (wallet and droplet) in brand tokens; launcher background `#15141A`. See [[Design-System-and-UX]] section 1.
+Logo replaced with the user-supplied gradient wallet-and-drips master (`assets/brand/source/`); all icons derived by `scripts/generate_brand_assets.py`; launcher background `#0E0D14`. See [[Design-System-and-UX]] section 1.
 
 ## 10. SVG editing (2026-10-17)
 Icons can now be modified (tint, line weight, outline/filled, rotate, flip, zoom, undo) and saved as new custom icons; 41 default presets. See [[ADR-0007-SVG-Customization-and-Global-Overrides]].
+
+Edited icons now load at app start and keep their namespace and tint ([[ADR-0007-SVG-Customization-and-Global-Overrides]], amendment b).

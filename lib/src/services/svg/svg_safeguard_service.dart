@@ -102,6 +102,10 @@ class SvgSafeguardService {
           final attrName = attr.name.local.toLowerCase();
           final attrVal = attr.value.toLowerCase().trim();
 
+          // Namespace declarations are inert identifiers, not fetched URLs.
+          // Stripping them breaks `xlink:` references and strict renderers.
+          if (attrName == 'xmlns' || attr.name.prefix == 'xmlns') continue;
+
           // Reject inline event handlers (e.g. onload, onclick, onerror)
           if (attrName.startsWith('on')) {
             attrsToRemove.add(attr);
@@ -134,6 +138,11 @@ class SvgSafeguardService {
     final hasHeight = rootElement.getAttribute('height') != null;
     if (!hasViewBox && (!hasWidth || !hasHeight)) {
       rootElement.setAttribute('viewBox', '0 0 24 24');
+    }
+
+    // Heal markup saved by earlier versions that dropped the namespace.
+    if (rootElement.getAttribute('xmlns') == null) {
+      rootElement.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
     }
 
     return SvgValidationResult.success(document.toXmlString());
