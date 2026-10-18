@@ -1120,6 +1120,8 @@ class WalletMeltJsonRestoreService {
       'income_schedules',
       'savings_contributions',
       'savings_goals',
+      'committee_events',
+      'committees',
       'expenses',
       'fuel_template_components',
       'essential_expense_templates',

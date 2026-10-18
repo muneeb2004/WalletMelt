@@ -24,7 +24,7 @@ related:
   "metadata": {
     "format": "walletmelt.local_json_backup",
     "format_version": 2,
-    "schema_version": 13,
+    "schema_version": 14,
     "app_version": "1.1.2+6",
     "exported_at": "2026-10-15T12:00:00.000",
     "includes": ["expenses", "grocery_items", "categories", "budgets", "monthly_budgets", "settings", "extended"],
@@ -72,3 +72,6 @@ The `settings` section gains `budget_period_start_day` (integer 1 to 28). A miss
 
 ## 8. Savings goals (schema v13, 2026-10-18)
 `savings_goals` and `savings_contributions` are optional extended tables (missing = none). `accountId` on goals is remapped through the `account` map; a goal whose account is absent and a contribution whose goal is absent are skipped. Full Replace deletes contributions then goals before `expenses` and `accounts`. See [[ADR-0015-Savings-Goals-Set-Aside-in-Accounts]].
+
+## 9. Committees (schema v14, 2026-10-18)
+`committees` and `committee_events` are optional extended tables (missing = none). A committee's `accountId` is a nullable link (dropped when the account is absent); an event whose committee is absent is skipped. Full Replace deletes events then committees before `expenses` and `accounts`. See [[ADR-0016-Committees-BC-Installments-and-Payout-Turn]].

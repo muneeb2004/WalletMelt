@@ -19,6 +19,13 @@ void main() {
 
       // Check for the current version section badge & items
       expect(find.text('VERSION ${AppVersion.version} UPDATES'), findsOneWidget);
+      expect(find.text('Committees (BC)'), findsOneWidget);
+      expect(find.text('Confirm each payment'), findsOneWidget);
+      expect(find.text('Linked to your balance'), findsOneWidget);
+      expect(find.text('Made a mistake?'), findsOneWidget);
+
+      // Check for v1.6.0 section badge & items
+      expect(find.text('VERSION 1.6.0 UPDATES'), findsOneWidget);
       expect(find.text('Savings goals'), findsOneWidget);
       expect(find.text('Your balance stays true'), findsOneWidget);
       expect(find.text('How much each month'), findsOneWidget);
@@ -87,7 +94,7 @@ void main() {
       // Check for v1.2 teaser
       expect(find.text('SNEAK PEEK • COMING NEXT'), findsOneWidget);
       expect(find.textContaining('manage their budget according to their bank balance', findRichText: true), findsNothing);
-      expect(find.textContaining('committees (BC)', findRichText: true), findsOneWidget);
+      expect(find.textContaining('bank and wallet alerts', findRichText: true), findsOneWidget);
     });
 
     testWidgets('showWhatsNewModal opens bottom sheet with close button', (tester) async {

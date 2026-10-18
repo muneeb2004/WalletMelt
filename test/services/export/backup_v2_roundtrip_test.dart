@@ -49,6 +49,8 @@ const _tables = [
   'income_schedules',
   'savings_goals',
   'savings_contributions',
+  'committees',
+  'committee_events',
 ];
 
 Future<void> _seed(local.WalletMeltDatabase db) async {
@@ -77,6 +79,10 @@ Future<void> _seed(local.WalletMeltDatabase db) async {
       "INSERT INTO account_movements (id, accountId, kind, amountMinorUnits, date, transferGroupId, createdAt, updatedAt) VALUES ('m1','a1','transfer_out',-100000,'2026-06-04T00:00:00.000','tg1','$_ts','$_ts');");
   await sql(
       "INSERT INTO account_movements (id, accountId, kind, amountMinorUnits, date, transferGroupId, createdAt, updatedAt) VALUES ('m2','a2','transfer_in',100000,'2026-06-04T00:00:00.000','tg1','$_ts','$_ts');");
+  await sql(
+      "INSERT INTO committees (id, name, monthlyMinorUnits, memberCount, payoutMonth, payoutMinorUnits, currency, accountId, startDate, status, createdAt, updatedAt) VALUES ('cm1','Office BC',1000000,6,3,6000000,'PKR','a1','2026-06-10T00:00:00.000','active','$_ts','$_ts');");
+  await sql(
+      "INSERT INTO committee_events (id, committeeId, kind, monthIndex, amountMinorUnits, date, createdAt, updatedAt) VALUES ('ce1','cm1','installment',1,1000000,'2026-06-10T00:00:00.000','$_ts','$_ts');");
   await sql(
       "INSERT INTO savings_goals (id, name, targetMinorUnits, currency, accountId, status, createdAt, updatedAt) VALUES ('sg1','Laptop',300000,'PKR','a1','active','$_ts','$_ts');");
   await sql(
@@ -147,7 +153,9 @@ Future<String> _exportV2(local.WalletMeltDatabase db,
       ..remove('incomes')
       ..remove('income_schedules')
       ..remove('savings_goals')
-      ..remove('savings_contributions');
+      ..remove('savings_contributions')
+      ..remove('committees')
+      ..remove('committee_events');
     extended
       ..['tables'] = tables
       ..remove('expense_account_links');
@@ -516,6 +524,8 @@ void main() {
     expect(counts['income_schedules'], 0);
     expect(counts['savings_goals'], 0);
     expect(counts['savings_contributions'], 0);
+    expect(counts['committees'], 0);
+    expect(counts['committee_events'], 0);
     expect(counts['expenses'], 2);
     final link = await dst
         .customSelect("SELECT accountId FROM expenses WHERE id='e1'")
@@ -586,5 +596,10 @@ void main() {
     expect(goals.read<int>('c'), 0, reason: 'goal without its account is skipped');
     expect(contributions.read<int>('c'), 0,
         reason: 'contribution without its goal is skipped');
+    final committee = await dst
+        .customSelect("SELECT accountId FROM committees WHERE id='cm1'")
+        .getSingle();
+    expect(committee.read<String?>('accountId'), isNull,
+        reason: 'dangling committee account link is dropped');
   });
 }

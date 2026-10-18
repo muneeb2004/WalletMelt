@@ -29,7 +29,9 @@ import 'package:wallet_melt/src/types/debt.dart';
 import 'package:wallet_melt/src/types/essential_expense.dart';
 import 'package:wallet_melt/src/types/expense.dart';
 import 'package:wallet_melt/src/types/fuel.dart' as wm_fuel;
+import 'package:wallet_melt/src/data/repositories/drift/drift_committee_repository.dart';
 import 'package:wallet_melt/src/data/repositories/drift/drift_goal_repository.dart';
+import 'package:wallet_melt/src/types/committee.dart';
 import 'package:wallet_melt/src/types/grocery_template.dart' as wm_template;
 import 'package:wallet_melt/src/types/savings_goal.dart';
 import 'package:wallet_melt/src/types/income.dart';
@@ -722,6 +724,7 @@ DemoDataBundle createDemoDataBundle({String? receiptPath}) {
   final accountRepo = DriftAccountRepository(demoDb);
   final incomeRepo = DriftIncomeRepository(demoDb);
   final goalRepo = DriftGoalRepository(demoDb);
+  final committeeRepo = DriftCommitteeRepository(demoDb);
   final stamp = now.toIso8601String();
   Account demoAccount(String id, String name, AccountType type, int sort) =>
       Account(
@@ -808,6 +811,36 @@ DemoDataBundle createDemoDataBundle({String? receiptPath}) {
         savedMinorUnits: 7500000),
   ];
 
+  CommitteeEvent demoPaid(int month) => CommitteeEvent(
+        id: 'ce-$month',
+        committeeId: 'bc-1',
+        kind: CommitteeEventKind.installment,
+        monthIndex: month,
+        amountMinorUnits: 2500000,
+        date: DateTime(2026, 5 + month, 10).toIso8601String(),
+        createdAt: stamp,
+        updatedAt: stamp,
+      );
+  final demoCommittees = <CommitteeProgress>[
+    CommitteeProgress(
+      committee: Committee(
+        id: 'bc-1',
+        name: 'Office committee',
+        monthlyMinorUnits: 2500000,
+        memberCount: 10,
+        payoutMonth: 6,
+        payoutMinorUnits: 25000000,
+        currency: 'PKR',
+        accountId: 'acc-bank',
+        startDate: DateTime(2026, 6, 10).toIso8601String(),
+        status: CommitteeStatus.active,
+        createdAt: stamp,
+        updatedAt: stamp,
+      ),
+      events: [demoPaid(1), demoPaid(2), demoPaid(3)],
+    ),
+  ];
+
   final darkState = AppState.test(
     driftCategoryRepository: _FakeCategoryRepository(categories),
     driftExpenseRepository: _FakeExpenseRepository(expenses),
@@ -822,6 +855,7 @@ DemoDataBundle createDemoDataBundle({String? receiptPath}) {
     driftAccountRepository: accountRepo,
     driftIncomeRepository: incomeRepo,
     driftGoalRepository: goalRepo,
+    driftCommitteeRepository: committeeRepo,
     settingsService: _FakeSettingsService(darkSettings),
     receiptStorageService: _FakeReceiptStorageService(),
     settings: darkSettings,
@@ -839,6 +873,7 @@ DemoDataBundle createDemoDataBundle({String? receiptPath}) {
   darkState.incomes = demoIncomes;
   darkState.incomeSchedules = demoSchedules;
   darkState.goalProgress = demoGoals;
+  darkState.committeeProgress = demoCommittees;
   darkState.isLoading = false;
 
   final lightState = AppState.test(
@@ -855,6 +890,7 @@ DemoDataBundle createDemoDataBundle({String? receiptPath}) {
     driftAccountRepository: accountRepo,
     driftIncomeRepository: incomeRepo,
     driftGoalRepository: goalRepo,
+    driftCommitteeRepository: committeeRepo,
     settingsService: _FakeSettingsService(lightSettings),
     receiptStorageService: _FakeReceiptStorageService(),
     settings: lightSettings,
@@ -872,6 +908,7 @@ DemoDataBundle createDemoDataBundle({String? receiptPath}) {
   lightState.incomes = demoIncomes;
   lightState.incomeSchedules = demoSchedules;
   lightState.goalProgress = demoGoals;
+  lightState.committeeProgress = demoCommittees;
   lightState.isLoading = false;
 
   final pinLockController = _FakePinLockController();

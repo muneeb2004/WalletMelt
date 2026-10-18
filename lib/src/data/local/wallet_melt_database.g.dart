@@ -14497,6 +14497,1169 @@ class SavingsContributionsCompanion
   }
 }
 
+class $CommitteesTable extends Committees
+    with TableInfo<$CommitteesTable, Committee> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CommitteesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _monthlyMinorUnitsMeta =
+      const VerificationMeta('monthlyMinorUnits');
+  @override
+  late final GeneratedColumn<int> monthlyMinorUnits = GeneratedColumn<int>(
+      'monthlyMinorUnits', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _memberCountMeta =
+      const VerificationMeta('memberCount');
+  @override
+  late final GeneratedColumn<int> memberCount = GeneratedColumn<int>(
+      'memberCount', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _payoutMonthMeta =
+      const VerificationMeta('payoutMonth');
+  @override
+  late final GeneratedColumn<int> payoutMonth = GeneratedColumn<int>(
+      'payoutMonth', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _payoutMinorUnitsMeta =
+      const VerificationMeta('payoutMinorUnits');
+  @override
+  late final GeneratedColumn<int> payoutMinorUnits = GeneratedColumn<int>(
+      'payoutMinorUnits', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _currencyMeta =
+      const VerificationMeta('currency');
+  @override
+  late final GeneratedColumn<String> currency = GeneratedColumn<String>(
+      'currency', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _accountIdMeta =
+      const VerificationMeta('accountId');
+  @override
+  late final GeneratedColumn<String> accountId = GeneratedColumn<String>(
+      'accountId', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES accounts (id) ON DELETE RESTRICT'));
+  static const VerificationMeta _startDateMeta =
+      const VerificationMeta('startDate');
+  @override
+  late final GeneratedColumn<String> startDate = GeneratedColumn<String>(
+      'startDate', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+      'status', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('active'));
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+      'createdAt', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<String> updatedAt = GeneratedColumn<String>(
+      'updatedAt', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _deletedAtMeta =
+      const VerificationMeta('deletedAt');
+  @override
+  late final GeneratedColumn<String> deletedAt = GeneratedColumn<String>(
+      'deletedAt', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        name,
+        monthlyMinorUnits,
+        memberCount,
+        payoutMonth,
+        payoutMinorUnits,
+        currency,
+        accountId,
+        startDate,
+        status,
+        createdAt,
+        updatedAt,
+        deletedAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'committees';
+  @override
+  VerificationContext validateIntegrity(Insertable<Committee> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('monthlyMinorUnits')) {
+      context.handle(
+          _monthlyMinorUnitsMeta,
+          monthlyMinorUnits.isAcceptableOrUnknown(
+              data['monthlyMinorUnits']!, _monthlyMinorUnitsMeta));
+    } else if (isInserting) {
+      context.missing(_monthlyMinorUnitsMeta);
+    }
+    if (data.containsKey('memberCount')) {
+      context.handle(
+          _memberCountMeta,
+          memberCount.isAcceptableOrUnknown(
+              data['memberCount']!, _memberCountMeta));
+    } else if (isInserting) {
+      context.missing(_memberCountMeta);
+    }
+    if (data.containsKey('payoutMonth')) {
+      context.handle(
+          _payoutMonthMeta,
+          payoutMonth.isAcceptableOrUnknown(
+              data['payoutMonth']!, _payoutMonthMeta));
+    } else if (isInserting) {
+      context.missing(_payoutMonthMeta);
+    }
+    if (data.containsKey('payoutMinorUnits')) {
+      context.handle(
+          _payoutMinorUnitsMeta,
+          payoutMinorUnits.isAcceptableOrUnknown(
+              data['payoutMinorUnits']!, _payoutMinorUnitsMeta));
+    } else if (isInserting) {
+      context.missing(_payoutMinorUnitsMeta);
+    }
+    if (data.containsKey('currency')) {
+      context.handle(_currencyMeta,
+          currency.isAcceptableOrUnknown(data['currency']!, _currencyMeta));
+    } else if (isInserting) {
+      context.missing(_currencyMeta);
+    }
+    if (data.containsKey('accountId')) {
+      context.handle(_accountIdMeta,
+          accountId.isAcceptableOrUnknown(data['accountId']!, _accountIdMeta));
+    }
+    if (data.containsKey('startDate')) {
+      context.handle(_startDateMeta,
+          startDate.isAcceptableOrUnknown(data['startDate']!, _startDateMeta));
+    } else if (isInserting) {
+      context.missing(_startDateMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(_statusMeta,
+          status.isAcceptableOrUnknown(data['status']!, _statusMeta));
+    }
+    if (data.containsKey('createdAt')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['createdAt']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updatedAt')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updatedAt']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deletedAt')) {
+      context.handle(_deletedAtMeta,
+          deletedAt.isAcceptableOrUnknown(data['deletedAt']!, _deletedAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Committee map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Committee(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      monthlyMinorUnits: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}monthlyMinorUnits'])!,
+      memberCount: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}memberCount'])!,
+      payoutMonth: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}payoutMonth'])!,
+      payoutMinorUnits: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}payoutMinorUnits'])!,
+      currency: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}currency'])!,
+      accountId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}accountId']),
+      startDate: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}startDate'])!,
+      status: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}status'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}createdAt'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}updatedAt'])!,
+      deletedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}deletedAt']),
+    );
+  }
+
+  @override
+  $CommitteesTable createAlias(String alias) {
+    return $CommitteesTable(attachedDatabase, alias);
+  }
+}
+
+class Committee extends DataClass implements Insertable<Committee> {
+  final String id;
+  final String name;
+  final int monthlyMinorUnits;
+  final int memberCount;
+  final int payoutMonth;
+  final int payoutMinorUnits;
+  final String currency;
+  final String? accountId;
+  final String startDate;
+  final String status;
+  final String createdAt;
+  final String updatedAt;
+  final String? deletedAt;
+  const Committee(
+      {required this.id,
+      required this.name,
+      required this.monthlyMinorUnits,
+      required this.memberCount,
+      required this.payoutMonth,
+      required this.payoutMinorUnits,
+      required this.currency,
+      this.accountId,
+      required this.startDate,
+      required this.status,
+      required this.createdAt,
+      required this.updatedAt,
+      this.deletedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    map['monthlyMinorUnits'] = Variable<int>(monthlyMinorUnits);
+    map['memberCount'] = Variable<int>(memberCount);
+    map['payoutMonth'] = Variable<int>(payoutMonth);
+    map['payoutMinorUnits'] = Variable<int>(payoutMinorUnits);
+    map['currency'] = Variable<String>(currency);
+    if (!nullToAbsent || accountId != null) {
+      map['accountId'] = Variable<String>(accountId);
+    }
+    map['startDate'] = Variable<String>(startDate);
+    map['status'] = Variable<String>(status);
+    map['createdAt'] = Variable<String>(createdAt);
+    map['updatedAt'] = Variable<String>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deletedAt'] = Variable<String>(deletedAt);
+    }
+    return map;
+  }
+
+  CommitteesCompanion toCompanion(bool nullToAbsent) {
+    return CommitteesCompanion(
+      id: Value(id),
+      name: Value(name),
+      monthlyMinorUnits: Value(monthlyMinorUnits),
+      memberCount: Value(memberCount),
+      payoutMonth: Value(payoutMonth),
+      payoutMinorUnits: Value(payoutMinorUnits),
+      currency: Value(currency),
+      accountId: accountId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(accountId),
+      startDate: Value(startDate),
+      status: Value(status),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+    );
+  }
+
+  factory Committee.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Committee(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      monthlyMinorUnits: serializer.fromJson<int>(json['monthlyMinorUnits']),
+      memberCount: serializer.fromJson<int>(json['memberCount']),
+      payoutMonth: serializer.fromJson<int>(json['payoutMonth']),
+      payoutMinorUnits: serializer.fromJson<int>(json['payoutMinorUnits']),
+      currency: serializer.fromJson<String>(json['currency']),
+      accountId: serializer.fromJson<String?>(json['accountId']),
+      startDate: serializer.fromJson<String>(json['startDate']),
+      status: serializer.fromJson<String>(json['status']),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+      updatedAt: serializer.fromJson<String>(json['updatedAt']),
+      deletedAt: serializer.fromJson<String?>(json['deletedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'monthlyMinorUnits': serializer.toJson<int>(monthlyMinorUnits),
+      'memberCount': serializer.toJson<int>(memberCount),
+      'payoutMonth': serializer.toJson<int>(payoutMonth),
+      'payoutMinorUnits': serializer.toJson<int>(payoutMinorUnits),
+      'currency': serializer.toJson<String>(currency),
+      'accountId': serializer.toJson<String?>(accountId),
+      'startDate': serializer.toJson<String>(startDate),
+      'status': serializer.toJson<String>(status),
+      'createdAt': serializer.toJson<String>(createdAt),
+      'updatedAt': serializer.toJson<String>(updatedAt),
+      'deletedAt': serializer.toJson<String?>(deletedAt),
+    };
+  }
+
+  Committee copyWith(
+          {String? id,
+          String? name,
+          int? monthlyMinorUnits,
+          int? memberCount,
+          int? payoutMonth,
+          int? payoutMinorUnits,
+          String? currency,
+          Value<String?> accountId = const Value.absent(),
+          String? startDate,
+          String? status,
+          String? createdAt,
+          String? updatedAt,
+          Value<String?> deletedAt = const Value.absent()}) =>
+      Committee(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        monthlyMinorUnits: monthlyMinorUnits ?? this.monthlyMinorUnits,
+        memberCount: memberCount ?? this.memberCount,
+        payoutMonth: payoutMonth ?? this.payoutMonth,
+        payoutMinorUnits: payoutMinorUnits ?? this.payoutMinorUnits,
+        currency: currency ?? this.currency,
+        accountId: accountId.present ? accountId.value : this.accountId,
+        startDate: startDate ?? this.startDate,
+        status: status ?? this.status,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+      );
+  Committee copyWithCompanion(CommitteesCompanion data) {
+    return Committee(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      monthlyMinorUnits: data.monthlyMinorUnits.present
+          ? data.monthlyMinorUnits.value
+          : this.monthlyMinorUnits,
+      memberCount:
+          data.memberCount.present ? data.memberCount.value : this.memberCount,
+      payoutMonth:
+          data.payoutMonth.present ? data.payoutMonth.value : this.payoutMonth,
+      payoutMinorUnits: data.payoutMinorUnits.present
+          ? data.payoutMinorUnits.value
+          : this.payoutMinorUnits,
+      currency: data.currency.present ? data.currency.value : this.currency,
+      accountId: data.accountId.present ? data.accountId.value : this.accountId,
+      startDate: data.startDate.present ? data.startDate.value : this.startDate,
+      status: data.status.present ? data.status.value : this.status,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Committee(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('monthlyMinorUnits: $monthlyMinorUnits, ')
+          ..write('memberCount: $memberCount, ')
+          ..write('payoutMonth: $payoutMonth, ')
+          ..write('payoutMinorUnits: $payoutMinorUnits, ')
+          ..write('currency: $currency, ')
+          ..write('accountId: $accountId, ')
+          ..write('startDate: $startDate, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id,
+      name,
+      monthlyMinorUnits,
+      memberCount,
+      payoutMonth,
+      payoutMinorUnits,
+      currency,
+      accountId,
+      startDate,
+      status,
+      createdAt,
+      updatedAt,
+      deletedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Committee &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.monthlyMinorUnits == this.monthlyMinorUnits &&
+          other.memberCount == this.memberCount &&
+          other.payoutMonth == this.payoutMonth &&
+          other.payoutMinorUnits == this.payoutMinorUnits &&
+          other.currency == this.currency &&
+          other.accountId == this.accountId &&
+          other.startDate == this.startDate &&
+          other.status == this.status &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt);
+}
+
+class CommitteesCompanion extends UpdateCompanion<Committee> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<int> monthlyMinorUnits;
+  final Value<int> memberCount;
+  final Value<int> payoutMonth;
+  final Value<int> payoutMinorUnits;
+  final Value<String> currency;
+  final Value<String?> accountId;
+  final Value<String> startDate;
+  final Value<String> status;
+  final Value<String> createdAt;
+  final Value<String> updatedAt;
+  final Value<String?> deletedAt;
+  final Value<int> rowid;
+  const CommitteesCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.monthlyMinorUnits = const Value.absent(),
+    this.memberCount = const Value.absent(),
+    this.payoutMonth = const Value.absent(),
+    this.payoutMinorUnits = const Value.absent(),
+    this.currency = const Value.absent(),
+    this.accountId = const Value.absent(),
+    this.startDate = const Value.absent(),
+    this.status = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CommitteesCompanion.insert({
+    required String id,
+    required String name,
+    required int monthlyMinorUnits,
+    required int memberCount,
+    required int payoutMonth,
+    required int payoutMinorUnits,
+    required String currency,
+    this.accountId = const Value.absent(),
+    required String startDate,
+    this.status = const Value.absent(),
+    required String createdAt,
+    required String updatedAt,
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        name = Value(name),
+        monthlyMinorUnits = Value(monthlyMinorUnits),
+        memberCount = Value(memberCount),
+        payoutMonth = Value(payoutMonth),
+        payoutMinorUnits = Value(payoutMinorUnits),
+        currency = Value(currency),
+        startDate = Value(startDate),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt);
+  static Insertable<Committee> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<int>? monthlyMinorUnits,
+    Expression<int>? memberCount,
+    Expression<int>? payoutMonth,
+    Expression<int>? payoutMinorUnits,
+    Expression<String>? currency,
+    Expression<String>? accountId,
+    Expression<String>? startDate,
+    Expression<String>? status,
+    Expression<String>? createdAt,
+    Expression<String>? updatedAt,
+    Expression<String>? deletedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (monthlyMinorUnits != null) 'monthlyMinorUnits': monthlyMinorUnits,
+      if (memberCount != null) 'memberCount': memberCount,
+      if (payoutMonth != null) 'payoutMonth': payoutMonth,
+      if (payoutMinorUnits != null) 'payoutMinorUnits': payoutMinorUnits,
+      if (currency != null) 'currency': currency,
+      if (accountId != null) 'accountId': accountId,
+      if (startDate != null) 'startDate': startDate,
+      if (status != null) 'status': status,
+      if (createdAt != null) 'createdAt': createdAt,
+      if (updatedAt != null) 'updatedAt': updatedAt,
+      if (deletedAt != null) 'deletedAt': deletedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CommitteesCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? name,
+      Value<int>? monthlyMinorUnits,
+      Value<int>? memberCount,
+      Value<int>? payoutMonth,
+      Value<int>? payoutMinorUnits,
+      Value<String>? currency,
+      Value<String?>? accountId,
+      Value<String>? startDate,
+      Value<String>? status,
+      Value<String>? createdAt,
+      Value<String>? updatedAt,
+      Value<String?>? deletedAt,
+      Value<int>? rowid}) {
+    return CommitteesCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      monthlyMinorUnits: monthlyMinorUnits ?? this.monthlyMinorUnits,
+      memberCount: memberCount ?? this.memberCount,
+      payoutMonth: payoutMonth ?? this.payoutMonth,
+      payoutMinorUnits: payoutMinorUnits ?? this.payoutMinorUnits,
+      currency: currency ?? this.currency,
+      accountId: accountId ?? this.accountId,
+      startDate: startDate ?? this.startDate,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (monthlyMinorUnits.present) {
+      map['monthlyMinorUnits'] = Variable<int>(monthlyMinorUnits.value);
+    }
+    if (memberCount.present) {
+      map['memberCount'] = Variable<int>(memberCount.value);
+    }
+    if (payoutMonth.present) {
+      map['payoutMonth'] = Variable<int>(payoutMonth.value);
+    }
+    if (payoutMinorUnits.present) {
+      map['payoutMinorUnits'] = Variable<int>(payoutMinorUnits.value);
+    }
+    if (currency.present) {
+      map['currency'] = Variable<String>(currency.value);
+    }
+    if (accountId.present) {
+      map['accountId'] = Variable<String>(accountId.value);
+    }
+    if (startDate.present) {
+      map['startDate'] = Variable<String>(startDate.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (createdAt.present) {
+      map['createdAt'] = Variable<String>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updatedAt'] = Variable<String>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deletedAt'] = Variable<String>(deletedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CommitteesCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('monthlyMinorUnits: $monthlyMinorUnits, ')
+          ..write('memberCount: $memberCount, ')
+          ..write('payoutMonth: $payoutMonth, ')
+          ..write('payoutMinorUnits: $payoutMinorUnits, ')
+          ..write('currency: $currency, ')
+          ..write('accountId: $accountId, ')
+          ..write('startDate: $startDate, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $CommitteeEventsTable extends CommitteeEvents
+    with TableInfo<$CommitteeEventsTable, CommitteeEvent> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CommitteeEventsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _committeeIdMeta =
+      const VerificationMeta('committeeId');
+  @override
+  late final GeneratedColumn<String> committeeId = GeneratedColumn<String>(
+      'committeeId', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES committees (id) ON DELETE RESTRICT'));
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+      'kind', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _monthIndexMeta =
+      const VerificationMeta('monthIndex');
+  @override
+  late final GeneratedColumn<int> monthIndex = GeneratedColumn<int>(
+      'monthIndex', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _amountMinorUnitsMeta =
+      const VerificationMeta('amountMinorUnits');
+  @override
+  late final GeneratedColumn<int> amountMinorUnits = GeneratedColumn<int>(
+      'amountMinorUnits', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _dateMeta = const VerificationMeta('date');
+  @override
+  late final GeneratedColumn<String> date = GeneratedColumn<String>(
+      'date', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+      'notes', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+      'createdAt', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<String> updatedAt = GeneratedColumn<String>(
+      'updatedAt', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _deletedAtMeta =
+      const VerificationMeta('deletedAt');
+  @override
+  late final GeneratedColumn<String> deletedAt = GeneratedColumn<String>(
+      'deletedAt', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        committeeId,
+        kind,
+        monthIndex,
+        amountMinorUnits,
+        date,
+        notes,
+        createdAt,
+        updatedAt,
+        deletedAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'committee_events';
+  @override
+  VerificationContext validateIntegrity(Insertable<CommitteeEvent> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('committeeId')) {
+      context.handle(
+          _committeeIdMeta,
+          committeeId.isAcceptableOrUnknown(
+              data['committeeId']!, _committeeIdMeta));
+    } else if (isInserting) {
+      context.missing(_committeeIdMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+          _kindMeta, kind.isAcceptableOrUnknown(data['kind']!, _kindMeta));
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('monthIndex')) {
+      context.handle(
+          _monthIndexMeta,
+          monthIndex.isAcceptableOrUnknown(
+              data['monthIndex']!, _monthIndexMeta));
+    } else if (isInserting) {
+      context.missing(_monthIndexMeta);
+    }
+    if (data.containsKey('amountMinorUnits')) {
+      context.handle(
+          _amountMinorUnitsMeta,
+          amountMinorUnits.isAcceptableOrUnknown(
+              data['amountMinorUnits']!, _amountMinorUnitsMeta));
+    } else if (isInserting) {
+      context.missing(_amountMinorUnitsMeta);
+    }
+    if (data.containsKey('date')) {
+      context.handle(
+          _dateMeta, date.isAcceptableOrUnknown(data['date']!, _dateMeta));
+    } else if (isInserting) {
+      context.missing(_dateMeta);
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+          _notesMeta, notes.isAcceptableOrUnknown(data['notes']!, _notesMeta));
+    }
+    if (data.containsKey('createdAt')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['createdAt']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updatedAt')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updatedAt']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deletedAt')) {
+      context.handle(_deletedAtMeta,
+          deletedAt.isAcceptableOrUnknown(data['deletedAt']!, _deletedAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  CommitteeEvent map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CommitteeEvent(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      committeeId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}committeeId'])!,
+      kind: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}kind'])!,
+      monthIndex: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}monthIndex'])!,
+      amountMinorUnits: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}amountMinorUnits'])!,
+      date: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}date'])!,
+      notes: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}notes']),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}createdAt'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}updatedAt'])!,
+      deletedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}deletedAt']),
+    );
+  }
+
+  @override
+  $CommitteeEventsTable createAlias(String alias) {
+    return $CommitteeEventsTable(attachedDatabase, alias);
+  }
+}
+
+class CommitteeEvent extends DataClass implements Insertable<CommitteeEvent> {
+  final String id;
+  final String committeeId;
+  final String kind;
+  final int monthIndex;
+  final int amountMinorUnits;
+  final String date;
+  final String? notes;
+  final String createdAt;
+  final String updatedAt;
+  final String? deletedAt;
+  const CommitteeEvent(
+      {required this.id,
+      required this.committeeId,
+      required this.kind,
+      required this.monthIndex,
+      required this.amountMinorUnits,
+      required this.date,
+      this.notes,
+      required this.createdAt,
+      required this.updatedAt,
+      this.deletedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['committeeId'] = Variable<String>(committeeId);
+    map['kind'] = Variable<String>(kind);
+    map['monthIndex'] = Variable<int>(monthIndex);
+    map['amountMinorUnits'] = Variable<int>(amountMinorUnits);
+    map['date'] = Variable<String>(date);
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
+    map['createdAt'] = Variable<String>(createdAt);
+    map['updatedAt'] = Variable<String>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deletedAt'] = Variable<String>(deletedAt);
+    }
+    return map;
+  }
+
+  CommitteeEventsCompanion toCompanion(bool nullToAbsent) {
+    return CommitteeEventsCompanion(
+      id: Value(id),
+      committeeId: Value(committeeId),
+      kind: Value(kind),
+      monthIndex: Value(monthIndex),
+      amountMinorUnits: Value(amountMinorUnits),
+      date: Value(date),
+      notes:
+          notes == null && nullToAbsent ? const Value.absent() : Value(notes),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+    );
+  }
+
+  factory CommitteeEvent.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CommitteeEvent(
+      id: serializer.fromJson<String>(json['id']),
+      committeeId: serializer.fromJson<String>(json['committeeId']),
+      kind: serializer.fromJson<String>(json['kind']),
+      monthIndex: serializer.fromJson<int>(json['monthIndex']),
+      amountMinorUnits: serializer.fromJson<int>(json['amountMinorUnits']),
+      date: serializer.fromJson<String>(json['date']),
+      notes: serializer.fromJson<String?>(json['notes']),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+      updatedAt: serializer.fromJson<String>(json['updatedAt']),
+      deletedAt: serializer.fromJson<String?>(json['deletedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'committeeId': serializer.toJson<String>(committeeId),
+      'kind': serializer.toJson<String>(kind),
+      'monthIndex': serializer.toJson<int>(monthIndex),
+      'amountMinorUnits': serializer.toJson<int>(amountMinorUnits),
+      'date': serializer.toJson<String>(date),
+      'notes': serializer.toJson<String?>(notes),
+      'createdAt': serializer.toJson<String>(createdAt),
+      'updatedAt': serializer.toJson<String>(updatedAt),
+      'deletedAt': serializer.toJson<String?>(deletedAt),
+    };
+  }
+
+  CommitteeEvent copyWith(
+          {String? id,
+          String? committeeId,
+          String? kind,
+          int? monthIndex,
+          int? amountMinorUnits,
+          String? date,
+          Value<String?> notes = const Value.absent(),
+          String? createdAt,
+          String? updatedAt,
+          Value<String?> deletedAt = const Value.absent()}) =>
+      CommitteeEvent(
+        id: id ?? this.id,
+        committeeId: committeeId ?? this.committeeId,
+        kind: kind ?? this.kind,
+        monthIndex: monthIndex ?? this.monthIndex,
+        amountMinorUnits: amountMinorUnits ?? this.amountMinorUnits,
+        date: date ?? this.date,
+        notes: notes.present ? notes.value : this.notes,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+      );
+  CommitteeEvent copyWithCompanion(CommitteeEventsCompanion data) {
+    return CommitteeEvent(
+      id: data.id.present ? data.id.value : this.id,
+      committeeId:
+          data.committeeId.present ? data.committeeId.value : this.committeeId,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      monthIndex:
+          data.monthIndex.present ? data.monthIndex.value : this.monthIndex,
+      amountMinorUnits: data.amountMinorUnits.present
+          ? data.amountMinorUnits.value
+          : this.amountMinorUnits,
+      date: data.date.present ? data.date.value : this.date,
+      notes: data.notes.present ? data.notes.value : this.notes,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CommitteeEvent(')
+          ..write('id: $id, ')
+          ..write('committeeId: $committeeId, ')
+          ..write('kind: $kind, ')
+          ..write('monthIndex: $monthIndex, ')
+          ..write('amountMinorUnits: $amountMinorUnits, ')
+          ..write('date: $date, ')
+          ..write('notes: $notes, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, committeeId, kind, monthIndex,
+      amountMinorUnits, date, notes, createdAt, updatedAt, deletedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CommitteeEvent &&
+          other.id == this.id &&
+          other.committeeId == this.committeeId &&
+          other.kind == this.kind &&
+          other.monthIndex == this.monthIndex &&
+          other.amountMinorUnits == this.amountMinorUnits &&
+          other.date == this.date &&
+          other.notes == this.notes &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt);
+}
+
+class CommitteeEventsCompanion extends UpdateCompanion<CommitteeEvent> {
+  final Value<String> id;
+  final Value<String> committeeId;
+  final Value<String> kind;
+  final Value<int> monthIndex;
+  final Value<int> amountMinorUnits;
+  final Value<String> date;
+  final Value<String?> notes;
+  final Value<String> createdAt;
+  final Value<String> updatedAt;
+  final Value<String?> deletedAt;
+  final Value<int> rowid;
+  const CommitteeEventsCompanion({
+    this.id = const Value.absent(),
+    this.committeeId = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.monthIndex = const Value.absent(),
+    this.amountMinorUnits = const Value.absent(),
+    this.date = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CommitteeEventsCompanion.insert({
+    required String id,
+    required String committeeId,
+    required String kind,
+    required int monthIndex,
+    required int amountMinorUnits,
+    required String date,
+    this.notes = const Value.absent(),
+    required String createdAt,
+    required String updatedAt,
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        committeeId = Value(committeeId),
+        kind = Value(kind),
+        monthIndex = Value(monthIndex),
+        amountMinorUnits = Value(amountMinorUnits),
+        date = Value(date),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt);
+  static Insertable<CommitteeEvent> custom({
+    Expression<String>? id,
+    Expression<String>? committeeId,
+    Expression<String>? kind,
+    Expression<int>? monthIndex,
+    Expression<int>? amountMinorUnits,
+    Expression<String>? date,
+    Expression<String>? notes,
+    Expression<String>? createdAt,
+    Expression<String>? updatedAt,
+    Expression<String>? deletedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (committeeId != null) 'committeeId': committeeId,
+      if (kind != null) 'kind': kind,
+      if (monthIndex != null) 'monthIndex': monthIndex,
+      if (amountMinorUnits != null) 'amountMinorUnits': amountMinorUnits,
+      if (date != null) 'date': date,
+      if (notes != null) 'notes': notes,
+      if (createdAt != null) 'createdAt': createdAt,
+      if (updatedAt != null) 'updatedAt': updatedAt,
+      if (deletedAt != null) 'deletedAt': deletedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CommitteeEventsCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? committeeId,
+      Value<String>? kind,
+      Value<int>? monthIndex,
+      Value<int>? amountMinorUnits,
+      Value<String>? date,
+      Value<String?>? notes,
+      Value<String>? createdAt,
+      Value<String>? updatedAt,
+      Value<String?>? deletedAt,
+      Value<int>? rowid}) {
+    return CommitteeEventsCompanion(
+      id: id ?? this.id,
+      committeeId: committeeId ?? this.committeeId,
+      kind: kind ?? this.kind,
+      monthIndex: monthIndex ?? this.monthIndex,
+      amountMinorUnits: amountMinorUnits ?? this.amountMinorUnits,
+      date: date ?? this.date,
+      notes: notes ?? this.notes,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (committeeId.present) {
+      map['committeeId'] = Variable<String>(committeeId.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (monthIndex.present) {
+      map['monthIndex'] = Variable<int>(monthIndex.value);
+    }
+    if (amountMinorUnits.present) {
+      map['amountMinorUnits'] = Variable<int>(amountMinorUnits.value);
+    }
+    if (date.present) {
+      map['date'] = Variable<String>(date.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (createdAt.present) {
+      map['createdAt'] = Variable<String>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updatedAt'] = Variable<String>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deletedAt'] = Variable<String>(deletedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CommitteeEventsCompanion(')
+          ..write('id: $id, ')
+          ..write('committeeId: $committeeId, ')
+          ..write('kind: $kind, ')
+          ..write('monthIndex: $monthIndex, ')
+          ..write('amountMinorUnits: $amountMinorUnits, ')
+          ..write('date: $date, ')
+          ..write('notes: $notes, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$WalletMeltDatabase extends GeneratedDatabase {
   _$WalletMeltDatabase(QueryExecutor e) : super(e);
   $WalletMeltDatabaseManager get managers => $WalletMeltDatabaseManager(this);
@@ -14536,6 +15699,9 @@ abstract class _$WalletMeltDatabase extends GeneratedDatabase {
   late final $SavingsGoalsTable savingsGoals = $SavingsGoalsTable(this);
   late final $SavingsContributionsTable savingsContributions =
       $SavingsContributionsTable(this);
+  late final $CommitteesTable committees = $CommitteesTable(this);
+  late final $CommitteeEventsTable committeeEvents =
+      $CommitteeEventsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -14568,7 +15734,9 @@ abstract class _$WalletMeltDatabase extends GeneratedDatabase {
         incomes,
         incomeSchedules,
         savingsGoals,
-        savingsContributions
+        savingsContributions,
+        committees,
+        committeeEvents
       ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
@@ -16015,6 +17183,20 @@ final class $$AccountsTableReferences
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: cache));
   }
+
+  static MultiTypedResultKey<$CommitteesTable, List<Committee>>
+      _committeesRefsTable(_$WalletMeltDatabase db) =>
+          MultiTypedResultKey.fromTable(db.committees,
+              aliasName: 'accounts__id__committees__accountId');
+
+  $$CommitteesTableProcessedTableManager get committeesRefs {
+    final manager = $$CommitteesTableTableManager($_db, $_db.committees)
+        .filter((f) => f.accountId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_committeesRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
 }
 
 class $$AccountsTableFilterComposer
@@ -16209,6 +17391,27 @@ class $$AccountsTableFilterComposer
             $$SavingsGoalsTableFilterComposer(
               $db: $db,
               $table: $db.savingsGoals,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<bool> committeesRefs(
+      Expression<bool> Function($$CommitteesTableFilterComposer f) f) {
+    final $$CommitteesTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.committees,
+        getReferencedColumn: (t) => t.accountId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$CommitteesTableFilterComposer(
+              $db: $db,
+              $table: $db.committees,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -16469,6 +17672,27 @@ class $$AccountsTableAnnotationComposer
             ));
     return f(composer);
   }
+
+  Expression<T> committeesRefs<T extends Object>(
+      Expression<T> Function($$CommitteesTableAnnotationComposer a) f) {
+    final $$CommitteesTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.committees,
+        getReferencedColumn: (t) => t.accountId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$CommitteesTableAnnotationComposer(
+              $db: $db,
+              $table: $db.committees,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 }
 
 class $$AccountsTableTableManager extends RootTableManager<
@@ -16489,7 +17713,8 @@ class $$AccountsTableTableManager extends RootTableManager<
         bool accountMovementsRefs,
         bool incomesRefs,
         bool incomeSchedulesRefs,
-        bool savingsGoalsRefs})> {
+        bool savingsGoalsRefs,
+        bool committeesRefs})> {
   $$AccountsTableTableManager(_$WalletMeltDatabase db, $AccountsTable table)
       : super(TableManagerState(
           db: db,
@@ -16579,7 +17804,8 @@ class $$AccountsTableTableManager extends RootTableManager<
               accountMovementsRefs = false,
               incomesRefs = false,
               incomeSchedulesRefs = false,
-              savingsGoalsRefs = false}) {
+              savingsGoalsRefs = false,
+              committeesRefs = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [
@@ -16589,7 +17815,8 @@ class $$AccountsTableTableManager extends RootTableManager<
                 if (accountMovementsRefs) db.accountMovements,
                 if (incomesRefs) db.incomes,
                 if (incomeSchedulesRefs) db.incomeSchedules,
-                if (savingsGoalsRefs) db.savingsGoals
+                if (savingsGoalsRefs) db.savingsGoals,
+                if (committeesRefs) db.committees
               ],
               addJoins: null,
               getPrefetchedDataCallback: (items) async {
@@ -16682,6 +17909,19 @@ class $$AccountsTableTableManager extends RootTableManager<
                         referencedItemsForCurrentItem:
                             (item, referencedItems) => referencedItems
                                 .where((e) => e.accountId == item.id),
+                        typedResults: items),
+                  if (committeesRefs)
+                    await $_getPrefetchedData<Account, $AccountsTable,
+                            Committee>(
+                        currentTable: table,
+                        referencedTable:
+                            $$AccountsTableReferences._committeesRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$AccountsTableReferences(db, table, p0)
+                                .committeesRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.accountId == item.id),
                         typedResults: items)
                 ];
               },
@@ -16708,7 +17948,8 @@ typedef $$AccountsTableProcessedTableManager = ProcessedTableManager<
         bool accountMovementsRefs,
         bool incomesRefs,
         bool incomeSchedulesRefs,
-        bool savingsGoalsRefs})>;
+        bool savingsGoalsRefs,
+        bool committeesRefs})>;
 typedef $$ExpensesTableCreateCompanionBuilder = ExpensesCompanion Function({
   required String id,
   required double amount,
@@ -26617,6 +27858,832 @@ typedef $$SavingsContributionsTableProcessedTableManager
         (SavingsContribution, $$SavingsContributionsTableReferences),
         SavingsContribution,
         PrefetchHooks Function({bool goalId})>;
+typedef $$CommitteesTableCreateCompanionBuilder = CommitteesCompanion Function({
+  required String id,
+  required String name,
+  required int monthlyMinorUnits,
+  required int memberCount,
+  required int payoutMonth,
+  required int payoutMinorUnits,
+  required String currency,
+  Value<String?> accountId,
+  required String startDate,
+  Value<String> status,
+  required String createdAt,
+  required String updatedAt,
+  Value<String?> deletedAt,
+  Value<int> rowid,
+});
+typedef $$CommitteesTableUpdateCompanionBuilder = CommitteesCompanion Function({
+  Value<String> id,
+  Value<String> name,
+  Value<int> monthlyMinorUnits,
+  Value<int> memberCount,
+  Value<int> payoutMonth,
+  Value<int> payoutMinorUnits,
+  Value<String> currency,
+  Value<String?> accountId,
+  Value<String> startDate,
+  Value<String> status,
+  Value<String> createdAt,
+  Value<String> updatedAt,
+  Value<String?> deletedAt,
+  Value<int> rowid,
+});
+
+final class $$CommitteesTableReferences
+    extends BaseReferences<_$WalletMeltDatabase, $CommitteesTable, Committee> {
+  $$CommitteesTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $AccountsTable _accountIdTable(_$WalletMeltDatabase db) =>
+      db.accounts.createAlias('committees__accountId__accounts__id');
+
+  $$AccountsTableProcessedTableManager? get accountId {
+    final $_column = $_itemColumn<String>('accountId');
+    if ($_column == null) return null;
+    final manager = $$AccountsTableTableManager($_db, $_db.accounts)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_accountIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static MultiTypedResultKey<$CommitteeEventsTable, List<CommitteeEvent>>
+      _committeeEventsRefsTable(_$WalletMeltDatabase db) =>
+          MultiTypedResultKey.fromTable(db.committeeEvents,
+              aliasName: 'committees__id__committee_events__committeeId');
+
+  $$CommitteeEventsTableProcessedTableManager get committeeEventsRefs {
+    final manager = $$CommitteeEventsTableTableManager(
+            $_db, $_db.committeeEvents)
+        .filter((f) => f.committeeId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache =
+        $_typedResult.readTableOrNull(_committeeEventsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+}
+
+class $$CommitteesTableFilterComposer
+    extends Composer<_$WalletMeltDatabase, $CommitteesTable> {
+  $$CommitteesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get monthlyMinorUnits => $composableBuilder(
+      column: $table.monthlyMinorUnits,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get memberCount => $composableBuilder(
+      column: $table.memberCount, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get payoutMonth => $composableBuilder(
+      column: $table.payoutMonth, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get payoutMinorUnits => $composableBuilder(
+      column: $table.payoutMinorUnits,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get currency => $composableBuilder(
+      column: $table.currency, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get startDate => $composableBuilder(
+      column: $table.startDate, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get status => $composableBuilder(
+      column: $table.status, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnFilters(column));
+
+  $$AccountsTableFilterComposer get accountId {
+    final $$AccountsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.accountId,
+        referencedTable: $db.accounts,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$AccountsTableFilterComposer(
+              $db: $db,
+              $table: $db.accounts,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  Expression<bool> committeeEventsRefs(
+      Expression<bool> Function($$CommitteeEventsTableFilterComposer f) f) {
+    final $$CommitteeEventsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.committeeEvents,
+        getReferencedColumn: (t) => t.committeeId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$CommitteeEventsTableFilterComposer(
+              $db: $db,
+              $table: $db.committeeEvents,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+}
+
+class $$CommitteesTableOrderingComposer
+    extends Composer<_$WalletMeltDatabase, $CommitteesTable> {
+  $$CommitteesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get monthlyMinorUnits => $composableBuilder(
+      column: $table.monthlyMinorUnits,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get memberCount => $composableBuilder(
+      column: $table.memberCount, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get payoutMonth => $composableBuilder(
+      column: $table.payoutMonth, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get payoutMinorUnits => $composableBuilder(
+      column: $table.payoutMinorUnits,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get currency => $composableBuilder(
+      column: $table.currency, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get startDate => $composableBuilder(
+      column: $table.startDate, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get status => $composableBuilder(
+      column: $table.status, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
+
+  $$AccountsTableOrderingComposer get accountId {
+    final $$AccountsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.accountId,
+        referencedTable: $db.accounts,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$AccountsTableOrderingComposer(
+              $db: $db,
+              $table: $db.accounts,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$CommitteesTableAnnotationComposer
+    extends Composer<_$WalletMeltDatabase, $CommitteesTable> {
+  $$CommitteesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<int> get monthlyMinorUnits => $composableBuilder(
+      column: $table.monthlyMinorUnits, builder: (column) => column);
+
+  GeneratedColumn<int> get memberCount => $composableBuilder(
+      column: $table.memberCount, builder: (column) => column);
+
+  GeneratedColumn<int> get payoutMonth => $composableBuilder(
+      column: $table.payoutMonth, builder: (column) => column);
+
+  GeneratedColumn<int> get payoutMinorUnits => $composableBuilder(
+      column: $table.payoutMinorUnits, builder: (column) => column);
+
+  GeneratedColumn<String> get currency =>
+      $composableBuilder(column: $table.currency, builder: (column) => column);
+
+  GeneratedColumn<String> get startDate =>
+      $composableBuilder(column: $table.startDate, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  $$AccountsTableAnnotationComposer get accountId {
+    final $$AccountsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.accountId,
+        referencedTable: $db.accounts,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$AccountsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.accounts,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  Expression<T> committeeEventsRefs<T extends Object>(
+      Expression<T> Function($$CommitteeEventsTableAnnotationComposer a) f) {
+    final $$CommitteeEventsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.committeeEvents,
+        getReferencedColumn: (t) => t.committeeId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$CommitteeEventsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.committeeEvents,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+}
+
+class $$CommitteesTableTableManager extends RootTableManager<
+    _$WalletMeltDatabase,
+    $CommitteesTable,
+    Committee,
+    $$CommitteesTableFilterComposer,
+    $$CommitteesTableOrderingComposer,
+    $$CommitteesTableAnnotationComposer,
+    $$CommitteesTableCreateCompanionBuilder,
+    $$CommitteesTableUpdateCompanionBuilder,
+    (Committee, $$CommitteesTableReferences),
+    Committee,
+    PrefetchHooks Function({bool accountId, bool committeeEventsRefs})> {
+  $$CommitteesTableTableManager(_$WalletMeltDatabase db, $CommitteesTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CommitteesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CommitteesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CommitteesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<int> monthlyMinorUnits = const Value.absent(),
+            Value<int> memberCount = const Value.absent(),
+            Value<int> payoutMonth = const Value.absent(),
+            Value<int> payoutMinorUnits = const Value.absent(),
+            Value<String> currency = const Value.absent(),
+            Value<String?> accountId = const Value.absent(),
+            Value<String> startDate = const Value.absent(),
+            Value<String> status = const Value.absent(),
+            Value<String> createdAt = const Value.absent(),
+            Value<String> updatedAt = const Value.absent(),
+            Value<String?> deletedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              CommitteesCompanion(
+            id: id,
+            name: name,
+            monthlyMinorUnits: monthlyMinorUnits,
+            memberCount: memberCount,
+            payoutMonth: payoutMonth,
+            payoutMinorUnits: payoutMinorUnits,
+            currency: currency,
+            accountId: accountId,
+            startDate: startDate,
+            status: status,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String name,
+            required int monthlyMinorUnits,
+            required int memberCount,
+            required int payoutMonth,
+            required int payoutMinorUnits,
+            required String currency,
+            Value<String?> accountId = const Value.absent(),
+            required String startDate,
+            Value<String> status = const Value.absent(),
+            required String createdAt,
+            required String updatedAt,
+            Value<String?> deletedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              CommitteesCompanion.insert(
+            id: id,
+            name: name,
+            monthlyMinorUnits: monthlyMinorUnits,
+            memberCount: memberCount,
+            payoutMonth: payoutMonth,
+            payoutMinorUnits: payoutMinorUnits,
+            currency: currency,
+            accountId: accountId,
+            startDate: startDate,
+            status: status,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$CommitteesTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: (
+              {accountId = false, committeeEventsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (committeeEventsRefs) db.committeeEvents
+              ],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (accountId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.accountId,
+                    referencedTable:
+                        $$CommitteesTableReferences._accountIdTable(db),
+                    referencedColumn:
+                        $$CommitteesTableReferences._accountIdTable(db).id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (committeeEventsRefs)
+                    await $_getPrefetchedData<Committee, $CommitteesTable,
+                            CommitteeEvent>(
+                        currentTable: table,
+                        referencedTable: $$CommitteesTableReferences
+                            ._committeeEventsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$CommitteesTableReferences(db, table, p0)
+                                .committeeEventsRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.committeeId == item.id),
+                        typedResults: items)
+                ];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$CommitteesTableProcessedTableManager = ProcessedTableManager<
+    _$WalletMeltDatabase,
+    $CommitteesTable,
+    Committee,
+    $$CommitteesTableFilterComposer,
+    $$CommitteesTableOrderingComposer,
+    $$CommitteesTableAnnotationComposer,
+    $$CommitteesTableCreateCompanionBuilder,
+    $$CommitteesTableUpdateCompanionBuilder,
+    (Committee, $$CommitteesTableReferences),
+    Committee,
+    PrefetchHooks Function({bool accountId, bool committeeEventsRefs})>;
+typedef $$CommitteeEventsTableCreateCompanionBuilder = CommitteeEventsCompanion
+    Function({
+  required String id,
+  required String committeeId,
+  required String kind,
+  required int monthIndex,
+  required int amountMinorUnits,
+  required String date,
+  Value<String?> notes,
+  required String createdAt,
+  required String updatedAt,
+  Value<String?> deletedAt,
+  Value<int> rowid,
+});
+typedef $$CommitteeEventsTableUpdateCompanionBuilder = CommitteeEventsCompanion
+    Function({
+  Value<String> id,
+  Value<String> committeeId,
+  Value<String> kind,
+  Value<int> monthIndex,
+  Value<int> amountMinorUnits,
+  Value<String> date,
+  Value<String?> notes,
+  Value<String> createdAt,
+  Value<String> updatedAt,
+  Value<String?> deletedAt,
+  Value<int> rowid,
+});
+
+final class $$CommitteeEventsTableReferences extends BaseReferences<
+    _$WalletMeltDatabase, $CommitteeEventsTable, CommitteeEvent> {
+  $$CommitteeEventsTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static $CommitteesTable _committeeIdTable(_$WalletMeltDatabase db) =>
+      db.committees
+          .createAlias('committee_events__committeeId__committees__id');
+
+  $$CommitteesTableProcessedTableManager get committeeId {
+    final $_column = $_itemColumn<String>('committeeId')!;
+
+    final manager = $$CommitteesTableTableManager($_db, $_db.committees)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_committeeIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$CommitteeEventsTableFilterComposer
+    extends Composer<_$WalletMeltDatabase, $CommitteeEventsTable> {
+  $$CommitteeEventsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get kind => $composableBuilder(
+      column: $table.kind, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get monthIndex => $composableBuilder(
+      column: $table.monthIndex, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get amountMinorUnits => $composableBuilder(
+      column: $table.amountMinorUnits,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get date => $composableBuilder(
+      column: $table.date, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get notes => $composableBuilder(
+      column: $table.notes, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnFilters(column));
+
+  $$CommitteesTableFilterComposer get committeeId {
+    final $$CommitteesTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.committeeId,
+        referencedTable: $db.committees,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$CommitteesTableFilterComposer(
+              $db: $db,
+              $table: $db.committees,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$CommitteeEventsTableOrderingComposer
+    extends Composer<_$WalletMeltDatabase, $CommitteeEventsTable> {
+  $$CommitteeEventsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+      column: $table.kind, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get monthIndex => $composableBuilder(
+      column: $table.monthIndex, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get amountMinorUnits => $composableBuilder(
+      column: $table.amountMinorUnits,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get date => $composableBuilder(
+      column: $table.date, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+      column: $table.notes, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
+
+  $$CommitteesTableOrderingComposer get committeeId {
+    final $$CommitteesTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.committeeId,
+        referencedTable: $db.committees,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$CommitteesTableOrderingComposer(
+              $db: $db,
+              $table: $db.committees,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$CommitteeEventsTableAnnotationComposer
+    extends Composer<_$WalletMeltDatabase, $CommitteeEventsTable> {
+  $$CommitteeEventsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<int> get monthIndex => $composableBuilder(
+      column: $table.monthIndex, builder: (column) => column);
+
+  GeneratedColumn<int> get amountMinorUnits => $composableBuilder(
+      column: $table.amountMinorUnits, builder: (column) => column);
+
+  GeneratedColumn<String> get date =>
+      $composableBuilder(column: $table.date, builder: (column) => column);
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  $$CommitteesTableAnnotationComposer get committeeId {
+    final $$CommitteesTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.committeeId,
+        referencedTable: $db.committees,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$CommitteesTableAnnotationComposer(
+              $db: $db,
+              $table: $db.committees,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$CommitteeEventsTableTableManager extends RootTableManager<
+    _$WalletMeltDatabase,
+    $CommitteeEventsTable,
+    CommitteeEvent,
+    $$CommitteeEventsTableFilterComposer,
+    $$CommitteeEventsTableOrderingComposer,
+    $$CommitteeEventsTableAnnotationComposer,
+    $$CommitteeEventsTableCreateCompanionBuilder,
+    $$CommitteeEventsTableUpdateCompanionBuilder,
+    (CommitteeEvent, $$CommitteeEventsTableReferences),
+    CommitteeEvent,
+    PrefetchHooks Function({bool committeeId})> {
+  $$CommitteeEventsTableTableManager(
+      _$WalletMeltDatabase db, $CommitteeEventsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CommitteeEventsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CommitteeEventsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CommitteeEventsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> committeeId = const Value.absent(),
+            Value<String> kind = const Value.absent(),
+            Value<int> monthIndex = const Value.absent(),
+            Value<int> amountMinorUnits = const Value.absent(),
+            Value<String> date = const Value.absent(),
+            Value<String?> notes = const Value.absent(),
+            Value<String> createdAt = const Value.absent(),
+            Value<String> updatedAt = const Value.absent(),
+            Value<String?> deletedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              CommitteeEventsCompanion(
+            id: id,
+            committeeId: committeeId,
+            kind: kind,
+            monthIndex: monthIndex,
+            amountMinorUnits: amountMinorUnits,
+            date: date,
+            notes: notes,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String committeeId,
+            required String kind,
+            required int monthIndex,
+            required int amountMinorUnits,
+            required String date,
+            Value<String?> notes = const Value.absent(),
+            required String createdAt,
+            required String updatedAt,
+            Value<String?> deletedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              CommitteeEventsCompanion.insert(
+            id: id,
+            committeeId: committeeId,
+            kind: kind,
+            monthIndex: monthIndex,
+            amountMinorUnits: amountMinorUnits,
+            date: date,
+            notes: notes,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$CommitteeEventsTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: ({committeeId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (committeeId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.committeeId,
+                    referencedTable:
+                        $$CommitteeEventsTableReferences._committeeIdTable(db),
+                    referencedColumn: $$CommitteeEventsTableReferences
+                        ._committeeIdTable(db)
+                        .id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$CommitteeEventsTableProcessedTableManager = ProcessedTableManager<
+    _$WalletMeltDatabase,
+    $CommitteeEventsTable,
+    CommitteeEvent,
+    $$CommitteeEventsTableFilterComposer,
+    $$CommitteeEventsTableOrderingComposer,
+    $$CommitteeEventsTableAnnotationComposer,
+    $$CommitteeEventsTableCreateCompanionBuilder,
+    $$CommitteeEventsTableUpdateCompanionBuilder,
+    (CommitteeEvent, $$CommitteeEventsTableReferences),
+    CommitteeEvent,
+    PrefetchHooks Function({bool committeeId})>;
 
 class $WalletMeltDatabaseManager {
   final _$WalletMeltDatabase _db;
@@ -26679,4 +28746,8 @@ class $WalletMeltDatabaseManager {
       $$SavingsGoalsTableTableManager(_db, _db.savingsGoals);
   $$SavingsContributionsTableTableManager get savingsContributions =>
       $$SavingsContributionsTableTableManager(_db, _db.savingsContributions);
+  $$CommitteesTableTableManager get committees =>
+      $$CommitteesTableTableManager(_db, _db.committees);
+  $$CommitteeEventsTableTableManager get committeeEvents =>
+      $$CommitteeEventsTableTableManager(_db, _db.committeeEvents);
 }

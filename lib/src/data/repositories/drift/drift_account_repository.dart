@@ -116,7 +116,8 @@ class DriftAccountRepository {
       '(SELECT COUNT(*) FROM income_schedules WHERE accountId = ?1) + '
       '(SELECT COUNT(*) FROM debt_records WHERE accountId = ?1) + '
       '(SELECT COUNT(*) FROM subscriptions WHERE accountId = ?1) + '
-      '(SELECT COUNT(*) FROM savings_goals WHERE accountId = ?1) AS n;',
+      '(SELECT COUNT(*) FROM savings_goals WHERE accountId = ?1) + '
+      '(SELECT COUNT(*) FROM committees WHERE accountId = ?1) AS n;',
       variables: [Variable.withString(accountId)],
     ).getSingle();
     return row.read<int>('n') > 0;
@@ -183,6 +184,19 @@ class DriftAccountRepository {
     final debtNet = {
       for (final r in debtRows) r.read<String>('id'): r.read<int>('total'),
     };
+    // ADR-0016: installments paid are money out, the payout is money in.
+    final committeeRows = await _db.customSelect(
+      'SELECT a.id AS id, COALESCE(SUM(CASE e.kind WHEN \'payout\' THEN e.amountMinorUnits '
+      'ELSE -e.amountMinorUnits END), 0) AS total '
+      'FROM accounts a LEFT JOIN committees c ON c.accountId = a.id '
+      'AND c.deletedAt IS NULL AND c.currency = a.currency '
+      'LEFT JOIN committee_events e ON e.committeeId = c.id '
+      'AND e.deletedAt IS NULL AND e.date >= a.openingDate '
+      'GROUP BY a.id;',
+    ).get();
+    final committeeNet = {
+      for (final r in committeeRows) r.read<String>('id'): r.read<int>('total'),
+    };
     final outflow = {
       for (final r in expenseRows) r.read<String>('id'): r.read<int>('total'),
     };
@@ -199,6 +213,7 @@ class DriftAccountRepository {
             movementNetMinorUnits: net[a.id] ?? 0,
             incomeInflowMinorUnits: inflow[a.id] ?? 0,
             debtNetMinorUnits: debtNet[a.id] ?? 0,
+            committeeNetMinorUnits: committeeNet[a.id] ?? 0,
           ),
         ),
     ];

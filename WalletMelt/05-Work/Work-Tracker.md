@@ -11,7 +11,10 @@ related:
 
 # Active Work & Roadmap Registry
 
-## Now (Current Release v1.6.0)
+## Now (Current Release v1.7.0)
+- [x] v1.7.0 (build 14): committees (BC) with confirm-on-paid installments and payout.
+
+## Previous Release (v1.6.0)
 - [x] v1.6.0 (build 13): savings goals set aside inside accounts, free to spend.
 
 ## Previous Release (v1.5.1)
@@ -97,3 +100,8 @@ Every release bumps `pubspec.yaml` and ships a plain-language, non-technical Wha
 - **Done**: savings goals (ADR-0015).
 - **Next**: committees (BC) with monthly installment and payout turn (ADR-0016); then Phase 3 notification capture.
 - Verified 1.6.0: analyzer clean, full suite passing, 35 screenshots.
+
+## Added 2026-10-18 (v1.7.0)
+- **Done**: committees (ADR-0016).
+- **Next**: Phase 3 notification capture: needs sample alert texts for JazzCash, Easypaisa, Meezan, HBL, UBL, NayaPay, SadaPay and Mashreq, an ADR, a Play policy review and an on-device parser design.
+- Verified 1.7.0: analyzer clean, full suite passing, 36 screenshots.

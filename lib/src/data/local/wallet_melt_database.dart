@@ -209,6 +209,55 @@ class SavingsContributions extends Table {
   Set<Column<Object>> get primaryKey => {id};
 }
 
+/// A rotating-savings committee (BC): the user's installment and payout turn
+/// (ADR-0016).
+class Committees extends Table {
+  @override
+  String get tableName => 'committees';
+
+  TextColumn get id => text()();
+  TextColumn get name => text()();
+  IntColumn get monthlyMinorUnits => integer().named('monthlyMinorUnits')();
+  IntColumn get memberCount => integer().named('memberCount')();
+  IntColumn get payoutMonth => integer().named('payoutMonth')();
+  IntColumn get payoutMinorUnits => integer().named('payoutMinorUnits')();
+  TextColumn get currency => text()();
+  TextColumn get accountId => text()
+      .named('accountId')
+      .nullable()
+      .references(Accounts, #id, onDelete: KeyAction.restrict)();
+  TextColumn get startDate => text().named('startDate')();
+  TextColumn get status => text().withDefault(const Constant('active'))();
+  TextColumn get createdAt => text().named('createdAt')();
+  TextColumn get updatedAt => text().named('updatedAt')();
+  TextColumn get deletedAt => text().named('deletedAt').nullable()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// Confirmed installments paid and the payout received for a committee.
+class CommitteeEvents extends Table {
+  @override
+  String get tableName => 'committee_events';
+
+  TextColumn get id => text()();
+  TextColumn get committeeId => text()
+      .named('committeeId')
+      .references(Committees, #id, onDelete: KeyAction.restrict)();
+  TextColumn get kind => text()(); // installment | payout
+  IntColumn get monthIndex => integer().named('monthIndex')();
+  IntColumn get amountMinorUnits => integer().named('amountMinorUnits')();
+  TextColumn get date => text()();
+  TextColumn get notes => text().nullable()();
+  TextColumn get createdAt => text().named('createdAt')();
+  TextColumn get updatedAt => text().named('updatedAt')();
+  TextColumn get deletedAt => text().named('deletedAt').nullable()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
 class GroceryItems extends Table {
   @override
   String get tableName => 'grocery_items';
@@ -678,13 +727,15 @@ class V1MigrationMetrics {
     IncomeSchedules,
     SavingsGoals,
     SavingsContributions,
+    Committees,
+    CommitteeEvents,
   ],
 )
 class WalletMeltDatabase extends _$WalletMeltDatabase {
   WalletMeltDatabase(super.executor, {this.preMigrationBackupPath});
   WalletMeltDatabase.memory() : this(openInMemoryConnection());
 
-  static const currentSchemaVersion = 13;
+  static const currentSchemaVersion = 14;
 
   final String? preMigrationBackupPath;
 
@@ -786,6 +837,9 @@ class WalletMeltDatabase extends _$WalletMeltDatabase {
           if (from < 13 && to >= 13) {
             await _upgradeFromV12ToV13(m, from, to);
           }
+          if (from < 14 && to >= 14) {
+            await _upgradeFromV13ToV14(m, from, to);
+          }
         },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON;');
@@ -808,6 +862,8 @@ class WalletMeltDatabase extends _$WalletMeltDatabase {
             'CREATE INDEX IF NOT EXISTS expenses_accountId_date_idx ON expenses (accountId, date);',
             'CREATE INDEX IF NOT EXISTS account_movements_accountId_date_idx ON account_movements (accountId, date);',
             'CREATE INDEX IF NOT EXISTS account_movements_transferGroupId_idx ON account_movements (transferGroupId);',
+            'CREATE INDEX IF NOT EXISTS committees_accountId_idx ON committees (accountId);',
+            'CREATE INDEX IF NOT EXISTS committee_events_committeeId_idx ON committee_events (committeeId, kind, monthIndex);',
             'CREATE INDEX IF NOT EXISTS savings_goals_accountId_idx ON savings_goals (accountId);',
             'CREATE INDEX IF NOT EXISTS savings_contributions_goalId_idx ON savings_contributions (goalId);',
             'CREATE INDEX IF NOT EXISTS debt_records_accountId_idx ON debt_records (accountId);',
@@ -1058,6 +1114,42 @@ class WalletMeltDatabase extends _$WalletMeltDatabase {
       }
     } catch (e) {
       if (hasAudit && from >= 9) {
+        await customStatement(
+          'UPDATE migration_audit SET status = ?, completedAt = ?, errorMessage = ? WHERE id = ?;',
+          ['failed', DateTime.now().toIso8601String(), e.toString(), auditId],
+        );
+      }
+      rethrow;
+    }
+  }
+
+  Future<void> _upgradeFromV13ToV14(Migrator m, int from, int to) async {
+    final hasAudit = await _tableExists('migration_audit');
+    final auditId = 'audit_v13_v14_${DateTime.now().millisecondsSinceEpoch}';
+    if (hasAudit && from >= 13) {
+      await customStatement(
+        'INSERT INTO migration_audit (id, fromVersion, toVersion, startedAt, status, preMigrationBackupPath) VALUES (?, ?, ?, ?, ?, ?);',
+        [auditId, from, to, DateTime.now().toIso8601String(), 'in_progress', preMigrationBackupPath],
+      );
+    }
+    try {
+      if (!await _tableExists('accounts')) await m.createTable(accounts);
+      if (!await _tableExists('committees')) await m.createTable(committees);
+      if (!await _tableExists('committee_events')) {
+        await m.createTable(committeeEvents);
+      }
+      await customStatement(
+          'CREATE INDEX IF NOT EXISTS committees_accountId_idx ON committees (accountId);');
+      await customStatement(
+          'CREATE INDEX IF NOT EXISTS committee_events_committeeId_idx ON committee_events (committeeId, kind, monthIndex);');
+      if (hasAudit && from >= 13) {
+        await customStatement(
+          'UPDATE migration_audit SET status = ?, completedAt = ? WHERE id = ?;',
+          ['completed', DateTime.now().toIso8601String(), auditId],
+        );
+      }
+    } catch (e) {
+      if (hasAudit && from >= 13) {
         await customStatement(
           'UPDATE migration_audit SET status = ?, completedAt = ?, errorMessage = ? WHERE id = ?;',
           ['failed', DateTime.now().toIso8601String(), e.toString(), auditId],

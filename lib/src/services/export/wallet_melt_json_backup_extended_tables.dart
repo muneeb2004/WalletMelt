@@ -30,6 +30,10 @@ class BackupExtendedTables {
         {'accountId': 'account'}),
     _spec('savings_contributions', (d) => d.savingsContributions,
         local.SavingsContribution.fromJson, {'goalId': 'goal'}),
+    _spec('committees', (d) => d.committees, local.Committee.fromJson,
+        {'accountId': 'account'}),
+    _spec('committee_events', (d) => d.committeeEvents,
+        local.CommitteeEvent.fromJson, {'committeeId': 'committee'}),
     _spec('stores', (d) => d.stores, local.Store.fromJson,
         {'defaultCategoryId': 'cat'},
         naturalKey: 'normalizedName'),
@@ -77,6 +81,8 @@ class BackupExtendedTables {
     'income_schedules',
     'savings_goals',
     'savings_contributions',
+    'committees',
+    'committee_events',
   };
 
   static const Set<String> _nullableAccountLinkTables = {
@@ -84,6 +90,7 @@ class BackupExtendedTables {
     'subscriptions',
     'incomes',
     'income_schedules',
+    'committees',
   };
 
   /// Names of the tables covered by the extended section (parent-first).
@@ -190,6 +197,7 @@ class BackupExtendedTables {
       'unit': {},
       'account': {},
       'goal': {},
+      'committee': {},
       'payee': {},
       'store': {},
       'item': {},
@@ -220,6 +228,10 @@ class BackupExtendedTables {
         // whose parent is absent from the backup are skipped, not fatal.
         if (spec.name == 'savings_goals' &&
             !await _exists(db, 'accounts', 'id', row['accountId'])) {
+          continue;
+        }
+        if (spec.name == 'committee_events' &&
+            !await _exists(db, 'committees', 'id', row['committeeId'])) {
           continue;
         }
         if (spec.name == 'savings_contributions' &&
@@ -333,6 +345,7 @@ class BackupExtendedTables {
       'units' => 'unit',
       'accounts' => 'account',
       'savings_goals' => 'goal',
+      'committees' => 'committee',
       'payees' => 'payee',
       'stores' => 'store',
       'items' => 'item',

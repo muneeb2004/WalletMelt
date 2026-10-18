@@ -48,7 +48,10 @@ import '../data/repositories/drift/drift_monthly_budget_repository.dart';
 import '../types/monthly_budget.dart';
 import '../analytics/balance_calculator.dart';
 import '../utils/budget_period.dart';
+import '../analytics/committee_planner.dart';
 import '../analytics/goal_planner.dart';
+import '../data/repositories/drift/drift_committee_repository.dart';
+import '../types/committee.dart' as wm_committee;
 import '../analytics/income_planner.dart';
 import '../data/repositories/drift/drift_goal_repository.dart';
 import '../types/savings_goal.dart' as wm_goal;
@@ -73,6 +76,7 @@ class AppState extends ChangeNotifier {
     DriftAccountRepository? driftAccountRepository,
     DriftIncomeRepository? driftIncomeRepository,
     DriftGoalRepository? driftGoalRepository,
+    DriftCommitteeRepository? driftCommitteeRepository,
     local.WalletMeltDatabase? driftDatabase,
     SettingsService? settingsService,
     ReceiptStorageService? receiptStorageService,
@@ -100,6 +104,8 @@ class AppState extends ChangeNotifier {
         (driftDatabase != null ? DriftIncomeRepository(driftDatabase) : null);
     _goalRepository = driftGoalRepository ??
         (driftDatabase != null ? DriftGoalRepository(driftDatabase) : null);
+    _committeeRepository = driftCommitteeRepository ??
+        (driftDatabase != null ? DriftCommitteeRepository(driftDatabase) : null);
   }
 
   AppState.test({
@@ -117,6 +123,7 @@ class AppState extends ChangeNotifier {
     DriftAccountRepository? driftAccountRepository,
     DriftIncomeRepository? driftIncomeRepository,
     DriftGoalRepository? driftGoalRepository,
+    DriftCommitteeRepository? driftCommitteeRepository,
     SettingsService? settingsService,
     ReceiptStorageService? receiptStorageService,
     WalletMeltSettings? settings,
@@ -145,6 +152,7 @@ class AppState extends ChangeNotifier {
     _accountRepository = driftAccountRepository;
     _incomeRepository = driftIncomeRepository;
     _goalRepository = driftGoalRepository;
+    _committeeRepository = driftCommitteeRepository;
     isLoading = false;
   }
 
@@ -167,6 +175,15 @@ class AppState extends ChangeNotifier {
   DriftAccountRepository? _accountRepository;
   DriftIncomeRepository? _incomeRepository;
   DriftGoalRepository? _goalRepository;
+  DriftCommitteeRepository? _committeeRepository;
+
+  /// Committees need the Drift runtime like accounts (ADR-0016).
+  bool get committeesAvailable => _committeeRepository != null;
+  List<wm_committee.CommitteeProgress> committeeProgress = const [];
+
+  /// Installments and payouts due today or earlier, oldest first.
+  List<CommitteeDueItem> get dueCommitteeItems =>
+      CommitteePlanner.dueItems(committeeProgress, DateTime.now());
 
   /// Savings goals need the Drift runtime like accounts (ADR-0015).
   bool get goalsAvailable => _goalRepository != null;
@@ -454,8 +471,14 @@ class AppState extends ChangeNotifier {
     await _refreshAccounts();
     await _refreshIncome();
     await _refreshGoals();
+    await _refreshCommittees();
 
     notifyListeners();
+  }
+
+  Future<void> _refreshCommittees() async {
+    final repo = _committeeRepository;
+    committeeProgress = repo == null ? const [] : await repo.listProgress();
   }
 
   Future<void> _refreshGoals() async {
@@ -661,6 +684,83 @@ class AppState extends ChangeNotifier {
 
   Future<List<wm_goal.GoalContribution>> goalContributions(String goalId) =>
       _goalsOrThrow.listContributions(goalId);
+
+  DriftCommitteeRepository get _committeesOrThrow {
+    final repo = _committeeRepository;
+    if (repo == null) {
+      throw StateError('Committees are unavailable on this storage backend.');
+    }
+    return repo;
+  }
+
+  /// Committee changes can move an account balance, so balances refresh too.
+  Future<void> _afterCommitteeChange() async {
+    await _refreshCommittees();
+    await _refreshAccounts();
+    notifyListeners();
+  }
+
+  Future<wm_committee.Committee> createCommittee({
+    required String name,
+    required int monthlyMinorUnits,
+    required int memberCount,
+    required int payoutMonth,
+    required DateTime startDate,
+    int? payoutMinorUnits,
+    String? accountId,
+  }) async {
+    final committee = await _committeesOrThrow.create(
+      name: name,
+      monthlyMinorUnits: monthlyMinorUnits,
+      memberCount: memberCount,
+      payoutMonth: payoutMonth,
+      startDate: startDate,
+      currency: settings.currency,
+      payoutMinorUnits: payoutMinorUnits,
+      accountId: accountId,
+    );
+    await _afterCommitteeChange();
+    return committee;
+  }
+
+  Future<void> recordCommitteeInstallment(String committeeId, int monthIndex,
+      {int? amountMinorUnits}) async {
+    await _committeesOrThrow.recordInstallment(committeeId, monthIndex,
+        amountMinorUnits: amountMinorUnits);
+    await _afterCommitteeChange();
+  }
+
+  Future<void> recordCommitteePayout(String committeeId,
+      {int? amountMinorUnits}) async {
+    await _committeesOrThrow.recordPayout(committeeId,
+        amountMinorUnits: amountMinorUnits);
+    await _afterCommitteeChange();
+  }
+
+  Future<void> undoCommitteeEvent(String eventId) async {
+    await _committeesOrThrow.undoEvent(eventId);
+    await _afterCommitteeChange();
+  }
+
+  Future<void> setCommitteeAccount(String committeeId, String? accountId) async {
+    await _committeesOrThrow.setAccount(committeeId, accountId);
+    await _afterCommitteeChange();
+  }
+
+  Future<void> archiveCommittee(String committeeId) async {
+    await _committeesOrThrow.archive(committeeId);
+    await _afterCommitteeChange();
+  }
+
+  Future<void> reopenCommittee(String committeeId) async {
+    await _committeesOrThrow.reopen(committeeId);
+    await _afterCommitteeChange();
+  }
+
+  Future<void> deleteCommittee(String committeeId) async {
+    await _committeesOrThrow.delete(committeeId);
+    await _afterCommitteeChange();
+  }
 
   Future<bool> accountHasTransactions(String id) =>
       _accountsOrThrow.hasLinkedRows(id);

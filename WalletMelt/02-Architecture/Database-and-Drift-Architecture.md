@@ -15,10 +15,10 @@ related:
 
 ## 1. Storage Engine
 - **Engine**: SQLite via Drift (`drift_flutter` / `sqlite3_flutter_libs`).
-- **Schema Version**: `13`.
+- **Schema Version**: `14`.
 - **Database File**: Stored in platform database directory as `wallet_melt.db`.
 
-## 2. Table Topology (28 Tables)
+## 2. Table Topology (30 Tables)
 ```text
 Core Financial:
   Categories ──< Expenses ──< GroceryItems
@@ -35,6 +35,9 @@ Accounts (v10, [[ADR-0011-Accounts-Derived-Balance-and-Transfers]]):
 
 Goals (v13, [[ADR-0015-Savings-Goals-Set-Aside-in-Accounts]]):
   Accounts ──< SavingsGoals ──< SavingsContributions
+
+Committees (v14, [[ADR-0016-Committees-BC-Installments-and-Payout-Turn]]):
+  Accounts ──< Committees ──< CommitteeEvents
 
 Obligations & Debt:
   Payees ──< DebtRecords ──< DebtRepayments
@@ -75,3 +78,6 @@ Metadata & Catalogs:
 
 ## Savings goals (2026-10-18, schema v13)
 `savings_goals` (required `accountId`, currency from the account, `status`, soft delete) and `savings_contributions` (signed minor units, soft delete), both RESTRICT. Saved and reserved amounts are derived; account balances are untouched. Accounts with goals are archived instead of deleted.
+
+## Committees (2026-10-18, schema v14)
+`committees` (nullable `accountId`, payout month and amount, soft delete) and `committee_events` (installment or payout per month, soft delete), both RESTRICT. Progress and the balance effect are derived. Accounts with committees are archived instead of deleted.

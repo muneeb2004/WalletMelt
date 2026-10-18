@@ -9,6 +9,7 @@ import 'package:wallet_melt/src/screens/budget/budget_screen.dart';
 import 'package:wallet_melt/src/screens/dashboard/dashboard_screen.dart';
 import 'package:wallet_melt/src/screens/debt/debt_screen.dart';
 import 'package:wallet_melt/src/screens/essentials/essential_expenses_screen.dart';
+import 'package:wallet_melt/src/screens/committees/committees_screen.dart';
 import 'package:wallet_melt/src/screens/goals/goals_screen.dart';
 import 'package:wallet_melt/src/screens/history/expense_detail_screen.dart';
 import 'package:wallet_melt/src/screens/history/history_screen.dart';
@@ -517,6 +518,15 @@ final List<ScreenshotTarget> screenshotTargets = [
     title: 'Savings Goals Set Aside in an Account',
     isDark: true,
     builder: (bundle) => const GoalsScreen(),
+  ),
+  ScreenshotTarget(
+    id: '11_committees_overview',
+    category: '11_accounts_income',
+    filename: '04_committees_overview.png',
+    relativePath: '11_accounts_income/04_committees_overview.png',
+    title: 'Committee Installments and Payout Turn',
+    isDark: false,
+    builder: (bundle) => const CommitteesScreen(),
   ),
 ];
 

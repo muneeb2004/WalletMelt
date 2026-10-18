@@ -96,7 +96,7 @@ class WhatsNewContent extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        'Save toward your goals',
+                        'Track your committee (BC)',
                         style: TextStyle(
                           fontSize: 12,
                           color: context.scheme.onSurfaceVariant,
@@ -123,9 +123,57 @@ class WhatsNewContent extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Version 1.6.0 Highlights
+              // Version 1.7.0 Highlights
               _buildSectionBadge(
                 label: 'VERSION ${AppVersion.version} UPDATES',
+                color: context.scheme.primary,
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.groups_rounded,
+                iconColor: context.scheme.primary,
+                title: 'Committees (BC)',
+                description:
+                    'Add your committee with the monthly amount, how many members it has and the month you receive the pot. See what you have paid, what is left and when your turn comes.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.notifications_active_rounded,
+                iconColor: context.money.caution,
+                title: 'Confirm each payment',
+                description:
+                    'On the due date Home asks whether you paid your installment or received your payout. You confirm the real amount, so nothing is ever recorded behind your back.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.account_balance_wallet_rounded,
+                iconColor: context.money.income,
+                title: 'Linked to your balance',
+                description:
+                    'Link a committee to an account and each installment comes out of it, while your payout goes in. Leave it unlinked and the committee is just tracked.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.undo_rounded,
+                iconColor: context.scheme.secondary,
+                title: 'Made a mistake?',
+                description:
+                    'Undo any payment you recorded and your balance goes straight back. Backups include your committees too.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 24),
+
+              // Version 1.6.0 Highlights
+              _buildSectionBadge(
+                label: 'VERSION 1.6.0 UPDATES',
                 color: context.scheme.primary,
                 isDark: isDark,
               ),
@@ -610,7 +658,7 @@ class WhatsNewContent extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      'Next up: committees (BC) with your payout turn, and an optional way to add expenses from bank and wallet alerts on your phone. It will always be your choice and stay on your device.',
+                      'Next up: an optional way to add expenses from bank and wallet alerts on your phone. It will always be your choice and stay on your device.',
                       style: TextStyle(
                         fontSize: 12,
                         height: 1.45,

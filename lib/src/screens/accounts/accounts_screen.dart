@@ -51,6 +51,12 @@ class AccountsScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Accounts'),
         actions: [
+          if (state.committeesAvailable)
+            IconButton(
+              tooltip: 'Committees',
+              onPressed: () => context.push('/committees'),
+              icon: const Icon(Icons.groups_outlined),
+            ),
           if (state.goalsAvailable)
             TextButton.icon(
               onPressed: () => context.push('/goals'),

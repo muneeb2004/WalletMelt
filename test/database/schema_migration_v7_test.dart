@@ -231,8 +231,8 @@ void main() {
     expect(subway.isFavorite, isFalse);
     expect(subway.lastUsedAt, isNull);
 
-    // Assert PRAGMA user_version is current schema version (13)
-    expect(WalletMeltDatabase.currentSchemaVersion, 13);
+    // Assert PRAGMA user_version is current schema version (14)
+    expect(WalletMeltDatabase.currentSchemaVersion, 14);
 
 
     // Assert new operations work seamlessly on migrated database

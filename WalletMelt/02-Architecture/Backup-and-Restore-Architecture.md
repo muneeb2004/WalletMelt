@@ -51,3 +51,6 @@ Schema v12 adds nullable `accountId` to `debt_records` and `subscriptions`. Rest
 
 ## 10. Savings goals (2026-10-18)
 Schema v13 adds `savings_goals` and `savings_contributions` as optional extended keys; skip-on-missing-parent on restore; delete order contributions, goals, then expenses and accounts. See [[Backup-Format-Specification]] section 8.
+
+## 11. Committees (2026-10-18)
+Schema v14 adds `committees` and `committee_events` as optional extended keys with skip-on-missing-parent and nullable account link; delete order events, committees, then expenses and accounts. See [[Backup-Format-Specification]] section 9.

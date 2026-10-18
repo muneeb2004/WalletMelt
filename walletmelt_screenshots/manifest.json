@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-18T10:20:20.795330",
-  "totalScreenshots": 35,
+  "generatedAt": "2026-10-18T10:34:15.906166",
+  "totalScreenshots": 36,
   "resolution": "1080x2400",
   "outputDirectory": "walletmelt_screenshots",
   "screenshots": [
@@ -12,7 +12,7 @@
       "relativePath": "01_dashboard/01_dashboard_overview_dark.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 208069,
+      "fileSizeBytes": 175328,
       "status": "verified"
     },
     {
@@ -23,7 +23,7 @@
       "relativePath": "01_dashboard/02_dashboard_overview_light.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 203136,
+      "fileSizeBytes": 169372,
       "status": "verified"
     },
     {
@@ -34,7 +34,7 @@
       "relativePath": "01_dashboard/03_dashboard_budget_adjust_sheet.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 165244,
+      "fileSizeBytes": 170295,
       "status": "verified"
     },
     {
@@ -45,7 +45,7 @@
       "relativePath": "01_dashboard/04_dashboard_scrolled_activity.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 232993,
+      "fileSizeBytes": 215602,
       "status": "verified"
     },
     {
@@ -265,7 +265,7 @@
       "relativePath": "08_settings/01_settings_overview.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 196253,
+      "fileSizeBytes": 195984,
       "status": "verified"
     },
     {
@@ -364,7 +364,7 @@
       "relativePath": "11_accounts_income/01_accounts_overview.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 105226,
+      "fileSizeBytes": 106508,
       "status": "verified"
     },
     {
@@ -387,6 +387,17 @@
       "width": 1080,
       "height": 2400,
       "fileSizeBytes": 113990,
+      "status": "verified"
+    },
+    {
+      "id": "11_committees_overview",
+      "category": "11_accounts_income",
+      "title": "Committee Installments and Payout Turn",
+      "filename": "04_committees_overview.png",
+      "relativePath": "11_accounts_income/04_committees_overview.png",
+      "width": 1080,
+      "height": 2400,
+      "fileSizeBytes": 54028,
       "status": "verified"
     }
   ]
