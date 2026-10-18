@@ -950,6 +950,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
 
                     // Category selector dropdown
                     DropdownButtonFormField<String>(
+                      menuMaxHeight: 320,
                       initialValue: categoryId,
                       decoration: const InputDecoration(labelText: 'Category'),
                       dropdownColor: Theme.of(context).brightness == Brightness.dark

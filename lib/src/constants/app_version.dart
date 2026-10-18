@@ -4,10 +4,10 @@
 /// scripts). Edit the version in pubspec.yaml, not here.
 abstract final class AppVersion {
   /// The major.minor.patch version string.
-  static const String version = '1.7.2';
+  static const String version = '1.7.3';
 
   /// The build number / version code.
-  static const int buildNumber = 16;
+  static const int buildNumber = 17;
 
   /// Full version with build number formatted for logs and backups.
   static const String fullVersion = '$version+$buildNumber';

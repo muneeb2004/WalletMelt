@@ -411,6 +411,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             ),
                             child: DropdownButtonHideUnderline(
                               child: DropdownButton<ExpenseSort>(
+                                menuMaxHeight: 320,
                                 value: _sort,
                                 icon: const Icon(Icons.sort_rounded, size: 16),
                                 style: TextStyle(

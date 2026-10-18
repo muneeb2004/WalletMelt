@@ -121,3 +121,6 @@ Simpler accounts: Add account needs only a name, account types are Cash, Bank an
 
 ## 21. Release 1.7.2+16 (2026-10-19)
 Lists share one rhythm (16 px sides, 12 px gap, bouncing physics) and rows animate in via `FluidItem` (`lib/src/widgets/fluid_list.dart`). See [[Design-System-and-UX]].
+
+## 22. Release 1.7.3+17 (2026-10-19)
+Rounded, themed dropdowns and popup menus ([[Design-System-and-UX]]).

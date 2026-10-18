@@ -211,6 +211,7 @@ class DebtScreen extends StatefulWidget {
                             Expanded(
                               flex: 5,
                               child: DropdownButtonFormField<DebtType>(
+                                menuMaxHeight: 320,
                                 initialValue: selectedType,
                                 decoration: const InputDecoration(labelText: 'Type'),
                                 dropdownColor: Theme.of(builderContext).brightness == Brightness.dark

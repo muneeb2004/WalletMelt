@@ -569,6 +569,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 ),
                 AppSpacing.gapSm,
                 DropdownButtonFormField<String>(
+                  menuMaxHeight: 320,
                   initialValue: _currency,
                   decoration: const InputDecoration(
                     labelText: 'Currency',

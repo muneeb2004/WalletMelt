@@ -90,3 +90,6 @@ Six steps only. Add no others.
 
 ## Lists and motion (2026-10-19)
 All list screens use `FluidList` (16 px sides, 12 px card gap, 120 px bottom clearance, bouncing physics). Rows enter with `FluidItem`: fade plus 18 px slide, 320 ms ease-out cubic, 40 ms stagger for the first 8 rows, disabled when the OS requests reduced motion.
+
+## Menus and dropdowns (2026-10-19)
+Popup menus come from `popupMenuTheme`/`menuTheme` (radius 16, hairline, surfaceContainerHigh). Dropdown buttons cannot be themed globally in Flutter, so each passes `borderRadius: radiusMd`, `dropdownColor: surfaceContainerHigh` and `menuMaxHeight: 320`.

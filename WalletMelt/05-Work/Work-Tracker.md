@@ -115,3 +115,6 @@ Every release bumps `pubspec.yaml` and ships a plain-language, non-technical Wha
 
 ## Release 1.7.2 (2026-10-19)
 - **Done**: uniform, fluid lists. New `lib/src/widgets/fluid_list.dart` (`FluidList` padding/gap/physics, `FluidItem` staggered fade and slide, 320 ms ease-out, max 8 staggered rows, respects reduced motion). Applied to accounts, goals, committees, income, debts-adjacent payees, merchants, subscriptions, essentials and history (spacing and scroll physics). What's New updated in plain language.
+
+## Release 1.7.3 (2026-10-19)
+- **Done**: option menus and dropdowns follow the design system. `popupMenuTheme` and `menuTheme` in the theme set a 16 px radius, hairline border and raised surface; every `DropdownButton`/`DropdownButtonFormField` passes the same radius, colour and a 320 px max height. What's New updated in plain language.

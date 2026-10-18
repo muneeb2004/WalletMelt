@@ -277,6 +277,9 @@ class _GoalEditorState extends State<_GoalEditor> {
           ),
           const SizedBox(height: AppSpacing.md),
           DropdownButtonFormField<String>(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+            dropdownColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+            menuMaxHeight: 320,
             key: const ValueKey('goal-account'),
             initialValue: _accountId,
             isExpanded: true,

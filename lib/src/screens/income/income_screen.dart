@@ -382,6 +382,9 @@ class _IncomeEditorState extends State<_IncomeEditor> {
           ),
           const SizedBox(height: AppSpacing.md),
           DropdownButtonFormField<IncomeSource>(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+            dropdownColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+            menuMaxHeight: 320,
             initialValue: _source,
             decoration: const InputDecoration(labelText: 'Source'),
             items: [
@@ -393,6 +396,9 @@ class _IncomeEditorState extends State<_IncomeEditor> {
           const SizedBox(height: AppSpacing.md),
           if (eligible.isNotEmpty) ...[
             DropdownButtonFormField<String?>(
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+              dropdownColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+              menuMaxHeight: 320,
               key: const ValueKey('income-account'),
               initialValue: _accountId,
               isExpanded: true,
@@ -424,6 +430,9 @@ class _IncomeEditorState extends State<_IncomeEditor> {
           ),
           if (_repeats)
             DropdownButtonFormField<String>(
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+              dropdownColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+              menuMaxHeight: 320,
               initialValue: _cycle,
               decoration: const InputDecoration(labelText: 'How often'),
               items: [

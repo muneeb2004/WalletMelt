@@ -704,6 +704,7 @@ class _AddSubscriptionSheetState extends State<_AddSubscriptionSheet> {
 
                 // Billing Cycle Dropdown
                 DropdownButtonFormField<String>(
+                  menuMaxHeight: 320,
                   initialValue: _billingCycle,
                   decoration: const InputDecoration(labelText: 'Billing Cycle'),
                   dropdownColor: context.scheme.surfaceContainer,
@@ -791,6 +792,7 @@ class _AddSubscriptionSheetState extends State<_AddSubscriptionSheet> {
 
                 // Notification Offset Dropdown
                 DropdownButtonFormField<int>(
+                  menuMaxHeight: 320,
                   initialValue: _notificationOffset,
                   decoration: const InputDecoration(labelText: 'Notification Reminder'),
                   dropdownColor: context.scheme.surfaceContainer,
