@@ -51,7 +51,7 @@ class _DashboardBalanceCardState extends State<DashboardBalanceCard> {
                   children: [
                     Text('Track your balance', style: textTheme.titleMedium),
                     Text(
-                      'Add cash, bank or wallet accounts to see what you have left.',
+                      'Add an account and log money in or out to see what you have left.',
                       style: textTheme.bodySmall
                           ?.copyWith(color: scheme.onSurfaceVariant),
                     ),

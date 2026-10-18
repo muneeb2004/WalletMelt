@@ -805,6 +805,16 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Adds ([amountMinorUnits] > 0) or removes (< 0) money from an account as
+  /// a deletable adjustment. This is not an expense and does not touch budgets.
+  Future<void> adjustAccountBalance(String accountId, int amountMinorUnits,
+      {String? notes}) async {
+    await _accountsOrThrow.recordAdjustment(accountId, amountMinorUnits,
+        notes: notes);
+    await _refreshAccounts();
+    notifyListeners();
+  }
+
   Future<int> assignUnassignedExpensesTo(String accountId) async {
     final changed = await _accountsOrThrow.assignUnassignedExpenses(accountId);
     await refresh();

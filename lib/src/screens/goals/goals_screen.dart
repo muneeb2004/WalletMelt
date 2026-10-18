@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../widgets/fluid_list.dart';
 import 'package:provider/provider.dart';
 
 import '../../analytics/goal_planner.dart';
@@ -49,8 +50,8 @@ class GoalsScreen extends StatelessWidget {
               ),
             )
           : ListView(
-              padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.md, AppSpacing.md, AppSpacing.md, 96),
+              padding: FluidList.padding,
+              physics: FluidList.physics,
               children: [
                 if (!hasAccount)
                   const EmptyState(
@@ -91,9 +92,9 @@ class GoalsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: AppSpacing.md),
                 ],
-                for (final p in active) ...[
-                  _GoalTile(progress: p),
-                  const SizedBox(height: AppSpacing.sm),
+                for (final (idx, p) in active.indexed) ...[
+                  FluidItem(index: idx, child: _GoalTile(progress: p)),
+                  const SizedBox(height: FluidList.gap),
                 ],
                 if (closed.isNotEmpty) ...[
                   const SizedBox(height: AppSpacing.md),
@@ -101,9 +102,9 @@ class GoalsScreen extends StatelessWidget {
                       style: textTheme.titleMedium
                           ?.copyWith(color: scheme.onSurfaceVariant)),
                   const SizedBox(height: AppSpacing.sm),
-                  for (final p in closed) ...[
-                    _GoalTile(progress: p),
-                    const SizedBox(height: AppSpacing.sm),
+                  for (final (idx, p) in closed.indexed) ...[
+                    FluidItem(index: idx, child: _GoalTile(progress: p)),
+                    const SizedBox(height: FluidList.gap),
                   ],
                 ],
               ],

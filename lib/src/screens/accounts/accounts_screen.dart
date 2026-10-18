@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../widgets/fluid_list.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -17,16 +18,12 @@ IconData accountTypeIcon(AccountType type) => switch (type) {
       AccountType.cash => Icons.payments_outlined,
       AccountType.bank => Icons.account_balance_outlined,
       AccountType.wallet => Icons.account_balance_wallet_outlined,
-      AccountType.card => Icons.credit_card_outlined,
-      AccountType.other => Icons.savings_outlined,
     };
 
 String accountTypeLabel(AccountType type) => switch (type) {
       AccountType.cash => 'Cash',
       AccountType.bank => 'Bank',
       AccountType.wallet => 'Wallet',
-      AccountType.card => 'Card',
-      AccountType.other => 'Other',
     };
 
 /// Parses a typed money amount into minor units; null when not a number.
@@ -89,24 +86,24 @@ class AccountsScreen extends StatelessWidget {
               ),
             )
           : ListView(
-              padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.md, AppSpacing.md, AppSpacing.md, 96),
+              padding: FluidList.padding,
+              physics: FluidList.physics,
               children: [
                 if (active.isEmpty)
                   const EmptyState(
                     icon: Icons.account_balance_wallet_outlined,
                     title: 'Track your balance',
                     subtitle:
-                        'Add cash, bank or wallet accounts with their current balance. WalletMelt keeps them up to date as you log expenses.',
+                        'Add an account, then log money in or out. Expenses and income you record update it for you.',
                   )
                 else ...[
                   _TotalsCard(totals: state.accountTotals),
                   const SizedBox(height: AppSpacing.md),
                   if (state.unassignedExpenseCount > 0)
                     _UnassignedBanner(count: state.unassignedExpenseCount),
-                  for (final b in active) ...[
-                    _AccountTile(balance: b),
-                    const SizedBox(height: AppSpacing.sm),
+                  for (final (idx, b) in active.indexed) ...[
+                    FluidItem(index: idx, child: _AccountTile(balance: b)),
+                    const SizedBox(height: FluidList.gap),
                   ],
                   if (active.length > 1)
                     Align(
@@ -124,9 +121,9 @@ class AccountsScreen extends StatelessWidget {
                       style: textTheme.titleMedium
                           ?.copyWith(color: scheme.onSurfaceVariant)),
                   const SizedBox(height: AppSpacing.sm),
-                  for (final b in archived) ...[
-                    _AccountTile(balance: b),
-                    const SizedBox(height: AppSpacing.sm),
+                  for (final (idx, b) in archived.indexed) ...[
+                    FluidItem(index: idx, child: _AccountTile(balance: b)),
+                    const SizedBox(height: FluidList.gap),
                   ],
                 ],
               ],
@@ -366,50 +363,62 @@ class _AccountEditorState extends State<_AccountEditor> {
             decoration: const InputDecoration(labelText: 'Name'),
           ),
           const SizedBox(height: AppSpacing.md),
-          SegmentedButton<AccountType>(
-            showSelectedIcon: false,
-            segments: [
-              for (final t in AccountType.values)
-                ButtonSegment(value: t, label: Text(accountTypeLabel(t))),
-            ],
-            selected: {_type},
-            onSelectionChanged: (s) => setState(() => _type = s.first),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          DropdownButtonFormField<String>(
-            initialValue: _currency,
-            isExpanded: true,
-            decoration: InputDecoration(
-              labelText: 'Currency',
-              helperText: _currencyLocked
-                  ? 'Locked because this account has transactions.'
-                  : null,
-            ),
-            items: [
-              for (final c in supportedCurrencies)
-                DropdownMenuItem(
-                    value: c.code, child: Text('${c.code} · ${c.name}')),
-            ],
-            onChanged:
-                _currencyLocked ? null : (v) => setState(() => _currency = v!),
-          ),
-          const SizedBox(height: AppSpacing.md),
           TextField(
             controller: _opening,
             keyboardType:
                 const TextInputType.numberWithOptions(decimal: true),
             decoration: InputDecoration(
-              labelText: _isEdit ? 'Opening balance' : 'Current balance',
+              labelText: _isEdit ? 'Opening balance' : 'Starting balance',
               helperText: _isEdit
                   ? 'Balance at the account start date, before logged expenses.'
-                  : 'What this account holds today.',
+                  : 'Optional. Leave it empty to start from zero.',
             ),
           ),
-          SwitchListTile(
-            contentPadding: EdgeInsets.zero,
-            title: const Text('Include in total balance'),
-            value: _includeInTotal,
-            onChanged: (v) => setState(() => _includeInTotal = v),
+          ExpansionTile(
+            key: const ValueKey('account-more-options'),
+            tilePadding: EdgeInsets.zero,
+            childrenPadding: EdgeInsets.zero,
+            shape: const Border(),
+            collapsedShape: const Border(),
+            initiallyExpanded: _isEdit,
+            title: const Text('More options'),
+            expandedCrossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SegmentedButton<AccountType>(
+                showSelectedIcon: false,
+                segments: [
+                  for (final t in AccountType.values)
+                    ButtonSegment(value: t, label: Text(accountTypeLabel(t))),
+                ],
+                selected: {_type},
+                onSelectionChanged: (s) => setState(() => _type = s.first),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              DropdownButtonFormField<String>(
+                initialValue: _currency,
+                isExpanded: true,
+                decoration: InputDecoration(
+                  labelText: 'Currency',
+                  helperText: _currencyLocked
+                      ? 'Locked because this account has transactions.'
+                      : null,
+                ),
+                items: [
+                  for (final c in supportedCurrencies)
+                    DropdownMenuItem(
+                        value: c.code, child: Text('${c.code} · ${c.name}')),
+                ],
+                onChanged: _currencyLocked
+                    ? null
+                    : (v) => setState(() => _currency = v!),
+              ),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Include in total balance'),
+                value: _includeInTotal,
+                onChanged: (v) => setState(() => _includeInTotal = v),
+              ),
+            ],
           ),
           if (_error != null)
             Padding(
@@ -497,12 +506,24 @@ class _AccountDetailState extends State<_AccountDetail> {
                     onPressed: account.isArchived
                         ? null
                         : () async {
-                            await showReconcileSheet(context, account,
-                                balance.balanceMinorUnits);
+                            await showAdjustSheet(context, account,
+                                isCredit: true);
                             _reload();
                           },
-                    icon: const Icon(Icons.balance_outlined),
-                    label: const Text('Update balance'),
+                    icon: const Icon(Icons.add),
+                    label: const Text('Add money'),
+                  ),
+                  FilledButton.tonalIcon(
+                    style: compactButtonStyle,
+                    onPressed: account.isArchived
+                        ? null
+                        : () async {
+                            await showAdjustSheet(context, account,
+                                isCredit: false);
+                            _reload();
+                          },
+                    icon: const Icon(Icons.remove),
+                    label: const Text('Spend money'),
                   ),
                   OutlinedButton.icon(
                     style: compactButtonStyle,
@@ -516,30 +537,37 @@ class _AccountDetailState extends State<_AccountDetail> {
                     icon: const Icon(Icons.swap_horiz),
                     label: const Text('Transfer'),
                   ),
-                  OutlinedButton.icon(
-                    style: compactButtonStyle,
-                    onPressed: () => showAccountEditorSheet(context,
-                        account: account),
-                    icon: const Icon(Icons.edit_outlined),
-                    label: const Text('Edit'),
+                  PopupMenuButton<String>(
+                    tooltip: 'More',
+                    onSelected: (value) async {
+                      switch (value) {
+                        case 'correct':
+                          await showReconcileSheet(
+                              context, account, balance.balanceMinorUnits);
+                          _reload();
+                        case 'edit':
+                          await showAccountEditorSheet(context,
+                              account: account);
+                        case 'restore':
+                          await widget.state.updateAccount(
+                              account.copyWith(isArchived: false));
+                        case 'remove':
+                          await _confirmRemove(context, account);
+                      }
+                    },
+                    itemBuilder: (_) => [
+                      if (!account.isArchived)
+                        const PopupMenuItem(
+                            value: 'correct', child: Text('Correct balance')),
+                      const PopupMenuItem(value: 'edit', child: Text('Edit')),
+                      if (account.isArchived)
+                        const PopupMenuItem(
+                            value: 'restore', child: Text('Restore'))
+                      else
+                        const PopupMenuItem(
+                            value: 'remove', child: Text('Remove')),
+                    ],
                   ),
-                  if (account.isArchived)
-                    OutlinedButton.icon(
-                    style: compactButtonStyle,
-                      onPressed: () async {
-                        await widget.state
-                            .updateAccount(account.copyWith(isArchived: false));
-                      },
-                      icon: const Icon(Icons.unarchive_outlined),
-                      label: const Text('Restore'),
-                    )
-                  else
-                    OutlinedButton.icon(
-                    style: compactButtonStyle,
-                      onPressed: () => _confirmRemove(context, account),
-                      icon: const Icon(Icons.archive_outlined),
-                      label: const Text('Remove'),
-                    ),
                 ],
               ),
               const SizedBox(height: AppSpacing.lg),
@@ -556,7 +584,7 @@ class _AccountDetailState extends State<_AccountDetail> {
                 builder: (context, snap) {
                   final rows = snap.data ?? const [];
                   if (rows.isEmpty) {
-                    return Text('No transfers or adjustments yet.',
+                    return Text('No money added, spent or transferred yet.',
                         style: textTheme.bodyMedium);
                   }
                   return Column(
@@ -608,7 +636,8 @@ class _AccountDetailState extends State<_AccountDetail> {
   }
 
   String _movementLabel(AccountMovement m) => switch (m.kind) {
-        AccountMovementKind.adjustment => m.notes ?? 'Balance updated',
+        AccountMovementKind.adjustment => m.notes ??
+            (m.amountMinorUnits >= 0 ? 'Money added' : 'Money spent'),
         AccountMovementKind.transferIn => 'Transfer in',
         AccountMovementKind.transferOut => 'Transfer out',
       };
@@ -629,6 +658,77 @@ class _AccountDetailState extends State<_AccountDetail> {
   }
 }
 
+/// Quick credit ([isCredit]) or debit entry: one amount, optional note.
+Future<void> showAdjustSheet(BuildContext context, Account account,
+    {required bool isCredit}) {
+  final state = context.read<AppState>();
+  final amount = TextEditingController();
+  final note = TextEditingController();
+  return showAppBottomSheet<void>(
+    context,
+    builder: (sheetContext) {
+      final textTheme = Theme.of(sheetContext).textTheme;
+      final scheme = Theme.of(sheetContext).colorScheme;
+      return SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg, AppSpacing.smMd, AppSpacing.lg, AppSpacing.lg),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(isCredit ? 'Add money' : 'Spend money',
+                style: textTheme.titleLarge),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              isCredit
+                  ? 'Money coming into ${account.name}. For salary or allowance, use Income so it shows in your records.'
+                  : 'Money leaving ${account.name} that you will not log as an expense. To count it in your budget, add it as an expense instead.',
+              style: textTheme.bodyMedium
+                  ?.copyWith(color: scheme.onSurfaceVariant),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            TextField(
+              controller: amount,
+              autofocus: true,
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
+              decoration: InputDecoration(
+                  labelText: 'Amount', prefixText: '${account.currency} '),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            TextField(
+              controller: note,
+              textCapitalization: TextCapitalization.sentences,
+              decoration:
+                  const InputDecoration(labelText: 'Note (optional)'),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            PrimaryButton(
+              label: isCredit ? 'Add money' : 'Spend money',
+              onPressed: () async {
+                final value = parseMinorUnits(amount.text);
+                if (value == null || value <= 0) {
+                  showErrorSnackbar(
+                      sheetContext, 'Enter an amount greater than zero.');
+                  return;
+                }
+                final navigator = Navigator.of(sheetContext);
+                final text = note.text.trim();
+                await state.adjustAccountBalance(
+                  account.id,
+                  isCredit ? value : -value,
+                  notes: text.isEmpty ? null : text,
+                );
+                navigator.pop();
+              },
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
 Future<void> showReconcileSheet(
     BuildContext context, Account account, int currentMinorUnits) {
   final state = context.read<AppState>();
@@ -645,7 +745,7 @@ Future<void> showReconcileSheet(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Update balance', style: textTheme.titleLarge),
+            Text('Correct balance', style: textTheme.titleLarge),
             const SizedBox(height: AppSpacing.xs),
             Text(
               'Enter what ${account.name} really holds now. WalletMelt records the difference as one adjustment you can delete later.',
@@ -662,7 +762,7 @@ Future<void> showReconcileSheet(
             ),
             const SizedBox(height: AppSpacing.md),
             PrimaryButton(
-              label: 'Update balance',
+              label: 'Correct balance',
               onPressed: () async {
                 final actual = parseMinorUnits(controller.text);
                 if (actual == null) {

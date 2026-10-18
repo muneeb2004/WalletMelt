@@ -70,7 +70,7 @@ class Accounts extends Table {
 
   TextColumn get id => text()();
   TextColumn get name => text()();
-  TextColumn get type => text()(); // cash | bank | wallet | card | other
+  TextColumn get type => text()(); // cash | bank | wallet
   TextColumn get currency => text()();
   IntColumn get openingBalanceMinorUnits =>
       integer().named('openingBalanceMinorUnits').withDefault(const Constant(0))();

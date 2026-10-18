@@ -77,3 +77,9 @@ c. **Archived accounts** stay in `AppState.accounts` (needed to preserve links o
 d. **Currency lock**: an account's currency cannot change once it has expenses or movements.
 e. **Audit rows** record the migration target `to`, so a v8 database upgraded to v10 stores the 8-to-9 step with `toVersion = 10`.
 f. **Deferred**: hide-balance state is per session (not persisted); the Dashboard prompt and balance card are the only entry points besides Settings; no demo account is seeded for screenshots yet, so the Dashboard setup prompt is suppressed when `SecurityUtils.isScreenshotMode` is set (published screenshots unchanged).
+
+## Amendment 2026-10-18 (release 1.7.1): simpler accounts
+g. **Three account types.** `type` is now `cash|bank|wallet`. `card` and `other` were removed because they only changed an icon and the app had not been distributed, so no legacy mapping is kept; `accountTypeFromName` falls back to `cash` for any unknown stored value. No schema change (still v14, the column is plain text).
+h. **Add account** asks for a name and an optional starting balance. Type, currency and include-in-total sit under "More options" (open when editing).
+i. **Add money / Spend money** write one signed `adjustment` movement (`DriftAccountRepository.recordAdjustment`, `AppState.adjustAccountBalance`) with the amount and an optional note. They are not expenses: budgets, daily allowance and Insights ignore them (the sheet says so and points to Add expense). Deleting the entry reverses the balance.
+j. **Correct balance** (the old "Update balance" reconcile) moved into the account's overflow menu for the rare case where the real balance differs.

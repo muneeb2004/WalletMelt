@@ -3,7 +3,7 @@ type: state
 status: stable
 priority: high
 created: 2026-09-13
-updated: 2026-10-18
+updated: 2026-10-19
 domain: control
 related:
   - "[[Project-Constitution]]"
@@ -115,3 +115,9 @@ Committees (BC) with installments, payout turn and confirm prompts ([[ADR-0016-C
 
 ## 19. Debt screen bottom padding (2026-10-18)
 The Debts list now carries its 120 px bottom clearance as list padding (not as outer padding), so rows scroll under the shell's extended FAB instead of being cut off by a hard edge above it.
+
+## 20. Release 1.7.1+15 (2026-10-18)
+Simpler accounts: Add account needs only a name, account types are Cash, Bank and Wallet, and accounts get Add money / Spend money entries instead of retyping the balance ([[ADR-0011-Accounts-Derived-Balance-and-Transfers]], amendment g to j). Declared version is `1.7.1+15`.
+
+## 21. Release 1.7.2+16 (2026-10-19)
+Lists share one rhythm (16 px sides, 12 px gap, bouncing physics) and rows animate in via `FluidItem` (`lib/src/widgets/fluid_list.dart`). See [[Design-System-and-UX]].

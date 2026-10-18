@@ -64,6 +64,7 @@ Metadata & Catalogs:
 
 ## Accounts and derived balance (2026-10-17, schema v10)
 - `accounts` (one currency each, `openingBalanceMinorUnits`, `openingDate`, `isArchived`, `includeInTotal`, `colorRole` = a ColorScheme role name) and `account_movements` (signed `amountMinorUnits`; kinds `adjustment|transfer_in|transfer_out`; both legs of a transfer share `transferGroupId`). `expenses.accountId` is nullable; NULL = unassigned.
+- Since 1.7.1 `accounts.type` holds only `cash|bank|wallet` (plain text column, no schema change, still v14); unknown stored values read back as `cash`. `DriftAccountRepository.recordAdjustment` writes a signed `adjustment` movement for Add money / Spend money ([[ADR-0011-Accounts-Derived-Balance-and-Transfers]], amendment g to j).
 - Balance is **never stored**: `DriftAccountRepository.listBalances` aggregates SQL and `BalanceCalculator` applies the formula ([[Analytics-and-Calculations]]). Indexes: `expenses(accountId, date)`, `account_movements(accountId, date)`, `account_movements(transferGroupId)` (created in the migration and in `beforeOpen`).
 - Accounts with history are archived rather than deleted (RESTRICT foreign keys). The legacy sqflite fallback has no account tables; `AppState.accountsAvailable` is false there and account UI is hidden.
 

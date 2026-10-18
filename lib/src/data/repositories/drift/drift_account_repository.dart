@@ -290,6 +290,28 @@ class DriftAccountRepository {
     });
   }
 
+  /// Records money added to (positive) or taken from (negative) an account
+  /// as one deletable adjustment. Zero is rejected.
+  Future<domain.AccountMovement> recordAdjustment(
+    String accountId,
+    int signedMinorUnits, {
+    String? notes,
+    DateTime? date,
+  }) async {
+    if (signedMinorUnits == 0) {
+      throw ArgumentError('Enter an amount greater than zero.');
+    }
+    return _db.transaction(
+      () => _insertMovement(
+        accountId: accountId,
+        kind: domain.AccountMovementKind.adjustment,
+        amountMinorUnits: signedMinorUnits,
+        date: date ?? DateTime.now(),
+        notes: notes,
+      ),
+    );
+  }
+
   /// Atomic two-leg transfer. Same-currency accounts use [amountMinorUnits] for
   /// both legs; cross-currency transfers must pass [receivedMinorUnits].
   Future<String> transfer({

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../widgets/fluid_list.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
@@ -161,7 +162,8 @@ class _EssentialExpensesScreenState extends State<EssentialExpensesScreen> {
         // ── Active Recurring Essentials List ─────────────────────────
         Expanded(
           child: ListView(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 120),
+            padding: FluidList.padding,
+            physics: FluidList.physics,
             children: [
               if (activeTemplates.isEmpty && inactiveTemplates.isEmpty) ...[
                 const SizedBox(height: 32),
