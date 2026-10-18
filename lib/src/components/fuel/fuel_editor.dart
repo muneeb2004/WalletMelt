@@ -311,6 +311,9 @@ class _FuelEditorState extends State<FuelEditor> {
                         ),
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<FuelType>(
+                            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                            dropdownColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+                            menuMaxHeight: 320,
                             value: row.fuelType,
                             isDense: true,
                             icon: const Icon(Icons.arrow_drop_down_rounded,

@@ -123,9 +123,27 @@ class WhatsNewContent extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Version 1.7.2 Highlights
+              // Version 1.7.3 Highlights
               _buildSectionBadge(
                 label: 'VERSION ${AppVersion.version} UPDATES',
+                color: context.scheme.primary,
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.arrow_drop_down_circle_outlined,
+                iconColor: context.scheme.primary,
+                title: 'Rounded dropdowns and menus',
+                description:
+                    'Dropdown lists and option menus now open with soft rounded corners and the same look as the rest of the app, instead of a plain square box.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 24),
+
+              // Version 1.7.2 Highlights
+              _buildSectionBadge(
+                label: 'VERSION 1.7.2 UPDATES',
                 color: context.scheme.primary,
                 isDark: isDark,
               ),

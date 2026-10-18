@@ -273,6 +273,9 @@ class _CommitteeEditorState extends State<_CommitteeEditor> {
           ),
           const SizedBox(height: AppSpacing.md),
           DropdownButtonFormField<int>(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+            dropdownColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+            menuMaxHeight: 320,
             key: ValueKey('turn-$members'),
             initialValue: members >= 1 ? turn.clamp(1, members) : null,
             decoration: const InputDecoration(labelText: 'Your payout month'),
@@ -302,6 +305,9 @@ class _CommitteeEditorState extends State<_CommitteeEditor> {
           if (_accounts.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.md),
             DropdownButtonFormField<String?>(
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+              dropdownColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+              menuMaxHeight: 320,
               key: const ValueKey('committee-account'),
               initialValue: _accountId,
               isExpanded: true,

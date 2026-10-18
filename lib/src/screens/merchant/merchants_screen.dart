@@ -75,6 +75,9 @@ class _MerchantsScreenState extends State<MerchantsScreen> {
                     ),
                     AppSpacing.gapSm,
                     DropdownButtonFormField<String?>(
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                      dropdownColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+                      menuMaxHeight: 320,
                       initialValue: selectedCategoryId,
                       decoration: const InputDecoration(
                         labelText: 'Default Category (Optional)',

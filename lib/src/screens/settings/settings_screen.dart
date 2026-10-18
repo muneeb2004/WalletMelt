@@ -252,6 +252,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   DropdownButtonFormField<String>(
+                    menuMaxHeight: 320,
                     initialValue: currency,
                     decoration: const InputDecoration(labelText: 'Currency'),
                     dropdownColor:
@@ -293,6 +294,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   const SizedBox(height: 14),
                   DropdownButtonFormField<int>(
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                    dropdownColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+                    menuMaxHeight: 320,
                     key: const ValueKey('budget-period-start-day'),
                     initialValue: state.settings.budgetPeriodStartDay,
                     decoration: const InputDecoration(
@@ -317,6 +321,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   const SizedBox(height: 14),
                   DropdownButtonFormField<ThemePreference>(
+                    menuMaxHeight: 320,
                     initialValue: themePreference,
                     decoration: const InputDecoration(labelText: 'Theme'),
                     dropdownColor:

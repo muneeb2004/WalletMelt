@@ -395,6 +395,9 @@ class _AccountEditorState extends State<_AccountEditor> {
               ),
               const SizedBox(height: AppSpacing.md),
               DropdownButtonFormField<String>(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                dropdownColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+                menuMaxHeight: 320,
                 initialValue: _currency,
                 isExpanded: true,
                 decoration: InputDecoration(
@@ -879,6 +882,9 @@ class _TransferFormState extends State<_TransferForm> {
           Text('Transfer', style: textTheme.titleLarge),
           const SizedBox(height: AppSpacing.md),
           DropdownButtonFormField<String>(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+            dropdownColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+            menuMaxHeight: 320,
             initialValue: _from,
             isExpanded: true,
             decoration: const InputDecoration(labelText: 'From'),
@@ -890,6 +896,9 @@ class _TransferFormState extends State<_TransferForm> {
           ),
           const SizedBox(height: AppSpacing.md),
           DropdownButtonFormField<String>(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+            dropdownColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+            menuMaxHeight: 320,
             initialValue: _to,
             isExpanded: true,
             decoration: const InputDecoration(labelText: 'To'),

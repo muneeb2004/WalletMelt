@@ -37,6 +37,9 @@ class AccountPickerField extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.lg),
       child: DropdownButtonFormField<String?>(
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        dropdownColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+        menuMaxHeight: 320,
         key: const ValueKey('expense-account-picker'),
         initialValue: selected,
         isExpanded: true,

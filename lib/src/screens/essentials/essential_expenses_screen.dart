@@ -557,6 +557,9 @@ class _AddEditEssentialSheetState extends State<_AddEditEssentialSheet> {
 
             // Category Selector
             DropdownButtonFormField<String>(
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+              dropdownColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+              menuMaxHeight: 320,
               initialValue: state.categories.any((c) => c.id == _categoryId)
                   ? _categoryId
                   : state.categories.firstOrNull?.id,
@@ -587,6 +590,9 @@ class _AddEditEssentialSheetState extends State<_AddEditEssentialSheet> {
 
             // Frequency
             DropdownButtonFormField<String>(
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+              dropdownColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+              menuMaxHeight: 320,
               initialValue: _frequency,
               decoration: const InputDecoration(labelText: 'Frequency'),
               items: const [
@@ -657,6 +663,9 @@ class _AddEditEssentialSheetState extends State<_AddEditEssentialSheet> {
                         Row(
                           children: [
                             DropdownButton<FuelType>(
+                              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                              dropdownColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+                              menuMaxHeight: 320,
                               value: _fuelComponents[i].fuelType,
                               isDense: true,
                               underline: const SizedBox.shrink(),
