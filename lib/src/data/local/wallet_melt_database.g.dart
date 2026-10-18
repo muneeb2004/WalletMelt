@@ -13546,6 +13546,957 @@ class IncomeSchedulesCompanion extends UpdateCompanion<IncomeSchedule> {
   }
 }
 
+class $SavingsGoalsTable extends SavingsGoals
+    with TableInfo<$SavingsGoalsTable, SavingsGoal> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SavingsGoalsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _targetMinorUnitsMeta =
+      const VerificationMeta('targetMinorUnits');
+  @override
+  late final GeneratedColumn<int> targetMinorUnits = GeneratedColumn<int>(
+      'targetMinorUnits', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _currencyMeta =
+      const VerificationMeta('currency');
+  @override
+  late final GeneratedColumn<String> currency = GeneratedColumn<String>(
+      'currency', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _accountIdMeta =
+      const VerificationMeta('accountId');
+  @override
+  late final GeneratedColumn<String> accountId = GeneratedColumn<String>(
+      'accountId', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES accounts (id) ON DELETE RESTRICT'));
+  static const VerificationMeta _targetDateMeta =
+      const VerificationMeta('targetDate');
+  @override
+  late final GeneratedColumn<String> targetDate = GeneratedColumn<String>(
+      'targetDate', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+      'status', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('active'));
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+      'createdAt', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<String> updatedAt = GeneratedColumn<String>(
+      'updatedAt', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _deletedAtMeta =
+      const VerificationMeta('deletedAt');
+  @override
+  late final GeneratedColumn<String> deletedAt = GeneratedColumn<String>(
+      'deletedAt', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        name,
+        targetMinorUnits,
+        currency,
+        accountId,
+        targetDate,
+        status,
+        createdAt,
+        updatedAt,
+        deletedAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'savings_goals';
+  @override
+  VerificationContext validateIntegrity(Insertable<SavingsGoal> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('targetMinorUnits')) {
+      context.handle(
+          _targetMinorUnitsMeta,
+          targetMinorUnits.isAcceptableOrUnknown(
+              data['targetMinorUnits']!, _targetMinorUnitsMeta));
+    } else if (isInserting) {
+      context.missing(_targetMinorUnitsMeta);
+    }
+    if (data.containsKey('currency')) {
+      context.handle(_currencyMeta,
+          currency.isAcceptableOrUnknown(data['currency']!, _currencyMeta));
+    } else if (isInserting) {
+      context.missing(_currencyMeta);
+    }
+    if (data.containsKey('accountId')) {
+      context.handle(_accountIdMeta,
+          accountId.isAcceptableOrUnknown(data['accountId']!, _accountIdMeta));
+    } else if (isInserting) {
+      context.missing(_accountIdMeta);
+    }
+    if (data.containsKey('targetDate')) {
+      context.handle(
+          _targetDateMeta,
+          targetDate.isAcceptableOrUnknown(
+              data['targetDate']!, _targetDateMeta));
+    }
+    if (data.containsKey('status')) {
+      context.handle(_statusMeta,
+          status.isAcceptableOrUnknown(data['status']!, _statusMeta));
+    }
+    if (data.containsKey('createdAt')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['createdAt']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updatedAt')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updatedAt']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deletedAt')) {
+      context.handle(_deletedAtMeta,
+          deletedAt.isAcceptableOrUnknown(data['deletedAt']!, _deletedAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SavingsGoal map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SavingsGoal(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      targetMinorUnits: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}targetMinorUnits'])!,
+      currency: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}currency'])!,
+      accountId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}accountId'])!,
+      targetDate: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}targetDate']),
+      status: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}status'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}createdAt'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}updatedAt'])!,
+      deletedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}deletedAt']),
+    );
+  }
+
+  @override
+  $SavingsGoalsTable createAlias(String alias) {
+    return $SavingsGoalsTable(attachedDatabase, alias);
+  }
+}
+
+class SavingsGoal extends DataClass implements Insertable<SavingsGoal> {
+  final String id;
+  final String name;
+  final int targetMinorUnits;
+  final String currency;
+  final String accountId;
+  final String? targetDate;
+  final String status;
+  final String createdAt;
+  final String updatedAt;
+  final String? deletedAt;
+  const SavingsGoal(
+      {required this.id,
+      required this.name,
+      required this.targetMinorUnits,
+      required this.currency,
+      required this.accountId,
+      this.targetDate,
+      required this.status,
+      required this.createdAt,
+      required this.updatedAt,
+      this.deletedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    map['targetMinorUnits'] = Variable<int>(targetMinorUnits);
+    map['currency'] = Variable<String>(currency);
+    map['accountId'] = Variable<String>(accountId);
+    if (!nullToAbsent || targetDate != null) {
+      map['targetDate'] = Variable<String>(targetDate);
+    }
+    map['status'] = Variable<String>(status);
+    map['createdAt'] = Variable<String>(createdAt);
+    map['updatedAt'] = Variable<String>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deletedAt'] = Variable<String>(deletedAt);
+    }
+    return map;
+  }
+
+  SavingsGoalsCompanion toCompanion(bool nullToAbsent) {
+    return SavingsGoalsCompanion(
+      id: Value(id),
+      name: Value(name),
+      targetMinorUnits: Value(targetMinorUnits),
+      currency: Value(currency),
+      accountId: Value(accountId),
+      targetDate: targetDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(targetDate),
+      status: Value(status),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+    );
+  }
+
+  factory SavingsGoal.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SavingsGoal(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      targetMinorUnits: serializer.fromJson<int>(json['targetMinorUnits']),
+      currency: serializer.fromJson<String>(json['currency']),
+      accountId: serializer.fromJson<String>(json['accountId']),
+      targetDate: serializer.fromJson<String?>(json['targetDate']),
+      status: serializer.fromJson<String>(json['status']),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+      updatedAt: serializer.fromJson<String>(json['updatedAt']),
+      deletedAt: serializer.fromJson<String?>(json['deletedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'targetMinorUnits': serializer.toJson<int>(targetMinorUnits),
+      'currency': serializer.toJson<String>(currency),
+      'accountId': serializer.toJson<String>(accountId),
+      'targetDate': serializer.toJson<String?>(targetDate),
+      'status': serializer.toJson<String>(status),
+      'createdAt': serializer.toJson<String>(createdAt),
+      'updatedAt': serializer.toJson<String>(updatedAt),
+      'deletedAt': serializer.toJson<String?>(deletedAt),
+    };
+  }
+
+  SavingsGoal copyWith(
+          {String? id,
+          String? name,
+          int? targetMinorUnits,
+          String? currency,
+          String? accountId,
+          Value<String?> targetDate = const Value.absent(),
+          String? status,
+          String? createdAt,
+          String? updatedAt,
+          Value<String?> deletedAt = const Value.absent()}) =>
+      SavingsGoal(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        targetMinorUnits: targetMinorUnits ?? this.targetMinorUnits,
+        currency: currency ?? this.currency,
+        accountId: accountId ?? this.accountId,
+        targetDate: targetDate.present ? targetDate.value : this.targetDate,
+        status: status ?? this.status,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+      );
+  SavingsGoal copyWithCompanion(SavingsGoalsCompanion data) {
+    return SavingsGoal(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      targetMinorUnits: data.targetMinorUnits.present
+          ? data.targetMinorUnits.value
+          : this.targetMinorUnits,
+      currency: data.currency.present ? data.currency.value : this.currency,
+      accountId: data.accountId.present ? data.accountId.value : this.accountId,
+      targetDate:
+          data.targetDate.present ? data.targetDate.value : this.targetDate,
+      status: data.status.present ? data.status.value : this.status,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SavingsGoal(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('targetMinorUnits: $targetMinorUnits, ')
+          ..write('currency: $currency, ')
+          ..write('accountId: $accountId, ')
+          ..write('targetDate: $targetDate, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, targetMinorUnits, currency,
+      accountId, targetDate, status, createdAt, updatedAt, deletedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SavingsGoal &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.targetMinorUnits == this.targetMinorUnits &&
+          other.currency == this.currency &&
+          other.accountId == this.accountId &&
+          other.targetDate == this.targetDate &&
+          other.status == this.status &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt);
+}
+
+class SavingsGoalsCompanion extends UpdateCompanion<SavingsGoal> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<int> targetMinorUnits;
+  final Value<String> currency;
+  final Value<String> accountId;
+  final Value<String?> targetDate;
+  final Value<String> status;
+  final Value<String> createdAt;
+  final Value<String> updatedAt;
+  final Value<String?> deletedAt;
+  final Value<int> rowid;
+  const SavingsGoalsCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.targetMinorUnits = const Value.absent(),
+    this.currency = const Value.absent(),
+    this.accountId = const Value.absent(),
+    this.targetDate = const Value.absent(),
+    this.status = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SavingsGoalsCompanion.insert({
+    required String id,
+    required String name,
+    required int targetMinorUnits,
+    required String currency,
+    required String accountId,
+    this.targetDate = const Value.absent(),
+    this.status = const Value.absent(),
+    required String createdAt,
+    required String updatedAt,
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        name = Value(name),
+        targetMinorUnits = Value(targetMinorUnits),
+        currency = Value(currency),
+        accountId = Value(accountId),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt);
+  static Insertable<SavingsGoal> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<int>? targetMinorUnits,
+    Expression<String>? currency,
+    Expression<String>? accountId,
+    Expression<String>? targetDate,
+    Expression<String>? status,
+    Expression<String>? createdAt,
+    Expression<String>? updatedAt,
+    Expression<String>? deletedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (targetMinorUnits != null) 'targetMinorUnits': targetMinorUnits,
+      if (currency != null) 'currency': currency,
+      if (accountId != null) 'accountId': accountId,
+      if (targetDate != null) 'targetDate': targetDate,
+      if (status != null) 'status': status,
+      if (createdAt != null) 'createdAt': createdAt,
+      if (updatedAt != null) 'updatedAt': updatedAt,
+      if (deletedAt != null) 'deletedAt': deletedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SavingsGoalsCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? name,
+      Value<int>? targetMinorUnits,
+      Value<String>? currency,
+      Value<String>? accountId,
+      Value<String?>? targetDate,
+      Value<String>? status,
+      Value<String>? createdAt,
+      Value<String>? updatedAt,
+      Value<String?>? deletedAt,
+      Value<int>? rowid}) {
+    return SavingsGoalsCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      targetMinorUnits: targetMinorUnits ?? this.targetMinorUnits,
+      currency: currency ?? this.currency,
+      accountId: accountId ?? this.accountId,
+      targetDate: targetDate ?? this.targetDate,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (targetMinorUnits.present) {
+      map['targetMinorUnits'] = Variable<int>(targetMinorUnits.value);
+    }
+    if (currency.present) {
+      map['currency'] = Variable<String>(currency.value);
+    }
+    if (accountId.present) {
+      map['accountId'] = Variable<String>(accountId.value);
+    }
+    if (targetDate.present) {
+      map['targetDate'] = Variable<String>(targetDate.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (createdAt.present) {
+      map['createdAt'] = Variable<String>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updatedAt'] = Variable<String>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deletedAt'] = Variable<String>(deletedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SavingsGoalsCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('targetMinorUnits: $targetMinorUnits, ')
+          ..write('currency: $currency, ')
+          ..write('accountId: $accountId, ')
+          ..write('targetDate: $targetDate, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $SavingsContributionsTable extends SavingsContributions
+    with TableInfo<$SavingsContributionsTable, SavingsContribution> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SavingsContributionsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _goalIdMeta = const VerificationMeta('goalId');
+  @override
+  late final GeneratedColumn<String> goalId = GeneratedColumn<String>(
+      'goalId', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES savings_goals (id) ON DELETE RESTRICT'));
+  static const VerificationMeta _amountMinorUnitsMeta =
+      const VerificationMeta('amountMinorUnits');
+  @override
+  late final GeneratedColumn<int> amountMinorUnits = GeneratedColumn<int>(
+      'amountMinorUnits', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _dateMeta = const VerificationMeta('date');
+  @override
+  late final GeneratedColumn<String> date = GeneratedColumn<String>(
+      'date', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+      'notes', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+      'createdAt', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<String> updatedAt = GeneratedColumn<String>(
+      'updatedAt', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _deletedAtMeta =
+      const VerificationMeta('deletedAt');
+  @override
+  late final GeneratedColumn<String> deletedAt = GeneratedColumn<String>(
+      'deletedAt', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        goalId,
+        amountMinorUnits,
+        date,
+        notes,
+        createdAt,
+        updatedAt,
+        deletedAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'savings_contributions';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<SavingsContribution> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('goalId')) {
+      context.handle(_goalIdMeta,
+          goalId.isAcceptableOrUnknown(data['goalId']!, _goalIdMeta));
+    } else if (isInserting) {
+      context.missing(_goalIdMeta);
+    }
+    if (data.containsKey('amountMinorUnits')) {
+      context.handle(
+          _amountMinorUnitsMeta,
+          amountMinorUnits.isAcceptableOrUnknown(
+              data['amountMinorUnits']!, _amountMinorUnitsMeta));
+    } else if (isInserting) {
+      context.missing(_amountMinorUnitsMeta);
+    }
+    if (data.containsKey('date')) {
+      context.handle(
+          _dateMeta, date.isAcceptableOrUnknown(data['date']!, _dateMeta));
+    } else if (isInserting) {
+      context.missing(_dateMeta);
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+          _notesMeta, notes.isAcceptableOrUnknown(data['notes']!, _notesMeta));
+    }
+    if (data.containsKey('createdAt')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['createdAt']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updatedAt')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updatedAt']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deletedAt')) {
+      context.handle(_deletedAtMeta,
+          deletedAt.isAcceptableOrUnknown(data['deletedAt']!, _deletedAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SavingsContribution map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SavingsContribution(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      goalId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}goalId'])!,
+      amountMinorUnits: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}amountMinorUnits'])!,
+      date: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}date'])!,
+      notes: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}notes']),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}createdAt'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}updatedAt'])!,
+      deletedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}deletedAt']),
+    );
+  }
+
+  @override
+  $SavingsContributionsTable createAlias(String alias) {
+    return $SavingsContributionsTable(attachedDatabase, alias);
+  }
+}
+
+class SavingsContribution extends DataClass
+    implements Insertable<SavingsContribution> {
+  final String id;
+  final String goalId;
+  final int amountMinorUnits;
+  final String date;
+  final String? notes;
+  final String createdAt;
+  final String updatedAt;
+  final String? deletedAt;
+  const SavingsContribution(
+      {required this.id,
+      required this.goalId,
+      required this.amountMinorUnits,
+      required this.date,
+      this.notes,
+      required this.createdAt,
+      required this.updatedAt,
+      this.deletedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['goalId'] = Variable<String>(goalId);
+    map['amountMinorUnits'] = Variable<int>(amountMinorUnits);
+    map['date'] = Variable<String>(date);
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
+    map['createdAt'] = Variable<String>(createdAt);
+    map['updatedAt'] = Variable<String>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deletedAt'] = Variable<String>(deletedAt);
+    }
+    return map;
+  }
+
+  SavingsContributionsCompanion toCompanion(bool nullToAbsent) {
+    return SavingsContributionsCompanion(
+      id: Value(id),
+      goalId: Value(goalId),
+      amountMinorUnits: Value(amountMinorUnits),
+      date: Value(date),
+      notes:
+          notes == null && nullToAbsent ? const Value.absent() : Value(notes),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+    );
+  }
+
+  factory SavingsContribution.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SavingsContribution(
+      id: serializer.fromJson<String>(json['id']),
+      goalId: serializer.fromJson<String>(json['goalId']),
+      amountMinorUnits: serializer.fromJson<int>(json['amountMinorUnits']),
+      date: serializer.fromJson<String>(json['date']),
+      notes: serializer.fromJson<String?>(json['notes']),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+      updatedAt: serializer.fromJson<String>(json['updatedAt']),
+      deletedAt: serializer.fromJson<String?>(json['deletedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'goalId': serializer.toJson<String>(goalId),
+      'amountMinorUnits': serializer.toJson<int>(amountMinorUnits),
+      'date': serializer.toJson<String>(date),
+      'notes': serializer.toJson<String?>(notes),
+      'createdAt': serializer.toJson<String>(createdAt),
+      'updatedAt': serializer.toJson<String>(updatedAt),
+      'deletedAt': serializer.toJson<String?>(deletedAt),
+    };
+  }
+
+  SavingsContribution copyWith(
+          {String? id,
+          String? goalId,
+          int? amountMinorUnits,
+          String? date,
+          Value<String?> notes = const Value.absent(),
+          String? createdAt,
+          String? updatedAt,
+          Value<String?> deletedAt = const Value.absent()}) =>
+      SavingsContribution(
+        id: id ?? this.id,
+        goalId: goalId ?? this.goalId,
+        amountMinorUnits: amountMinorUnits ?? this.amountMinorUnits,
+        date: date ?? this.date,
+        notes: notes.present ? notes.value : this.notes,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+      );
+  SavingsContribution copyWithCompanion(SavingsContributionsCompanion data) {
+    return SavingsContribution(
+      id: data.id.present ? data.id.value : this.id,
+      goalId: data.goalId.present ? data.goalId.value : this.goalId,
+      amountMinorUnits: data.amountMinorUnits.present
+          ? data.amountMinorUnits.value
+          : this.amountMinorUnits,
+      date: data.date.present ? data.date.value : this.date,
+      notes: data.notes.present ? data.notes.value : this.notes,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SavingsContribution(')
+          ..write('id: $id, ')
+          ..write('goalId: $goalId, ')
+          ..write('amountMinorUnits: $amountMinorUnits, ')
+          ..write('date: $date, ')
+          ..write('notes: $notes, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, goalId, amountMinorUnits, date, notes,
+      createdAt, updatedAt, deletedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SavingsContribution &&
+          other.id == this.id &&
+          other.goalId == this.goalId &&
+          other.amountMinorUnits == this.amountMinorUnits &&
+          other.date == this.date &&
+          other.notes == this.notes &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt);
+}
+
+class SavingsContributionsCompanion
+    extends UpdateCompanion<SavingsContribution> {
+  final Value<String> id;
+  final Value<String> goalId;
+  final Value<int> amountMinorUnits;
+  final Value<String> date;
+  final Value<String?> notes;
+  final Value<String> createdAt;
+  final Value<String> updatedAt;
+  final Value<String?> deletedAt;
+  final Value<int> rowid;
+  const SavingsContributionsCompanion({
+    this.id = const Value.absent(),
+    this.goalId = const Value.absent(),
+    this.amountMinorUnits = const Value.absent(),
+    this.date = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SavingsContributionsCompanion.insert({
+    required String id,
+    required String goalId,
+    required int amountMinorUnits,
+    required String date,
+    this.notes = const Value.absent(),
+    required String createdAt,
+    required String updatedAt,
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        goalId = Value(goalId),
+        amountMinorUnits = Value(amountMinorUnits),
+        date = Value(date),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt);
+  static Insertable<SavingsContribution> custom({
+    Expression<String>? id,
+    Expression<String>? goalId,
+    Expression<int>? amountMinorUnits,
+    Expression<String>? date,
+    Expression<String>? notes,
+    Expression<String>? createdAt,
+    Expression<String>? updatedAt,
+    Expression<String>? deletedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (goalId != null) 'goalId': goalId,
+      if (amountMinorUnits != null) 'amountMinorUnits': amountMinorUnits,
+      if (date != null) 'date': date,
+      if (notes != null) 'notes': notes,
+      if (createdAt != null) 'createdAt': createdAt,
+      if (updatedAt != null) 'updatedAt': updatedAt,
+      if (deletedAt != null) 'deletedAt': deletedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SavingsContributionsCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? goalId,
+      Value<int>? amountMinorUnits,
+      Value<String>? date,
+      Value<String?>? notes,
+      Value<String>? createdAt,
+      Value<String>? updatedAt,
+      Value<String?>? deletedAt,
+      Value<int>? rowid}) {
+    return SavingsContributionsCompanion(
+      id: id ?? this.id,
+      goalId: goalId ?? this.goalId,
+      amountMinorUnits: amountMinorUnits ?? this.amountMinorUnits,
+      date: date ?? this.date,
+      notes: notes ?? this.notes,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (goalId.present) {
+      map['goalId'] = Variable<String>(goalId.value);
+    }
+    if (amountMinorUnits.present) {
+      map['amountMinorUnits'] = Variable<int>(amountMinorUnits.value);
+    }
+    if (date.present) {
+      map['date'] = Variable<String>(date.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (createdAt.present) {
+      map['createdAt'] = Variable<String>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updatedAt'] = Variable<String>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deletedAt'] = Variable<String>(deletedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SavingsContributionsCompanion(')
+          ..write('id: $id, ')
+          ..write('goalId: $goalId, ')
+          ..write('amountMinorUnits: $amountMinorUnits, ')
+          ..write('date: $date, ')
+          ..write('notes: $notes, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$WalletMeltDatabase extends GeneratedDatabase {
   _$WalletMeltDatabase(QueryExecutor e) : super(e);
   $WalletMeltDatabaseManager get managers => $WalletMeltDatabaseManager(this);
@@ -13582,6 +14533,9 @@ abstract class _$WalletMeltDatabase extends GeneratedDatabase {
   late final $IncomesTable incomes = $IncomesTable(this);
   late final $IncomeSchedulesTable incomeSchedules =
       $IncomeSchedulesTable(this);
+  late final $SavingsGoalsTable savingsGoals = $SavingsGoalsTable(this);
+  late final $SavingsContributionsTable savingsContributions =
+      $SavingsContributionsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -13612,7 +14566,9 @@ abstract class _$WalletMeltDatabase extends GeneratedDatabase {
         monthlyBudgets,
         accountMovements,
         incomes,
-        incomeSchedules
+        incomeSchedules,
+        savingsGoals,
+        savingsContributions
       ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
@@ -15045,6 +16001,20 @@ final class $$AccountsTableReferences
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: cache));
   }
+
+  static MultiTypedResultKey<$SavingsGoalsTable, List<SavingsGoal>>
+      _savingsGoalsRefsTable(_$WalletMeltDatabase db) =>
+          MultiTypedResultKey.fromTable(db.savingsGoals,
+              aliasName: 'accounts__id__savings_goals__accountId');
+
+  $$SavingsGoalsTableProcessedTableManager get savingsGoalsRefs {
+    final manager = $$SavingsGoalsTableTableManager($_db, $_db.savingsGoals)
+        .filter((f) => f.accountId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_savingsGoalsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
 }
 
 class $$AccountsTableFilterComposer
@@ -15218,6 +16188,27 @@ class $$AccountsTableFilterComposer
             $$IncomeSchedulesTableFilterComposer(
               $db: $db,
               $table: $db.incomeSchedules,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<bool> savingsGoalsRefs(
+      Expression<bool> Function($$SavingsGoalsTableFilterComposer f) f) {
+    final $$SavingsGoalsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.savingsGoals,
+        getReferencedColumn: (t) => t.accountId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$SavingsGoalsTableFilterComposer(
+              $db: $db,
+              $table: $db.savingsGoals,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -15457,6 +16448,27 @@ class $$AccountsTableAnnotationComposer
             ));
     return f(composer);
   }
+
+  Expression<T> savingsGoalsRefs<T extends Object>(
+      Expression<T> Function($$SavingsGoalsTableAnnotationComposer a) f) {
+    final $$SavingsGoalsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.savingsGoals,
+        getReferencedColumn: (t) => t.accountId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$SavingsGoalsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.savingsGoals,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 }
 
 class $$AccountsTableTableManager extends RootTableManager<
@@ -15476,7 +16488,8 @@ class $$AccountsTableTableManager extends RootTableManager<
         bool subscriptionsRefs,
         bool accountMovementsRefs,
         bool incomesRefs,
-        bool incomeSchedulesRefs})> {
+        bool incomeSchedulesRefs,
+        bool savingsGoalsRefs})> {
   $$AccountsTableTableManager(_$WalletMeltDatabase db, $AccountsTable table)
       : super(TableManagerState(
           db: db,
@@ -15565,7 +16578,8 @@ class $$AccountsTableTableManager extends RootTableManager<
               subscriptionsRefs = false,
               accountMovementsRefs = false,
               incomesRefs = false,
-              incomeSchedulesRefs = false}) {
+              incomeSchedulesRefs = false,
+              savingsGoalsRefs = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [
@@ -15574,7 +16588,8 @@ class $$AccountsTableTableManager extends RootTableManager<
                 if (subscriptionsRefs) db.subscriptions,
                 if (accountMovementsRefs) db.accountMovements,
                 if (incomesRefs) db.incomes,
-                if (incomeSchedulesRefs) db.incomeSchedules
+                if (incomeSchedulesRefs) db.incomeSchedules,
+                if (savingsGoalsRefs) db.savingsGoals
               ],
               addJoins: null,
               getPrefetchedDataCallback: (items) async {
@@ -15654,6 +16669,19 @@ class $$AccountsTableTableManager extends RootTableManager<
                         referencedItemsForCurrentItem:
                             (item, referencedItems) => referencedItems
                                 .where((e) => e.accountId == item.id),
+                        typedResults: items),
+                  if (savingsGoalsRefs)
+                    await $_getPrefetchedData<Account, $AccountsTable,
+                            SavingsGoal>(
+                        currentTable: table,
+                        referencedTable: $$AccountsTableReferences
+                            ._savingsGoalsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$AccountsTableReferences(db, table, p0)
+                                .savingsGoalsRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.accountId == item.id),
                         typedResults: items)
                 ];
               },
@@ -15679,7 +16707,8 @@ typedef $$AccountsTableProcessedTableManager = ProcessedTableManager<
         bool subscriptionsRefs,
         bool accountMovementsRefs,
         bool incomesRefs,
-        bool incomeSchedulesRefs})>;
+        bool incomeSchedulesRefs,
+        bool savingsGoalsRefs})>;
 typedef $$ExpensesTableCreateCompanionBuilder = ExpensesCompanion Function({
   required String id,
   required double amount,
@@ -24828,6 +25857,766 @@ typedef $$IncomeSchedulesTableProcessedTableManager = ProcessedTableManager<
     (IncomeSchedule, $$IncomeSchedulesTableReferences),
     IncomeSchedule,
     PrefetchHooks Function({bool accountId})>;
+typedef $$SavingsGoalsTableCreateCompanionBuilder = SavingsGoalsCompanion
+    Function({
+  required String id,
+  required String name,
+  required int targetMinorUnits,
+  required String currency,
+  required String accountId,
+  Value<String?> targetDate,
+  Value<String> status,
+  required String createdAt,
+  required String updatedAt,
+  Value<String?> deletedAt,
+  Value<int> rowid,
+});
+typedef $$SavingsGoalsTableUpdateCompanionBuilder = SavingsGoalsCompanion
+    Function({
+  Value<String> id,
+  Value<String> name,
+  Value<int> targetMinorUnits,
+  Value<String> currency,
+  Value<String> accountId,
+  Value<String?> targetDate,
+  Value<String> status,
+  Value<String> createdAt,
+  Value<String> updatedAt,
+  Value<String?> deletedAt,
+  Value<int> rowid,
+});
+
+final class $$SavingsGoalsTableReferences extends BaseReferences<
+    _$WalletMeltDatabase, $SavingsGoalsTable, SavingsGoal> {
+  $$SavingsGoalsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $AccountsTable _accountIdTable(_$WalletMeltDatabase db) =>
+      db.accounts.createAlias('savings_goals__accountId__accounts__id');
+
+  $$AccountsTableProcessedTableManager get accountId {
+    final $_column = $_itemColumn<String>('accountId')!;
+
+    final manager = $$AccountsTableTableManager($_db, $_db.accounts)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_accountIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static MultiTypedResultKey<$SavingsContributionsTable,
+      List<SavingsContribution>> _savingsContributionsRefsTable(
+          _$WalletMeltDatabase db) =>
+      MultiTypedResultKey.fromTable(db.savingsContributions,
+          aliasName: 'savings_goals__id__savings_contributions__goalId');
+
+  $$SavingsContributionsTableProcessedTableManager
+      get savingsContributionsRefs {
+    final manager =
+        $$SavingsContributionsTableTableManager($_db, $_db.savingsContributions)
+            .filter((f) => f.goalId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache =
+        $_typedResult.readTableOrNull(_savingsContributionsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+}
+
+class $$SavingsGoalsTableFilterComposer
+    extends Composer<_$WalletMeltDatabase, $SavingsGoalsTable> {
+  $$SavingsGoalsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get targetMinorUnits => $composableBuilder(
+      column: $table.targetMinorUnits,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get currency => $composableBuilder(
+      column: $table.currency, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get targetDate => $composableBuilder(
+      column: $table.targetDate, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get status => $composableBuilder(
+      column: $table.status, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnFilters(column));
+
+  $$AccountsTableFilterComposer get accountId {
+    final $$AccountsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.accountId,
+        referencedTable: $db.accounts,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$AccountsTableFilterComposer(
+              $db: $db,
+              $table: $db.accounts,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  Expression<bool> savingsContributionsRefs(
+      Expression<bool> Function($$SavingsContributionsTableFilterComposer f)
+          f) {
+    final $$SavingsContributionsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.savingsContributions,
+        getReferencedColumn: (t) => t.goalId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$SavingsContributionsTableFilterComposer(
+              $db: $db,
+              $table: $db.savingsContributions,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+}
+
+class $$SavingsGoalsTableOrderingComposer
+    extends Composer<_$WalletMeltDatabase, $SavingsGoalsTable> {
+  $$SavingsGoalsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get targetMinorUnits => $composableBuilder(
+      column: $table.targetMinorUnits,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get currency => $composableBuilder(
+      column: $table.currency, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get targetDate => $composableBuilder(
+      column: $table.targetDate, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get status => $composableBuilder(
+      column: $table.status, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
+
+  $$AccountsTableOrderingComposer get accountId {
+    final $$AccountsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.accountId,
+        referencedTable: $db.accounts,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$AccountsTableOrderingComposer(
+              $db: $db,
+              $table: $db.accounts,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$SavingsGoalsTableAnnotationComposer
+    extends Composer<_$WalletMeltDatabase, $SavingsGoalsTable> {
+  $$SavingsGoalsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<int> get targetMinorUnits => $composableBuilder(
+      column: $table.targetMinorUnits, builder: (column) => column);
+
+  GeneratedColumn<String> get currency =>
+      $composableBuilder(column: $table.currency, builder: (column) => column);
+
+  GeneratedColumn<String> get targetDate => $composableBuilder(
+      column: $table.targetDate, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  $$AccountsTableAnnotationComposer get accountId {
+    final $$AccountsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.accountId,
+        referencedTable: $db.accounts,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$AccountsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.accounts,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  Expression<T> savingsContributionsRefs<T extends Object>(
+      Expression<T> Function($$SavingsContributionsTableAnnotationComposer a)
+          f) {
+    final $$SavingsContributionsTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.id,
+            referencedTable: $db.savingsContributions,
+            getReferencedColumn: (t) => t.goalId,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$SavingsContributionsTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.savingsContributions,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return f(composer);
+  }
+}
+
+class $$SavingsGoalsTableTableManager extends RootTableManager<
+    _$WalletMeltDatabase,
+    $SavingsGoalsTable,
+    SavingsGoal,
+    $$SavingsGoalsTableFilterComposer,
+    $$SavingsGoalsTableOrderingComposer,
+    $$SavingsGoalsTableAnnotationComposer,
+    $$SavingsGoalsTableCreateCompanionBuilder,
+    $$SavingsGoalsTableUpdateCompanionBuilder,
+    (SavingsGoal, $$SavingsGoalsTableReferences),
+    SavingsGoal,
+    PrefetchHooks Function({bool accountId, bool savingsContributionsRefs})> {
+  $$SavingsGoalsTableTableManager(
+      _$WalletMeltDatabase db, $SavingsGoalsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SavingsGoalsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SavingsGoalsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SavingsGoalsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<int> targetMinorUnits = const Value.absent(),
+            Value<String> currency = const Value.absent(),
+            Value<String> accountId = const Value.absent(),
+            Value<String?> targetDate = const Value.absent(),
+            Value<String> status = const Value.absent(),
+            Value<String> createdAt = const Value.absent(),
+            Value<String> updatedAt = const Value.absent(),
+            Value<String?> deletedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              SavingsGoalsCompanion(
+            id: id,
+            name: name,
+            targetMinorUnits: targetMinorUnits,
+            currency: currency,
+            accountId: accountId,
+            targetDate: targetDate,
+            status: status,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String name,
+            required int targetMinorUnits,
+            required String currency,
+            required String accountId,
+            Value<String?> targetDate = const Value.absent(),
+            Value<String> status = const Value.absent(),
+            required String createdAt,
+            required String updatedAt,
+            Value<String?> deletedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              SavingsGoalsCompanion.insert(
+            id: id,
+            name: name,
+            targetMinorUnits: targetMinorUnits,
+            currency: currency,
+            accountId: accountId,
+            targetDate: targetDate,
+            status: status,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$SavingsGoalsTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: (
+              {accountId = false, savingsContributionsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (savingsContributionsRefs) db.savingsContributions
+              ],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (accountId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.accountId,
+                    referencedTable:
+                        $$SavingsGoalsTableReferences._accountIdTable(db),
+                    referencedColumn:
+                        $$SavingsGoalsTableReferences._accountIdTable(db).id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (savingsContributionsRefs)
+                    await $_getPrefetchedData<SavingsGoal, $SavingsGoalsTable,
+                            SavingsContribution>(
+                        currentTable: table,
+                        referencedTable: $$SavingsGoalsTableReferences
+                            ._savingsContributionsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$SavingsGoalsTableReferences(db, table, p0)
+                                .savingsContributionsRefs,
+                        referencedItemsForCurrentItem: (item,
+                                referencedItems) =>
+                            referencedItems.where((e) => e.goalId == item.id),
+                        typedResults: items)
+                ];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$SavingsGoalsTableProcessedTableManager = ProcessedTableManager<
+    _$WalletMeltDatabase,
+    $SavingsGoalsTable,
+    SavingsGoal,
+    $$SavingsGoalsTableFilterComposer,
+    $$SavingsGoalsTableOrderingComposer,
+    $$SavingsGoalsTableAnnotationComposer,
+    $$SavingsGoalsTableCreateCompanionBuilder,
+    $$SavingsGoalsTableUpdateCompanionBuilder,
+    (SavingsGoal, $$SavingsGoalsTableReferences),
+    SavingsGoal,
+    PrefetchHooks Function({bool accountId, bool savingsContributionsRefs})>;
+typedef $$SavingsContributionsTableCreateCompanionBuilder
+    = SavingsContributionsCompanion Function({
+  required String id,
+  required String goalId,
+  required int amountMinorUnits,
+  required String date,
+  Value<String?> notes,
+  required String createdAt,
+  required String updatedAt,
+  Value<String?> deletedAt,
+  Value<int> rowid,
+});
+typedef $$SavingsContributionsTableUpdateCompanionBuilder
+    = SavingsContributionsCompanion Function({
+  Value<String> id,
+  Value<String> goalId,
+  Value<int> amountMinorUnits,
+  Value<String> date,
+  Value<String?> notes,
+  Value<String> createdAt,
+  Value<String> updatedAt,
+  Value<String?> deletedAt,
+  Value<int> rowid,
+});
+
+final class $$SavingsContributionsTableReferences extends BaseReferences<
+    _$WalletMeltDatabase, $SavingsContributionsTable, SavingsContribution> {
+  $$SavingsContributionsTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static $SavingsGoalsTable _goalIdTable(_$WalletMeltDatabase db) =>
+      db.savingsGoals
+          .createAlias('savings_contributions__goalId__savings_goals__id');
+
+  $$SavingsGoalsTableProcessedTableManager get goalId {
+    final $_column = $_itemColumn<String>('goalId')!;
+
+    final manager = $$SavingsGoalsTableTableManager($_db, $_db.savingsGoals)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_goalIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$SavingsContributionsTableFilterComposer
+    extends Composer<_$WalletMeltDatabase, $SavingsContributionsTable> {
+  $$SavingsContributionsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get amountMinorUnits => $composableBuilder(
+      column: $table.amountMinorUnits,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get date => $composableBuilder(
+      column: $table.date, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get notes => $composableBuilder(
+      column: $table.notes, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnFilters(column));
+
+  $$SavingsGoalsTableFilterComposer get goalId {
+    final $$SavingsGoalsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.goalId,
+        referencedTable: $db.savingsGoals,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$SavingsGoalsTableFilterComposer(
+              $db: $db,
+              $table: $db.savingsGoals,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$SavingsContributionsTableOrderingComposer
+    extends Composer<_$WalletMeltDatabase, $SavingsContributionsTable> {
+  $$SavingsContributionsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get amountMinorUnits => $composableBuilder(
+      column: $table.amountMinorUnits,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get date => $composableBuilder(
+      column: $table.date, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+      column: $table.notes, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
+
+  $$SavingsGoalsTableOrderingComposer get goalId {
+    final $$SavingsGoalsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.goalId,
+        referencedTable: $db.savingsGoals,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$SavingsGoalsTableOrderingComposer(
+              $db: $db,
+              $table: $db.savingsGoals,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$SavingsContributionsTableAnnotationComposer
+    extends Composer<_$WalletMeltDatabase, $SavingsContributionsTable> {
+  $$SavingsContributionsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get amountMinorUnits => $composableBuilder(
+      column: $table.amountMinorUnits, builder: (column) => column);
+
+  GeneratedColumn<String> get date =>
+      $composableBuilder(column: $table.date, builder: (column) => column);
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  $$SavingsGoalsTableAnnotationComposer get goalId {
+    final $$SavingsGoalsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.goalId,
+        referencedTable: $db.savingsGoals,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$SavingsGoalsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.savingsGoals,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$SavingsContributionsTableTableManager extends RootTableManager<
+    _$WalletMeltDatabase,
+    $SavingsContributionsTable,
+    SavingsContribution,
+    $$SavingsContributionsTableFilterComposer,
+    $$SavingsContributionsTableOrderingComposer,
+    $$SavingsContributionsTableAnnotationComposer,
+    $$SavingsContributionsTableCreateCompanionBuilder,
+    $$SavingsContributionsTableUpdateCompanionBuilder,
+    (SavingsContribution, $$SavingsContributionsTableReferences),
+    SavingsContribution,
+    PrefetchHooks Function({bool goalId})> {
+  $$SavingsContributionsTableTableManager(
+      _$WalletMeltDatabase db, $SavingsContributionsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SavingsContributionsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SavingsContributionsTableOrderingComposer(
+                  $db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SavingsContributionsTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> goalId = const Value.absent(),
+            Value<int> amountMinorUnits = const Value.absent(),
+            Value<String> date = const Value.absent(),
+            Value<String?> notes = const Value.absent(),
+            Value<String> createdAt = const Value.absent(),
+            Value<String> updatedAt = const Value.absent(),
+            Value<String?> deletedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              SavingsContributionsCompanion(
+            id: id,
+            goalId: goalId,
+            amountMinorUnits: amountMinorUnits,
+            date: date,
+            notes: notes,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String goalId,
+            required int amountMinorUnits,
+            required String date,
+            Value<String?> notes = const Value.absent(),
+            required String createdAt,
+            required String updatedAt,
+            Value<String?> deletedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              SavingsContributionsCompanion.insert(
+            id: id,
+            goalId: goalId,
+            amountMinorUnits: amountMinorUnits,
+            date: date,
+            notes: notes,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$SavingsContributionsTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: ({goalId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (goalId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.goalId,
+                    referencedTable:
+                        $$SavingsContributionsTableReferences._goalIdTable(db),
+                    referencedColumn: $$SavingsContributionsTableReferences
+                        ._goalIdTable(db)
+                        .id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$SavingsContributionsTableProcessedTableManager
+    = ProcessedTableManager<
+        _$WalletMeltDatabase,
+        $SavingsContributionsTable,
+        SavingsContribution,
+        $$SavingsContributionsTableFilterComposer,
+        $$SavingsContributionsTableOrderingComposer,
+        $$SavingsContributionsTableAnnotationComposer,
+        $$SavingsContributionsTableCreateCompanionBuilder,
+        $$SavingsContributionsTableUpdateCompanionBuilder,
+        (SavingsContribution, $$SavingsContributionsTableReferences),
+        SavingsContribution,
+        PrefetchHooks Function({bool goalId})>;
 
 class $WalletMeltDatabaseManager {
   final _$WalletMeltDatabase _db;
@@ -24886,4 +26675,8 @@ class $WalletMeltDatabaseManager {
       $$IncomesTableTableManager(_db, _db.incomes);
   $$IncomeSchedulesTableTableManager get incomeSchedules =>
       $$IncomeSchedulesTableTableManager(_db, _db.incomeSchedules);
+  $$SavingsGoalsTableTableManager get savingsGoals =>
+      $$SavingsGoalsTableTableManager(_db, _db.savingsGoals);
+  $$SavingsContributionsTableTableManager get savingsContributions =>
+      $$SavingsContributionsTableTableManager(_db, _db.savingsContributions);
 }

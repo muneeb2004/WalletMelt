@@ -24,7 +24,7 @@ related:
   "metadata": {
     "format": "walletmelt.local_json_backup",
     "format_version": 2,
-    "schema_version": 12,
+    "schema_version": 13,
     "app_version": "1.1.2+6",
     "exported_at": "2026-10-15T12:00:00.000",
     "includes": ["expenses", "grocery_items", "categories", "budgets", "monthly_budgets", "settings", "extended"],
@@ -69,3 +69,6 @@ The `settings` section gains `budget_period_start_day` (integer 1 to 28). A miss
 
 ## 7. Debt and subscription account links (schema v12, 2026-10-18)
 `accountId` rides inside the existing `debt_records` and `subscriptions` rows (Drift JSON) and is remapped through the `account` map. A missing key restores as unlinked; a link to an account that is not in the backup is dropped rather than failing the restore. Full Replace deletes `accounts` after `debt_records`. See [[ADR-0014-Debts-and-Subscriptions-Move-Account-Balances]].
+
+## 8. Savings goals (schema v13, 2026-10-18)
+`savings_goals` and `savings_contributions` are optional extended tables (missing = none). `accountId` on goals is remapped through the `account` map; a goal whose account is absent and a contribution whose goal is absent are skipped. Full Replace deletes contributions then goals before `expenses` and `accounts`. See [[ADR-0015-Savings-Goals-Set-Aside-in-Accounts]].

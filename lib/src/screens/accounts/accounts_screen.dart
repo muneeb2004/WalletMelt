@@ -51,6 +51,12 @@ class AccountsScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Accounts'),
         actions: [
+          if (state.goalsAvailable)
+            TextButton.icon(
+              onPressed: () => context.push('/goals'),
+              icon: const Icon(Icons.savings_outlined),
+              label: const Text('Goals'),
+            ),
           if (state.incomeAvailable)
             TextButton.icon(
               onPressed: () => context.push('/income'),
@@ -200,6 +206,8 @@ class _AccountTile extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final negative = balance.balanceMinorUnits < 0;
+    final reserved =
+        context.read<AppState>().reservedByAccount[account.id] ?? 0;
     return WMCard(
       tone: WMCardTone.raised,
       onTap: () => showAccountDetailSheet(context, account.id),
@@ -216,6 +224,8 @@ class _AccountTile extends StatelessWidget {
                   [
                     accountTypeLabel(account.type),
                     if (!account.includeInTotal) 'Not in total',
+                    if (reserved > 0)
+                      '${formatMoneyMinorUnits(reserved, account.currency)} set aside',
                   ].join(' · '),
                   style: textTheme.bodySmall
                       ?.copyWith(color: scheme.onSurfaceVariant),

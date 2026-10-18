@@ -59,6 +59,7 @@ Welcome to the **WalletMelt Engineering Control Plane**. This Obsidian vault ser
 - [[ADR-0012-Income-Schedules-and-Budget-Suggestion]]: (accepted) income facts, confirm-on-arrival recurring income, advisory budget suggestion.
 - [[ADR-0013-Budget-Period-Start-Day]]: (accepted) budget period start day (payday budgeting), no data migration.
 - [[ADR-0014-Debts-and-Subscriptions-Move-Account-Balances]]: (accepted) debts and subscriptions linked to accounts; derived debt cash flow.
+- [[ADR-0015-Savings-Goals-Set-Aside-in-Accounts]]: (accepted) savings goals set aside inside an account; derived reserved and free to spend.
 
 ### 6. Work & Knowledge
 - [[Work-Tracker]]: Current status (Now, Next, Later, Blocked).

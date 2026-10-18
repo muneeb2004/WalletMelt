@@ -47,6 +47,8 @@ const _tables = [
   'account_movements',
   'incomes',
   'income_schedules',
+  'savings_goals',
+  'savings_contributions',
 ];
 
 Future<void> _seed(local.WalletMeltDatabase db) async {
@@ -75,6 +77,10 @@ Future<void> _seed(local.WalletMeltDatabase db) async {
       "INSERT INTO account_movements (id, accountId, kind, amountMinorUnits, date, transferGroupId, createdAt, updatedAt) VALUES ('m1','a1','transfer_out',-100000,'2026-06-04T00:00:00.000','tg1','$_ts','$_ts');");
   await sql(
       "INSERT INTO account_movements (id, accountId, kind, amountMinorUnits, date, transferGroupId, createdAt, updatedAt) VALUES ('m2','a2','transfer_in',100000,'2026-06-04T00:00:00.000','tg1','$_ts','$_ts');");
+  await sql(
+      "INSERT INTO savings_goals (id, name, targetMinorUnits, currency, accountId, status, createdAt, updatedAt) VALUES ('sg1','Laptop',300000,'PKR','a1','active','$_ts','$_ts');");
+  await sql(
+      "INSERT INTO savings_contributions (id, goalId, amountMinorUnits, date, createdAt, updatedAt) VALUES ('sc1','sg1',120000,'2026-06-06T00:00:00.000','$_ts','$_ts');");
   await sql(
       "INSERT INTO incomes (id, accountId, scheduleId, title, source, amountMinorUnits, currency, date, createdAt, updatedAt) VALUES ('in1','a1','is1','Salary','salary',5000000,'PKR','2026-06-05T00:00:00.000','$_ts','$_ts');");
   await sql(
@@ -139,7 +145,9 @@ Future<String> _exportV2(local.WalletMeltDatabase db,
       ..remove('accounts')
       ..remove('account_movements')
       ..remove('incomes')
-      ..remove('income_schedules');
+      ..remove('income_schedules')
+      ..remove('savings_goals')
+      ..remove('savings_contributions');
     extended
       ..['tables'] = tables
       ..remove('expense_account_links');
@@ -496,7 +504,8 @@ void main() {
     await _seed(src);
     final json = await _exportV2(src, legacyExtended: true);
     expect(json, isNot(contains('expense_account_links')));
-    expect(const WalletMeltJsonBackupValidator().validate(json).isValid, isTrue);
+    final validation = const WalletMeltJsonBackupValidator().validate(json);
+    expect(validation.isValid, isTrue, reason: validation.error);
 
     final result = await _restore(dst, tmp, json, RestoreMode.fullReplace);
     expect(result.success, isTrue, reason: result.errorMessage);
@@ -505,6 +514,8 @@ void main() {
     expect(counts['account_movements'], 0);
     expect(counts['incomes'], 0);
     expect(counts['income_schedules'], 0);
+    expect(counts['savings_goals'], 0);
+    expect(counts['savings_contributions'], 0);
     expect(counts['expenses'], 2);
     final link = await dst
         .customSelect("SELECT accountId FROM expenses WHERE id='e1'")
@@ -524,6 +535,8 @@ void main() {
       ..['account_movements'] = <Object?>[]
       ..['incomes'] = <Object?>[]
       ..['income_schedules'] = <Object?>[];
+    // Goals and contributions whose account is gone are skipped (ADR-0015).
+    // (They stay in the section on purpose.)
     extended['tables'] = tables;
     extended['expense_account_links'] = <Object?>[];
     final json = const WalletMeltJsonBackupEncoder().encode(
@@ -567,5 +580,11 @@ void main() {
         .customSelect("SELECT accountId FROM debt_records WHERE id='d1'")
         .getSingle();
     expect(debt.read<String?>('accountId'), isNull);
+    final goals = await dst.customSelect('SELECT COUNT(*) c FROM savings_goals').getSingle();
+    final contributions =
+        await dst.customSelect('SELECT COUNT(*) c FROM savings_contributions').getSingle();
+    expect(goals.read<int>('c'), 0, reason: 'goal without its account is skipped');
+    expect(contributions.read<int>('c'), 0,
+        reason: 'contribution without its goal is skipped');
   });
 }

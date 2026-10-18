@@ -11,7 +11,10 @@ related:
 
 # Active Work & Roadmap Registry
 
-## Now (Current Release v1.5.1)
+## Now (Current Release v1.6.0)
+- [x] v1.6.0 (build 13): savings goals set aside inside accounts, free to spend.
+
+## Previous Release (v1.5.1)
 - [x] v1.5.1 (build 12): link or unlink existing debts and subscriptions to an account.
 
 ## Previous Release (v1.5.0)
@@ -89,3 +92,8 @@ Every release bumps `pubspec.yaml` and ships a plain-language, non-technical Wha
 - **Done**: edit-time account linking for debts and subscriptions.
 - **Next**: savings goals set aside inside an account, then committees (BC) with payout turn: each needs an ADR (ADR-0015+), version bump and plain-language What's New.
 - Verified 1.5.1: analyzer clean, 614 tests passing.
+
+## Added 2026-10-18 (v1.6.0)
+- **Done**: savings goals (ADR-0015).
+- **Next**: committees (BC) with monthly installment and payout turn (ADR-0016); then Phase 3 notification capture.
+- Verified 1.6.0: analyzer clean, full suite passing, 35 screenshots.

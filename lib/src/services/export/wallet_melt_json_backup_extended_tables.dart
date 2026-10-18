@@ -26,6 +26,10 @@ class BackupExtendedTables {
         {'accountId': 'account'}),
     _spec('income_schedules', (d) => d.incomeSchedules,
         local.IncomeSchedule.fromJson, {'accountId': 'account'}),
+    _spec('savings_goals', (d) => d.savingsGoals, local.SavingsGoal.fromJson,
+        {'accountId': 'account'}),
+    _spec('savings_contributions', (d) => d.savingsContributions,
+        local.SavingsContribution.fromJson, {'goalId': 'goal'}),
     _spec('stores', (d) => d.stores, local.Store.fromJson,
         {'defaultCategoryId': 'cat'},
         naturalKey: 'normalizedName'),
@@ -71,6 +75,8 @@ class BackupExtendedTables {
     'account_movements',
     'incomes',
     'income_schedules',
+    'savings_goals',
+    'savings_contributions',
   };
 
   static const Set<String> _nullableAccountLinkTables = {
@@ -183,6 +189,7 @@ class BackupExtendedTables {
       'exp': expenseMap,
       'unit': {},
       'account': {},
+      'goal': {},
       'payee': {},
       'store': {},
       'item': {},
@@ -208,6 +215,17 @@ class BackupExtendedTables {
         final sourceId = row['id'] as String;
         final sourceTransactionId = row['fuelTransactionId'] as String?;
         spec.remap(row, maps);
+
+        // Goals need their account and contributions need their goal; rows
+        // whose parent is absent from the backup are skipped, not fatal.
+        if (spec.name == 'savings_goals' &&
+            !await _exists(db, 'accounts', 'id', row['accountId'])) {
+          continue;
+        }
+        if (spec.name == 'savings_contributions' &&
+            !await _exists(db, 'savings_goals', 'id', row['goalId'])) {
+          continue;
+        }
 
         // Optional account links that point at an account the backup does not
         // contain are dropped instead of failing the whole restore.
@@ -314,6 +332,7 @@ class BackupExtendedTables {
     final key = switch (table) {
       'units' => 'unit',
       'accounts' => 'account',
+      'savings_goals' => 'goal',
       'payees' => 'payee',
       'stores' => 'store',
       'items' => 'item',

@@ -48,7 +48,10 @@ import '../data/repositories/drift/drift_monthly_budget_repository.dart';
 import '../types/monthly_budget.dart';
 import '../analytics/balance_calculator.dart';
 import '../utils/budget_period.dart';
+import '../analytics/goal_planner.dart';
 import '../analytics/income_planner.dart';
+import '../data/repositories/drift/drift_goal_repository.dart';
+import '../types/savings_goal.dart' as wm_goal;
 import '../data/repositories/drift/drift_income_repository.dart';
 import '../types/income.dart' as wm_income;
 import '../data/repositories/drift/drift_account_repository.dart';
@@ -69,6 +72,7 @@ class AppState extends ChangeNotifier {
     DriftStoreRepository? driftStoreRepository,
     DriftAccountRepository? driftAccountRepository,
     DriftIncomeRepository? driftIncomeRepository,
+    DriftGoalRepository? driftGoalRepository,
     local.WalletMeltDatabase? driftDatabase,
     SettingsService? settingsService,
     ReceiptStorageService? receiptStorageService,
@@ -94,6 +98,8 @@ class AppState extends ChangeNotifier {
         (driftDatabase != null ? DriftAccountRepository(driftDatabase) : null);
     _incomeRepository = driftIncomeRepository ??
         (driftDatabase != null ? DriftIncomeRepository(driftDatabase) : null);
+    _goalRepository = driftGoalRepository ??
+        (driftDatabase != null ? DriftGoalRepository(driftDatabase) : null);
   }
 
   AppState.test({
@@ -110,6 +116,7 @@ class AppState extends ChangeNotifier {
     DriftStoreRepository? driftStoreRepository,
     DriftAccountRepository? driftAccountRepository,
     DriftIncomeRepository? driftIncomeRepository,
+    DriftGoalRepository? driftGoalRepository,
     SettingsService? settingsService,
     ReceiptStorageService? receiptStorageService,
     WalletMeltSettings? settings,
@@ -137,6 +144,7 @@ class AppState extends ChangeNotifier {
     _driftStoreRepository = driftStoreRepository ?? _FakeDriftStoreRepository();
     _accountRepository = driftAccountRepository;
     _incomeRepository = driftIncomeRepository;
+    _goalRepository = driftGoalRepository;
     isLoading = false;
   }
 
@@ -158,6 +166,29 @@ class AppState extends ChangeNotifier {
   late DriftStoreRepository _driftStoreRepository;
   DriftAccountRepository? _accountRepository;
   DriftIncomeRepository? _incomeRepository;
+  DriftGoalRepository? _goalRepository;
+
+  /// Savings goals need the Drift runtime like accounts (ADR-0015).
+  bool get goalsAvailable => _goalRepository != null;
+  List<wm_goal.GoalProgress> goalProgress = const [];
+
+  /// Money set aside per account by active goals.
+  Map<String, int> get reservedByAccount =>
+      GoalPlanner.reservedByAccount(goalProgress);
+
+  /// Balance minus set-aside money for one account (may be negative).
+  int freeToSpendFor(String accountId) {
+    final balance = accountBalances
+        .where((b) => b.account.id == accountId)
+        .map((b) => b.balanceMinorUnits)
+        .firstOrNull;
+    if (balance == null) return 0;
+    return GoalPlanner.freeToSpend(balance, reservedByAccount[accountId] ?? 0);
+  }
+
+  /// Free-to-spend per currency over accounts included in the total.
+  List<wm_account.CurrencyTotal> get freeToSpendTotals =>
+      GoalPlanner.freeTotalsByCurrency(accountBalances, reservedByAccount);
 
   /// Income needs the Drift runtime like accounts (ADR-0012).
   bool get incomeAvailable => _incomeRepository != null;
@@ -422,8 +453,14 @@ class AppState extends ChangeNotifier {
     savedMerchants = await _driftStoreRepository.listSavedMerchants();
     await _refreshAccounts();
     await _refreshIncome();
+    await _refreshGoals();
 
     notifyListeners();
+  }
+
+  Future<void> _refreshGoals() async {
+    final repo = _goalRepository;
+    goalProgress = repo == null ? const [] : await repo.listProgress();
   }
 
   Future<void> _refreshIncome() async {
@@ -561,6 +598,69 @@ class AppState extends ChangeNotifier {
     await _incomeOrThrow.skipOccurrence(scheduleId);
     await _afterIncomeChange();
   }
+
+  DriftGoalRepository get _goalsOrThrow {
+    final repo = _goalRepository;
+    if (repo == null) {
+      throw StateError('Savings goals are unavailable on this storage backend.');
+    }
+    return repo;
+  }
+
+  Future<void> _afterGoalChange() async {
+    await _refreshGoals();
+    notifyListeners();
+  }
+
+  Future<wm_goal.SavingsGoal> createGoal({
+    required String name,
+    required int targetMinorUnits,
+    required String accountId,
+    DateTime? targetDate,
+  }) async {
+    final goal = await _goalsOrThrow.createGoal(
+      name: name,
+      targetMinorUnits: targetMinorUnits,
+      accountId: accountId,
+      targetDate: targetDate,
+    );
+    await _afterGoalChange();
+    return goal;
+  }
+
+  Future<void> setAsideForGoal(String goalId, int amountMinorUnits,
+      {String? notes}) async {
+    await _goalsOrThrow.setAside(goalId, amountMinorUnits, notes: notes);
+    await _afterGoalChange();
+  }
+
+  Future<void> releaseFromGoal(String goalId, int amountMinorUnits) async {
+    await _goalsOrThrow.release(goalId, amountMinorUnits);
+    await _afterGoalChange();
+  }
+
+  Future<void> markGoalAchieved(String goalId) async {
+    await _goalsOrThrow.markAchieved(goalId);
+    await _afterGoalChange();
+  }
+
+  Future<void> archiveGoal(String goalId) async {
+    await _goalsOrThrow.archive(goalId);
+    await _afterGoalChange();
+  }
+
+  Future<void> reopenGoal(String goalId) async {
+    await _goalsOrThrow.reopen(goalId);
+    await _afterGoalChange();
+  }
+
+  Future<void> deleteGoal(String goalId) async {
+    await _goalsOrThrow.deleteGoal(goalId);
+    await _afterGoalChange();
+  }
+
+  Future<List<wm_goal.GoalContribution>> goalContributions(String goalId) =>
+      _goalsOrThrow.listContributions(goalId);
 
   Future<bool> accountHasTransactions(String id) =>
       _accountsOrThrow.hasLinkedRows(id);

@@ -66,3 +66,6 @@ Everything that was "the calendar month" is now "the budget period": `SpendingAn
 
 ## Debt cash flow (2026-10-18, [[ADR-0014-Debts-and-Subscriptions-Move-Account-Balances]])
 `debtNet` covers debts linked to the account, in the account currency, dated on or after its opening date. Principal at creation: `loanGiven` = minus, `loanTaken` = plus, `owedToMe` and `iOwe` = zero. Repayments: plus for `owedToMe` and `loanGiven`, minus for `iOwe` and `loanTaken` (`ROUND(amount * 100)`; repayments have no minor-unit column). Subscription renewals are ordinary expenses carrying the subscription's account when it is active and in the same currency. Spending analytics are unchanged.
+
+## Savings goals (2026-10-18, [[ADR-0015-Savings-Goals-Set-Aside-in-Accounts]])
+`GoalPlanner` (`lib/src/analytics/goal_planner.dart`, pure): `saved(goal)` = sum of non-deleted contributions; `reserved(account)` = sum of saved over active goals (achieved and archived reserve nothing, negative sums floor at 0); `freeToSpend = balance - reserved` (may be negative); free totals use the same inclusion rules as total balance. `monthsLeft` counts whole calendar months to the target date (minimum 1 while in the future, 0 once passed); `monthlyPace = ceil(remaining / monthsLeft)`, null without a date, once reached or after the date. Account balance and spending analytics are unchanged.

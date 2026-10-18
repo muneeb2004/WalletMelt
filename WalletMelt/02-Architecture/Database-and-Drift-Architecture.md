@@ -15,10 +15,10 @@ related:
 
 ## 1. Storage Engine
 - **Engine**: SQLite via Drift (`drift_flutter` / `sqlite3_flutter_libs`).
-- **Schema Version**: `12`.
+- **Schema Version**: `13`.
 - **Database File**: Stored in platform database directory as `wallet_melt.db`.
 
-## 2. Table Topology (26 Tables)
+## 2. Table Topology (28 Tables)
 ```text
 Core Financial:
   Categories ──< Expenses ──< GroceryItems
@@ -32,6 +32,9 @@ Accounts (v10, [[ADR-0011-Accounts-Derived-Balance-and-Transfers]]):
   Accounts ──< AccountMovements
   Accounts ──< Incomes, Accounts ──< IncomeSchedules (v11, [[ADR-0012-Income-Schedules-and-Budget-Suggestion]])
   Accounts ──< Expenses.accountId (nullable, ON DELETE RESTRICT)
+
+Goals (v13, [[ADR-0015-Savings-Goals-Set-Aside-in-Accounts]]):
+  Accounts ──< SavingsGoals ──< SavingsContributions
 
 Obligations & Debt:
   Payees ──< DebtRecords ──< DebtRepayments
@@ -69,3 +72,6 @@ Metadata & Catalogs:
 
 ## Linking existing debts (2026-10-18)
 `DriftDebtRepository.setAccount(debtId, accountId)` sets or clears `debt_records.accountId`, rejecting archived, missing or other-currency accounts. See [[ADR-0014-Debts-and-Subscriptions-Move-Account-Balances]].
+
+## Savings goals (2026-10-18, schema v13)
+`savings_goals` (required `accountId`, currency from the account, `status`, soft delete) and `savings_contributions` (signed minor units, soft delete), both RESTRICT. Saved and reserved amounts are derived; account balances are untouched. Accounts with goals are archived instead of deleted.

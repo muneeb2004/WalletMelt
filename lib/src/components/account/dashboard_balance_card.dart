@@ -66,6 +66,8 @@ class _DashboardBalanceCardState extends State<DashboardBalanceCard> {
     }
 
     final totals = state.accountTotals;
+    final anyReserved = state.reservedByAccount.values.any((v) => v > 0);
+    final free = anyReserved ? state.freeToSpendTotals : const [];
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.lg),
       child: WMCard(
@@ -90,6 +92,16 @@ class _DashboardBalanceCardState extends State<DashboardBalanceCard> {
                             ? '••••'
                             : formatMoneyMinorUnits(t.minorUnits, t.currency),
                         style: withTabularFigures(textTheme.titleLarge),
+                      ),
+                  if (free.isNotEmpty)
+                    for (final t in free)
+                      Text(
+                        _hidden
+                            ? 'Free to spend ••••'
+                            : 'Free to spend ${formatMoneyMinorUnits(t.minorUnits, t.currency)}',
+                        key: const Key('dashboard_free_to_spend'),
+                        style: textTheme.bodySmall
+                            ?.copyWith(color: scheme.onSurfaceVariant),
                       ),
                 ],
               ),

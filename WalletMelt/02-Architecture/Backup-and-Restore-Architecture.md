@@ -48,3 +48,6 @@ The backup `settings` section now carries `budget_period_start_day` (1 to 28; mi
 
 ## 9. Account links on debts and subscriptions (2026-10-18)
 Schema v12 adds nullable `accountId` to `debt_records` and `subscriptions`. Restore order is accounts first; dangling links are nulled; Full Replace deletes `accounts` after `debt_records`/`subscriptions`. See [[Backup-Format-Specification]] section 7.
+
+## 10. Savings goals (2026-10-18)
+Schema v13 adds `savings_goals` and `savings_contributions` as optional extended keys; skip-on-missing-parent on restore; delete order contributions, goals, then expenses and accounts. See [[Backup-Format-Specification]] section 8.

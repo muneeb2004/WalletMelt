@@ -165,6 +165,50 @@ class IncomeSchedules extends Table {
   Set<Column<Object>> get primaryKey => {id};
 }
 
+/// A target saved inside one account (ADR-0015). Progress is derived from
+/// contributions; the account balance is never changed by a goal.
+class SavingsGoals extends Table {
+  @override
+  String get tableName => 'savings_goals';
+
+  TextColumn get id => text()();
+  TextColumn get name => text()();
+  IntColumn get targetMinorUnits => integer().named('targetMinorUnits')();
+  TextColumn get currency => text()();
+  TextColumn get accountId => text()
+      .named('accountId')
+      .references(Accounts, #id, onDelete: KeyAction.restrict)();
+  TextColumn get targetDate => text().named('targetDate').nullable()();
+  TextColumn get status => text().withDefault(const Constant('active'))();
+  TextColumn get createdAt => text().named('createdAt')();
+  TextColumn get updatedAt => text().named('updatedAt')();
+  TextColumn get deletedAt => text().named('deletedAt').nullable()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// Signed set-aside facts for a goal: positive sets money aside, negative
+/// releases it.
+class SavingsContributions extends Table {
+  @override
+  String get tableName => 'savings_contributions';
+
+  TextColumn get id => text()();
+  TextColumn get goalId => text()
+      .named('goalId')
+      .references(SavingsGoals, #id, onDelete: KeyAction.restrict)();
+  IntColumn get amountMinorUnits => integer().named('amountMinorUnits')();
+  TextColumn get date => text()();
+  TextColumn get notes => text().nullable()();
+  TextColumn get createdAt => text().named('createdAt')();
+  TextColumn get updatedAt => text().named('updatedAt')();
+  TextColumn get deletedAt => text().named('deletedAt').nullable()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
 class GroceryItems extends Table {
   @override
   String get tableName => 'grocery_items';
@@ -632,13 +676,15 @@ class V1MigrationMetrics {
     AccountMovements,
     Incomes,
     IncomeSchedules,
+    SavingsGoals,
+    SavingsContributions,
   ],
 )
 class WalletMeltDatabase extends _$WalletMeltDatabase {
   WalletMeltDatabase(super.executor, {this.preMigrationBackupPath});
   WalletMeltDatabase.memory() : this(openInMemoryConnection());
 
-  static const currentSchemaVersion = 12;
+  static const currentSchemaVersion = 13;
 
   final String? preMigrationBackupPath;
 
@@ -737,6 +783,9 @@ class WalletMeltDatabase extends _$WalletMeltDatabase {
           if (from < 12 && to >= 12) {
             await _upgradeFromV11ToV12(m, from, to);
           }
+          if (from < 13 && to >= 13) {
+            await _upgradeFromV12ToV13(m, from, to);
+          }
         },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON;');
@@ -759,6 +808,8 @@ class WalletMeltDatabase extends _$WalletMeltDatabase {
             'CREATE INDEX IF NOT EXISTS expenses_accountId_date_idx ON expenses (accountId, date);',
             'CREATE INDEX IF NOT EXISTS account_movements_accountId_date_idx ON account_movements (accountId, date);',
             'CREATE INDEX IF NOT EXISTS account_movements_transferGroupId_idx ON account_movements (transferGroupId);',
+            'CREATE INDEX IF NOT EXISTS savings_goals_accountId_idx ON savings_goals (accountId);',
+            'CREATE INDEX IF NOT EXISTS savings_contributions_goalId_idx ON savings_contributions (goalId);',
             'CREATE INDEX IF NOT EXISTS debt_records_accountId_idx ON debt_records (accountId);',
             'CREATE INDEX IF NOT EXISTS subscriptions_accountId_idx ON subscriptions (accountId);',
             'CREATE INDEX IF NOT EXISTS incomes_accountId_date_idx ON incomes (accountId, date);',
@@ -1007,6 +1058,44 @@ class WalletMeltDatabase extends _$WalletMeltDatabase {
       }
     } catch (e) {
       if (hasAudit && from >= 9) {
+        await customStatement(
+          'UPDATE migration_audit SET status = ?, completedAt = ?, errorMessage = ? WHERE id = ?;',
+          ['failed', DateTime.now().toIso8601String(), e.toString(), auditId],
+        );
+      }
+      rethrow;
+    }
+  }
+
+  Future<void> _upgradeFromV12ToV13(Migrator m, int from, int to) async {
+    final hasAudit = await _tableExists('migration_audit');
+    final auditId = 'audit_v12_v13_${DateTime.now().millisecondsSinceEpoch}';
+    if (hasAudit && from >= 12) {
+      await customStatement(
+        'INSERT INTO migration_audit (id, fromVersion, toVersion, startedAt, status, preMigrationBackupPath) VALUES (?, ?, ?, ?, ?, ?);',
+        [auditId, from, to, DateTime.now().toIso8601String(), 'in_progress', preMigrationBackupPath],
+      );
+    }
+    try {
+      if (!await _tableExists('accounts')) await m.createTable(accounts);
+      if (!await _tableExists('savings_goals')) {
+        await m.createTable(savingsGoals);
+      }
+      if (!await _tableExists('savings_contributions')) {
+        await m.createTable(savingsContributions);
+      }
+      await customStatement(
+          'CREATE INDEX IF NOT EXISTS savings_goals_accountId_idx ON savings_goals (accountId);');
+      await customStatement(
+          'CREATE INDEX IF NOT EXISTS savings_contributions_goalId_idx ON savings_contributions (goalId);');
+      if (hasAudit && from >= 12) {
+        await customStatement(
+          'UPDATE migration_audit SET status = ?, completedAt = ? WHERE id = ?;',
+          ['completed', DateTime.now().toIso8601String(), auditId],
+        );
+      }
+    } catch (e) {
+      if (hasAudit && from >= 12) {
         await customStatement(
           'UPDATE migration_audit SET status = ?, completedAt = ?, errorMessage = ? WHERE id = ?;',
           ['failed', DateTime.now().toIso8601String(), e.toString(), auditId],

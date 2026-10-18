@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-18T00:30:12.668167",
-  "totalScreenshots": 34,
+  "generatedAt": "2026-10-18T10:20:20.795330",
+  "totalScreenshots": 35,
   "resolution": "1080x2400",
   "outputDirectory": "walletmelt_screenshots",
   "screenshots": [
@@ -12,7 +12,7 @@
       "relativePath": "01_dashboard/01_dashboard_overview_dark.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 209826,
+      "fileSizeBytes": 208069,
       "status": "verified"
     },
     {
@@ -23,7 +23,7 @@
       "relativePath": "01_dashboard/02_dashboard_overview_light.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 204462,
+      "fileSizeBytes": 203136,
       "status": "verified"
     },
     {
@@ -34,7 +34,7 @@
       "relativePath": "01_dashboard/03_dashboard_budget_adjust_sheet.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 165063,
+      "fileSizeBytes": 165244,
       "status": "verified"
     },
     {
@@ -45,7 +45,7 @@
       "relativePath": "01_dashboard/04_dashboard_scrolled_activity.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 235427,
+      "fileSizeBytes": 232993,
       "status": "verified"
     },
     {
@@ -188,7 +188,7 @@
       "relativePath": "05_debts/02_debts_detail_sheet.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 189288,
+      "fileSizeBytes": 174467,
       "status": "verified"
     },
     {
@@ -199,7 +199,7 @@
       "relativePath": "05_debts/03_debts_add_sheet.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 151005,
+      "fileSizeBytes": 151803,
       "status": "verified"
     },
     {
@@ -221,7 +221,7 @@
       "relativePath": "06_obligations/02_subscriptions_add_sheet.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 147470,
+      "fileSizeBytes": 156305,
       "status": "verified"
     },
     {
@@ -265,7 +265,7 @@
       "relativePath": "08_settings/01_settings_overview.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 195967,
+      "fileSizeBytes": 196253,
       "status": "verified"
     },
     {
@@ -364,7 +364,7 @@
       "relativePath": "11_accounts_income/01_accounts_overview.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 96401,
+      "fileSizeBytes": 105226,
       "status": "verified"
     },
     {
@@ -376,6 +376,17 @@
       "width": 1080,
       "height": 2400,
       "fileSizeBytes": 118544,
+      "status": "verified"
+    },
+    {
+      "id": "11_goals_overview",
+      "category": "11_accounts_income",
+      "title": "Savings Goals Set Aside in an Account",
+      "filename": "03_goals_overview.png",
+      "relativePath": "11_accounts_income/03_goals_overview.png",
+      "width": 1080,
+      "height": 2400,
+      "fileSizeBytes": 113990,
       "status": "verified"
     }
   ]

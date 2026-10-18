@@ -29,7 +29,9 @@ import 'package:wallet_melt/src/types/debt.dart';
 import 'package:wallet_melt/src/types/essential_expense.dart';
 import 'package:wallet_melt/src/types/expense.dart';
 import 'package:wallet_melt/src/types/fuel.dart' as wm_fuel;
+import 'package:wallet_melt/src/data/repositories/drift/drift_goal_repository.dart';
 import 'package:wallet_melt/src/types/grocery_template.dart' as wm_template;
+import 'package:wallet_melt/src/types/savings_goal.dart';
 import 'package:wallet_melt/src/types/income.dart';
 import 'package:wallet_melt/src/types/merchant.dart';
 import 'package:wallet_melt/src/types/payee.dart';
@@ -719,6 +721,7 @@ DemoDataBundle createDemoDataBundle({String? receiptPath}) {
   final demoDb = WalletMeltDatabase(NativeDatabase.memory());
   final accountRepo = DriftAccountRepository(demoDb);
   final incomeRepo = DriftIncomeRepository(demoDb);
+  final goalRepo = DriftGoalRepository(demoDb);
   final stamp = now.toIso8601String();
   Account demoAccount(String id, String name, AccountType type, int sort) =>
       Account(
@@ -784,6 +787,27 @@ DemoDataBundle createDemoDataBundle({String? receiptPath}) {
     ),
   ];
 
+  SavingsGoal demoGoal(String id, String name, int target, {String? date}) =>
+      SavingsGoal(
+        id: id,
+        name: name,
+        targetMinorUnits: target,
+        currency: 'PKR',
+        accountId: 'acc-bank',
+        targetDate: date,
+        status: GoalStatus.active,
+        createdAt: stamp,
+        updatedAt: stamp,
+      );
+  final demoGoals = <GoalProgress>[
+    GoalProgress(
+        goal: demoGoal('goal-1', 'New laptop', 24000000, date: '2027-03-01'),
+        savedMinorUnits: 9000000),
+    GoalProgress(
+        goal: demoGoal('goal-2', 'Semester fees', 12000000, date: '2027-01-15'),
+        savedMinorUnits: 7500000),
+  ];
+
   final darkState = AppState.test(
     driftCategoryRepository: _FakeCategoryRepository(categories),
     driftExpenseRepository: _FakeExpenseRepository(expenses),
@@ -797,6 +821,7 @@ DemoDataBundle createDemoDataBundle({String? receiptPath}) {
     driftStoreRepository: _FakeStoreRepository(merchants),
     driftAccountRepository: accountRepo,
     driftIncomeRepository: incomeRepo,
+    driftGoalRepository: goalRepo,
     settingsService: _FakeSettingsService(darkSettings),
     receiptStorageService: _FakeReceiptStorageService(),
     settings: darkSettings,
@@ -813,6 +838,7 @@ DemoDataBundle createDemoDataBundle({String? receiptPath}) {
   darkState.accountBalances = demoBalances;
   darkState.incomes = demoIncomes;
   darkState.incomeSchedules = demoSchedules;
+  darkState.goalProgress = demoGoals;
   darkState.isLoading = false;
 
   final lightState = AppState.test(
@@ -828,6 +854,7 @@ DemoDataBundle createDemoDataBundle({String? receiptPath}) {
     driftStoreRepository: _FakeStoreRepository(merchants),
     driftAccountRepository: accountRepo,
     driftIncomeRepository: incomeRepo,
+    driftGoalRepository: goalRepo,
     settingsService: _FakeSettingsService(lightSettings),
     receiptStorageService: _FakeReceiptStorageService(),
     settings: lightSettings,
@@ -844,6 +871,7 @@ DemoDataBundle createDemoDataBundle({String? receiptPath}) {
   lightState.accountBalances = demoBalances;
   lightState.incomes = demoIncomes;
   lightState.incomeSchedules = demoSchedules;
+  lightState.goalProgress = demoGoals;
   lightState.isLoading = false;
 
   final pinLockController = _FakePinLockController();

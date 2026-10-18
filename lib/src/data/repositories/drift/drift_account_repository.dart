@@ -115,7 +115,8 @@ class DriftAccountRepository {
       '(SELECT COUNT(*) FROM incomes WHERE accountId = ?1) + '
       '(SELECT COUNT(*) FROM income_schedules WHERE accountId = ?1) + '
       '(SELECT COUNT(*) FROM debt_records WHERE accountId = ?1) + '
-      '(SELECT COUNT(*) FROM subscriptions WHERE accountId = ?1) AS n;',
+      '(SELECT COUNT(*) FROM subscriptions WHERE accountId = ?1) + '
+      '(SELECT COUNT(*) FROM savings_goals WHERE accountId = ?1) AS n;',
       variables: [Variable.withString(accountId)],
     ).getSingle();
     return row.read<int>('n') > 0;

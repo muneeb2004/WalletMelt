@@ -96,7 +96,7 @@ class WhatsNewContent extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        'Link what you already have',
+                        'Save toward your goals',
                         style: TextStyle(
                           fontSize: 12,
                           color: context.scheme.onSurfaceVariant,
@@ -123,9 +123,57 @@ class WhatsNewContent extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Version 1.5.1 Highlights
+              // Version 1.6.0 Highlights
               _buildSectionBadge(
                 label: 'VERSION ${AppVersion.version} UPDATES',
+                color: context.scheme.primary,
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.savings_rounded,
+                iconColor: context.scheme.primary,
+                title: 'Savings goals',
+                description:
+                    'Save toward a laptop, fees or a trip. Pick the account the money lives in, set a target and a date, and watch the progress bar fill as you set money aside.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.lock_clock_rounded,
+                iconColor: context.money.income,
+                title: 'Your balance stays true',
+                description:
+                    'Setting money aside never changes what your account holds. Instead WalletMelt shows what is still free to spend on Home and on each account.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.trending_up_rounded,
+                iconColor: context.money.caution,
+                title: 'How much each month',
+                description:
+                    'If you give a goal a date, WalletMelt suggests about how much to set aside each month to get there on time.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.celebration_rounded,
+                iconColor: context.scheme.secondary,
+                title: 'Mark it achieved',
+                description:
+                    'When you reach a goal, mark it achieved and the money becomes free to spend again. Your history is kept, and backups include your goals.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 24),
+
+              // Version 1.5.1 Highlights
+              _buildSectionBadge(
+                label: 'VERSION 1.5.1 UPDATES',
                 color: context.scheme.primary,
                 isDark: isDark,
               ),
@@ -562,7 +610,7 @@ class WhatsNewContent extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      'Next up: savings goals and committees, and an optional way to add expenses from bank and wallet alerts on your phone. It will always be your choice and stay on your device.',
+                      'Next up: committees (BC) with your payout turn, and an optional way to add expenses from bank and wallet alerts on your phone. It will always be your choice and stay on your device.',
                       style: TextStyle(
                         fontSize: 12,
                         height: 1.45,
