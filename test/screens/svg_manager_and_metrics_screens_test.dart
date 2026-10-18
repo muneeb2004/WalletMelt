@@ -9,6 +9,7 @@ import 'package:wallet_melt/src/services/svg/svg_customization_service.dart';
 import 'package:wallet_melt/src/state/app_state.dart';
 import 'package:wallet_melt/src/types/debt.dart';
 import 'package:wallet_melt/src/types/settings.dart';
+import 'package:wallet_melt/src/utils/budget_period.dart';
 
 class _FakeAppState extends ChangeNotifier implements AppState {
   @override
@@ -16,6 +17,9 @@ class _FakeAppState extends ChangeNotifier implements AppState {
 
   @override
   DateTime get selectedMonth => DateTime(2026, 9, 1);
+
+  @override
+  BudgetPeriod get budgetPeriod => BudgetPeriod.calendar;
 
   @override
   double getCurrentMonthTotalSpent() => 15000.0;

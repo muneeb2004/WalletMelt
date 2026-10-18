@@ -9,6 +9,7 @@ class WalletMeltSettings {
     this.lastExportedAt,
     this.monthlyBudgetAmount,
     this.lastSeenWhatsNewVersion = '',
+    this.budgetPeriodStartDay = 1,
   });
 
   final String currency;
@@ -19,6 +20,9 @@ class WalletMeltSettings {
   final double? monthlyBudgetAmount;
   final String lastSeenWhatsNewVersion;
 
+  /// Day of month (1 to 28) on which a budget period starts (ADR-0013).
+  final int budgetPeriodStartDay;
+
   WalletMeltSettings copyWith({
     String? currency,
     ThemePreference? themePreference,
@@ -28,6 +32,7 @@ class WalletMeltSettings {
     double? monthlyBudgetAmount,
     bool clearMonthlyBudget = false,
     String? lastSeenWhatsNewVersion,
+    int? budgetPeriodStartDay,
   }) {
     return WalletMeltSettings(
       currency: currency ?? this.currency,
@@ -42,6 +47,7 @@ class WalletMeltSettings {
           : (monthlyBudgetAmount ?? this.monthlyBudgetAmount),
       lastSeenWhatsNewVersion:
           lastSeenWhatsNewVersion ?? this.lastSeenWhatsNewVersion,
+      budgetPeriodStartDay: budgetPeriodStartDay ?? this.budgetPeriodStartDay,
     );
   }
 

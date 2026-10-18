@@ -7,7 +7,6 @@ import '../../components/glass/app_background.dart';
 import '../../state/app_state.dart';
 import '../../theme/wallet_melt_theme.dart';
 import '../../utils/currency_format.dart';
-import '../../utils/date_utils.dart';
 
 class MetricCalculationsScreen extends StatelessWidget {
   const MetricCalculationsScreen({super.key});
@@ -28,6 +27,7 @@ class MetricCalculationsScreen extends StatelessWidget {
       monthlyBudget: monthlyBudget,
       totalSpent: totalSpent,
       month: selectedMonth,
+      period: state.budgetPeriod,
     );
 
     final budgetUtil = FinancialMetricsCalculator.calculateBudgetUtilization(
@@ -154,7 +154,7 @@ class MetricCalculationsScreen extends StatelessWidget {
                       ),
                       const Spacer(),
                       Text(
-                        readableMonth(selectedMonth),
+                        state.budgetPeriod.label(selectedMonth),
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,

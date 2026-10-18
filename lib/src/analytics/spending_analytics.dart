@@ -1,4 +1,5 @@
 import '../types/expense.dart';
+import '../utils/budget_period.dart';
 import '../utils/date_utils.dart';
 import '../utils/merchant_normalizer.dart';
 import 'analytics_snapshot.dart';
@@ -15,21 +16,13 @@ class SpendingAnalytics {
     required DateTime selectedMonth,
     required DateTime now,
     required String currency,
+    BudgetPeriod period = BudgetPeriod.calendar,
   }) {
     final prevMonth = DateTime(selectedMonth.year, selectedMonth.month - 1);
-    final daysInMonth = DateTime(selectedMonth.year, selectedMonth.month + 1, 0).day;
+    final daysInMonth = period.lengthInDays(selectedMonth);
 
-    final bool isFuture = selectedMonth.year > now.year ||
-        (selectedMonth.year == now.year && selectedMonth.month > now.month);
-
-    final int daysElapsed;
-    if (isFuture) {
-      daysElapsed = 0;
-    } else if (selectedMonth.year == now.year && selectedMonth.month == now.month) {
-      daysElapsed = now.day.clamp(1, daysInMonth);
-    } else {
-      daysElapsed = daysInMonth;
-    }
+    final bool isFuture = period.isFuture(selectedMonth, now);
+    final int daysElapsed = period.daysElapsed(selectedMonth, now);
 
     double curTotal = 0.0;
     double prevTotal = 0.0;
@@ -65,8 +58,8 @@ class SpendingAnalytics {
       // GLOBAL FUTURE-DATE EXCLUSION: Skip transactions dated after current calendar day
       if (expDate.isAfter(endOfNowDay)) continue;
 
-      final inCurrent = isSameMonth(expDate, selectedMonth);
-      final inPrevious = isSameMonth(expDate, prevMonth);
+      final inCurrent = period.contains(selectedMonth, expDate);
+      final inPrevious = period.contains(prevMonth, expDate);
 
       if (inCurrent) {
         curExpenses.add(exp);
@@ -132,6 +125,7 @@ class SpendingAnalytics {
       previousPositiveTotal: prevPosTotal,
       daysElapsed: daysElapsed,
       daysInMonth: daysInMonth,
+      period: period,
       currentByCategory: Map.unmodifiable(curByCategory),
       previousByCategory: Map.unmodifiable(prevByCategory),
       currentPositiveCountByCategory: Map.unmodifiable(curPosCountByCat),

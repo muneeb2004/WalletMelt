@@ -1,8 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:wallet_melt/src/data/local/wallet_melt_database.dart'
+    show WalletMeltDatabase;
+import 'package:wallet_melt/src/data/repositories/drift/drift_account_repository.dart';
 import 'package:wallet_melt/src/data/repositories/drift/drift_budget_repository.dart';
 import 'package:wallet_melt/src/data/repositories/drift/drift_category_repository.dart';
 import 'package:wallet_melt/src/data/repositories/drift/drift_debt_repository.dart';
@@ -10,6 +14,7 @@ import 'package:wallet_melt/src/data/repositories/drift/drift_essential_expense_
 import 'package:wallet_melt/src/data/repositories/drift/drift_expense_repository.dart';
 import 'package:wallet_melt/src/data/repositories/drift/drift_fuel_repository.dart';
 import 'package:wallet_melt/src/data/repositories/drift/drift_grocery_template_repository.dart';
+import 'package:wallet_melt/src/data/repositories/drift/drift_income_repository.dart';
 import 'package:wallet_melt/src/data/repositories/drift/drift_payee_repository.dart';
 import 'package:wallet_melt/src/data/repositories/drift/drift_store_repository.dart';
 import 'package:wallet_melt/src/data/repositories/drift/drift_subscription_repository.dart';
@@ -17,6 +22,7 @@ import 'package:wallet_melt/src/security/pin_lock_controller.dart';
 import 'package:wallet_melt/src/services/receipt_storage/receipt_storage_service.dart';
 import 'package:wallet_melt/src/services/settings/settings_service.dart';
 import 'package:wallet_melt/src/state/app_state.dart';
+import 'package:wallet_melt/src/types/account.dart';
 import 'package:wallet_melt/src/types/budget.dart';
 import 'package:wallet_melt/src/types/category.dart' as wm;
 import 'package:wallet_melt/src/types/debt.dart';
@@ -24,6 +30,7 @@ import 'package:wallet_melt/src/types/essential_expense.dart';
 import 'package:wallet_melt/src/types/expense.dart';
 import 'package:wallet_melt/src/types/fuel.dart' as wm_fuel;
 import 'package:wallet_melt/src/types/grocery_template.dart' as wm_template;
+import 'package:wallet_melt/src/types/income.dart';
 import 'package:wallet_melt/src/types/merchant.dart';
 import 'package:wallet_melt/src/types/payee.dart';
 import 'package:wallet_melt/src/types/settings.dart';
@@ -707,6 +714,76 @@ DemoDataBundle createDemoDataBundle({String? receiptPath}) {
     hasAcceptedPrivacyPolicy: true,
   );
 
+  // Accounts and income (ADR-0011/0012). The repositories sit on a never
+  // opened in-memory database; the screens read the fields set below.
+  final demoDb = WalletMeltDatabase(NativeDatabase.memory());
+  final accountRepo = DriftAccountRepository(demoDb);
+  final incomeRepo = DriftIncomeRepository(demoDb);
+  final stamp = now.toIso8601String();
+  Account demoAccount(String id, String name, AccountType type, int sort) =>
+      Account(
+        id: id,
+        name: name,
+        type: type,
+        currency: 'PKR',
+        openingBalanceMinorUnits: 0,
+        openingDate: DateTime(2026, 8).toIso8601String(),
+        sortOrder: sort,
+        createdAt: stamp,
+        updatedAt: stamp,
+      );
+  final demoBalances = <AccountBalance>[
+    AccountBalance(
+        account: demoAccount('acc-bank', 'Meezan salary account', AccountType.bank, 0),
+        balanceMinorUnits: 41250000),
+    AccountBalance(
+        account: demoAccount('acc-wallet', 'JazzCash', AccountType.wallet, 1),
+        balanceMinorUnits: 1875000),
+    AccountBalance(
+        account: demoAccount('acc-cash', 'Cash in hand', AccountType.cash, 2),
+        balanceMinorUnits: 620000),
+  ];
+  final demoIncomes = <Income>[
+    Income(
+      id: 'inc-1',
+      accountId: 'acc-bank',
+      title: 'August salary',
+      source: IncomeSource.salary,
+      amountMinorUnits: 18500000,
+      currency: 'PKR',
+      date: DateTime(2026, 8, 1).toIso8601String(),
+      createdAt: stamp,
+      updatedAt: stamp,
+    ),
+    Income(
+      id: 'inc-2',
+      accountId: 'acc-wallet',
+      title: 'Design project',
+      source: IncomeSource.freelance,
+      amountMinorUnits: 4500000,
+      currency: 'PKR',
+      date: DateTime(2026, 8, 12).toIso8601String(),
+      createdAt: stamp,
+      updatedAt: stamp,
+    ),
+  ];
+  final demoSchedules = <IncomeSchedule>[
+    IncomeSchedule(
+      id: 'sched-1',
+      title: 'Monthly salary',
+      source: IncomeSource.salary,
+      amountMinorUnits: 18500000,
+      currency: 'PKR',
+      accountId: 'acc-bank',
+      cycle: 'monthly',
+      startDate: DateTime(2026, 8, 1).toIso8601String(),
+      nextDueDate: DateTime(2026, 11, 1).toIso8601String(),
+      status: IncomeScheduleStatus.active,
+      createdAt: stamp,
+      updatedAt: stamp,
+    ),
+  ];
+
   final darkState = AppState.test(
     driftCategoryRepository: _FakeCategoryRepository(categories),
     driftExpenseRepository: _FakeExpenseRepository(expenses),
@@ -718,6 +795,8 @@ DemoDataBundle createDemoDataBundle({String? receiptPath}) {
     driftEssentialExpenseRepository: _FakeEssentialRepository(essentials),
     driftFuelRepository: _FakeFuelRepository(),
     driftStoreRepository: _FakeStoreRepository(merchants),
+    driftAccountRepository: accountRepo,
+    driftIncomeRepository: incomeRepo,
     settingsService: _FakeSettingsService(darkSettings),
     receiptStorageService: _FakeReceiptStorageService(),
     settings: darkSettings,
@@ -731,6 +810,9 @@ DemoDataBundle createDemoDataBundle({String? receiptPath}) {
   darkState.payees = payees;
   darkState.savedMerchants = merchants;
   darkState.selectedMonth = DateTime(2026, 8);
+  darkState.accountBalances = demoBalances;
+  darkState.incomes = demoIncomes;
+  darkState.incomeSchedules = demoSchedules;
   darkState.isLoading = false;
 
   final lightState = AppState.test(
@@ -744,6 +826,8 @@ DemoDataBundle createDemoDataBundle({String? receiptPath}) {
     driftEssentialExpenseRepository: _FakeEssentialRepository(essentials),
     driftFuelRepository: _FakeFuelRepository(),
     driftStoreRepository: _FakeStoreRepository(merchants),
+    driftAccountRepository: accountRepo,
+    driftIncomeRepository: incomeRepo,
     settingsService: _FakeSettingsService(lightSettings),
     receiptStorageService: _FakeReceiptStorageService(),
     settings: lightSettings,
@@ -757,6 +841,9 @@ DemoDataBundle createDemoDataBundle({String? receiptPath}) {
   lightState.payees = payees;
   lightState.savedMerchants = merchants;
   lightState.selectedMonth = DateTime(2026, 8);
+  lightState.accountBalances = demoBalances;
+  lightState.incomes = demoIncomes;
+  lightState.incomeSchedules = demoSchedules;
   lightState.isLoading = false;
 
   final pinLockController = _FakePinLockController();

@@ -47,6 +47,7 @@ import '../data/repositories/drift/drift_store_repository.dart';
 import '../data/repositories/drift/drift_monthly_budget_repository.dart';
 import '../types/monthly_budget.dart';
 import '../analytics/balance_calculator.dart';
+import '../utils/budget_period.dart';
 import '../analytics/income_planner.dart';
 import '../data/repositories/drift/drift_income_repository.dart';
 import '../types/income.dart' as wm_income;
@@ -177,10 +178,11 @@ class AppState extends ChangeNotifier {
 
   /// Expected income this calendar month in the app currency, minor units.
   int get expectedIncomeThisMonthMinorUnits => IncomePlanner.expectedForMonth(
-        month: DateTime.now(),
+        month: budgetPeriod.periodOf(DateTime.now()),
         currency: settings.currency,
         received: incomes,
         schedules: incomeSchedules,
+        period: budgetPeriod,
       );
 
   /// Advisory budget (major units) from expected income minus commitments, or
@@ -239,6 +241,11 @@ class AppState extends ChangeNotifier {
   }
   List<CategoryBudget> currentBudgets = const [];
   DateTime _selectedMonth = DateTime(DateTime.now().year, DateTime.now().month);
+
+  /// Budget period definition from settings (ADR-0013). Start day 1 is the
+  /// calendar month.
+  BudgetPeriod get budgetPeriod =>
+      BudgetPeriod.fromStartDay(settings.budgetPeriodStartDay);
   DateTime get selectedMonth => _selectedMonth;
   set selectedMonth(DateTime value) {
     _selectedMonth = value;
@@ -295,7 +302,7 @@ class AppState extends ChangeNotifier {
     _currentMonthExpenses = expenses.where((e) {
       if (e.deletedAt != null) return false;
       try {
-        return isSameMonth(parseIsoDate(e.date), selectedMonth);
+        return budgetPeriod.contains(selectedMonth, parseIsoDate(e.date));
       } catch (_) {
         return false;
       }
@@ -323,6 +330,7 @@ class AppState extends ChangeNotifier {
       selectedMonth: selectedMonth,
       now: now,
       currency: settings.currency,
+      period: budgetPeriod,
     );
     return _cachedSnapshot!;
   }
@@ -376,6 +384,7 @@ class AppState extends ChangeNotifier {
       isLoading = true;
       notifyListeners();
       settings = await _settingsService.load();
+      _selectedMonth = budgetPeriod.periodOf(DateTime.now());
       await refresh();
     } catch (error, stack) {
       debugPrint('AppState.initialize error: $error\n$stack');
@@ -699,7 +708,7 @@ class AppState extends ChangeNotifier {
     if (key == currentMonthKey) {
       _currentMonthlyBudget = null;
     }
-    if (key == monthKey(DateTime.now())) {
+    if (key == monthKey(budgetPeriod.periodOf(DateTime.now()))) {
       settings = settings.copyWith(clearMonthlyBudget: true);
       await _settingsService.save(settings);
     }
@@ -883,7 +892,7 @@ class AppState extends ChangeNotifier {
       if (e.deletedAt != null) return false;
       try {
         final d = parseIsoDate(e.date);
-        return isSameMonth(d, month);
+        return budgetPeriod.contains(month, d);
       } catch (_) {
         return false;
       }
@@ -1150,6 +1159,18 @@ class AppState extends ChangeNotifier {
 
   Future<void> clearBudget(String categoryId) async {
     await _driftBudgetRepository.delete(categoryId, currentMonthKey);
+    await refresh();
+  }
+
+  /// Changes the day on which each budget period starts (ADR-0013). All
+  /// history is regrouped; no stored data is rewritten.
+  Future<void> setBudgetPeriodStartDay(int day) async {
+    final clamped = day.clamp(1, BudgetPeriod.maxStartDay);
+    if (clamped == settings.budgetPeriodStartDay) return;
+    settings = settings.copyWith(budgetPeriodStartDay: clamped);
+    await _settingsService.save(settings);
+    _monthlyBudgetCache.clear();
+    _selectedMonth = budgetPeriod.periodOf(DateTime.now());
     await refresh();
   }
 

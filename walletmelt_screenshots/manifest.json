@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-17T01:26:17.651224",
-  "totalScreenshots": 32,
+  "generatedAt": "2026-10-18T00:30:12.668167",
+  "totalScreenshots": 34,
   "resolution": "1080x2400",
   "outputDirectory": "walletmelt_screenshots",
   "screenshots": [
@@ -12,7 +12,7 @@
       "relativePath": "01_dashboard/01_dashboard_overview_dark.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 223393,
+      "fileSizeBytes": 209826,
       "status": "verified"
     },
     {
@@ -23,7 +23,7 @@
       "relativePath": "01_dashboard/02_dashboard_overview_light.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 218407,
+      "fileSizeBytes": 204462,
       "status": "verified"
     },
     {
@@ -34,7 +34,7 @@
       "relativePath": "01_dashboard/03_dashboard_budget_adjust_sheet.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 166002,
+      "fileSizeBytes": 165063,
       "status": "verified"
     },
     {
@@ -45,7 +45,7 @@
       "relativePath": "01_dashboard/04_dashboard_scrolled_activity.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 223854,
+      "fileSizeBytes": 235427,
       "status": "verified"
     },
     {
@@ -56,7 +56,7 @@
       "relativePath": "02_expenses/01_expenses_add_keypad.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 140575,
+      "fileSizeBytes": 151572,
       "status": "verified"
     },
     {
@@ -177,7 +177,7 @@
       "relativePath": "05_debts/01_debts_overview.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 209861,
+      "fileSizeBytes": 209794,
       "status": "verified"
     },
     {
@@ -221,7 +221,7 @@
       "relativePath": "06_obligations/02_subscriptions_add_sheet.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 146899,
+      "fileSizeBytes": 147470,
       "status": "verified"
     },
     {
@@ -265,7 +265,7 @@
       "relativePath": "08_settings/01_settings_overview.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 179519,
+      "fileSizeBytes": 195967,
       "status": "verified"
     },
     {
@@ -331,7 +331,7 @@
       "relativePath": "09_security/03_security_settings_enabled.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 193050,
+      "fileSizeBytes": 206313,
       "status": "verified"
     },
     {
@@ -354,6 +354,28 @@
       "width": 1080,
       "height": 2400,
       "fileSizeBytes": 309309,
+      "status": "verified"
+    },
+    {
+      "id": "11_accounts_overview",
+      "category": "11_accounts_income",
+      "title": "Accounts and Total Balance",
+      "filename": "01_accounts_overview.png",
+      "relativePath": "11_accounts_income/01_accounts_overview.png",
+      "width": 1080,
+      "height": 2400,
+      "fileSizeBytes": 96401,
+      "status": "verified"
+    },
+    {
+      "id": "11_income_overview",
+      "category": "11_accounts_income",
+      "title": "Income and Repeating Salary",
+      "filename": "02_income_overview.png",
+      "relativePath": "11_accounts_income/02_income_overview.png",
+      "width": 1080,
+      "height": 2400,
+      "fileSizeBytes": 118544,
       "status": "verified"
     }
   ]

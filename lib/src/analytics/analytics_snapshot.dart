@@ -1,4 +1,5 @@
 import '../types/expense.dart';
+import '../utils/budget_period.dart';
 
 /// Aggregated metrics for a single merchant key within the selected month.
 class MerchantAggregate {
@@ -49,9 +50,13 @@ class SpendingAnalyticsSnapshot {
     required this.previousRefundCount,
     required this.currentExpenses,
     required this.previousExpenses,
+    this.period = BudgetPeriod.calendar,
   });
 
   final DateTime selectedMonth;
+
+  /// Budget period definition the snapshot was built with (ADR-0013).
+  final BudgetPeriod period;
   final DateTime now;
   final DateTime snapshotGeneratedAt;
   final String currency;

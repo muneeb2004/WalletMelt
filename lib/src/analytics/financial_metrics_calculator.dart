@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/wallet_melt_theme.dart';
+import '../utils/budget_period.dart';
 import '../types/debt.dart';
 import '../types/expense.dart';
 import '../types/subscription.dart';
@@ -96,24 +97,13 @@ class FinancialMetricsCalculator {
   ///   For example, on day 13 of a 30-day month: 30 - 13 + 1 = 18 days remaining.
   ///   On the final day (day 30): 30 - 30 + 1 = 1 day remaining.
   /// - Future months: Total days in that month (e.g. 30 or 31).
-  static int calculateDaysRemainingInMonth(DateTime month, [DateTime? now]) {
+  ///
+  /// With a non-default [period] (ADR-0013) the same rules apply to the
+  /// period's first and last day instead of the calendar month.
+  static int calculateDaysRemainingInMonth(DateTime month,
+      [DateTime? now, BudgetPeriod period = BudgetPeriod.calendar]) {
     final referenceNow = now ?? DateTime.now();
-
-    // Check past month
-    if (month.year < referenceNow.year ||
-        (month.year == referenceNow.year && month.month < referenceNow.month)) {
-      return 0;
-    }
-
-    final lastDayOfMonth = DateTime(month.year, month.month + 1, 0).day;
-
-    // Current month
-    if (month.year == referenceNow.year && month.month == referenceNow.month) {
-      return (lastDayOfMonth - referenceNow.day + 1).clamp(1, lastDayOfMonth);
-    }
-
-    // Future month
-    return lastDayOfMonth;
+    return period.daysRemaining(month, referenceNow);
   }
 
   /// Calculates Daily Spend Allowance for [month].
@@ -130,17 +120,18 @@ class FinancialMetricsCalculator {
     required double totalSpent,
     required DateTime month,
     DateTime? now,
+    BudgetPeriod period = BudgetPeriod.calendar,
   }) {
     final referenceNow = now ?? DateTime.now();
-    final isCurrentMonth = month.year == referenceNow.year &&
-        month.month == referenceNow.month;
+    final isCurrentMonth = period.isCurrent(month, referenceNow);
 
     final hasBudget = monthlyBudget != null && monthlyBudget > 0;
     final totalBudget = monthlyBudget ?? 0.0;
     final remainingBudget = hasBudget ? (totalBudget - totalSpent) : null;
     final isOverBudget = hasBudget && (remainingBudget ?? 0.0) < 0;
 
-    final daysRemaining = calculateDaysRemainingInMonth(month, referenceNow);
+    final daysRemaining =
+        calculateDaysRemainingInMonth(month, referenceNow, period);
 
     double allowance = 0.0;
     if (isCurrentMonth && hasBudget && !isOverBudget && daysRemaining > 0) {

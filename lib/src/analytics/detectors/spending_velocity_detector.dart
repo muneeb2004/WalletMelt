@@ -13,8 +13,8 @@ class SpendingVelocityDetector implements InsightDetector {
     final snapshot = context.snapshot;
 
     // Velocity is strictly evaluated for the active current month
-    final isCurrentMonth = snapshot.selectedMonth.year == snapshot.now.year &&
-        snapshot.selectedMonth.month == snapshot.now.month;
+    final isCurrentMonth =
+        snapshot.period.isCurrent(snapshot.selectedMonth, snapshot.now);
     if (!isCurrentMonth) return null;
 
     if (snapshot.daysElapsed < AnalyticsConstants.minDaysForVelocity) {

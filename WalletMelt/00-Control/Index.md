@@ -57,6 +57,7 @@ Welcome to the **WalletMelt Engineering Control Plane**. This Obsidian vault ser
 - [[ADR-0010-Tonal-Material3-Design-System-and-Brand]]: Tonal Material 3 system, single indigo brand, one card, one type scale, token guard.
 - [[ADR-0011-Accounts-Derived-Balance-and-Transfers]]: (accepted) accounts, derived balance, transfers and reconcile; see [[Balance-Income-and-Auto-Capture-Exploration]].
 - [[ADR-0012-Income-Schedules-and-Budget-Suggestion]]: (accepted) income facts, confirm-on-arrival recurring income, advisory budget suggestion.
+- [[ADR-0013-Budget-Period-Start-Day]]: (accepted) budget period start day (payday budgeting), no data migration.
 
 ### 6. Work & Knowledge
 - [[Work-Tracker]]: Current status (Now, Next, Later, Blocked).

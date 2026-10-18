@@ -343,4 +343,67 @@ Future<void> seedScreenshotData(WalletMeltDatabase db, SettingsService settingsS
   for (final s in fixedSubscriptions) {
     await db.into(db.subscriptions).insertOnConflictUpdate(s);
   }
+
+  // 7. Accounts, income and a repeating salary (ADR-0011/0012). The next
+  // salary date is far enough ahead that no confirm prompt appears.
+  final openingDate = '2026-08-01T00:00:00.000';
+  await db.into(db.accounts).insertOnConflictUpdate(AccountsCompanion.insert(
+        id: 'acc-bank',
+        name: 'Meezan salary account',
+        type: 'bank',
+        currency: 'PKR',
+        openingBalanceMinorUnits: const Value(25000000),
+        openingDate: openingDate,
+        sortOrder: const Value(0),
+        createdAt: dateStr,
+        updatedAt: dateStr,
+      ));
+  await db.into(db.accounts).insertOnConflictUpdate(AccountsCompanion.insert(
+        id: 'acc-wallet',
+        name: 'JazzCash',
+        type: 'wallet',
+        currency: 'PKR',
+        openingBalanceMinorUnits: const Value(1500000),
+        openingDate: openingDate,
+        sortOrder: const Value(1),
+        createdAt: dateStr,
+        updatedAt: dateStr,
+      ));
+  await db.into(db.accounts).insertOnConflictUpdate(AccountsCompanion.insert(
+        id: 'acc-cash',
+        name: 'Cash in hand',
+        type: 'cash',
+        currency: 'PKR',
+        openingBalanceMinorUnits: const Value(800000),
+        openingDate: openingDate,
+        sortOrder: const Value(2),
+        createdAt: dateStr,
+        updatedAt: dateStr,
+      ));
+  await db.into(db.incomes).insertOnConflictUpdate(IncomesCompanion.insert(
+        id: 'inc-1',
+        accountId: const Value('acc-bank'),
+        title: 'August salary',
+        source: 'salary',
+        amountMinorUnits: 18500000,
+        currency: 'PKR',
+        date: '2026-08-01T00:00:00.000',
+        createdAt: dateStr,
+        updatedAt: dateStr,
+      ));
+  await db
+      .into(db.incomeSchedules)
+      .insertOnConflictUpdate(IncomeSchedulesCompanion.insert(
+        id: 'sched-1',
+        title: 'Monthly salary',
+        source: 'salary',
+        amountMinorUnits: 18500000,
+        currency: 'PKR',
+        accountId: const Value('acc-bank'),
+        cycle: 'monthly',
+        startDate: '2026-08-01T00:00:00.000',
+        nextDueDate: '2099-01-01T00:00:00.000',
+        createdAt: dateStr,
+        updatedAt: dateStr,
+      ));
 }

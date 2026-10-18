@@ -11,7 +11,10 @@ related:
 
 # Active Work & Roadmap Registry
 
-## Now (Current Release v1.3.0)
+## Now (Current Release v1.4.0)
+- [x] v1.4.0 (build 10): budget period start day (payday budgeting), plain-language What's New, screenshots with balance and income ([[ADR-0013-Budget-Period-Start-Day]]).
+
+## Previous Release (v1.3.0)
 - [x] v1.3.0 (build 9): accounts and derived balance, income and confirm-on-arrival recurring income, budget suggestion, optional backup keys; What's New written in plain language ([[ADR-0011-Accounts-Derived-Balance-and-Transfers]], [[ADR-0012-Income-Schedules-and-Budget-Suggestion]]).
 
 ## Previous Release (v1.2.1)
@@ -65,3 +68,9 @@ related:
 
 ## Release rule (2026-10-17)
 Every release bumps `pubspec.yaml` and ships a plain-language, non-technical What's New entry in `lib/src/widgets/whats_new_dialog.dart` (and its test) in the same commit.
+
+## Added 2026-10-18
+- **Done**: pay-cycle (start day) budgets; screenshot demo accounts and income (34 screenshots).
+- **Next**: link debt repayments and subscription renewals to accounts; savings goals / committees; Phase 3 notification capture (needs Play policy review before the Play Store listing).
+
+- **Known flake (2026-10-18)**: `test/screenshots/publication_screenshot_test.dart` fails roughly 1 run in 4 on a single, varying target (passes on rerun and in isolation); see [[Technical-Debt-Registry]] TD-010 for the older screenshot-suite hang.

@@ -3,7 +3,7 @@ type: knowledge
 status: stable
 priority: high
 created: 2026-09-13
-updated: 2026-10-17
+updated: 2026-10-18
 domain: backup
 related:
   - "[[Backup-and-Restore-Architecture]]"
@@ -63,3 +63,6 @@ related:
 
 ## 5. Income (schema v11, 2026-10-17)
 `incomes` and `income_schedules` are optional extended tables like the account tables (absence = no rows; pre-v11 v2 files still validate and restore). `accountId` on both is remapped through the `account` map. Restore order: accounts, account_movements, incomes, income_schedules. Test: `test/services/export/backup_v2_roundtrip_test.dart`.
+
+## 6. Settings (2026-10-18)
+The `settings` section gains `budget_period_start_day` (integer 1 to 28). A missing key restores as 1 (calendar month). See [[ADR-0013-Budget-Period-Start-Day]].

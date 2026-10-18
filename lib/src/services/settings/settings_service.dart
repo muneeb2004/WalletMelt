@@ -13,6 +13,7 @@ class SettingsService {
   static const _lastExportKey = 'settings.lastExportedAt';
   static const _monthlyBudgetAmountKey = 'settings.monthlyBudgetAmount';
   static const _whatsNewKey = 'settings.lastSeenWhatsNewVersion';
+  static const _periodStartDayKey = 'settings.budgetPeriodStartDay';
 
   final _secureStorage = const FlutterSecureStorage();
 
@@ -70,6 +71,8 @@ class SettingsService {
       lastExportedAt: prefs.getString(_lastExportKey),
       monthlyBudgetAmount: monthlyBudget,
       lastSeenWhatsNewVersion: prefs.getString(_whatsNewKey) ?? '',
+      budgetPeriodStartDay:
+          (prefs.getInt(_periodStartDayKey) ?? 1).clamp(1, 28),
     );
   }
 
@@ -80,6 +83,7 @@ class SettingsService {
     await prefs.setBool(_onboardingKey, settings.hasCompletedOnboarding);
     await prefs.setBool(_privacyPolicyKey, settings.hasAcceptedPrivacyPolicy);
     await prefs.setString(_whatsNewKey, settings.lastSeenWhatsNewVersion);
+    await prefs.setInt(_periodStartDayKey, settings.budgetPeriodStartDay);
     
     final lastExportedAt = settings.lastExportedAt;
     if (lastExportedAt != null) {

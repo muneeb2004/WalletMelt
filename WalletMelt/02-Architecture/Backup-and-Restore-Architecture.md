@@ -42,3 +42,6 @@ Schema v10 adds `accounts`, `account_movements` and `expense_account_links` to t
 
 ## 7. Income (2026-10-17)
 Schema v11 adds `incomes` and `income_schedules` to the optional extended keys; Full Replace deletes them before `expenses` and `accounts`. See [[Backup-Format-Specification]] section 5, [[ADR-0012-Income-Schedules-and-Budget-Suggestion]].
+
+## 8. Settings field (2026-10-18)
+The backup `settings` section now carries `budget_period_start_day` (1 to 28; missing = 1). Encoder and `_settingsFromJson` handle it; older backups restore unchanged. See [[Backup-Format-Specification]] section 6, [[ADR-0013-Budget-Period-Start-Day]].

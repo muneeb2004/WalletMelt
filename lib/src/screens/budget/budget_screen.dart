@@ -7,6 +7,7 @@ import '../../analytics/financial_metrics_calculator.dart';
 import '../../components/glass/app_background.dart';
 import '../../state/app_state.dart';
 import '../../theme/wallet_melt_theme.dart';
+import '../../utils/budget_period.dart';
 import '../../utils/currency_format.dart';
 import '../../utils/date_utils.dart';
 import '../../utils/number_parser.dart';
@@ -275,11 +276,10 @@ class _BudgetScreenState extends State<BudgetScreen> {
     }
 
     // Check if the navigated month is the current calendar month
-    final isCurrentMonth = selectedMonth.year == now.year &&
-        selectedMonth.month == now.month;
+    final isCurrentMonth = state.budgetPeriod.isCurrent(selectedMonth, now);
 
     final remaining = monthlyBudget != null ? monthlyBudget - totalSpent : null;
-    final daysLeft = _getDaysLeftInMonth(selectedMonth);
+    final daysLeft = _getDaysLeftInMonth(selectedMonth, state.budgetPeriod);
 
     // Calculate ratio
     final ratio = monthlyBudget != null && monthlyBudget > 0
@@ -320,7 +320,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                 icon: const Icon(Icons.chevron_left_rounded),
               ),
               Text(
-                readableMonth(selectedMonth),
+                context.read<AppState>().budgetPeriod.label(selectedMonth),
                 style: theme.textTheme.titleMedium,
               ),
               IconButton(
@@ -358,7 +358,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                     icon: const Icon(Icons.chevron_left_rounded, size: 20),
                   ),
                   Text(
-                    readableMonth(selectedMonth),
+                    context.read<AppState>().budgetPeriod.label(selectedMonth),
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 12),
                   ),
                   IconButton(
@@ -614,8 +614,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
           ),
 
           // ── Row 3: Daily Spend Allowance (Full-width Cohesive Row) ────────
-          if (selectedMonth.year == DateTime.now().year &&
-              selectedMonth.month == DateTime.now().month) ...[
+          if (context.read<AppState>().budgetPeriod.isCurrent(selectedMonth, DateTime.now())) ...[
             const SizedBox(height: AppSpacing.sm),
             () {
               final allowanceResult =
@@ -623,6 +622,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                 monthlyBudget: monthlyBudget,
                 totalSpent: totalSpent,
                 month: selectedMonth,
+                period: context.read<AppState>().budgetPeriod,
               );
               return _buildFullWidthMetricRow(
                 context: context,
@@ -761,7 +761,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
               if (exp.deletedAt == null) {
                 try {
                   final date = parseIsoDate(exp.date);
-                  if (isSameMonth(date, selectedMonth)) {
+                  if (context.read<AppState>().budgetPeriod.contains(selectedMonth, date)) {
                     categorySpentMap[exp.categoryId] =
                         (categorySpentMap[exp.categoryId] ?? 0) + exp.amount;
                   }
@@ -878,8 +878,9 @@ class _BudgetScreenState extends State<BudgetScreen> {
 
   // _getBudgetColor removed — use top-level budgetProgressColor() from wallet_melt_theme.dart
 
-  int _getDaysLeftInMonth(DateTime month) {
-    return FinancialMetricsCalculator.calculateDaysRemainingInMonth(month);
+  int _getDaysLeftInMonth(DateTime month, BudgetPeriod period) {
+    return FinancialMetricsCalculator.calculateDaysRemainingInMonth(
+        month, null, period);
   }
 
 

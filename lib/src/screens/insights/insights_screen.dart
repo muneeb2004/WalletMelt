@@ -11,7 +11,6 @@ import '../../types/expense.dart';
 import '../../types/insight_action.dart';
 import '../../types/subscription.dart' as wm_sub;
 import '../../utils/currency_format.dart';
-import '../../utils/date_utils.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/insights/insight_card_shell.dart';
 import '../../widgets/insights/insight_content.dart';
@@ -94,7 +93,6 @@ class _InsightsScreenState extends State<InsightsScreen> {
     taxByCategory.clear();
 
     final selectedYear = selectedMonth.year;
-    final selectedMonthInt = selectedMonth.month;
 
     for (final exp in expenses) {
       if (exp.deletedAt != null) continue;
@@ -107,7 +105,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
       }
 
       final isSameYear = expDate.year == selectedYear;
-      final isSameMonth = isSameYear && expDate.month == selectedMonthInt;
+      final isSameMonth = state.budgetPeriod.contains(selectedMonth, expDate);
 
       if (isSameMonth) {
         if (exp.taxAmount != null && exp.taxAmount! > 0) {
@@ -318,7 +316,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
                                 size: 13, color: context.scheme.onSurfaceVariant),
                             const SizedBox(width: 6),
                             Text(
-                              readableMonth(selectedMonth),
+                              state.budgetPeriod.label(selectedMonth),
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 color: context.scheme.onSurfaceVariant,
                                 fontSize: 12,

@@ -5,6 +5,7 @@ import '../analytics/spending_analytics.dart';
 import '../types/budget.dart';
 import '../types/category.dart';
 import '../types/expense.dart';
+import 'budget_period.dart';
 import 'date_utils.dart';
 
 class CategorySpend {
@@ -58,6 +59,7 @@ MonthlyInsights buildMonthlyInsights({
   required DateTime month,
   DateTime? now,
   String currency = 'PKR',
+  BudgetPeriod period = BudgetPeriod.calendar,
 }) {
   final nowTime = now ?? DateTime.now();
   final snapshot = SpendingAnalytics.buildSnapshot(
@@ -65,6 +67,7 @@ MonthlyInsights buildMonthlyInsights({
     selectedMonth: month,
     now: nowTime,
     currency: currency,
+    period: period,
   );
 
   return buildMonthlyInsightsFromSnapshot(
@@ -136,10 +139,11 @@ MonthlyInsights buildMonthlyInsightsFromSnapshot({
   );
 }
 
-Map<String, List<Expense>> groupExpensesByMonth(List<Expense> expenses) {
+Map<String, List<Expense>> groupExpensesByMonth(List<Expense> expenses,
+    [BudgetPeriod period = BudgetPeriod.calendar]) {
   final grouped = <String, List<Expense>>{};
   for (final expense in expenses) {
-    final key = monthKey(parseIsoDate(expense.date));
+    final key = monthKey(period.periodOf(parseIsoDate(expense.date)));
     grouped.putIfAbsent(key, () => []).add(expense);
   }
   return grouped;

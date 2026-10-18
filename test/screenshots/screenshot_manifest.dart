@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:wallet_melt/src/screens/accounts/accounts_screen.dart';
 import 'package:wallet_melt/src/screens/add_expense/add_expense_screen.dart';
 import 'package:wallet_melt/src/screens/budget/budget_screen.dart';
 import 'package:wallet_melt/src/screens/dashboard/dashboard_screen.dart';
@@ -11,6 +12,7 @@ import 'package:wallet_melt/src/screens/essentials/essential_expenses_screen.dar
 import 'package:wallet_melt/src/screens/history/expense_detail_screen.dart';
 import 'package:wallet_melt/src/screens/history/history_screen.dart';
 import 'package:wallet_melt/src/screens/history/receipt_viewer_screen.dart';
+import 'package:wallet_melt/src/screens/income/income_screen.dart';
 import 'package:wallet_melt/src/screens/insights/insights_screen.dart';
 import 'package:wallet_melt/src/screens/merchant/merchants_screen.dart';
 import 'package:wallet_melt/src/screens/onboarding/onboarding_screen.dart';
@@ -483,6 +485,28 @@ final List<ScreenshotTarget> screenshotTargets = [
     title: 'Privacy Policy & Data Transparency',
     isDark: true,
     builder: (bundle) => const PrivacyPolicyScreen(),
+  ),
+
+  // ===========================================================================
+  // 11. ACCOUNTS & INCOME
+  // ===========================================================================
+  ScreenshotTarget(
+    id: '11_accounts_overview',
+    category: '11_accounts_income',
+    filename: '01_accounts_overview.png',
+    relativePath: '11_accounts_income/01_accounts_overview.png',
+    title: 'Accounts and Total Balance',
+    isDark: true,
+    builder: (bundle) => const AccountsScreen(),
+  ),
+  ScreenshotTarget(
+    id: '11_income_overview',
+    category: '11_accounts_income',
+    filename: '02_income_overview.png',
+    relativePath: '11_accounts_income/02_income_overview.png',
+    title: 'Income and Repeating Salary',
+    isDark: false,
+    builder: (bundle) => const IncomeScreen(),
   ),
 ];
 

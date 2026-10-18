@@ -11,7 +11,6 @@ import '../../screens/budget/budget_screen.dart';
 import '../../state/app_state.dart';
 import '../../theme/wallet_melt_theme.dart';
 import '../../utils/currency_format.dart';
-import '../../utils/date_utils.dart';
 import '../../analytics/financial_metrics_calculator.dart';
 import '../../types/debt.dart';
 import '../../widgets/section_header.dart';
@@ -151,6 +150,7 @@ class DashboardScreen extends StatelessWidget {
       monthlyBudget: monthlyBudget,
       totalSpent: totalSpent,
       month: selectedMonth,
+      period: state.budgetPeriod,
     );
     final hasBudget = allowanceResult.hasBudget;
     final budgetLimit = allowanceResult.totalBudget;
@@ -190,7 +190,7 @@ class DashboardScreen extends StatelessWidget {
               Align(
                 alignment: Alignment.centerLeft,
                 child: _MonthSwitcher(
-                  label: readableMonth(selectedMonth),
+                  label: state.budgetPeriod.label(selectedMonth),
                   onPrevious: context.read<AppState>().previousMonth,
                   onNext: context.read<AppState>().nextMonth,
                 ),

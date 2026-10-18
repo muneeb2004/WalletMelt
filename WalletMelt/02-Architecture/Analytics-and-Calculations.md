@@ -3,7 +3,7 @@ type: architecture
 status: stable
 priority: high
 created: 2026-09-13
-updated: 2026-10-15
+updated: 2026-10-18
 domain: architecture
 related:
   - "[[Product-Requirements]]"
@@ -57,3 +57,9 @@ All financial metrics are calculated via [`FinancialMetricsCalculator`](file:///
 - `IncomePlanner` (`lib/src/analytics/income_planner.dart`, pure): **expected income for a month** = received incomes dated in the month + every active schedule occurrence in the month counted from the schedule's current `nextDueDate` (an overdue, unconfirmed occurrence still counts), per currency.
 - **Suggested budget** (advisory, major units) = `expectedIncome - sum(monthly subscriptions) - sum(monthly essentials)`, floored at 0, null when no income is expected. Essentials' monthly equivalent: weekly x 52/12, quarterly /3, yearly /12, `custom_N` x 30/N. The user's own monthly budget is never overwritten.
 - Recurrence arithmetic lives in `lib/src/utils/recurrence.dart` (`advanceByCycle`), shared with subscriptions. Weekly now advances 7 days (subscriptions previously treated an unknown/weekly cycle as monthly).
+
+## Budget periods (2026-10-18, [[ADR-0013-Budget-Period-Start-Day]])
+Everything that was "the calendar month" is now "the budget period": `SpendingAnalytics.buildSnapshot`, `FinancialMetricsCalculator.calculateDaysRemainingInMonth` / `calculateDailySpendAllowance`, `IncomePlanner.expectedForMonth`, `groupExpensesByMonth` and AppState's current-period expense filter take a `BudgetPeriod` (default `BudgetPeriod.calendar`, identical to the old behaviour).
+- Period named by start month: with start day D, period `YYYY-MM` = D of that month to D-1 of the next month, inclusive.
+- Days elapsed counts from the period start including today; days remaining counts to the last day including today (never 0 inside the current period). Daily allowance = remaining budget / days remaining.
+- Tax metrics by calendar year stay calendar-based; the monthly tax figure on the Insights screen follows the selected period.

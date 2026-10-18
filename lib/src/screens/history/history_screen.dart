@@ -63,6 +63,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   // Memoization cache to avoid recalculating sorting/filtering on rebuilds
   List<Expense>? _cachedRawExpenses;
+  int? _cachedPeriodStartDay;
   String? _cachedSearchQuery;
   String? _cachedCategoryId;
   ExpenseSort? _cachedSort;
@@ -108,7 +109,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   List<_ListItem> _getOrCreateItems(List<Expense> rawExpenses) {
+    final period = context.read<AppState>().budgetPeriod;
     if (_cachedRawExpenses == rawExpenses &&
+        _cachedPeriodStartDay == period.startDay &&
         _cachedSearchQuery == _searchQuery &&
         _cachedCategoryId == _categoryId &&
         _cachedSort == _sort &&
@@ -148,21 +151,29 @@ class _HistoryScreenState extends State<HistoryScreen> {
     _cachedFilteredList = filtered;
 
     final now = DateTime.now();
-    final currentMonthKey = '${now.year}-${now.month.toString().padLeft(2, '0')}';
+    final currentPeriod = period.periodOf(now);
 
     List<Expense> displayExpenses;
     if (!_showAllHistory && _searchQuery.isEmpty && !_showRecycleBin) {
-      displayExpenses = filtered.where((e) => e.date.startsWith(currentMonthKey)).toList();
+      displayExpenses = filtered
+          .where((e) {
+            final d = DateTime.tryParse(e.date);
+            return d != null && period.contains(currentPeriod, d);
+          })
+          .toList();
       _hiddenOlderCount = filtered.length - displayExpenses.length;
     } else {
       displayExpenses = filtered;
       _hiddenOlderCount = 0;
     }
 
-    final grouped = groupExpensesByMonth(displayExpenses);
+    final grouped = groupExpensesByMonth(displayExpenses, period);
     final items = <_ListItem>[];
     for (final entry in grouped.entries) {
-      items.add(_HeaderItem(entry.key));
+      final headerLabel = period.isCalendarMonth
+          ? entry.key
+          : period.label(DateTime.parse('${entry.key}-01'));
+      items.add(_HeaderItem(headerLabel));
       for (final expense in entry.value) {
         items.add(_ExpenseItem(expense));
       }
@@ -170,11 +181,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
     if (_hiddenOlderCount > 0 && !_showAllHistory && _searchQuery.isEmpty && !_showRecycleBin) {
       items.add(_ToggleHistoryItem(showAll: false, hiddenCount: _hiddenOlderCount));
-    } else if (_showAllHistory && !_showRecycleBin && filtered.any((e) => !e.date.startsWith(currentMonthKey))) {
+    } else if (_showAllHistory && !_showRecycleBin && filtered.any((e) {
+      final d = DateTime.tryParse(e.date);
+      return d == null || !period.contains(currentPeriod, d);
+    })) {
       items.add(_ToggleHistoryItem(showAll: true, hiddenCount: 0));
     }
 
     _cachedRawExpenses = rawExpenses;
+    _cachedPeriodStartDay = period.startDay;
     _cachedSearchQuery = _searchQuery;
     _cachedCategoryId = _categoryId;
     _cachedSort = _sort;

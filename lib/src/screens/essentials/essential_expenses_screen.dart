@@ -9,7 +9,6 @@ import '../../theme/wallet_melt_theme.dart';
 import '../../types/essential_expense.dart';
 import '../../types/fuel.dart';
 import '../../utils/currency_format.dart';
-import '../../utils/date_utils.dart';
 import '../../utils/number_parser.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/primary_button.dart';
@@ -91,7 +90,7 @@ class _EssentialExpensesScreenState extends State<EssentialExpensesScreen> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'MONTHLY ESSENTIALS (${readableMonth(state.selectedMonth)})',
+                        'MONTHLY ESSENTIALS (${state.budgetPeriod.label(state.selectedMonth)})',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(

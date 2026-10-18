@@ -1,6 +1,7 @@
 import '../types/essential_expense.dart';
 import '../types/income.dart';
 import '../types/subscription.dart';
+import '../utils/budget_period.dart';
 import '../utils/recurrence.dart';
 import 'financial_metrics_calculator.dart';
 
@@ -8,8 +9,8 @@ import 'financial_metrics_calculator.dart';
 class IncomePlanner {
   const IncomePlanner._();
 
-  /// Expected income (minor units) for [currency] in the calendar month of
-  /// [month]: received incomes dated in the month plus every active schedule
+  /// Expected income (minor units) for [currency] in the budget period named
+  /// by [month] (the calendar month when [period] is the default): received incomes dated in the month plus every active schedule
   /// occurrence dated in the month at or after the schedule's `nextDueDate`
   /// (an overdue, unconfirmed occurrence still counts).
   static int expectedForMonth({
@@ -17,9 +18,10 @@ class IncomePlanner {
     required String currency,
     required Iterable<Income> received,
     required Iterable<IncomeSchedule> schedules,
+    BudgetPeriod period = BudgetPeriod.calendar,
   }) {
-    final start = DateTime(month.year, month.month);
-    final end = DateTime(month.year, month.month + 1);
+    final start = period.start(month);
+    final end = period.endExclusive(month);
     var total = 0;
     for (final income in received) {
       if (income.deletedAt != null || income.currency != currency) continue;

@@ -292,6 +292,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     },
                   ),
                   const SizedBox(height: 14),
+                  DropdownButtonFormField<int>(
+                    key: const ValueKey('budget-period-start-day'),
+                    initialValue: state.settings.budgetPeriodStartDay,
+                    decoration: const InputDecoration(
+                      labelText: 'My budget month starts on',
+                      helperText:
+                          'Pick payday or allowance day. Budgets, History and Insights regroup by this day; nothing is deleted.',
+                      helperMaxLines: 3,
+                    ),
+                    isExpanded: true,
+                    items: [
+                      for (var day = 1; day <= 28; day++)
+                        DropdownMenuItem(
+                          value: day,
+                          child: Text(day == 1
+                              ? 'Day 1 (calendar month)'
+                              : 'Day $day of the month'),
+                        ),
+                    ],
+                    onChanged: (value) {
+                      if (value != null) state.setBudgetPeriodStartDay(value);
+                    },
+                  ),
+                  const SizedBox(height: 14),
                   DropdownButtonFormField<ThemePreference>(
                     initialValue: themePreference,
                     decoration: const InputDecoration(labelText: 'Theme'),

@@ -900,6 +900,9 @@ class WalletMeltJsonRestoreService {
           json['has_completed_onboarding'] == 1,
       lastExportedAt: _nullableString(json['last_exported_at']),
       monthlyBudgetAmount: monthlyBudget,
+      budgetPeriodStartDay: json['budget_period_start_day'] is num
+          ? (json['budget_period_start_day'] as num).toInt().clamp(1, 28)
+          : 1,
     );
   }
 

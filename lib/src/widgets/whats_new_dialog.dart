@@ -96,7 +96,7 @@ class WhatsNewContent extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        'Your balance, your income, all in one place',
+                        'Budget from payday, not the 1st',
                         style: TextStyle(
                           fontSize: 12,
                           color: context.scheme.onSurfaceVariant,
@@ -123,9 +123,47 @@ class WhatsNewContent extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Version 1.3.0 Highlights
+              // Version 1.4.0 Highlights
               _buildSectionBadge(
                 label: 'VERSION ${AppVersion.version} UPDATES',
+                color: context.scheme.primary,
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.event_available_rounded,
+                iconColor: context.scheme.primary,
+                title: 'Budget from payday',
+                description:
+                    'Choose the day your budget month starts, like the 25th. Your budget, daily allowance, History and Insights all follow it, so what you see matches how you actually get paid.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.history_rounded,
+                iconColor: context.scheme.secondary,
+                title: 'Your history comes along',
+                description:
+                    'Changing the start day regroups all your past spending to match. Nothing is deleted, and you can change it back any time in Settings.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.photo_library_rounded,
+                iconColor: context.money.caution,
+                title: 'Balance and income in the tour',
+                description:
+                    'The app preview now shows your total balance, accounts and repeating income.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 24),
+
+              // Version 1.3.0 Highlights
+              _buildSectionBadge(
+                label: 'VERSION 1.3.0 UPDATES',
                 color: context.scheme.primary,
                 isDark: isDark,
               ),
@@ -458,7 +496,7 @@ class WhatsNewContent extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      'Next up: planning around payday or your semester, savings goals, and an optional way to add expenses from bank and wallet alerts on your phone. It will always be your choice and stay on your device.',
+                      'Next up: savings goals and committees, and an optional way to add expenses from bank and wallet alerts on your phone. It will always be your choice and stay on your device.',
                       style: TextStyle(
                         fontSize: 12,
                         height: 1.45,
