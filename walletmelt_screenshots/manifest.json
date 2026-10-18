@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-18T10:34:15.906166",
+  "generatedAt": "2026-10-18T22:21:32.900077",
   "totalScreenshots": 36,
   "resolution": "1080x2400",
   "outputDirectory": "walletmelt_screenshots",
@@ -12,7 +12,7 @@
       "relativePath": "01_dashboard/01_dashboard_overview_dark.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 175328,
+      "fileSizeBytes": 176048,
       "status": "verified"
     },
     {
@@ -23,7 +23,7 @@
       "relativePath": "01_dashboard/02_dashboard_overview_light.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 169372,
+      "fileSizeBytes": 170074,
       "status": "verified"
     },
     {
@@ -34,7 +34,7 @@
       "relativePath": "01_dashboard/03_dashboard_budget_adjust_sheet.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 170295,
+      "fileSizeBytes": 171372,
       "status": "verified"
     },
     {
@@ -177,7 +177,7 @@
       "relativePath": "05_debts/01_debts_overview.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 209794,
+      "fileSizeBytes": 235515,
       "status": "verified"
     },
     {
@@ -188,7 +188,7 @@
       "relativePath": "05_debts/02_debts_detail_sheet.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 174467,
+      "fileSizeBytes": 174473,
       "status": "verified"
     },
     {
@@ -199,7 +199,7 @@
       "relativePath": "05_debts/03_debts_add_sheet.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 151803,
+      "fileSizeBytes": 151807,
       "status": "verified"
     },
     {
@@ -265,7 +265,7 @@
       "relativePath": "08_settings/01_settings_overview.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 195984,
+      "fileSizeBytes": 195299,
       "status": "verified"
     },
     {
@@ -309,7 +309,7 @@
       "relativePath": "09_security/01_security_pin_lock_screen.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 101614,
+      "fileSizeBytes": 102178,
       "status": "verified"
     },
     {

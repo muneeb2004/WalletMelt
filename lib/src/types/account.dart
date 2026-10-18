@@ -1,4 +1,4 @@
-enum AccountType { cash, bank, wallet, card, other }
+enum AccountType { cash, bank, wallet }
 
 enum AccountMovementKind { adjustment, transferIn, transferOut }
 
@@ -20,7 +20,7 @@ AccountType accountTypeFromName(String? name) {
   for (final value in AccountType.values) {
     if (value.name == name) return value;
   }
-  return AccountType.other;
+  return AccountType.cash;
 }
 
 class Account {

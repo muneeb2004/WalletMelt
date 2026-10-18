@@ -67,7 +67,9 @@ void main() {
 
     await tester.tap(find.text('Bank').first);
     await tester.pumpAndSettle();
-    expect(find.text('Update balance'), findsOneWidget);
+    expect(find.text('Add money'), findsOneWidget);
+    expect(find.text('Spend money'), findsOneWidget);
+    expect(find.text('Update balance'), findsNothing);
     expect(find.text('Transfer'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
@@ -82,6 +84,73 @@ void main() {
             .firstWhere((b) => b.account.name == 'Wallet')
             .balanceMinorUnits,
         25000);
+  });
+
+  testWidgets('add money and spend money change the balance and are deletable',
+      (tester) async {
+    final state = await makeState(tester);
+    await tester.pumpWidget(host(state, const AccountsScreen()));
+    await tester.pumpAndSettle();
+    int bank() => state.accountBalances
+        .firstWhere((b) => b.account.name == 'Bank')
+        .balanceMinorUnits;
+
+    await tester.tap(find.text('Bank').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Add money'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.widgetWithText(TextField, 'Amount'), '500');
+    await tester.tap(find.widgetWithText(PrimaryButton, 'Add money'));
+    await tester.pumpAndSettle();
+    expect(bank(), 150000);
+    expect(find.text('Money added'), findsOneWidget);
+
+    await tester.tap(find.text('Spend money'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('add it as an expense'), findsOneWidget);
+    await tester.enterText(find.widgetWithText(TextField, 'Amount'), '200');
+    await tester.enterText(
+        find.widgetWithText(TextField, 'Note (optional)'), 'ATM fee');
+    await tester.tap(find.widgetWithText(PrimaryButton, 'Spend money'));
+    await tester.pumpAndSettle();
+    expect(bank(), 130000);
+    expect(find.text('ATM fee'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Delete').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Delete').last);
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(bank(), 150000);
+  });
+
+  testWidgets('add account needs only a name and keeps options collapsed',
+      (tester) async {
+    final state = await makeState(tester);
+    await tester.pumpWidget(host(state, const AccountsScreen()));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Add account'));
+    await tester.pumpAndSettle();
+    expect(find.text('Starting balance'), findsOneWidget);
+    expect(find.text('Card'), findsNothing);
+    expect(find.text('Other'), findsNothing);
+    await tester.enterText(find.widgetWithText(TextField, 'Name'), 'Savings');
+    await tester.tap(find.widgetWithText(PrimaryButton, 'Add account'));
+    await tester.pumpAndSettle();
+
+    final saved =
+        state.accountBalances.firstWhere((b) => b.account.name == 'Savings');
+    expect(saved.balanceMinorUnits, 0);
+    expect(saved.account.type, AccountType.cash);
+    expect(saved.account.currency, 'PKR');
+    expect(saved.account.includeInTotal, isTrue);
+  });
+
+  test('unknown stored account types fall back to cash', () {
+    expect(accountTypeFromName('card'), AccountType.cash);
+    expect(accountTypeFromName(null), AccountType.cash);
+    expect(accountTypeFromName('wallet'), AccountType.wallet);
   });
 
   testWidgets('income screen adds a one-off income that raises the balance',

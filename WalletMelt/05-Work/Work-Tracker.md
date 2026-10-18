@@ -108,3 +108,7 @@ Every release bumps `pubspec.yaml` and ships a plain-language, non-technical Wha
 
 ## Blocked (2026-10-18)
 - **Notification capture** ([[ADR-0017-Optional-Notification-Capture]], proposed): on hold until the owner sends sample alert texts for JazzCash, Easypaisa, Meezan, HBL, UBL, NayaPay, SadaPay and Mashreq; Play policy still to be verified in the Play Console.
+
+## Release 1.7.1 (2026-10-18)
+- **Done**: simpler accounts (3 types, name-only Add account, Add money / Spend money, Correct balance in the overflow menu). What's New updated in plain language.
+- Verified 1.7.1: analyzer clean, full suite passing (643 tests), 36 screenshots.

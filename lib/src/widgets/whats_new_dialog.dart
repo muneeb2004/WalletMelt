@@ -96,7 +96,7 @@ class WhatsNewContent extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        'Track your committee (BC)',
+                        'Simpler accounts and balances',
                         style: TextStyle(
                           fontSize: 12,
                           color: context.scheme.onSurfaceVariant,
@@ -123,9 +123,47 @@ class WhatsNewContent extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Version 1.7.0 Highlights
+              // Version 1.7.1 Highlights
               _buildSectionBadge(
                 label: 'VERSION ${AppVersion.version} UPDATES',
+                color: context.scheme.primary,
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.add_card_rounded,
+                iconColor: context.scheme.primary,
+                title: 'Add an account in seconds',
+                description:
+                    'Just give it a name. The starting balance is optional, and type, currency and the rest are tucked under More options. Accounts are now Cash, Bank or Wallet.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.swap_vert_rounded,
+                iconColor: context.money.income,
+                title: 'Add money, spend money',
+                description:
+                    'No more typing your whole balance. Open an account and tap Add money or Spend money with just the amount. Delete an entry and the balance goes straight back.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.tune_rounded,
+                iconColor: context.scheme.secondary,
+                title: 'Fix a balance when you need to',
+                description:
+                    'Correct balance is still there under the menu on each account, for the odd time your real balance is different.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 24),
+
+              // Version 1.7.0 Highlights
+              _buildSectionBadge(
+                label: 'VERSION 1.7.0 UPDATES',
                 color: context.scheme.primary,
                 isDark: isDark,
               ),
