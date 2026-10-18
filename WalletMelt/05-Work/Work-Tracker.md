@@ -105,3 +105,6 @@ Every release bumps `pubspec.yaml` and ships a plain-language, non-technical Wha
 - **Done**: committees (ADR-0016).
 - **Next**: Phase 3 notification capture: needs sample alert texts for JazzCash, Easypaisa, Meezan, HBL, UBL, NayaPay, SadaPay and Mashreq, an ADR, a Play policy review and an on-device parser design.
 - Verified 1.7.0: analyzer clean, full suite passing, 36 screenshots.
+
+## Blocked (2026-10-18)
+- **Notification capture** ([[ADR-0017-Optional-Notification-Capture]], proposed): on hold until the owner sends sample alert texts for JazzCash, Easypaisa, Meezan, HBL, UBL, NayaPay, SadaPay and Mashreq; Play policy still to be verified in the Play Console.
