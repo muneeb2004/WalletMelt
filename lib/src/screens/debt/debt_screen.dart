@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../components/account/account_picker_field.dart';
+import '../../components/account/choose_account_sheet.dart';
 import 'package:uuid/uuid.dart';
 import 'package:collection/collection.dart';
 
@@ -692,6 +693,37 @@ class DebtScreen extends StatefulWidget {
                                   }
                                 },
                                 child: const Text('Settle Remaining Balance'),
+                              ),
+                              const SizedBox(height: 10),
+                            ],
+
+                            if (state.accountsAvailable) ...[
+                              OutlinedButton.icon(
+                                key: const Key('debt_link_account'),
+                                icon: const Icon(
+                                    Icons.account_balance_wallet_outlined),
+                                label: Text(
+                                  state.accounts
+                                          .where((a) => a.id == debt.accountId)
+                                          .map((a) => 'Account: ${a.name}')
+                                          .firstOrNull ??
+                                      'Link to an account',
+                                ),
+                                onPressed: () => showChooseAccountSheet(
+                                  context,
+                                  accounts: state.accounts,
+                                  currency: debt.currency,
+                                  currentAccountId: debt.accountId,
+                                  title: 'Account for this debt',
+                                  explanation:
+                                      'The original loan amount (for loans you gave or took) and every repayment dated after the account start date will count toward its balance. Close this screen and reopen it to see the change.',
+                                  onSelected: (id) async {
+                                    await state.setDebtAccount(debt.id, id);
+                                    if (sheetContext.mounted) {
+                                      Navigator.of(sheetContext).pop();
+                                    }
+                                  },
+                                ),
                               ),
                               const SizedBox(height: 10),
                             ],

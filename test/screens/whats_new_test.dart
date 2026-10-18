@@ -19,6 +19,11 @@ void main() {
 
       // Check for the current version section badge & items
       expect(find.text('VERSION ${AppVersion.version} UPDATES'), findsOneWidget);
+      expect(find.text('Link subscriptions you already have'), findsOneWidget);
+      expect(find.text('Link loans and debts you already have'), findsOneWidget);
+
+      // Check for v1.5.0 section badge & items
+      expect(find.text('VERSION 1.5.0 UPDATES'), findsOneWidget);
       expect(find.text('Subscriptions pay from an account'), findsOneWidget);
       expect(find.text('Loans and debts update your balance'), findsOneWidget);
       expect(find.text('Backups include the links'), findsOneWidget);

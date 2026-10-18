@@ -59,6 +59,29 @@ class DriftDebtRepository {
     return debt;
   }
 
+  /// Links an existing debt to an account, or clears the link (ADR-0014).
+  /// The account must be active and share the debt's currency.
+  Future<void> setAccount(String debtId, String? accountId) async {
+    if (accountId != null) {
+      final debt = await (_db.select(_db.debtRecords)
+            ..where((t) => t.id.equals(debtId)))
+          .getSingleOrNull();
+      final account = await (_db.select(_db.accounts)
+            ..where((a) => a.id.equals(accountId) & a.deletedAt.isNull()))
+          .getSingleOrNull();
+      if (debt == null) throw StateError('Debt not found.');
+      if (account == null || account.isArchived) {
+        throw StateError('Choose an active account.');
+      }
+      if (account.currency != debt.currency) {
+        throw ArgumentError(
+            'Account currency (${account.currency}) must match the debt currency (${debt.currency}).');
+      }
+    }
+    await (_db.update(_db.debtRecords)..where((t) => t.id.equals(debtId)))
+        .write(local.DebtRecordsCompanion(accountId: Value(accountId)));
+  }
+
   Future<void> deleteDebt(String id) async {
     await (_db.delete(_db.debtRecords)..where((t) => t.id.equals(id))).go();
   }

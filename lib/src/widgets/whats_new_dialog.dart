@@ -96,7 +96,7 @@ class WhatsNewContent extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        'Loans and subscriptions now count',
+                        'Link what you already have',
                         style: TextStyle(
                           fontSize: 12,
                           color: context.scheme.onSurfaceVariant,
@@ -123,9 +123,37 @@ class WhatsNewContent extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Version 1.5.0 Highlights
+              // Version 1.5.1 Highlights
               _buildSectionBadge(
                 label: 'VERSION ${AppVersion.version} UPDATES',
+                color: context.scheme.primary,
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.link_rounded,
+                iconColor: context.scheme.primary,
+                title: 'Link subscriptions you already have',
+                description:
+                    'Open any subscription and choose which account it is paid from. From then on, each renewal comes out of that account. Past renewals are left alone.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.account_balance_rounded,
+                iconColor: context.money.income,
+                title: 'Link loans and debts you already have',
+                description:
+                    'Open a loan or debt and link it to an account, or unlink it again. Your balance updates straight away and nothing is lost.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 24),
+
+              // Version 1.5.0 Highlights
+              _buildSectionBadge(
+                label: 'VERSION 1.5.0 UPDATES',
                 color: context.scheme.primary,
                 isDark: isDark,
               ),

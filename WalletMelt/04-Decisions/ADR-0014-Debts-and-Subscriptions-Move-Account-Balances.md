@@ -30,7 +30,7 @@ After ADR-0011 and ADR-0012 the balance reflects expenses, transfers, reconciles
 5. **Backup**: `accountId` travels inside the existing Drift `toJson` rows of `debt_records` and `subscriptions`; both are remapped through the `account` map. Older backups lack the key and restore as unlinked. Full Replace now deletes `accounts` after `debt_records` and `subscriptions` (RESTRICT keys).
 6. **Archive/lock rules** (ADR-0011) count linked debts and subscriptions as account history.
 7. **UI**: an optional "Paid from" / "Money goes to" account picker (same-currency, non-archived accounts) on the add-subscription and add-debt forms, defaulting to no account.
-8. **Deferred**: the account is chosen when a debt or subscription is created; there is no edit form to link or re-link an existing one yet (existing rows stay unlinked, which is the previous behaviour).
+8. **Linking later (added in 1.5.1)**: an existing debt (debt detail sheet) or subscription (its action sheet) can be linked, re-linked or unlinked through a chooser limited to active same-currency accounts. Linking a debt applies its original loan amount and all repayments dated after the account start date, because debt cash flow is derived; subscription linking only affects future renewals.
 
 ## Alternatives Considered
 1. **Write movement rows for debt events**: duplicates data and must be kept in sync with repayment edits and deletes. Rejected for derivation.
@@ -56,3 +56,4 @@ After ADR-0011 and ADR-0012 the balance reflects expenses, transfers, reconciles
 - Migration `_upgradeFromV11ToV12` adds both columns and indexes with table-exists guards; audit row `audit_v11_v12_*`.
 - Restore drops an optional account link (`debt_records`, `subscriptions`, `incomes`, `income_schedules`) that points at an account absent from the backup, instead of failing the whole restore.
 - Tests: `test/accounts/debt_subscription_account_test.dart`, `test/database/schema_migration_v12_test.dart`, `test/services/export/backup_v2_roundtrip_test.dart`.
+- Linking later: `DriftDebtRepository.setAccount` validates currency and active state; `AppState.setDebtAccount`; chooser `lib/src/components/account/choose_account_sheet.dart`. Tests: `test/accounts/link_existing_test.dart`.

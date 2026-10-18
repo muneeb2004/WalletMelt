@@ -1115,6 +1115,11 @@ class AppState extends ChangeNotifier {
     return id;
   }
 
+  Future<void> setDebtAccount(String debtId, String? accountId) async {
+    await _driftDebtRepository.setAccount(debtId, accountId);
+    await refresh();
+  }
+
   Future<wm_debt.DebtRecord?> getDebtById(String id) async {
     return _driftDebtRepository.getById(id);
   }

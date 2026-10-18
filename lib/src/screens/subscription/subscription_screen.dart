@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../components/account/account_picker_field.dart';
+import '../../components/account/choose_account_sheet.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../components/glass/app_background.dart';
@@ -973,6 +974,36 @@ class _SubscriptionActionsSheet extends StatelessWidget {
               },
             ),
           ],
+
+          if (state.accountsAvailable)
+            _ActionButton(
+              icon: Icons.account_balance_wallet_outlined,
+              label: state.accounts
+                      .where((a) => a.id == subscription.accountId)
+                      .map((a) => 'Paid from: ${a.name}')
+                      .firstOrNull ??
+                  'Choose account to pay from',
+              color: theme.colorScheme.primary,
+              onTap: () {
+                Navigator.pop(context);
+                showChooseAccountSheet(
+                  context,
+                  accounts: state.accounts,
+                  currency: subscription.currency,
+                  currentAccountId: subscription.accountId,
+                  title: 'Pay this subscription from',
+                  explanation:
+                      'Future renewals will come out of this account. Renewals already recorded are not changed.',
+                  onSelected: (id) => state.updateSubscription(
+                    subscription.copyWith(
+                      accountId: id,
+                      clearAccountId: id == null,
+                      updatedAt: DateTime.now().toIso8601String(),
+                    ),
+                  ),
+                );
+              },
+            ),
 
           _ActionButton(
             icon: Icons.edit_outlined,

@@ -11,7 +11,10 @@ related:
 
 # Active Work & Roadmap Registry
 
-## Now (Current Release v1.5.0)
+## Now (Current Release v1.5.1)
+- [x] v1.5.1 (build 12): link or unlink existing debts and subscriptions to an account.
+
+## Previous Release (v1.5.0)
 - [x] v1.5.0 (build 11): debts and subscriptions linked to accounts ([[ADR-0014-Debts-and-Subscriptions-Move-Account-Balances]]).
 
 ## Previous Release (v1.4.0)
@@ -81,3 +84,8 @@ Every release bumps `pubspec.yaml` and ships a plain-language, non-technical Wha
 ## Added 2026-10-18 (v1.5.0)
 - **Done**: account links on debts and subscriptions; renewals post to the subscription account.
 - **Next**: edit form to link existing debts and subscriptions; savings goals / committees; Phase 3 notification capture (parsers: JazzCash, Easypaisa, Meezan, HBL, UBL, NayaPay, SadaPay, Mashreq; Play policy review before the Play Store listing).
+
+## Added 2026-10-18 (v1.5.1)
+- **Done**: edit-time account linking for debts and subscriptions.
+- **Next**: savings goals set aside inside an account, then committees (BC) with payout turn: each needs an ADR (ADR-0015+), version bump and plain-language What's New.
+- Verified 1.5.1: analyzer clean, 614 tests passing.

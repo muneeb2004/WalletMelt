@@ -66,3 +66,6 @@ Metadata & Catalogs:
 
 ## Debt and subscription account links (2026-10-18, schema v12)
 `debt_records.accountId` and `subscriptions.accountId` are nullable FKs to `accounts` (RESTRICT) with indexes. Debt cash flow is derived in the balance SQL, never stored ([[ADR-0014-Debts-and-Subscriptions-Move-Account-Balances]]). Table count is unchanged (26).
+
+## Linking existing debts (2026-10-18)
+`DriftDebtRepository.setAccount(debtId, accountId)` sets or clears `debt_records.accountId`, rejecting archived, missing or other-currency accounts. See [[ADR-0014-Debts-and-Subscriptions-Move-Account-Balances]].
