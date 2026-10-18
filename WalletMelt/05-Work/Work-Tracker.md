@@ -11,7 +11,10 @@ related:
 
 # Active Work & Roadmap Registry
 
-## Now (Current Release v1.4.0)
+## Now (Current Release v1.5.0)
+- [x] v1.5.0 (build 11): debts and subscriptions linked to accounts ([[ADR-0014-Debts-and-Subscriptions-Move-Account-Balances]]).
+
+## Previous Release (v1.4.0)
 - [x] v1.4.0 (build 10): budget period start day (payday budgeting), plain-language What's New, screenshots with balance and income ([[ADR-0013-Budget-Period-Start-Day]]).
 
 ## Previous Release (v1.3.0)
@@ -74,3 +77,7 @@ Every release bumps `pubspec.yaml` and ships a plain-language, non-technical Wha
 - **Next**: link debt repayments and subscription renewals to accounts; savings goals / committees; Phase 3 notification capture (needs Play policy review before the Play Store listing).
 
 - **Known flake (2026-10-18)**: `test/screenshots/publication_screenshot_test.dart` fails roughly 1 run in 4 on a single, varying target (passes on rerun and in isolation); see [[Technical-Debt-Registry]] TD-010 for the older screenshot-suite hang.
+
+## Added 2026-10-18 (v1.5.0)
+- **Done**: account links on debts and subscriptions; renewals post to the subscription account.
+- **Next**: edit form to link existing debts and subscriptions; savings goals / committees; Phase 3 notification capture (parsers: JazzCash, Easypaisa, Meezan, HBL, UBL, NayaPay, SadaPay, Mashreq; Play policy review before the Play Store listing).

@@ -45,7 +45,7 @@ All financial metrics are calculated via [`FinancialMetricsCalculator`](file:///
 `Subscription.calculateNextRenewalDate` advances month-based cycles (monthly 1, quarterly 3, semi-annual 6, annual 12 months) from the **anchor day** taken from `startDate`, clamped to the last day of the target month. Jan 31 -> Feb 28/29 -> Mar 31 (no permanent drift, no skipped February). `custom_N` adds N calendar days via `DateTime(y, m, d + N)` (no DST hour shift); `N <= 0` falls back to 30. Renewals are saved **atomically per subscription** (`DriftSubscriptionRepository.applyRenewals`: all renewal expenses + the advanced date in one transaction) and concurrent runs share one in-flight Future. Regression tests: `test/subscription_renewal_test.dart`.
 
 ## Account balance (2026-10-17, [[ADR-0011-Accounts-Derived-Balance-and-Transfers]])
-`balance = openingBalance - expenseOutflow + movementNet + incomeInflow`, in integer minor units (`BalanceCalculator`, `lib/src/analytics/balance_calculator.dart`).
+`balance = openingBalance - expenseOutflow + movementNet + incomeInflow + debtNet`, in integer minor units (`BalanceCalculator`, `lib/src/analytics/balance_calculator.dart`).
 - `expenseOutflow` sums non-deleted expenses with `accountId = account`, `expense.currency = account.currency` and `expense.date >= account.openingDate` (uses `amountMinorUnits`, falling back to `ROUND(amount * 100)` for legacy rows).
 - `movementNet` sums non-deleted `account_movements` dated on/after `openingDate` (signed: transfer out and negative adjustments reduce it).
 - Totals are one figure per currency over accounts that are included, not archived and not deleted; there is no FX conversion.
@@ -63,3 +63,6 @@ Everything that was "the calendar month" is now "the budget period": `SpendingAn
 - Period named by start month: with start day D, period `YYYY-MM` = D of that month to D-1 of the next month, inclusive.
 - Days elapsed counts from the period start including today; days remaining counts to the last day including today (never 0 inside the current period). Daily allowance = remaining budget / days remaining.
 - Tax metrics by calendar year stay calendar-based; the monthly tax figure on the Insights screen follows the selected period.
+
+## Debt cash flow (2026-10-18, [[ADR-0014-Debts-and-Subscriptions-Move-Account-Balances]])
+`debtNet` covers debts linked to the account, in the account currency, dated on or after its opening date. Principal at creation: `loanGiven` = minus, `loanTaken` = plus, `owedToMe` and `iOwe` = zero. Repayments: plus for `owedToMe` and `loanGiven`, minus for `iOwe` and `loanTaken` (`ROUND(amount * 100)`; repayments have no minor-unit column). Subscription renewals are ordinary expenses carrying the subscription's account when it is active and in the same currency. Spending analytics are unchanged.

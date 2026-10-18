@@ -45,3 +45,6 @@ Schema v11 adds `incomes` and `income_schedules` to the optional extended keys; 
 
 ## 8. Settings field (2026-10-18)
 The backup `settings` section now carries `budget_period_start_day` (1 to 28; missing = 1). Encoder and `_settingsFromJson` handle it; older backups restore unchanged. See [[Backup-Format-Specification]] section 6, [[ADR-0013-Budget-Period-Start-Day]].
+
+## 9. Account links on debts and subscriptions (2026-10-18)
+Schema v12 adds nullable `accountId` to `debt_records` and `subscriptions`. Restore order is accounts first; dangling links are nulled; Full Replace deletes `accounts` after `debt_records`/`subscriptions`. See [[Backup-Format-Specification]] section 7.

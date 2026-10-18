@@ -1057,6 +1057,7 @@ class AppState extends ChangeNotifier {
       // for this subscription is known, then it is saved atomically.
       var updatedSub = sub;
       final drafts = <ExpenseDraft>[];
+      final renewalAccountId = await _renewalAccountIdFor(sub);
 
       while (currentNextDateStr.compareTo(todayStr) <= 0) {
         final parsedDate = DateTime.parse(currentNextDateStr);
@@ -1071,6 +1072,7 @@ class AppState extends ChangeNotifier {
           notes: 'Auto-generated subscription renewal for ${sub.name}',
           subtotalAmount: sub.amount,
           taxAmount: sub.taxAmount,
+          accountId: renewalAccountId,
         ));
 
         final nextDate = sub.calculateNextRenewalDate(parsedDate);
@@ -1095,6 +1097,22 @@ class AppState extends ChangeNotifier {
             'Renewal for "${sub.name}" failed and was rolled back: $error');
       }
     }
+  }
+
+  /// The subscription's account, but only when it is usable for this renewal:
+  /// still active and in the subscription's currency (ADR-0014).
+  Future<String?> _renewalAccountIdFor(wm_sub.Subscription sub) async {
+    final id = sub.accountId;
+    final repo = _accountRepository;
+    if (id == null || repo == null) return null;
+    final account = await repo.getById(id);
+    if (account == null ||
+        account.isArchived ||
+        account.deletedAt != null ||
+        account.currency != sub.currency) {
+      return null;
+    }
+    return id;
   }
 
   Future<wm_debt.DebtRecord?> getDebtById(String id) async {

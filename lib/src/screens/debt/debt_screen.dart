@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../components/account/account_picker_field.dart';
 import 'package:uuid/uuid.dart';
 import 'package:collection/collection.dart';
 
@@ -116,6 +117,7 @@ class DebtScreen extends StatefulWidget {
     final state = context.read<AppState>();
 
     DebtType selectedType = initialType ?? DebtType.owedToMe;
+    String? selectedAccountId;
     DateTime? selectedDueDate;
 
     await showAppBottomSheet<void>(
@@ -243,6 +245,23 @@ class DebtScreen extends StatefulWidget {
                         ),
                         AppSpacing.gapMd,
 
+                        if (state.accountsAvailable) ...[
+                          AccountPickerField(
+                            accounts: state.accounts,
+                            currency: state.settings.currency,
+                            value: selectedAccountId,
+                            label: 'Account (optional)',
+                            helperText: selectedType == DebtType.loanGiven
+                                ? 'The loan amount leaves this account; repayments come back to it.'
+                                : selectedType == DebtType.loanTaken
+                                    ? 'The loan amount arrives in this account; repayments leave it.'
+                                    : 'Repayments will update this account balance.',
+                            onChanged: (id) =>
+                                setSheetState(() => selectedAccountId = id),
+                          ),
+                          AppSpacing.gapMd,
+                        ],
+
                         WMGlassSurface.tier1(
                           onTap: () async {
                             final picked = await showDatePicker(
@@ -359,6 +378,7 @@ class DebtScreen extends StatefulWidget {
                                   ? null
                                   : notesController.text.trim(),
                               dueDate: selectedDueDate?.toIso8601String().substring(0, 10),
+                              accountId: selectedAccountId,
                             );
 
                             await state.addDebt(newDebt);

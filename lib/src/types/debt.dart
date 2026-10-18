@@ -50,6 +50,7 @@ class DebtRecord {
     this.dueDate,
     this.settledAt,
     this.notes,
+    this.accountId,
   });
 
   final String id;
@@ -65,6 +66,9 @@ class DebtRecord {
   final String? settledAt;
   final DebtStatus status;
   final String? notes;
+
+  /// Optional account that holds the money for this debt (ADR-0014).
+  final String? accountId;
 
   bool get isSettled => status == DebtStatus.settled || remainingAmount <= 0;
 
@@ -84,6 +88,8 @@ class DebtRecord {
     bool clearSettledAt = false,
     DebtStatus? status,
     String? notes,
+    String? accountId,
+    bool clearAccountId = false,
   }) {
     return DebtRecord(
       id: id ?? this.id,
@@ -99,6 +105,7 @@ class DebtRecord {
       settledAt: clearSettledAt ? null : settledAt ?? this.settledAt,
       status: status ?? this.status,
       notes: notes ?? this.notes,
+      accountId: clearAccountId ? null : accountId ?? this.accountId,
     );
   }
 }

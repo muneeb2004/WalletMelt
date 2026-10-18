@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import '../../components/account/account_picker_field.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../components/glass/app_background.dart';
@@ -429,6 +430,7 @@ class _AddSubscriptionSheetState extends State<_AddSubscriptionSheet> {
   final _customDaysController = TextEditingController();
   
   String? _categoryId;
+  String? _accountId;
   String _billingCycle = 'Monthly';
   DateTime _startDate = DateTime.now();
   int _notificationOffset = 0; // 0 = same day
@@ -771,6 +773,17 @@ class _AddSubscriptionSheetState extends State<_AddSubscriptionSheet> {
                 ),
                 const SizedBox(height: 16),
 
+                if (context.read<AppState>().accountsAvailable)
+                  AccountPickerField(
+                    accounts: context.watch<AppState>().accounts,
+                    currency: context.read<AppState>().settings.currency,
+                    value: _accountId,
+                    label: 'Paid from (optional)',
+                    helperText:
+                        'Renewals will reduce this account balance.',
+                    onChanged: (id) => setState(() => _accountId = id),
+                  ),
+
                 // Notification Offset Dropdown
                 DropdownButtonFormField<int>(
                   initialValue: _notificationOffset,
@@ -856,6 +869,7 @@ class _AddSubscriptionSheetState extends State<_AddSubscriptionSheet> {
                               createdAt: DateTime.now().toIso8601String(),
                               updatedAt: DateTime.now().toIso8601String(),
                               notificationOffset: _notificationOffset,
+                              accountId: _accountId,
                             );
 
                             await state.addSubscription(sub);

@@ -21,6 +21,7 @@ class Subscription {
     this.notificationOffset,
     this.deletedAt,
     this.version = 1,
+    this.accountId,
   });
 
   final String id;
@@ -40,6 +41,9 @@ class Subscription {
   final int? notificationOffset;
   final String? deletedAt;
   final int version;
+
+  /// Optional account renewals are paid from (ADR-0014).
+  final String? accountId;
 
   bool get isActive => status == SubscriptionStatus.active;
   bool get isPaused => status == SubscriptionStatus.paused;
@@ -79,6 +83,8 @@ class Subscription {
     String? deletedAt,
     bool clearDeletedAt = false,
     int? version,
+    String? accountId,
+    bool clearAccountId = false,
   }) {
     return Subscription(
       id: id ?? this.id,
@@ -98,6 +104,7 @@ class Subscription {
       notificationOffset: clearNotificationOffset ? null : notificationOffset ?? this.notificationOffset,
       deletedAt: clearDeletedAt ? null : deletedAt ?? this.deletedAt,
       version: version ?? this.version,
+      accountId: clearAccountId ? null : accountId ?? this.accountId,
     );
   }
 }

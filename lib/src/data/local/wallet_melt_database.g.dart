@@ -7456,6 +7456,15 @@ class $DebtRecordsTable extends DebtRecords
   late final GeneratedColumn<String> notes = GeneratedColumn<String>(
       'notes', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _accountIdMeta =
+      const VerificationMeta('accountId');
+  @override
+  late final GeneratedColumn<String> accountId = GeneratedColumn<String>(
+      'accountId', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES accounts (id) ON DELETE RESTRICT'));
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -7472,7 +7481,8 @@ class $DebtRecordsTable extends DebtRecords
         dueDate,
         settledAt,
         status,
-        notes
+        notes,
+        accountId
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -7573,6 +7583,10 @@ class $DebtRecordsTable extends DebtRecords
       context.handle(
           _notesMeta, notes.isAcceptableOrUnknown(data['notes']!, _notesMeta));
     }
+    if (data.containsKey('accountId')) {
+      context.handle(_accountIdMeta,
+          accountId.isAcceptableOrUnknown(data['accountId']!, _accountIdMeta));
+    }
     return context;
   }
 
@@ -7614,6 +7628,8 @@ class $DebtRecordsTable extends DebtRecords
           .read(DriftSqlType.string, data['${effectivePrefix}status'])!,
       notes: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}notes']),
+      accountId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}accountId']),
     );
   }
 
@@ -7639,6 +7655,7 @@ class DebtRecord extends DataClass implements Insertable<DebtRecord> {
   final String? settledAt;
   final String status;
   final String? notes;
+  final String? accountId;
   const DebtRecord(
       {required this.id,
       required this.personName,
@@ -7654,7 +7671,8 @@ class DebtRecord extends DataClass implements Insertable<DebtRecord> {
       this.dueDate,
       this.settledAt,
       required this.status,
-      this.notes});
+      this.notes,
+      this.accountId});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -7688,6 +7706,9 @@ class DebtRecord extends DataClass implements Insertable<DebtRecord> {
     map['status'] = Variable<String>(status);
     if (!nullToAbsent || notes != null) {
       map['notes'] = Variable<String>(notes);
+    }
+    if (!nullToAbsent || accountId != null) {
+      map['accountId'] = Variable<String>(accountId);
     }
     return map;
   }
@@ -7724,6 +7745,9 @@ class DebtRecord extends DataClass implements Insertable<DebtRecord> {
       status: Value(status),
       notes:
           notes == null && nullToAbsent ? const Value.absent() : Value(notes),
+      accountId: accountId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(accountId),
     );
   }
 
@@ -7748,6 +7772,7 @@ class DebtRecord extends DataClass implements Insertable<DebtRecord> {
       settledAt: serializer.fromJson<String?>(json['settledAt']),
       status: serializer.fromJson<String>(json['status']),
       notes: serializer.fromJson<String?>(json['notes']),
+      accountId: serializer.fromJson<String?>(json['accountId']),
     );
   }
   @override
@@ -7771,6 +7796,7 @@ class DebtRecord extends DataClass implements Insertable<DebtRecord> {
       'settledAt': serializer.toJson<String?>(settledAt),
       'status': serializer.toJson<String>(status),
       'notes': serializer.toJson<String?>(notes),
+      'accountId': serializer.toJson<String?>(accountId),
     };
   }
 
@@ -7789,7 +7815,8 @@ class DebtRecord extends DataClass implements Insertable<DebtRecord> {
           Value<String?> dueDate = const Value.absent(),
           Value<String?> settledAt = const Value.absent(),
           String? status,
-          Value<String?> notes = const Value.absent()}) =>
+          Value<String?> notes = const Value.absent(),
+          Value<String?> accountId = const Value.absent()}) =>
       DebtRecord(
         id: id ?? this.id,
         personName: personName ?? this.personName,
@@ -7810,6 +7837,7 @@ class DebtRecord extends DataClass implements Insertable<DebtRecord> {
         settledAt: settledAt.present ? settledAt.value : this.settledAt,
         status: status ?? this.status,
         notes: notes.present ? notes.value : this.notes,
+        accountId: accountId.present ? accountId.value : this.accountId,
       );
   DebtRecord copyWithCompanion(DebtRecordsCompanion data) {
     return DebtRecord(
@@ -7838,6 +7866,7 @@ class DebtRecord extends DataClass implements Insertable<DebtRecord> {
       settledAt: data.settledAt.present ? data.settledAt.value : this.settledAt,
       status: data.status.present ? data.status.value : this.status,
       notes: data.notes.present ? data.notes.value : this.notes,
+      accountId: data.accountId.present ? data.accountId.value : this.accountId,
     );
   }
 
@@ -7858,7 +7887,8 @@ class DebtRecord extends DataClass implements Insertable<DebtRecord> {
           ..write('dueDate: $dueDate, ')
           ..write('settledAt: $settledAt, ')
           ..write('status: $status, ')
-          ..write('notes: $notes')
+          ..write('notes: $notes, ')
+          ..write('accountId: $accountId')
           ..write(')'))
         .toString();
   }
@@ -7879,7 +7909,8 @@ class DebtRecord extends DataClass implements Insertable<DebtRecord> {
       dueDate,
       settledAt,
       status,
-      notes);
+      notes,
+      accountId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -7898,7 +7929,8 @@ class DebtRecord extends DataClass implements Insertable<DebtRecord> {
           other.dueDate == this.dueDate &&
           other.settledAt == this.settledAt &&
           other.status == this.status &&
-          other.notes == this.notes);
+          other.notes == this.notes &&
+          other.accountId == this.accountId);
 }
 
 class DebtRecordsCompanion extends UpdateCompanion<DebtRecord> {
@@ -7917,6 +7949,7 @@ class DebtRecordsCompanion extends UpdateCompanion<DebtRecord> {
   final Value<String?> settledAt;
   final Value<String> status;
   final Value<String?> notes;
+  final Value<String?> accountId;
   final Value<int> rowid;
   const DebtRecordsCompanion({
     this.id = const Value.absent(),
@@ -7934,6 +7967,7 @@ class DebtRecordsCompanion extends UpdateCompanion<DebtRecord> {
     this.settledAt = const Value.absent(),
     this.status = const Value.absent(),
     this.notes = const Value.absent(),
+    this.accountId = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   DebtRecordsCompanion.insert({
@@ -7952,6 +7986,7 @@ class DebtRecordsCompanion extends UpdateCompanion<DebtRecord> {
     this.settledAt = const Value.absent(),
     required String status,
     this.notes = const Value.absent(),
+    this.accountId = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         personName = Value(personName),
@@ -7977,6 +8012,7 @@ class DebtRecordsCompanion extends UpdateCompanion<DebtRecord> {
     Expression<String>? settledAt,
     Expression<String>? status,
     Expression<String>? notes,
+    Expression<String>? accountId,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -7997,6 +8033,7 @@ class DebtRecordsCompanion extends UpdateCompanion<DebtRecord> {
       if (settledAt != null) 'settledAt': settledAt,
       if (status != null) 'status': status,
       if (notes != null) 'notes': notes,
+      if (accountId != null) 'accountId': accountId,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -8017,6 +8054,7 @@ class DebtRecordsCompanion extends UpdateCompanion<DebtRecord> {
       Value<String?>? settledAt,
       Value<String>? status,
       Value<String?>? notes,
+      Value<String?>? accountId,
       Value<int>? rowid}) {
     return DebtRecordsCompanion(
       id: id ?? this.id,
@@ -8036,6 +8074,7 @@ class DebtRecordsCompanion extends UpdateCompanion<DebtRecord> {
       settledAt: settledAt ?? this.settledAt,
       status: status ?? this.status,
       notes: notes ?? this.notes,
+      accountId: accountId ?? this.accountId,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -8090,6 +8129,9 @@ class DebtRecordsCompanion extends UpdateCompanion<DebtRecord> {
     if (notes.present) {
       map['notes'] = Variable<String>(notes.value);
     }
+    if (accountId.present) {
+      map['accountId'] = Variable<String>(accountId.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -8114,6 +8156,7 @@ class DebtRecordsCompanion extends UpdateCompanion<DebtRecord> {
           ..write('settledAt: $settledAt, ')
           ..write('status: $status, ')
           ..write('notes: $notes, ')
+          ..write('accountId: $accountId, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -8815,6 +8858,15 @@ class $SubscriptionsTable extends Subscriptions
       type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultValue: const Constant(1));
+  static const VerificationMeta _accountIdMeta =
+      const VerificationMeta('accountId');
+  @override
+  late final GeneratedColumn<String> accountId = GeneratedColumn<String>(
+      'accountId', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES accounts (id) ON DELETE RESTRICT'));
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -8835,7 +8887,8 @@ class $SubscriptionsTable extends Subscriptions
         cancelledAt,
         notificationOffset,
         deletedAt,
-        version
+        version,
+        accountId
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -8960,6 +9013,10 @@ class $SubscriptionsTable extends Subscriptions
       context.handle(_versionMeta,
           version.isAcceptableOrUnknown(data['version']!, _versionMeta));
     }
+    if (data.containsKey('accountId')) {
+      context.handle(_accountIdMeta,
+          accountId.isAcceptableOrUnknown(data['accountId']!, _accountIdMeta));
+    }
     return context;
   }
 
@@ -9007,6 +9064,8 @@ class $SubscriptionsTable extends Subscriptions
           .read(DriftSqlType.string, data['${effectivePrefix}deletedAt']),
       version: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}version'])!,
+      accountId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}accountId']),
     );
   }
 
@@ -9036,6 +9095,7 @@ class Subscription extends DataClass implements Insertable<Subscription> {
   final int? notificationOffset;
   final String? deletedAt;
   final int version;
+  final String? accountId;
   const Subscription(
       {required this.id,
       required this.name,
@@ -9055,7 +9115,8 @@ class Subscription extends DataClass implements Insertable<Subscription> {
       this.cancelledAt,
       this.notificationOffset,
       this.deletedAt,
-      required this.version});
+      required this.version,
+      this.accountId});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -9092,6 +9153,9 @@ class Subscription extends DataClass implements Insertable<Subscription> {
       map['deletedAt'] = Variable<String>(deletedAt);
     }
     map['version'] = Variable<int>(version);
+    if (!nullToAbsent || accountId != null) {
+      map['accountId'] = Variable<String>(accountId);
+    }
     return map;
   }
 
@@ -9130,6 +9194,9 @@ class Subscription extends DataClass implements Insertable<Subscription> {
           ? const Value.absent()
           : Value(deletedAt),
       version: Value(version),
+      accountId: accountId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(accountId),
     );
   }
 
@@ -9158,6 +9225,7 @@ class Subscription extends DataClass implements Insertable<Subscription> {
       notificationOffset: serializer.fromJson<int?>(json['notificationOffset']),
       deletedAt: serializer.fromJson<String?>(json['deletedAt']),
       version: serializer.fromJson<int>(json['version']),
+      accountId: serializer.fromJson<String?>(json['accountId']),
     );
   }
   @override
@@ -9183,6 +9251,7 @@ class Subscription extends DataClass implements Insertable<Subscription> {
       'notificationOffset': serializer.toJson<int?>(notificationOffset),
       'deletedAt': serializer.toJson<String?>(deletedAt),
       'version': serializer.toJson<int>(version),
+      'accountId': serializer.toJson<String?>(accountId),
     };
   }
 
@@ -9205,7 +9274,8 @@ class Subscription extends DataClass implements Insertable<Subscription> {
           Value<String?> cancelledAt = const Value.absent(),
           Value<int?> notificationOffset = const Value.absent(),
           Value<String?> deletedAt = const Value.absent(),
-          int? version}) =>
+          int? version,
+          Value<String?> accountId = const Value.absent()}) =>
       Subscription(
         id: id ?? this.id,
         name: name ?? this.name,
@@ -9232,6 +9302,7 @@ class Subscription extends DataClass implements Insertable<Subscription> {
             : this.notificationOffset,
         deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
         version: version ?? this.version,
+        accountId: accountId.present ? accountId.value : this.accountId,
       );
   Subscription copyWithCompanion(SubscriptionsCompanion data) {
     return Subscription(
@@ -9267,6 +9338,7 @@ class Subscription extends DataClass implements Insertable<Subscription> {
           : this.notificationOffset,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
       version: data.version.present ? data.version.value : this.version,
+      accountId: data.accountId.present ? data.accountId.value : this.accountId,
     );
   }
 
@@ -9291,7 +9363,8 @@ class Subscription extends DataClass implements Insertable<Subscription> {
           ..write('cancelledAt: $cancelledAt, ')
           ..write('notificationOffset: $notificationOffset, ')
           ..write('deletedAt: $deletedAt, ')
-          ..write('version: $version')
+          ..write('version: $version, ')
+          ..write('accountId: $accountId')
           ..write(')'))
         .toString();
   }
@@ -9316,7 +9389,8 @@ class Subscription extends DataClass implements Insertable<Subscription> {
       cancelledAt,
       notificationOffset,
       deletedAt,
-      version);
+      version,
+      accountId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -9339,7 +9413,8 @@ class Subscription extends DataClass implements Insertable<Subscription> {
           other.cancelledAt == this.cancelledAt &&
           other.notificationOffset == this.notificationOffset &&
           other.deletedAt == this.deletedAt &&
-          other.version == this.version);
+          other.version == this.version &&
+          other.accountId == this.accountId);
 }
 
 class SubscriptionsCompanion extends UpdateCompanion<Subscription> {
@@ -9362,6 +9437,7 @@ class SubscriptionsCompanion extends UpdateCompanion<Subscription> {
   final Value<int?> notificationOffset;
   final Value<String?> deletedAt;
   final Value<int> version;
+  final Value<String?> accountId;
   final Value<int> rowid;
   const SubscriptionsCompanion({
     this.id = const Value.absent(),
@@ -9383,6 +9459,7 @@ class SubscriptionsCompanion extends UpdateCompanion<Subscription> {
     this.notificationOffset = const Value.absent(),
     this.deletedAt = const Value.absent(),
     this.version = const Value.absent(),
+    this.accountId = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   SubscriptionsCompanion.insert({
@@ -9405,6 +9482,7 @@ class SubscriptionsCompanion extends UpdateCompanion<Subscription> {
     this.notificationOffset = const Value.absent(),
     this.deletedAt = const Value.absent(),
     this.version = const Value.absent(),
+    this.accountId = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         name = Value(name),
@@ -9437,6 +9515,7 @@ class SubscriptionsCompanion extends UpdateCompanion<Subscription> {
     Expression<int>? notificationOffset,
     Expression<String>? deletedAt,
     Expression<int>? version,
+    Expression<String>? accountId,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -9460,6 +9539,7 @@ class SubscriptionsCompanion extends UpdateCompanion<Subscription> {
       if (notificationOffset != null) 'notificationOffset': notificationOffset,
       if (deletedAt != null) 'deletedAt': deletedAt,
       if (version != null) 'version': version,
+      if (accountId != null) 'accountId': accountId,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -9484,6 +9564,7 @@ class SubscriptionsCompanion extends UpdateCompanion<Subscription> {
       Value<int?>? notificationOffset,
       Value<String?>? deletedAt,
       Value<int>? version,
+      Value<String?>? accountId,
       Value<int>? rowid}) {
     return SubscriptionsCompanion(
       id: id ?? this.id,
@@ -9505,6 +9586,7 @@ class SubscriptionsCompanion extends UpdateCompanion<Subscription> {
       notificationOffset: notificationOffset ?? this.notificationOffset,
       deletedAt: deletedAt ?? this.deletedAt,
       version: version ?? this.version,
+      accountId: accountId ?? this.accountId,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -9569,6 +9651,9 @@ class SubscriptionsCompanion extends UpdateCompanion<Subscription> {
     if (version.present) {
       map['version'] = Variable<int>(version.value);
     }
+    if (accountId.present) {
+      map['accountId'] = Variable<String>(accountId.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -9597,6 +9682,7 @@ class SubscriptionsCompanion extends UpdateCompanion<Subscription> {
           ..write('notificationOffset: $notificationOffset, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('version: $version, ')
+          ..write('accountId: $accountId, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -14886,6 +14972,34 @@ final class $$AccountsTableReferences
         manager.$state.copyWith(prefetchedData: cache));
   }
 
+  static MultiTypedResultKey<$DebtRecordsTable, List<DebtRecord>>
+      _debtRecordsRefsTable(_$WalletMeltDatabase db) =>
+          MultiTypedResultKey.fromTable(db.debtRecords,
+              aliasName: 'accounts__id__debt_records__accountId');
+
+  $$DebtRecordsTableProcessedTableManager get debtRecordsRefs {
+    final manager = $$DebtRecordsTableTableManager($_db, $_db.debtRecords)
+        .filter((f) => f.accountId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_debtRecordsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
+  static MultiTypedResultKey<$SubscriptionsTable, List<Subscription>>
+      _subscriptionsRefsTable(_$WalletMeltDatabase db) =>
+          MultiTypedResultKey.fromTable(db.subscriptions,
+              aliasName: 'accounts__id__subscriptions__accountId');
+
+  $$SubscriptionsTableProcessedTableManager get subscriptionsRefs {
+    final manager = $$SubscriptionsTableTableManager($_db, $_db.subscriptions)
+        .filter((f) => f.accountId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_subscriptionsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
   static MultiTypedResultKey<$AccountMovementsTable, List<AccountMovement>>
       _accountMovementsRefsTable(_$WalletMeltDatabase db) =>
           MultiTypedResultKey.fromTable(db.accountMovements,
@@ -14999,6 +15113,48 @@ class $$AccountsTableFilterComposer
             $$ExpensesTableFilterComposer(
               $db: $db,
               $table: $db.expenses,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<bool> debtRecordsRefs(
+      Expression<bool> Function($$DebtRecordsTableFilterComposer f) f) {
+    final $$DebtRecordsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.debtRecords,
+        getReferencedColumn: (t) => t.accountId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$DebtRecordsTableFilterComposer(
+              $db: $db,
+              $table: $db.debtRecords,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<bool> subscriptionsRefs(
+      Expression<bool> Function($$SubscriptionsTableFilterComposer f) f) {
+    final $$SubscriptionsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.subscriptions,
+        getReferencedColumn: (t) => t.accountId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$SubscriptionsTableFilterComposer(
+              $db: $db,
+              $table: $db.subscriptions,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -15197,6 +15353,48 @@ class $$AccountsTableAnnotationComposer
     return f(composer);
   }
 
+  Expression<T> debtRecordsRefs<T extends Object>(
+      Expression<T> Function($$DebtRecordsTableAnnotationComposer a) f) {
+    final $$DebtRecordsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.debtRecords,
+        getReferencedColumn: (t) => t.accountId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$DebtRecordsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.debtRecords,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<T> subscriptionsRefs<T extends Object>(
+      Expression<T> Function($$SubscriptionsTableAnnotationComposer a) f) {
+    final $$SubscriptionsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.subscriptions,
+        getReferencedColumn: (t) => t.accountId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$SubscriptionsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.subscriptions,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
   Expression<T> accountMovementsRefs<T extends Object>(
       Expression<T> Function($$AccountMovementsTableAnnotationComposer a) f) {
     final $$AccountMovementsTableAnnotationComposer composer = $composerBuilder(
@@ -15274,6 +15472,8 @@ class $$AccountsTableTableManager extends RootTableManager<
     Account,
     PrefetchHooks Function(
         {bool expensesRefs,
+        bool debtRecordsRefs,
+        bool subscriptionsRefs,
         bool accountMovementsRefs,
         bool incomesRefs,
         bool incomeSchedulesRefs})> {
@@ -15361,6 +15561,8 @@ class $$AccountsTableTableManager extends RootTableManager<
               .toList(),
           prefetchHooksCallback: (
               {expensesRefs = false,
+              debtRecordsRefs = false,
+              subscriptionsRefs = false,
               accountMovementsRefs = false,
               incomesRefs = false,
               incomeSchedulesRefs = false}) {
@@ -15368,6 +15570,8 @@ class $$AccountsTableTableManager extends RootTableManager<
               db: db,
               explicitlyWatchedTables: [
                 if (expensesRefs) db.expenses,
+                if (debtRecordsRefs) db.debtRecords,
+                if (subscriptionsRefs) db.subscriptions,
                 if (accountMovementsRefs) db.accountMovements,
                 if (incomesRefs) db.incomes,
                 if (incomeSchedulesRefs) db.incomeSchedules
@@ -15383,6 +15587,32 @@ class $$AccountsTableTableManager extends RootTableManager<
                         managerFromTypedResult: (p0) =>
                             $$AccountsTableReferences(db, table, p0)
                                 .expensesRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.accountId == item.id),
+                        typedResults: items),
+                  if (debtRecordsRefs)
+                    await $_getPrefetchedData<Account, $AccountsTable,
+                            DebtRecord>(
+                        currentTable: table,
+                        referencedTable:
+                            $$AccountsTableReferences._debtRecordsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$AccountsTableReferences(db, table, p0)
+                                .debtRecordsRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.accountId == item.id),
+                        typedResults: items),
+                  if (subscriptionsRefs)
+                    await $_getPrefetchedData<Account, $AccountsTable,
+                            Subscription>(
+                        currentTable: table,
+                        referencedTable: $$AccountsTableReferences
+                            ._subscriptionsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$AccountsTableReferences(db, table, p0)
+                                .subscriptionsRefs,
                         referencedItemsForCurrentItem:
                             (item, referencedItems) => referencedItems
                                 .where((e) => e.accountId == item.id),
@@ -15445,6 +15675,8 @@ typedef $$AccountsTableProcessedTableManager = ProcessedTableManager<
     Account,
     PrefetchHooks Function(
         {bool expensesRefs,
+        bool debtRecordsRefs,
+        bool subscriptionsRefs,
         bool accountMovementsRefs,
         bool incomesRefs,
         bool incomeSchedulesRefs})>;
@@ -20202,6 +20434,7 @@ typedef $$DebtRecordsTableCreateCompanionBuilder = DebtRecordsCompanion
   Value<String?> settledAt,
   required String status,
   Value<String?> notes,
+  Value<String?> accountId,
   Value<int> rowid,
 });
 typedef $$DebtRecordsTableUpdateCompanionBuilder = DebtRecordsCompanion
@@ -20221,6 +20454,7 @@ typedef $$DebtRecordsTableUpdateCompanionBuilder = DebtRecordsCompanion
   Value<String?> settledAt,
   Value<String> status,
   Value<String?> notes,
+  Value<String?> accountId,
   Value<int> rowid,
 });
 
@@ -20237,6 +20471,20 @@ final class $$DebtRecordsTableReferences extends BaseReferences<
     final manager = $$PayeesTableTableManager($_db, $_db.payees)
         .filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_payeeIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static $AccountsTable _accountIdTable(_$WalletMeltDatabase db) =>
+      db.accounts.createAlias('debt_records__accountId__accounts__id');
+
+  $$AccountsTableProcessedTableManager? get accountId {
+    final $_column = $_itemColumn<String>('accountId');
+    if ($_column == null) return null;
+    final manager = $$AccountsTableTableManager($_db, $_db.accounts)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_accountIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: [item]));
@@ -20324,6 +20572,26 @@ class $$DebtRecordsTableFilterComposer
             $$PayeesTableFilterComposer(
               $db: $db,
               $table: $db.payees,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$AccountsTableFilterComposer get accountId {
+    final $$AccountsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.accountId,
+        referencedTable: $db.accounts,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$AccountsTableFilterComposer(
+              $db: $db,
+              $table: $db.accounts,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -20428,6 +20696,26 @@ class $$DebtRecordsTableOrderingComposer
             ));
     return composer;
   }
+
+  $$AccountsTableOrderingComposer get accountId {
+    final $$AccountsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.accountId,
+        referencedTable: $db.accounts,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$AccountsTableOrderingComposer(
+              $db: $db,
+              $table: $db.accounts,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
 }
 
 class $$DebtRecordsTableAnnotationComposer
@@ -20501,6 +20789,26 @@ class $$DebtRecordsTableAnnotationComposer
     return composer;
   }
 
+  $$AccountsTableAnnotationComposer get accountId {
+    final $$AccountsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.accountId,
+        referencedTable: $db.accounts,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$AccountsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.accounts,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
   Expression<T> debtRepaymentsRefs<T extends Object>(
       Expression<T> Function($$DebtRepaymentsTableAnnotationComposer a) f) {
     final $$DebtRepaymentsTableAnnotationComposer composer = $composerBuilder(
@@ -20534,7 +20842,8 @@ class $$DebtRecordsTableTableManager extends RootTableManager<
     $$DebtRecordsTableUpdateCompanionBuilder,
     (DebtRecord, $$DebtRecordsTableReferences),
     DebtRecord,
-    PrefetchHooks Function({bool payeeId, bool debtRepaymentsRefs})> {
+    PrefetchHooks Function(
+        {bool payeeId, bool accountId, bool debtRepaymentsRefs})> {
   $$DebtRecordsTableTableManager(
       _$WalletMeltDatabase db, $DebtRecordsTable table)
       : super(TableManagerState(
@@ -20562,6 +20871,7 @@ class $$DebtRecordsTableTableManager extends RootTableManager<
             Value<String?> settledAt = const Value.absent(),
             Value<String> status = const Value.absent(),
             Value<String?> notes = const Value.absent(),
+            Value<String?> accountId = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               DebtRecordsCompanion(
@@ -20580,6 +20890,7 @@ class $$DebtRecordsTableTableManager extends RootTableManager<
             settledAt: settledAt,
             status: status,
             notes: notes,
+            accountId: accountId,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -20598,6 +20909,7 @@ class $$DebtRecordsTableTableManager extends RootTableManager<
             Value<String?> settledAt = const Value.absent(),
             required String status,
             Value<String?> notes = const Value.absent(),
+            Value<String?> accountId = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               DebtRecordsCompanion.insert(
@@ -20616,6 +20928,7 @@ class $$DebtRecordsTableTableManager extends RootTableManager<
             settledAt: settledAt,
             status: status,
             notes: notes,
+            accountId: accountId,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
@@ -20625,7 +20938,9 @@ class $$DebtRecordsTableTableManager extends RootTableManager<
                   ))
               .toList(),
           prefetchHooksCallback: (
-              {payeeId = false, debtRepaymentsRefs = false}) {
+              {payeeId = false,
+              accountId = false,
+              debtRepaymentsRefs = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [
@@ -20652,6 +20967,16 @@ class $$DebtRecordsTableTableManager extends RootTableManager<
                         $$DebtRecordsTableReferences._payeeIdTable(db),
                     referencedColumn:
                         $$DebtRecordsTableReferences._payeeIdTable(db).id,
+                  ) as T;
+                }
+                if (accountId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.accountId,
+                    referencedTable:
+                        $$DebtRecordsTableReferences._accountIdTable(db),
+                    referencedColumn:
+                        $$DebtRecordsTableReferences._accountIdTable(db).id,
                   ) as T;
                 }
 
@@ -20690,7 +21015,8 @@ typedef $$DebtRecordsTableProcessedTableManager = ProcessedTableManager<
     $$DebtRecordsTableUpdateCompanionBuilder,
     (DebtRecord, $$DebtRecordsTableReferences),
     DebtRecord,
-    PrefetchHooks Function({bool payeeId, bool debtRepaymentsRefs})>;
+    PrefetchHooks Function(
+        {bool payeeId, bool accountId, bool debtRepaymentsRefs})>;
 typedef $$DebtRepaymentsTableCreateCompanionBuilder = DebtRepaymentsCompanion
     Function({
   required String id,
@@ -21149,6 +21475,7 @@ typedef $$SubscriptionsTableCreateCompanionBuilder = SubscriptionsCompanion
   Value<int?> notificationOffset,
   Value<String?> deletedAt,
   Value<int> version,
+  Value<String?> accountId,
   Value<int> rowid,
 });
 typedef $$SubscriptionsTableUpdateCompanionBuilder = SubscriptionsCompanion
@@ -21172,6 +21499,7 @@ typedef $$SubscriptionsTableUpdateCompanionBuilder = SubscriptionsCompanion
   Value<int?> notificationOffset,
   Value<String?> deletedAt,
   Value<int> version,
+  Value<String?> accountId,
   Value<int> rowid,
 });
 
@@ -21189,6 +21517,20 @@ final class $$SubscriptionsTableReferences extends BaseReferences<
     final manager = $$CategoriesTableTableManager($_db, $_db.categories)
         .filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_categoryIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static $AccountsTable _accountIdTable(_$WalletMeltDatabase db) =>
+      db.accounts.createAlias('subscriptions__accountId__accounts__id');
+
+  $$AccountsTableProcessedTableManager? get accountId {
+    final $_column = $_itemColumn<String>('accountId');
+    if ($_column == null) return null;
+    final manager = $$AccountsTableTableManager($_db, $_db.accounts)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_accountIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: [item]));
@@ -21274,6 +21616,26 @@ class $$SubscriptionsTableFilterComposer
             $$CategoriesTableFilterComposer(
               $db: $db,
               $table: $db.categories,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$AccountsTableFilterComposer get accountId {
+    final $$AccountsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.accountId,
+        referencedTable: $db.accounts,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$AccountsTableFilterComposer(
+              $db: $db,
+              $table: $db.accounts,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -21370,6 +21732,26 @@ class $$SubscriptionsTableOrderingComposer
             ));
     return composer;
   }
+
+  $$AccountsTableOrderingComposer get accountId {
+    final $$AccountsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.accountId,
+        referencedTable: $db.accounts,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$AccountsTableOrderingComposer(
+              $db: $db,
+              $table: $db.accounts,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
 }
 
 class $$SubscriptionsTableAnnotationComposer
@@ -21454,6 +21836,26 @@ class $$SubscriptionsTableAnnotationComposer
             ));
     return composer;
   }
+
+  $$AccountsTableAnnotationComposer get accountId {
+    final $$AccountsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.accountId,
+        referencedTable: $db.accounts,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$AccountsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.accounts,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
 }
 
 class $$SubscriptionsTableTableManager extends RootTableManager<
@@ -21467,7 +21869,7 @@ class $$SubscriptionsTableTableManager extends RootTableManager<
     $$SubscriptionsTableUpdateCompanionBuilder,
     (Subscription, $$SubscriptionsTableReferences),
     Subscription,
-    PrefetchHooks Function({bool categoryId})> {
+    PrefetchHooks Function({bool categoryId, bool accountId})> {
   $$SubscriptionsTableTableManager(
       _$WalletMeltDatabase db, $SubscriptionsTable table)
       : super(TableManagerState(
@@ -21499,6 +21901,7 @@ class $$SubscriptionsTableTableManager extends RootTableManager<
             Value<int?> notificationOffset = const Value.absent(),
             Value<String?> deletedAt = const Value.absent(),
             Value<int> version = const Value.absent(),
+            Value<String?> accountId = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               SubscriptionsCompanion(
@@ -21521,6 +21924,7 @@ class $$SubscriptionsTableTableManager extends RootTableManager<
             notificationOffset: notificationOffset,
             deletedAt: deletedAt,
             version: version,
+            accountId: accountId,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -21543,6 +21947,7 @@ class $$SubscriptionsTableTableManager extends RootTableManager<
             Value<int?> notificationOffset = const Value.absent(),
             Value<String?> deletedAt = const Value.absent(),
             Value<int> version = const Value.absent(),
+            Value<String?> accountId = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               SubscriptionsCompanion.insert(
@@ -21565,6 +21970,7 @@ class $$SubscriptionsTableTableManager extends RootTableManager<
             notificationOffset: notificationOffset,
             deletedAt: deletedAt,
             version: version,
+            accountId: accountId,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
@@ -21573,7 +21979,7 @@ class $$SubscriptionsTableTableManager extends RootTableManager<
                     $$SubscriptionsTableReferences(db, table, e)
                   ))
               .toList(),
-          prefetchHooksCallback: ({categoryId = false}) {
+          prefetchHooksCallback: ({categoryId = false, accountId = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [],
@@ -21600,6 +22006,16 @@ class $$SubscriptionsTableTableManager extends RootTableManager<
                         $$SubscriptionsTableReferences._categoryIdTable(db).id,
                   ) as T;
                 }
+                if (accountId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.accountId,
+                    referencedTable:
+                        $$SubscriptionsTableReferences._accountIdTable(db),
+                    referencedColumn:
+                        $$SubscriptionsTableReferences._accountIdTable(db).id,
+                  ) as T;
+                }
 
                 return state;
               },
@@ -21622,7 +22038,7 @@ typedef $$SubscriptionsTableProcessedTableManager = ProcessedTableManager<
     $$SubscriptionsTableUpdateCompanionBuilder,
     (Subscription, $$SubscriptionsTableReferences),
     Subscription,
-    PrefetchHooks Function({bool categoryId})>;
+    PrefetchHooks Function({bool categoryId, bool accountId})>;
 typedef $$EssentialExpenseTemplatesTableCreateCompanionBuilder
     = EssentialExpenseTemplatesCompanion Function({
   required String id,

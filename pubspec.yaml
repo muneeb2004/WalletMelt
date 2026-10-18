@@ -1,7 +1,7 @@
 name: wallet_melt
 description: "WalletMelt - Know where your money went."
 publish_to: "none"
-version: 1.4.0+10
+version: 1.5.0+11
 
 environment:
   sdk: ">=3.3.0 <4.0.0"

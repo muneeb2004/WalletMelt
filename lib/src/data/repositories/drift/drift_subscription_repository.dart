@@ -50,6 +50,7 @@ class DriftSubscriptionRepository {
       notificationOffset: Value(sub.notificationOffset),
       deletedAt: Value(sub.deletedAt),
       version: Value(sub.version),
+      accountId: Value(sub.accountId),
     );
     await _db.into(_db.subscriptions).insert(row);
     return sub;
@@ -94,6 +95,7 @@ class DriftSubscriptionRepository {
         notificationOffset: Value(sub.notificationOffset),
         deletedAt: Value(sub.deletedAt),
         version: Value(sub.version + 1),
+        accountId: Value(sub.accountId),
       ),
     );
   }
@@ -128,6 +130,7 @@ class DriftSubscriptionRepository {
       notificationOffset: row.notificationOffset,
       deletedAt: row.deletedAt,
       version: row.version,
+      accountId: row.accountId,
     );
   }
 

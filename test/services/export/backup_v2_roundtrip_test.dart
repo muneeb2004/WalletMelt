@@ -97,13 +97,13 @@ Future<void> _seed(local.WalletMeltDatabase db) async {
   await sql(
       "INSERT INTO monthly_budgets (id, month, amount, currency, createdAt, updatedAt) VALUES ('mb1','2026-06',40000,'PKR','$_ts','$_ts');");
   await sql(
-      "INSERT INTO debt_records (id, personName, payeeId, type, principalAmount, remainingAmount, currency, createdAt, status) VALUES ('d1','Ali','p1','owedToMe',500,300,'PKR','$_ts','partiallyPaid');");
+      "INSERT INTO debt_records (id, personName, payeeId, type, principalAmount, remainingAmount, currency, createdAt, status, accountId) VALUES ('d1','Ali','p1','owedToMe',500,300,'PKR','$_ts','partiallyPaid','a1');");
   await sql(
       "INSERT INTO debt_repayments (id, debtId, amount, createdAt) VALUES ('dr1','d1',200,'$_ts');");
   await sql(
       "INSERT INTO grocery_templates (id, name, items, createdAt) VALUES ('gt1','Weekly','milk,eggs','$_ts');");
   await sql(
-      "INSERT INTO subscriptions (id, name, categoryId, amount, currency, startDate, nextOccurrenceDate, billingCycle, status, createdAt, updatedAt) VALUES ('sub1','Netflix','c1',10,'PKR','2026-01-31','2026-07-31','monthly','active','$_ts','$_ts');");
+      "INSERT INTO subscriptions (id, name, categoryId, amount, currency, startDate, nextOccurrenceDate, billingCycle, status, createdAt, updatedAt, accountId) VALUES ('sub1','Netflix','c1',10,'PKR','2026-01-31','2026-07-31','monthly','active','$_ts','$_ts','a1');");
   await sql(
       "INSERT INTO essential_expense_templates (id, name, categoryId, frequency, expectedAmount, isActive, isFuel, createdAt, updatedAt) VALUES ('et1','Fuel','c1','monthly',9000,1,1,'$_ts','$_ts');");
   await sql(
@@ -129,6 +129,12 @@ Future<String> _exportV2(local.WalletMeltDatabase db,
   final extended = await BackupExtendedTables.export(db);
   if (legacyExtended) {
     final tables = Map<String, Object?>.from(extended['tables']! as Map);
+    for (final name in ['debt_records', 'subscriptions']) {
+      tables[name] = [
+        for (final row in tables[name]! as List)
+          Map<String, Object?>.from(row as Map)..remove('accountId'),
+      ];
+    }
     tables
       ..remove('accounts')
       ..remove('account_movements')
@@ -436,6 +442,14 @@ void main() {
           .customSelect("SELECT accountId FROM expenses WHERE id='e1'")
           .getSingle();
       expect(link.read<String?>('accountId'), 'a1');
+      final debtLink = await entry.key
+          .customSelect("SELECT accountId FROM debt_records WHERE id='d1'")
+          .getSingle();
+      expect(debtLink.read<String?>('accountId'), 'a1');
+      final subLink = await entry.key
+          .customSelect("SELECT accountId FROM subscriptions WHERE id='sub1'")
+          .getSingle();
+      expect(subLink.read<String?>('accountId'), 'a1');
       final other = await entry.key
           .customSelect("SELECT accountId FROM expenses WHERE id='e2'")
           .getSingle();
@@ -496,5 +510,62 @@ void main() {
         .customSelect("SELECT accountId FROM expenses WHERE id='e1'")
         .getSingle();
     expect(link.read<String?>('accountId'), isNull);
+  });
+
+  test('account links to a missing account are dropped, not fatal', () async {
+    final src = local.WalletMeltDatabase(NativeDatabase.memory());
+    final dst = local.WalletMeltDatabase(NativeDatabase.memory());
+    addTearDown(src.close);
+    addTearDown(dst.close);
+    await _seed(src);
+    final extended = await BackupExtendedTables.export(src);
+    final tables = Map<String, Object?>.from(extended['tables']! as Map)
+      ..['accounts'] = <Object?>[]
+      ..['account_movements'] = <Object?>[]
+      ..['incomes'] = <Object?>[]
+      ..['income_schedules'] = <Object?>[];
+    extended['tables'] = tables;
+    extended['expense_account_links'] = <Object?>[];
+    final json = const WalletMeltJsonBackupEncoder().encode(
+      expenses: [
+        for (final e in await src.select(src.expenses).get())
+          domain.Expense(
+            id: e.id,
+            amount: e.amount,
+            currency: e.currency,
+            categoryId: e.categoryId,
+            title: e.title,
+            date: e.date,
+            isRecurring: e.isRecurring,
+            createdAt: e.createdAt,
+            updatedAt: e.updatedAt,
+          ),
+      ],
+      groceryItems: const [],
+      categories: [
+        for (final c in await src.select(src.categories).get())
+          domain.Category(
+            id: c.id,
+            name: c.name,
+            icon: c.icon,
+            color: c.color,
+            isDefault: c.isDefault,
+            createdAt: c.createdAt,
+            updatedAt: c.updatedAt,
+          ),
+      ],
+      budgets: const [],
+      settings: WalletMeltSettings.defaults,
+      exportedAt: DateTime(2026, 6, 14),
+      appVersion: '1.5.0+11',
+      extended: extended,
+      schemaVersion: local.WalletMeltDatabase.currentSchemaVersion,
+    );
+    final result = await _restore(dst, tmp, json, RestoreMode.fullReplace);
+    expect(result.success, isTrue, reason: result.errorMessage);
+    final debt = await dst
+        .customSelect("SELECT accountId FROM debt_records WHERE id='d1'")
+        .getSingle();
+    expect(debt.read<String?>('accountId'), isNull);
   });
 }

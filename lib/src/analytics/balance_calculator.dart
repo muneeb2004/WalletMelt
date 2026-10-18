@@ -3,8 +3,8 @@ import '../types/account.dart';
 /// Pure balance rules from ADR-0011. The repository supplies SQL aggregates;
 /// this class owns the formula so it can be tested and documented in one place.
 ///
-/// `balance = openingBalance - expenseOutflow + movementNet + incomeInflow`
-/// (ADR-0011, ADR-0012), where all sums
+/// `balance = openingBalance - expenseOutflow + movementNet + incomeInflow
+/// + debtNet` (ADR-0011, ADR-0012, ADR-0014), where all sums
 /// only cover rows dated on/after the account's opening date and (for expenses)
 /// whose currency equals the account currency.
 class BalanceCalculator {
@@ -15,11 +15,13 @@ class BalanceCalculator {
     required int expenseOutflowMinorUnits,
     required int movementNetMinorUnits,
     int incomeInflowMinorUnits = 0,
+    int debtNetMinorUnits = 0,
   }) {
     return openingBalanceMinorUnits -
         expenseOutflowMinorUnits +
         movementNetMinorUnits +
-        incomeInflowMinorUnits;
+        incomeInflowMinorUnits +
+        debtNetMinorUnits;
   }
 
   /// One total per currency over accounts that are included, not archived and

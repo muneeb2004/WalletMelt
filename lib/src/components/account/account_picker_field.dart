@@ -13,6 +13,8 @@ class AccountPickerField extends StatelessWidget {
     required this.currency,
     required this.value,
     required this.onChanged,
+    this.label = 'Paid from',
+    this.helperText,
     super.key,
   });
 
@@ -20,6 +22,8 @@ class AccountPickerField extends StatelessWidget {
   final String currency;
   final String? value;
   final ValueChanged<String?> onChanged;
+  final String label;
+  final String? helperText;
 
   @override
   Widget build(BuildContext context) {
@@ -36,9 +40,11 @@ class AccountPickerField extends StatelessWidget {
         key: const ValueKey('expense-account-picker'),
         initialValue: selected,
         isExpanded: true,
-        decoration: const InputDecoration(
-          labelText: 'Paid from',
-          prefixIcon: Icon(Icons.account_balance_wallet_outlined),
+        decoration: InputDecoration(
+          labelText: label,
+          helperText: helperText,
+          helperMaxLines: 2,
+          prefixIcon: const Icon(Icons.account_balance_wallet_outlined),
         ),
         style: textTheme.bodyLarge,
         items: [

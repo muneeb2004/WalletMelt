@@ -36,13 +36,13 @@ class BackupExtendedTables {
         {'itemId': 'item'},
         naturalKey: 'normalizedAlias'),
     _spec('debt_records', (d) => d.debtRecords, local.DebtRecord.fromJson,
-        {'payeeId': 'payee'}),
+        {'payeeId': 'payee', 'accountId': 'account'}),
     _spec('debt_repayments', (d) => d.debtRepayments,
         local.DebtRepayment.fromJson, {'debtId': 'debt'}),
     _spec('grocery_templates', (d) => d.groceryTemplates,
         local.GroceryTemplate.fromJson, {}),
     _spec('subscriptions', (d) => d.subscriptions, local.Subscription.fromJson,
-        {'categoryId': 'cat'}),
+        {'categoryId': 'cat', 'accountId': 'account'}),
     _spec('essential_expense_templates', (d) => d.essentialExpenseTemplates,
         local.EssentialExpenseTemplate.fromJson, {'categoryId': 'cat'}),
     _spec('fuel_template_components', (d) => d.fuelTemplateComponents,
@@ -69,6 +69,13 @@ class BackupExtendedTables {
   static const Set<String> _optionalTables = {
     'accounts',
     'account_movements',
+    'incomes',
+    'income_schedules',
+  };
+
+  static const Set<String> _nullableAccountLinkTables = {
+    'debt_records',
+    'subscriptions',
     'incomes',
     'income_schedules',
   };
@@ -201,6 +208,15 @@ class BackupExtendedTables {
         final sourceId = row['id'] as String;
         final sourceTransactionId = row['fuelTransactionId'] as String?;
         spec.remap(row, maps);
+
+        // Optional account links that point at an account the backup does not
+        // contain are dropped instead of failing the whole restore.
+        if (_nullableAccountLinkTables.contains(spec.name)) {
+          final linked = row['accountId'];
+          if (linked is String && !await _exists(db, 'accounts', 'id', linked)) {
+            row['accountId'] = null;
+          }
+        }
 
         if (spec.expenseScoped) {
           final expenseId = row['expenseId'] as String?;

@@ -113,7 +113,9 @@ class DriftAccountRepository {
       'SELECT (SELECT COUNT(*) FROM expenses WHERE accountId = ?1) + '
       '(SELECT COUNT(*) FROM account_movements WHERE accountId = ?1) + '
       '(SELECT COUNT(*) FROM incomes WHERE accountId = ?1) + '
-      '(SELECT COUNT(*) FROM income_schedules WHERE accountId = ?1) AS n;',
+      '(SELECT COUNT(*) FROM income_schedules WHERE accountId = ?1) + '
+      '(SELECT COUNT(*) FROM debt_records WHERE accountId = ?1) + '
+      '(SELECT COUNT(*) FROM subscriptions WHERE accountId = ?1) AS n;',
       variables: [Variable.withString(accountId)],
     ).getSingle();
     return row.read<int>('n') > 0;
@@ -160,6 +162,26 @@ class DriftAccountRepository {
     final inflow = {
       for (final r in incomeRows) r.read<String>('id'): r.read<int>('total'),
     };
+    // ADR-0014. Principal: loanGiven out, loanTaken in. Repayments: money in for
+    // owedToMe/loanGiven, out for iOwe/loanTaken. Linked debts only.
+    final debtRows = await _db.customSelect(
+      'SELECT a.id AS id, COALESCE(SUM(x.v), 0) AS total FROM accounts a '
+      'LEFT JOIN ('
+      'SELECT d.accountId AS accountId, d.currency AS currency, d.createdAt AS at, '
+      "CASE d.type WHEN 'loanGiven' THEN -COALESCE(d.principalAmountMinorUnits, CAST(ROUND(d.principalAmount * 100) AS INTEGER)) "
+      "WHEN 'loanTaken' THEN COALESCE(d.principalAmountMinorUnits, CAST(ROUND(d.principalAmount * 100) AS INTEGER)) ELSE 0 END AS v "
+      'FROM debt_records d WHERE d.accountId IS NOT NULL '
+      'UNION ALL '
+      'SELECT d.accountId, d.currency, r.createdAt, '
+      "CASE WHEN d.type IN ('owedToMe', 'loanGiven') THEN CAST(ROUND(r.amount * 100) AS INTEGER) "
+      'ELSE -CAST(ROUND(r.amount * 100) AS INTEGER) END '
+      'FROM debt_repayments r JOIN debt_records d ON d.id = r.debtId WHERE d.accountId IS NOT NULL'
+      ') x ON x.accountId = a.id AND x.currency = a.currency AND x.at >= a.openingDate '
+      'GROUP BY a.id;',
+    ).get();
+    final debtNet = {
+      for (final r in debtRows) r.read<String>('id'): r.read<int>('total'),
+    };
     final outflow = {
       for (final r in expenseRows) r.read<String>('id'): r.read<int>('total'),
     };
@@ -175,6 +197,7 @@ class DriftAccountRepository {
             expenseOutflowMinorUnits: outflow[a.id] ?? 0,
             movementNetMinorUnits: net[a.id] ?? 0,
             incomeInflowMinorUnits: inflow[a.id] ?? 0,
+            debtNetMinorUnits: debtNet[a.id] ?? 0,
           ),
         ),
     ];

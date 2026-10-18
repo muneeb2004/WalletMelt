@@ -3,7 +3,7 @@ type: architecture
 status: stable
 priority: high
 created: 2026-09-13
-updated: 2026-10-17
+updated: 2026-10-18
 domain: architecture
 related:
   - "[[Application-Architecture]]"
@@ -15,7 +15,7 @@ related:
 
 ## 1. Storage Engine
 - **Engine**: SQLite via Drift (`drift_flutter` / `sqlite3_flutter_libs`).
-- **Schema Version**: `11`.
+- **Schema Version**: `12`.
 - **Database File**: Stored in platform database directory as `wallet_melt.db`.
 
 ## 2. Table Topology (26 Tables)
@@ -63,3 +63,6 @@ Metadata & Catalogs:
 
 ## Income (2026-10-17, schema v11)
 `incomes` (received facts, soft delete, optional `accountId` and `scheduleId`) and `income_schedules` (expectations: `cycle`, `startDate` anchor, `nextDueDate`, `status`). Both reference `accounts` with RESTRICT; an account with incomes or schedules is archived rather than deleted. Index `incomes(accountId, date)` and `income_schedules(status, nextDueDate)`. Money is integer minor units. See [[ADR-0012-Income-Schedules-and-Budget-Suggestion]].
+
+## Debt and subscription account links (2026-10-18, schema v12)
+`debt_records.accountId` and `subscriptions.accountId` are nullable FKs to `accounts` (RESTRICT) with indexes. Debt cash flow is derived in the balance SQL, never stored ([[ADR-0014-Debts-and-Subscriptions-Move-Account-Balances]]). Table count is unchanged (26).

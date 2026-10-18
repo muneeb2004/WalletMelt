@@ -53,6 +53,7 @@ class DriftDebtRepository {
       settledAt: Value(debt.settledAt),
       status: debt.status.name,
       notes: Value(debt.notes),
+      accountId: Value(debt.accountId),
     );
     await _db.into(_db.debtRecords).insert(row);
     return debt;
@@ -124,6 +125,7 @@ class DriftDebtRepository {
         orElse: () => domain.DebtStatus.active,
       ),
       notes: row.notes,
+      accountId: row.accountId,
     );
   }
 

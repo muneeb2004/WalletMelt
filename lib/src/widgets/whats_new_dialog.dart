@@ -96,7 +96,7 @@ class WhatsNewContent extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        'Budget from payday, not the 1st',
+                        'Loans and subscriptions now count',
                         style: TextStyle(
                           fontSize: 12,
                           color: context.scheme.onSurfaceVariant,
@@ -123,9 +123,47 @@ class WhatsNewContent extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Version 1.4.0 Highlights
+              // Version 1.5.0 Highlights
               _buildSectionBadge(
                 label: 'VERSION ${AppVersion.version} UPDATES',
+                color: context.scheme.primary,
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.subscriptions_rounded,
+                iconColor: context.scheme.primary,
+                title: 'Subscriptions pay from an account',
+                description:
+                    'Choose which account a subscription is paid from. Each renewal then comes out of that account, so your balance stays right without you doing anything.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.handshake_rounded,
+                iconColor: context.money.income,
+                title: 'Loans and debts update your balance',
+                description:
+                    'When you lend money it leaves your account, and when you borrow it arrives. Repayments move the balance the right way. Debts you do not link to an account work exactly as before.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.restore_rounded,
+                iconColor: context.scheme.secondary,
+                title: 'Backups include the links',
+                description:
+                    'Your backups remember which account each subscription and loan belongs to, and older backups still restore as before.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 24),
+
+              // Version 1.4.0 Highlights
+              _buildSectionBadge(
+                label: 'VERSION 1.4.0 UPDATES',
                 color: context.scheme.primary,
                 isDark: isDark,
               ),

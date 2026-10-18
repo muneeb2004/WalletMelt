@@ -24,7 +24,7 @@ related:
   "metadata": {
     "format": "walletmelt.local_json_backup",
     "format_version": 2,
-    "schema_version": 11,
+    "schema_version": 12,
     "app_version": "1.1.2+6",
     "exported_at": "2026-10-15T12:00:00.000",
     "includes": ["expenses", "grocery_items", "categories", "budgets", "monthly_budgets", "settings", "extended"],
@@ -66,3 +66,6 @@ related:
 
 ## 6. Settings (2026-10-18)
 The `settings` section gains `budget_period_start_day` (integer 1 to 28). A missing key restores as 1 (calendar month). See [[ADR-0013-Budget-Period-Start-Day]].
+
+## 7. Debt and subscription account links (schema v12, 2026-10-18)
+`accountId` rides inside the existing `debt_records` and `subscriptions` rows (Drift JSON) and is remapped through the `account` map. A missing key restores as unlinked; a link to an account that is not in the backup is dropped rather than failing the restore. Full Replace deletes `accounts` after `debt_records`. See [[ADR-0014-Debts-and-Subscriptions-Move-Account-Balances]].
