@@ -929,9 +929,8 @@ class _DebtScreenState extends State<DebtScreen> {
 
     return Scaffold(
       body: AppBackground(
-        padding: EdgeInsets.fromLTRB(20, 16, 20, isKeyboardOpen ? 16 : 120),
         child: ListView(
-
+          padding: EdgeInsets.fromLTRB(20, 16, 20, isKeyboardOpen ? 16 : 120),
           physics: const BouncingScrollPhysics(),
           children: [
             Row(

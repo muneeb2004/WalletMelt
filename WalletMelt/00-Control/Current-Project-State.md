@@ -112,3 +112,6 @@ Savings goals set aside inside an account with free to spend ([[ADR-0015-Savings
 
 ## 18. Release 1.7.0+14 (2026-10-18)
 Committees (BC) with installments, payout turn and confirm prompts ([[ADR-0016-Committees-BC-Installments-and-Payout-Turn]]). Route `/committees`; 36 screenshots.
+
+## 19. Debt screen bottom padding (2026-10-18)
+The Debts list now carries its 120 px bottom clearance as list padding (not as outer padding), so rows scroll under the shell's extended FAB instead of being cut off by a hard edge above it.
