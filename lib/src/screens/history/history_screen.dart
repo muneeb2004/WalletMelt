@@ -10,6 +10,7 @@ import '../../components/expense/expense_list_tile.dart';
 import '../../components/glass/app_background.dart';
 import '../../state/app_state.dart';
 import '../../theme/wallet_melt_theme.dart';
+import '../../widgets/fluid_list.dart';
 import '../../types/category.dart' as wm;
 import '../../types/expense.dart';
 import '../../utils/insights.dart';
@@ -251,9 +252,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
         child: Skeletonizer(
           enabled: isLoading,
           child: CustomScrollView(
+            physics: FluidList.physics,
             slivers: [
               SliverPadding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                padding: const EdgeInsets.fromLTRB(AppSpacing.md, 16, AppSpacing.md, 0),
                 sliver: SliverToBoxAdapter(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -541,7 +543,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               else
                 // ── Lazy expense list with date-group headers and Slidable actions split (Directive 7) ──
                 SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
+                  padding: const EdgeInsets.fromLTRB(AppSpacing.md, 0, AppSpacing.md, 120),
                   sliver: SliverList.builder(
                     itemCount: items.length,
                     itemBuilder: (context, index) {

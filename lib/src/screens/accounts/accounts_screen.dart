@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../widgets/fluid_list.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -85,8 +86,8 @@ class AccountsScreen extends StatelessWidget {
               ),
             )
           : ListView(
-              padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.md, AppSpacing.md, AppSpacing.md, 96),
+              padding: FluidList.padding,
+              physics: FluidList.physics,
               children: [
                 if (active.isEmpty)
                   const EmptyState(
@@ -100,9 +101,9 @@ class AccountsScreen extends StatelessWidget {
                   const SizedBox(height: AppSpacing.md),
                   if (state.unassignedExpenseCount > 0)
                     _UnassignedBanner(count: state.unassignedExpenseCount),
-                  for (final b in active) ...[
-                    _AccountTile(balance: b),
-                    const SizedBox(height: AppSpacing.sm),
+                  for (final (idx, b) in active.indexed) ...[
+                    FluidItem(index: idx, child: _AccountTile(balance: b)),
+                    const SizedBox(height: FluidList.gap),
                   ],
                   if (active.length > 1)
                     Align(
@@ -120,9 +121,9 @@ class AccountsScreen extends StatelessWidget {
                       style: textTheme.titleMedium
                           ?.copyWith(color: scheme.onSurfaceVariant)),
                   const SizedBox(height: AppSpacing.sm),
-                  for (final b in archived) ...[
-                    _AccountTile(balance: b),
-                    const SizedBox(height: AppSpacing.sm),
+                  for (final (idx, b) in archived.indexed) ...[
+                    FluidItem(index: idx, child: _AccountTile(balance: b)),
+                    const SizedBox(height: FluidList.gap),
                   ],
                 ],
               ],

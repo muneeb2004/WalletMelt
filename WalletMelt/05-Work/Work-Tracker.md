@@ -3,7 +3,7 @@ type: work-tracker
 status: active
 priority: high
 created: 2026-09-13
-updated: 2026-10-17
+updated: 2026-10-19
 domain: work
 related:
   - "[[Current-Project-State]]"
@@ -112,3 +112,6 @@ Every release bumps `pubspec.yaml` and ships a plain-language, non-technical Wha
 ## Release 1.7.1 (2026-10-18)
 - **Done**: simpler accounts (3 types, name-only Add account, Add money / Spend money, Correct balance in the overflow menu). What's New updated in plain language.
 - Verified 1.7.1: analyzer clean, full suite passing (643 tests), 36 screenshots.
+
+## Release 1.7.2 (2026-10-19)
+- **Done**: uniform, fluid lists. New `lib/src/widgets/fluid_list.dart` (`FluidList` padding/gap/physics, `FluidItem` staggered fade and slide, 320 ms ease-out, max 8 staggered rows, respects reduced motion). Applied to accounts, goals, committees, income, debts-adjacent payees, merchants, subscriptions, essentials and history (spacing and scroll physics). What's New updated in plain language.

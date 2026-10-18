@@ -10,6 +10,7 @@ import '../../widgets/app_snackbar.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/primary_button.dart';
 import '../../components/category/category_icon.dart';
+import '../../widgets/fluid_list.dart';
 
 class MerchantsScreen extends StatefulWidget {
   const MerchantsScreen({super.key});
@@ -288,16 +289,17 @@ class _MerchantsScreenState extends State<MerchantsScreen> {
                         onActionPressed: _searchQuery.isEmpty ? () => _showAddEditMerchantSheet(context) : null,
                       )
                     : ListView.separated(
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
+                        padding: FluidList.padding,
+                        physics: FluidList.physics,
                         itemCount: filtered.length,
-                        separatorBuilder: (context, index) => const SizedBox(height: 10),
+                        separatorBuilder: (context, index) => const SizedBox(height: FluidList.gap),
                         itemBuilder: (context, index) {
                           final merchant = filtered[index];
                           final category = merchant.defaultCategoryId != null
                               ? state.categoryById(merchant.defaultCategoryId!)
                               : null;
 
-                          return WMGlassSurface.tier1(
+                          return FluidItem(index: index, child: WMGlassSurface.tier1(
                             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                             child: Row(
                               children: [
@@ -403,7 +405,7 @@ class _MerchantsScreenState extends State<MerchantsScreen> {
                                 ),
                               ],
                             ),
-                          );
+                          ));
                         },
                       ),
               ),

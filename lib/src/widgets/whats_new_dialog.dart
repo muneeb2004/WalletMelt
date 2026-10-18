@@ -123,9 +123,27 @@ class WhatsNewContent extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Version 1.7.1 Highlights
+              // Version 1.7.2 Highlights
               _buildSectionBadge(
                 label: 'VERSION ${AppVersion.version} UPDATES',
+                color: context.scheme.primary,
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.swipe_vertical_rounded,
+                iconColor: context.scheme.primary,
+                title: 'Smoother, tidier lists',
+                description:
+                    'Every list now has the same spacing and a soft bounce when you scroll. Cards glide in one after another instead of popping up all at once.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 24),
+
+              // Version 1.7.1 Highlights
+              _buildSectionBadge(
+                label: 'VERSION 1.7.1 UPDATES',
                 color: context.scheme.primary,
                 isDark: isDark,
               ),

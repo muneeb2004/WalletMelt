@@ -10,6 +10,7 @@ import '../../types/payee.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/primary_button.dart';
+import '../../widgets/fluid_list.dart';
 
 class PayeesScreen extends StatefulWidget {
   const PayeesScreen({super.key});
@@ -285,14 +286,17 @@ class _PayeesScreenState extends State<PayeesScreen> {
                           : 'Try a different search term.',
                     )
                   : ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
+                      padding: FluidList.padding,
+                      physics: FluidList.physics,
                       itemCount: filtered.length,
                       itemBuilder: (ctx, idx) {
                         final payee = filtered[idx];
                         final linkedCount = state.debts.where((d) => d.payeeId == payee.id).length;
 
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
+                        return FluidItem(
+                          index: idx,
+                          child: Padding(
+                          padding: const EdgeInsets.only(bottom: FluidList.gap),
                           child: WMGlassSurface.tier2(
                             padding: const EdgeInsets.all(16),
                             child: Column(
@@ -471,7 +475,7 @@ class _PayeesScreenState extends State<PayeesScreen> {
                               ],
                             ),
                           ),
-                        );
+                        ));
                       },
                     ),
             ),

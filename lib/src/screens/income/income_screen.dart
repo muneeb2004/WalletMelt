@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../widgets/fluid_list.dart';
 import 'package:provider/provider.dart';
 
 import '../../state/app_state.dart';
@@ -72,8 +73,8 @@ class IncomeScreen extends StatelessWidget {
               ),
             )
           : ListView(
-              padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.md, AppSpacing.md, AppSpacing.md, 96),
+              padding: FluidList.padding,
+              physics: FluidList.physics,
               children: [
                 if (schedules.isEmpty && received.isEmpty)
                   const EmptyState(
@@ -108,18 +109,18 @@ class IncomeScreen extends StatelessWidget {
                 if (schedules.isNotEmpty) ...[
                   Text('Repeating', style: textTheme.titleMedium),
                   const SizedBox(height: AppSpacing.sm),
-                  for (final s in schedules) ...[
-                    _ScheduleTile(schedule: s),
-                    const SizedBox(height: AppSpacing.sm),
+                  for (final (idx, s) in schedules.indexed) ...[
+                    FluidItem(index: idx, child: _ScheduleTile(schedule: s)),
+                    const SizedBox(height: FluidList.gap),
                   ],
                   const SizedBox(height: AppSpacing.md),
                 ],
                 if (received.isNotEmpty) ...[
                   Text('Received', style: textTheme.titleMedium),
                   const SizedBox(height: AppSpacing.sm),
-                  for (final i in received) ...[
-                    _IncomeTile(income: i),
-                    const SizedBox(height: AppSpacing.sm),
+                  for (final (idx, i) in received.indexed) ...[
+                    FluidItem(index: idx, child: _IncomeTile(income: i)),
+                    const SizedBox(height: FluidList.gap),
                   ],
                 ],
               ],

@@ -3,7 +3,7 @@ type: product
 status: stable
 priority: high
 created: 2026-09-13
-updated: 2026-10-17
+updated: 2026-10-19
 domain: product
 related:
   - "[[Product-Requirements]]"
@@ -87,3 +87,6 @@ Six steps only. Add no others.
 - Need a new colour or text size? Propose a role here and in `lib/src/theme/` first; do not inline it.
 - The guard test `test/theme/design_token_guard_test.dart` enforces a ratchet on raw colours and small fonts; lower its baseline when you migrate code, never raise it.
 - Intentional raw colours: category/user-picked colours, colour-picker and SVG-editor swatches, receipt-viewer image overlay, and white foreground on category-coloured swipe actions.
+
+## Lists and motion (2026-10-19)
+All list screens use `FluidList` (16 px sides, 12 px card gap, 120 px bottom clearance, bouncing physics). Rows enter with `FluidItem`: fade plus 18 px slide, 320 ms ease-out cubic, 40 ms stagger for the first 8 rows, disabled when the OS requests reduced motion.

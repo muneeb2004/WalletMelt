@@ -18,6 +18,7 @@ import '../../utils/number_parser.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/app_snackbar.dart';
+import '../../widgets/fluid_list.dart';
 
 class SubscriptionScreen extends StatefulWidget {
   const SubscriptionScreen({this.isEmbedded = false, super.key});
@@ -126,20 +127,23 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                   ),
                 )
               : ListView.builder(
-                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 120),
+                  padding: FluidList.padding,
+                  physics: FluidList.physics,
                   itemCount: filteredSubs.length,
                   itemBuilder: (context, index) {
                     final sub = filteredSubs[index];
                     final category = state.categoryById(sub.categoryId);
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 12.0),
+                    return FluidItem(
+                      index: index,
+                      child: Padding(
+                      padding: const EdgeInsets.only(bottom: FluidList.gap),
                       child: _SubscriptionCard(
                         subscription: sub,
                         category: category,
                         currency: currency,
                         onTap: () => _showSubscriptionActions(context, sub),
                       ),
-                    );
+                    ));
                   },
                 ),
         ),
