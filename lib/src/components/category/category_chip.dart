@@ -9,12 +9,16 @@ class WalletCategoryChip extends StatelessWidget {
     required this.category,
     required this.selected,
     required this.onTap,
+    this.onLongPress,
     super.key,
   });
 
   final Category category;
   final bool selected;
   final VoidCallback onTap;
+
+  /// Optional: lets the user edit the category without leaving the form.
+  final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +58,7 @@ class WalletCategoryChip extends StatelessWidget {
                 WMHaptics.selection();
                 onTap();
               },
+              onLongPress: onLongPress,
               child: Center(
                 widthFactor: 1.0,
                 heightFactor: 1.0,

@@ -5,247 +5,10 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 import '../../services/svg/svg_customization_service.dart';
+import '../../services/svg/svg_colour_info.dart';
+import 'icon_catalog.dart';
 
-class CategoryPreset {
-  const CategoryPreset({
-    required this.id,
-    required this.label,
-    required this.assetPath,
-  });
-
-  final String id;
-  final String label;
-  final String assetPath;
-}
-
-const List<CategoryPreset> categoryPresets = [
-  CategoryPreset(
-    id: 'food_dining',
-    label: 'Food & Dining',
-    assetPath: 'assets/icons/categories/presets/food_dining.svg',
-  ),
-  CategoryPreset(
-    id: 'shopping',
-    label: 'Shopping',
-    assetPath: 'assets/icons/categories/presets/shopping.svg',
-  ),
-  CategoryPreset(
-    id: 'transport',
-    label: 'Transport',
-    assetPath: 'assets/icons/categories/presets/transport.svg',
-  ),
-  CategoryPreset(
-    id: 'entertainment',
-    label: 'Entertainment',
-    assetPath: 'assets/icons/categories/presets/entertainment.svg',
-  ),
-  CategoryPreset(
-    id: 'health',
-    label: 'Health',
-    assetPath: 'assets/icons/categories/presets/health.svg',
-  ),
-  CategoryPreset(
-    id: 'education',
-    label: 'Education',
-    assetPath: 'assets/icons/categories/presets/education.svg',
-  ),
-  CategoryPreset(
-    id: 'travel',
-    label: 'Travel',
-    assetPath: 'assets/icons/categories/presets/travel.svg',
-  ),
-  CategoryPreset(
-    id: 'fitness',
-    label: 'Fitness',
-    assetPath: 'assets/icons/categories/presets/fitness.svg',
-  ),
-  CategoryPreset(
-    id: 'gift',
-    label: 'Gifts',
-    assetPath: 'assets/icons/categories/presets/gift.svg',
-  ),
-  CategoryPreset(
-    id: 'pets',
-    label: 'Pets',
-    assetPath: 'assets/icons/categories/presets/pets.svg',
-  ),
-  CategoryPreset(
-    id: 'personal_care',
-    label: 'Self Care',
-    assetPath: 'assets/icons/categories/presets/personal_care.svg',
-  ),
-  CategoryPreset(
-    id: 'savings',
-    label: 'Savings',
-    assetPath: 'assets/icons/categories/presets/savings.svg',
-  ),
-  CategoryPreset(
-    id: 'coffee',
-    label: 'Coffee & Tea',
-    assetPath: 'assets/icons/categories/presets/coffee.svg',
-  ),
-  CategoryPreset(
-    id: 'smartphone',
-    label: 'Mobile & Data',
-    assetPath: 'assets/icons/categories/presets/smartphone.svg',
-  ),
-  CategoryPreset(
-    id: 'book',
-    label: 'Books',
-    assetPath: 'assets/icons/categories/presets/book.svg',
-  ),
-  CategoryPreset(
-    id: 'pencil',
-    label: 'Stationery',
-    assetPath: 'assets/icons/categories/presets/pencil.svg',
-  ),
-  CategoryPreset(
-    id: 'shirt',
-    label: 'Clothing',
-    assetPath: 'assets/icons/categories/presets/shirt.svg',
-  ),
-  CategoryPreset(
-    id: 'pill',
-    label: 'Medicine',
-    assetPath: 'assets/icons/categories/presets/pill.svg',
-  ),
-  CategoryPreset(
-    id: 'shield',
-    label: 'Insurance',
-    assetPath: 'assets/icons/categories/presets/shield.svg',
-  ),
-  CategoryPreset(
-    id: 'repeat',
-    label: 'Subscriptions',
-    assetPath: 'assets/icons/categories/presets/repeat.svg',
-  ),
-  CategoryPreset(
-    id: 'percent',
-    label: 'Tax & Fees',
-    assetPath: 'assets/icons/categories/presets/percent.svg',
-  ),
-  CategoryPreset(
-    id: 'heart',
-    label: 'Charity',
-    assetPath: 'assets/icons/categories/presets/heart.svg',
-  ),
-  CategoryPreset(
-    id: 'banknote',
-    label: 'Cash',
-    assetPath: 'assets/icons/categories/presets/banknote.svg',
-  ),
-  CategoryPreset(
-    id: 'bicycle',
-    label: 'Bike',
-    assetPath: 'assets/icons/categories/presets/bicycle.svg',
-  ),
-  CategoryPreset(
-    id: 'bus',
-    label: 'Bus & Metro',
-    assetPath: 'assets/icons/categories/presets/bus.svg',
-  ),
-  CategoryPreset(
-    id: 'car',
-    label: 'Ride & Taxi',
-    assetPath: 'assets/icons/categories/presets/car.svg',
-  ),
-  CategoryPreset(
-    id: 'plane',
-    label: 'Flights',
-    assetPath: 'assets/icons/categories/presets/plane.svg',
-  ),
-  CategoryPreset(
-    id: 'bed',
-    label: 'Hotel & Stay',
-    assetPath: 'assets/icons/categories/presets/bed.svg',
-  ),
-  CategoryPreset(
-    id: 'film',
-    label: 'Movies',
-    assetPath: 'assets/icons/categories/presets/film.svg',
-  ),
-  CategoryPreset(
-    id: 'music',
-    label: 'Music',
-    assetPath: 'assets/icons/categories/presets/music.svg',
-  ),
-  CategoryPreset(
-    id: 'gamepad',
-    label: 'Games',
-    assetPath: 'assets/icons/categories/presets/gamepad.svg',
-  ),
-  CategoryPreset(
-    id: 'scissors',
-    label: 'Haircut',
-    assetPath: 'assets/icons/categories/presets/scissors.svg',
-  ),
-  CategoryPreset(
-    id: 'landmark',
-    label: 'Bank',
-    assetPath: 'assets/icons/categories/presets/landmark.svg',
-  ),
-  CategoryPreset(
-    id: 'credit_card',
-    label: 'Cards',
-    assetPath: 'assets/icons/categories/presets/credit_card.svg',
-  ),
-  CategoryPreset(
-    id: 'wallet',
-    label: 'Wallet',
-    assetPath: 'assets/icons/categories/presets/wallet.svg',
-  ),
-  CategoryPreset(
-    id: 'receipt',
-    label: 'Bills',
-    assetPath: 'assets/icons/categories/presets/receipt.svg',
-  ),
-  CategoryPreset(
-    id: 'laptop',
-    label: 'Tech',
-    assetPath: 'assets/icons/categories/presets/laptop.svg',
-  ),
-  CategoryPreset(
-    id: 'printer',
-    label: 'Printing',
-    assetPath: 'assets/icons/categories/presets/printer.svg',
-  ),
-  CategoryPreset(
-    id: 'leaf',
-    label: 'Garden',
-    assetPath: 'assets/icons/categories/presets/leaf.svg',
-  ),
-  CategoryPreset(
-    id: 'building',
-    label: 'Hostel',
-    assetPath: 'assets/icons/categories/presets/building.svg',
-  ),
-  CategoryPreset(
-    id: 'baby',
-    label: 'Kids',
-    assetPath: 'assets/icons/categories/presets/baby.svg',
-  ),
-];
-
-const Map<String, String> standardCategorySvgMap = {
-  'electricity': 'assets/icons/categories/electricity.svg',
-  'bolt': 'assets/icons/categories/electricity.svg',
-  'gas': 'assets/icons/categories/gas.svg',
-  'local_fire_department': 'assets/icons/categories/gas.svg',
-  'grocery': 'assets/icons/categories/grocery.svg',
-  'shopping_basket': 'assets/icons/categories/grocery.svg',
-  'internet': 'assets/icons/categories/internet.svg',
-  'wifi': 'assets/icons/categories/internet.svg',
-  'water': 'assets/icons/categories/water.svg',
-  'water_drop': 'assets/icons/categories/water.svg',
-  'rent': 'assets/icons/categories/rent.svg',
-  'home': 'assets/icons/categories/rent.svg',
-  'maintenance': 'assets/icons/categories/maintenance.svg',
-  'build': 'assets/icons/categories/maintenance.svg',
-  'fuel': 'assets/icons/categories/fuel.svg',
-  'local_gas_station': 'assets/icons/categories/fuel.svg',
-  'other': 'assets/icons/categories/other.svg',
-  'more_horiz': 'assets/icons/categories/other.svg',
-};
+export 'icon_catalog.dart';
 
 const Map<String, String> _standardCategorySvgMap = standardCategorySvgMap;
 
@@ -277,6 +40,17 @@ class CategoryIcon extends StatelessWidget {
     final raw = (icon ?? '').trim();
     if (raw.isEmpty) {
       return Icon(defaultIcon, size: size, color: color);
+    }
+
+    if (raw.startsWith(emojiPrefix)) {
+      return SizedBox(
+        width: size,
+        height: size,
+        child: FittedBox(
+          fit: BoxFit.contain,
+          child: Text(raw.substring(emojiPrefix.length)),
+        ),
+      );
     }
 
     final colorFilter = color != null
@@ -363,6 +137,20 @@ class CategoryIcon extends StatelessWidget {
     );
   }
 
+  static final Map<String, bool> _multicolour = {};
+
+  /// Uploads with their own colours (two or more, or a gradient) keep them;
+  /// single-colour uploads are tinted to follow the theme.
+  static bool _keepsOwnColours(File file) {
+    return _multicolour.putIfAbsent(file.path, () {
+      try {
+        return SvgColourInfo.isMulticolour(file.readAsStringSync());
+      } catch (_) {
+        return false;
+      }
+    });
+  }
+
   Widget _buildFileSvg(File file, ColorFilter? colorFilter) {
     if (!file.existsSync()) {
       return Icon(defaultIcon, size: size, color: color);
@@ -371,7 +159,7 @@ class CategoryIcon extends StatelessWidget {
       file,
       width: size,
       height: size,
-      colorFilter: colorFilter,
+      colorFilter: _keepsOwnColours(file) ? null : colorFilter,
       placeholderBuilder: (_) => Icon(defaultIcon, size: size, color: color),
     );
   }

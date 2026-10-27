@@ -2,17 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import 'dart:convert';
-import 'dart:io' as io;
-import 'package:file_picker/file_picker.dart';
-import 'package:path_provider/path_provider.dart';
 
 import '../../components/account/account_picker_field.dart';
 import '../../components/category/category_chip.dart';
-import '../../components/category/category_icon.dart';
-import '../../services/svg/svg_safeguard_service.dart';
-import '../../services/svg/svg_customization_service.dart';
-import '../settings/svg_editor_dialog.dart';
+import '../category/category_editor_sheet.dart';
 import '../../components/fuel/fuel_editor.dart';
 import '../../components/glass/app_background.dart';
 import '../../types/expense.dart';
@@ -25,7 +18,6 @@ import '../../theme/wallet_melt_theme.dart';
 import '../../utils/expense_validation.dart';
 import '../../utils/number_parser.dart';
 import '../../widgets/app_snackbar.dart';
-import '../../widgets/color_picker_sheet.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/state_views.dart';
 import '../../widgets/receipt_image.dart';
@@ -276,6 +268,75 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       );
     }
 
+    Widget amountCard() => WMGlassSurface.tier2(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'AMOUNT',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.0,
+                    color: context.scheme.onSurfaceVariant,
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: context.scheme.surfaceContainerHigh,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    currency,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _amountController,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              autofocus: !isEditing,
+              style: TextStyle(
+                fontFamily: 'PlusJakartaSans',
+                fontSize: 34,
+                fontWeight: FontWeight.w900,
+                fontFeatures: const [FontFeature.tabularFigures()],
+                color: context.scheme.onSurface,
+                letterSpacing: -0.5,
+              ),
+              decoration: InputDecoration(
+                hintText: '0.00',
+                hintStyle: TextStyle(
+                  fontFamily: 'PlusJakartaSans',
+                  fontSize: 34,
+                  fontWeight: FontWeight.w900,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                  color: context.scheme.onSurfaceVariant.withValues(alpha: 0.4),
+                  letterSpacing: -0.5,
+                ),
+                filled: false,
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                contentPadding: EdgeInsets.zero,
+                errorText: _validation?.amountError,
+              ),
+              onChanged: (_) => setState(() {}),
+            ),
+          ],
+        ),
+      );
+
     return Scaffold(
       body: AppBackground(
         padding: EdgeInsets.zero,
@@ -310,6 +371,13 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
             ),
             const SizedBox(height: 18),
 
+            // Standard expenses lead with the amount; grocery and fuel keep
+            // category first because choosing them changes the form.
+            if (!isGroceryMode && !isFuelMode) ...[
+              amountCard(),
+              const SizedBox(height: 18),
+            ],
+
             // Category Selector chips at the top
             _SectionTitle(
                 title: 'Category',
@@ -330,8 +398,18 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                         _categoryManuallySelected = true;
                       });
                     },
+                    onLongPress: () =>
+                        showCategoryEditor(context, existing: category),
                   ),
               ],
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: AppSpacing.sm),
+              child: Text(
+                'Hold a category to change its icon, name or colour.',
+                style: theme.textTheme.bodySmall
+                    ?.copyWith(color: context.scheme.onSurfaceVariant),
+              ),
             ),
             if (_validation?.categoryError != null)
               Padding(
@@ -557,75 +635,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               ),
             ] else ...[
               // ── Standard Expense Form ────────────────────────────
-              WMGlassSurface.tier2(
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'AMOUNT',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 1.0,
-                            color: context.scheme.onSurfaceVariant,
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: context.scheme.surfaceContainerHigh,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            currency,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    TextField(
-                      controller: _amountController,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      autofocus: !isEditing,
-                      style: TextStyle(
-                        fontFamily: 'PlusJakartaSans',
-                        fontSize: 34,
-                        fontWeight: FontWeight.w900,
-                        fontFeatures: const [FontFeature.tabularFigures()],
-                        color: context.scheme.onSurface,
-                        letterSpacing: -0.5,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: '0.00',
-                        hintStyle: TextStyle(
-                          fontFamily: 'PlusJakartaSans',
-                          fontSize: 34,
-                          fontWeight: FontWeight.w900,
-                          fontFeatures: const [FontFeature.tabularFigures()],
-                          color: context.scheme.onSurfaceVariant.withValues(alpha: 0.4),
-                          letterSpacing: -0.5,
-                        ),
-                        filled: false,
-                        border: InputBorder.none,
-                        enabledBorder: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        contentPadding: EdgeInsets.zero,
-                        errorText: _validation?.amountError,
-                      ),
-                      onChanged: (_) => setState(() {}),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 14),
               WMGlassSurface.tier1(
                 onTap: _pickDate,
                 padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
@@ -1011,291 +1020,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   }
 
   Future<void> _showAddCategorySheet(BuildContext context) async {
-    final nameController = TextEditingController();
-    final appState = context.read<AppState>();
-    final colors = [
-      '#F4B740',
-      '#E8805D',
-      '#8FD6B5',
-      '#7EA6C8',
-      '#77C8D4',
-      '#A88CC2'
-    ];
-    var selectedColor = colors.first;
-    var selectedIcon = categoryPresets.first.id;
-    String? uploadError;
-    var isUploading = false;
-
-    await showAppBottomSheet<void>(
-      context,
-      builder: (sheetContext) {
-        return StatefulBuilder(
-          builder: (context, setSheetState) {
-            final activeColor = colorFromHex(selectedColor);
-            return SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.lg,
-                  AppSpacing.sm,
-                  AppSpacing.lg,
-                  AppSpacing.lg,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Custom Category',
-                        style: Theme.of(context).textTheme.titleLarge),
-                    const SizedBox(height: 14),
-
-                    // Live preview tile
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: activeColor.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: activeColor.withValues(alpha: 0.25)),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: activeColor.withValues(alpha: 0.2),
-                              shape: BoxShape.circle,
-                            ),
-                            child: CategoryIcon(
-                              icon: selectedIcon,
-                              size: 24,
-                              color: activeColor,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              nameController.text.trim().isEmpty
-                                  ? 'Category Preview'
-                                  : nameController.text.trim(),
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-
-                    TextField(
-                      controller: nameController,
-                      autofocus: true,
-                      decoration: const InputDecoration(labelText: 'Category Name'),
-                      onChanged: (_) => setSheetState(() {}),
-                    ),
-                    const SizedBox(height: 14),
-
-                    Text(
-                      'Choose Category Icon',
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                    ),
-                    const SizedBox(height: 8),
-
-                    // Preset icons grid
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        for (final preset in categoryPresets)
-                          InkWell(
-                            borderRadius: BorderRadius.circular(12),
-                            onTap: () => setSheetState(() {
-                              selectedIcon = preset.id;
-                              uploadError = null;
-                            }),
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 150),
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: selectedIcon == preset.id
-                                    ? activeColor.withValues(alpha: 0.22)
-                                    : Theme.of(context).cardColor.withValues(alpha: 0.5),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: selectedIcon == preset.id
-                                      ? activeColor
-                                      : Theme.of(context).dividerColor.withValues(alpha: 0.2),
-                                  width: selectedIcon == preset.id ? 2 : 1,
-                                ),
-                              ),
-                              child: Tooltip(
-                                message: preset.label,
-                                child: CategoryIcon(
-                                  icon: preset.id,
-                                  size: 22,
-                                  color: selectedIcon == preset.id ? activeColor : null,
-                                ),
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-
-                    // Upload Custom SVG Option
-                    OutlinedButton.icon(
-                      icon: isUploading
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.upload_file_rounded, size: 18),
-                      label: Text(
-                        selectedIcon.startsWith('custom:')
-                            ? 'Custom SVG Uploaded (Tap to Change)'
-                            : 'Upload Custom SVG',
-                      ),
-                      onPressed: isUploading
-                          ? null
-                          : () async {
-                              try {
-                                setSheetState(() => isUploading = true);
-                                final files = await FilePicker.pickFiles(
-                                  type: FileType.custom,
-                                  allowedExtensions: ['svg'],
-                                );
-                                if (files.isNotEmpty) {
-                                  final file = files.first;
-                                  String? content;
-                                  final bytes = await file.readAsBytes();
-                                  if (bytes.isNotEmpty) {
-                                    content = utf8.decode(bytes);
-                                  } else if (file.path != null) {
-                                    content = await io.File(file.path!).readAsString();
-                                  }
-                                  if (!context.mounted) return;
-                                  if (content == null || content.isEmpty) {
-                                    setSheetState(() => uploadError = 'Could not read file contents.');
-                                    return;
-                                  }
-
-                                  const safeguard = SvgSafeguardService();
-                                  final val = safeguard.validate(content);
-                                  if (!val.isValid) {
-                                    setSheetState(() => uploadError = val.errorMessage);
-                                    return;
-                                  }
-
-                                  final docsDir = await getApplicationDocumentsDirectory();
-                                  final iconId = await safeguard.saveCustomSvg(
-                                    sanitizedSvg: val.sanitizedContent!,
-                                    baseDir: docsDir,
-                                  );
-
-                                  if (!context.mounted) return;
-                                  setSheetState(() {
-                                    selectedIcon = iconId;
-                                    uploadError = null;
-                                  });
-                                }
-                              } catch (e) {
-                                if (context.mounted) {
-                                  setSheetState(() => uploadError = 'Upload error: $e');
-                                }
-                              } finally {
-                                if (context.mounted) {
-                                  setSheetState(() => isUploading = false);
-                                }
-                              }
-                            },
-                    ),
-
-                    if (selectedIcon.isNotEmpty) ...[
-                      const SizedBox(height: 6),
-                      TextButton.icon(
-                        style: TextButton.styleFrom(
-                          visualDensity: VisualDensity.compact,
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        ),
-                        icon: const Icon(Icons.tune_rounded, size: 16),
-                        label: const Text('Edit Selected SVG', style: TextStyle(fontSize: 12)),
-                        onPressed: () async {
-                          final libraryName = categoryPresets
-                              .where((p) => p.id == selectedIcon)
-                              .map((p) => p.label)
-                              .firstOrNull;
-                          final item = SvgIconItem(
-                            id: selectedIcon,
-                            label: libraryName ?? 'Custom icon',
-                            type: selectedIcon.startsWith('custom:')
-                                ? SvgIconType.custom
-                                : SvgIconType.preset,
-                          );
-                          final categoryName = nameController.text.trim();
-                          final result = await SvgEditorDialog.show(
-                            context,
-                            item,
-                            usedBy: categoryName.isEmpty ? null : categoryName,
-                          );
-                          if (!context.mounted) return;
-                          final newId = result?.useIconId;
-                          if (newId != null) selectedIcon = newId;
-                          setSheetState(() {});
-                        },
-                      ),
-                    ],
-
-                    if (uploadError != null) ...[
-                      const SizedBox(height: 6),
-                      Text(
-                        uploadError!,
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.error,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-
-                    const SizedBox(height: 14),
-                    Text(
-                      'Category Color',
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                    ),
-                    const SizedBox(height: 8),
-                    WMColorPicker(
-                      selectedColor: selectedColor,
-                      presetColors: colors,
-                      onColorChanged: (c) => setSheetState(() => selectedColor = c),
-                    ),
-                    const SizedBox(height: 20),
-                    PrimaryButton(
-                      label: 'Create category',
-                      onPressed: () async {
-                        if (nameController.text.trim().isEmpty) return;
-                        final navigator = Navigator.of(sheetContext);
-                        final category = await appState.addCategory(
-                          name: nameController.text.trim(),
-                          icon: selectedIcon,
-                          color: selectedColor,
-                        );
-                        if (!mounted || !sheetContext.mounted) return;
-                        setState(() => _categoryId = category.id);
-                        navigator.pop();
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
-    nameController.dispose();
+    final category = await showCategoryEditor(context);
+    if (category != null && mounted) setState(() => _categoryId = category.id);
   }
 
   double _getGrocerySubtotal() {

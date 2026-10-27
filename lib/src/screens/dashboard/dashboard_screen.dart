@@ -160,6 +160,9 @@ class DashboardScreen extends StatelessWidget {
     final ratio = hasBudget ? (totalSpent / budgetLimit).clamp(0.0, 1.5) : 0.0;
     final Color budgetColor = money.budget(ratio);
     final isCurrentMonth = allowanceResult.isCurrentMonth;
+    // With accounts, spend and balance share the top row as equal tiles.
+    final splitHero = state.accountsAvailable &&
+        state.accountBalances.any((b) => !b.account.isArchived);
 
     return Scaffold(
       body: AppBackground(
@@ -199,6 +202,40 @@ class DashboardScreen extends StatelessWidget {
               const SizedBox(height: AppSpacing.md),
 
               // ── Hero: total spend, budget bar, daily allowance ──────────
+              if (splitHero) ...[
+                IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(
+                        child: _SpendTile(
+                          totalSpent: totalSpent,
+                          currency: currency,
+                          hasBudget: hasBudget,
+                          ratio: ratio,
+                          budgetColor: budgetColor,
+                          remaining: remaining,
+                          isOverBudget: isOverBudget,
+                          onTap: () => BudgetScreen.showSetBudgetSheet(
+                              context, state, monthlyBudget, totalSpent),
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.smMd),
+                      Expanded(
+                          child: DashboardBalanceCard(
+                              state: state, fillHeight: true)),
+                    ],
+                  ),
+                ),
+                if (isCurrentMonth && hasBudget) ...[
+                  const SizedBox(height: AppSpacing.smMd),
+                  _AllowanceRow(
+                    isOverBudget: isOverBudget,
+                    dailyAllowance: allowanceResult.dailyAllowance,
+                    currency: currency,
+                  ),
+                ],
+              ] else
               WMCard(
                 key: const Key('dashboard_hero'),
                 tone: WMCardTone.brand,
@@ -398,7 +435,7 @@ class DashboardScreen extends StatelessWidget {
               // ── Account balance (opt-in, ADR-0011) ───────────────────────
               DueIncomeCard(state: state),
               DueCommitteeCard(state: state),
-              DashboardBalanceCard(state: state),
+              if (!splitHero) DashboardBalanceCard(state: state),
 
               // ── Recent activity ──────────────────────────────────────────
               Row(
@@ -795,6 +832,147 @@ class _DeltaChip extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+
+/// Half-width "Total spend" tile shown beside the balance tile.
+class _SpendTile extends StatelessWidget {
+  const _SpendTile({
+    required this.totalSpent,
+    required this.currency,
+    required this.hasBudget,
+    required this.ratio,
+    required this.budgetColor,
+    required this.remaining,
+    required this.isOverBudget,
+    required this.onTap,
+  });
+
+  final double totalSpent;
+  final String currency;
+  final bool hasBudget;
+  final double ratio;
+  final Color budgetColor;
+  final double remaining;
+  final bool isOverBudget;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final money = context.money;
+    return WMCard(
+      key: const Key('dashboard_hero'),
+      tone: WMCardTone.brand,
+      onTap: onTap,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Total spend',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: textTheme.labelMedium?.copyWith(color: scheme.primary)),
+          const SizedBox(height: AppSpacing.xs),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              formatMoney(totalSpent, currency),
+              style: withTabularFigures(textTheme.titleLarge)
+                  .copyWith(color: scheme.onPrimaryContainer),
+            ),
+          ),
+          const Spacer(),
+          const SizedBox(height: AppSpacing.smMd),
+          if (hasBudget) ...[
+            LinearProgressIndicator(
+              value: ratio.clamp(0.0, 1.0),
+              minHeight: 6,
+              backgroundColor: scheme.surface,
+              valueColor: AlwaysStoppedAnimation<Color>(budgetColor),
+              borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                isOverBudget
+                    ? 'Over by ${formatMoney(-remaining, currency)}'
+                    : '${formatMoney(remaining, currency)} remaining',
+                style: textTheme.bodySmall?.copyWith(
+                  color: isOverBudget
+                      ? money.overText
+                      : scheme.onPrimaryContainer,
+                ),
+              ),
+            ),
+          ] else
+            Row(
+              children: [
+                Text('Set budget',
+                    style:
+                        textTheme.bodySmall?.copyWith(color: scheme.primary)),
+                const SizedBox(width: AppSpacing.xs),
+                Icon(Icons.arrow_forward_rounded,
+                    size: 16, color: scheme.primary),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Full-width daily allowance row under the spend and balance tiles.
+class _AllowanceRow extends StatelessWidget {
+  const _AllowanceRow({
+    required this.isOverBudget,
+    required this.dailyAllowance,
+    required this.currency,
+  });
+
+  final bool isOverBudget;
+  final double dailyAllowance;
+  final String currency;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    return WMCard(
+      tone: WMCardTone.raised,
+      padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md, vertical: AppSpacing.smMd),
+      onTap: () => context.push('/settings/metrics'),
+      child: Row(
+        children: [
+          Text('Daily allowance', style: textTheme.labelMedium),
+          const SizedBox(width: AppSpacing.xs),
+          Icon(Icons.info_outline_rounded,
+              size: 16, color: scheme.onSurfaceVariant),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerRight,
+              child: Text(
+                isOverBudget
+                    ? 'Over budget — no daily allowance'
+                    : '${formatMoney(dailyAllowance, currency)} / day',
+                style: textTheme.titleSmall?.copyWith(
+                  color: isOverBudget
+                      ? context.money.overText
+                      : scheme.onSurface,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

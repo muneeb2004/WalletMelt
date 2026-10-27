@@ -377,8 +377,6 @@ class _SvgEditorDialogState extends State<SvgEditorDialog> {
                             _buildStyle(context, text)
                           else
                             _buildTransform(context),
-                          const SizedBox(height: AppSpacing.sm),
-                          _buildAdvanced(context, text),
                           if (_validationError != null) _buildError(context, text),
                         ],
                       ),
@@ -457,7 +455,7 @@ class _SvgEditorDialogState extends State<SvgEditorDialog> {
                 ),
               const PopupMenuItem(
                 value: 'file',
-                child: Text('Replace from file'),
+                child: Text('Replace with my own file'),
               ),
             ],
           ),
@@ -771,49 +769,6 @@ class _SvgEditorDialogState extends State<SvgEditorDialog> {
               : null,
         ),
       ],
-    );
-  }
-
-  Widget _buildAdvanced(BuildContext context, TextTheme text) {
-    final scheme = context.scheme;
-    return Theme(
-      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-      child: ExpansionTile(
-        tilePadding: EdgeInsets.zero,
-        title: Row(
-          children: [
-            Text('Advanced', style: text.titleSmall),
-            const SizedBox(width: AppSpacing.sm),
-            Icon(
-              _valid ? Icons.check_circle_rounded : Icons.error_rounded,
-              size: 16,
-              color: _valid ? context.money.incomeText : scheme.error,
-            ),
-          ],
-        ),
-        subtitle: const Text('SVG markup'),
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              color: scheme.surfaceContainer,
-              borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-              border: Border.all(
-                  color: _valid ? scheme.outlineVariant : scheme.error),
-            ),
-            child: TextField(
-              controller: _codeController,
-              maxLines: 8,
-              onChanged: _validateCode,
-              style: text.bodySmall?.copyWith(fontFamily: 'monospace'),
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.all(AppSpacing.smMd),
-                border: InputBorder.none,
-                hintText: '<svg ...> ... </svg>',
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 

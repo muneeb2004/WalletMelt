@@ -3,7 +3,7 @@ type: knowledge
 status: stable
 priority: high
 created: 2026-09-13
-updated: 2026-10-18
+updated: 2026-10-27
 domain: backup
 related:
   - "[[Backup-and-Restore-Architecture]]"
@@ -15,7 +15,7 @@ related:
 
 ## 1. Container
 - **JSON**: `walletmelt-backup-<timestamp>.json` (pretty-printed UTF-8).
-- **ZIP** (when receipts are packaged): `backup.json`, `metadata.json`, `receipts/<basename>`.
+- **ZIP** (when receipts are packaged): `backup.json`, `metadata.json`, `receipts/<basename>`, `icons/uploads/<file>.svg`, `icons/overrides/<key>.svg` (section 10).
 - **Encrypted** (optional passphrase): `WMENC01` header | 16-byte salt | 16-byte IV | ciphertext | 32-byte HMAC-SHA256 tag. PBKDF2-HMAC-SHA256 100k iterations -> 64 bytes (32 AES-256-CTR key + 32 HMAC key). The whole JSON or ZIP is encrypted.
 
 ## 2. `backup.json` (format_version 2)
@@ -75,3 +75,9 @@ The `settings` section gains `budget_period_start_day` (integer 1 to 28). A miss
 
 ## 9. Committees (schema v14, 2026-10-18)
 `committees` and `committee_events` are optional extended tables (missing = none). A committee's `accountId` is a nullable link (dropped when the account is absent); an event whose committee is absent is skipped. Full Replace deletes events then committees before `expenses` and `accounts`. See [[ADR-0016-Committees-BC-Installments-and-Payout-Turn]].
+
+## 10. Uploaded and edited icons (2026-10-27)
+ZIP backups also carry the user's icon files: `icons/uploads/<file>.svg` (uploads and copies, the files behind `custom:<file>.svg` category icons) and `icons/overrides/<key>.svg` (edits to built-in or uploaded icons). `metadata.json` gains `icon_file_count` and `recordCounts.icons`. JSON-only backups (and the pre-restore safety backup) carry no icon files. Nothing in `backup.json` changes and the format stays 2; older ZIPs simply have no `icons/` folder.
+- **Restore.** After a successful restore `AppState.restoreJsonBackup` calls `SvgCustomizationService.importFiles`. Only names matching `[A-Za-z0-9_-]+.svg` are read; every file is re-validated and sanitized by `SvgSafeguardService`. Safe Merge keeps an existing local file; Full Replace uses the backup copy. A bad icon is skipped and never fails the restore. The override cache is reloaded so tiles update at once.
+- **Export.** `SvgCustomizationService.exportableFiles` feeds `createBackup(iconFiles:)`; the Settings backup action passes it.
+- Tests: `test/services/export/backup_icons_test.dart`.

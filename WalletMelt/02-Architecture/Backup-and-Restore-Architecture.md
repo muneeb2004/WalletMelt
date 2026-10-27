@@ -3,7 +3,7 @@ type: architecture
 status: stable
 priority: medium
 created: 2026-09-13
-updated: 2026-10-15
+updated: 2026-10-27
 domain: architecture
 related:
   - "[[ADR-0005-Safe-Merge-Transactional-Restore]]"
@@ -54,3 +54,6 @@ Schema v13 adds `savings_goals` and `savings_contributions` as optional extended
 
 ## 11. Committees (2026-10-18)
 Schema v14 adds `committees` and `committee_events` as optional extended keys with skip-on-missing-parent and nullable account link; delete order events, committees, then expenses and accounts. See [[Backup-Format-Specification]] section 9.
+
+## Icon files in ZIP backups (2026-10-27)
+ZIP backups carry the user's uploaded icons (`icons/uploads/`) and icon edits (`icons/overrides/`). `createBackup(iconFiles:)` writes them; after a successful restore `AppState.restoreJsonBackup` calls `SvgCustomizationService.importFiles` (Safe Merge keeps local files, Full Replace uses the backup copy, unsafe names and invalid SVGs are skipped, and an icon problem never fails the restore). JSON-only and safety backups carry no icons. Details: [[Backup-Format-Specification]] section 10, [[ADR-0007-SVG-Customization-and-Global-Overrides]].

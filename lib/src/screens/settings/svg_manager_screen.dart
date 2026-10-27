@@ -1,20 +1,20 @@
-import 'dart:convert';
-import 'dart:io';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../../components/category/category_icon.dart';
 import '../../components/glass/app_background.dart';
 import '../../services/svg/svg_customization_service.dart';
-import '../../services/svg/svg_safeguard_service.dart';
+import '../../services/svg/svg_upload.dart';
 import '../../state/app_state.dart';
 import '../../theme/wallet_melt_theme.dart';
 import '../../widgets/app_snackbar.dart';
 import 'svg_editor_dialog.dart';
 
+enum _Filter { all, builtIn, yours }
+
+/// Browse every icon, add your own, tweak colours, and delete uploads.
+/// Choosing which icon a category uses happens on the Categories screen.
 class SvgManagerScreen extends StatefulWidget {
   const SvgManagerScreen({super.key});
 
@@ -23,41 +23,38 @@ class SvgManagerScreen extends StatefulWidget {
 }
 
 class _SvgManagerScreenState extends State<SvgManagerScreen> {
-  final TextEditingController _searchController = TextEditingController();
-  List<SvgIconItem> _allIcons = [];
-  bool _isLoading = true;
-  String _filterType = 'all'; // all, preset, standard, custom
+  final TextEditingController _search = TextEditingController();
+  List<SvgIconItem> _all = [];
+  bool _loading = true;
+  bool _uploading = false;
+  _Filter _filter = _Filter.all;
 
   @override
   void initState() {
     super.initState();
-    _loadIcons();
-    SvgCustomizationService.instance.addListener(_onServiceUpdate);
+    _load();
+    SvgCustomizationService.instance.addListener(_load);
   }
 
   @override
   void dispose() {
-    _searchController.dispose();
-    SvgCustomizationService.instance.removeListener(_onServiceUpdate);
+    _search.dispose();
+    SvgCustomizationService.instance.removeListener(_load);
     super.dispose();
   }
 
-  void _onServiceUpdate() {
-    _loadIcons();
-  }
-
-  Future<void> _loadIcons() async {
+  Future<void> _load() async {
     final icons = await SvgCustomizationService.instance.listAllIcons();
     if (mounted) {
       setState(() {
-        _allIcons = icons;
-        _isLoading = false;
+        _all = icons;
+        _loading = false;
       });
     }
   }
 
-  /// Names of categories using [iconId], or null when no AppState is in
-  /// scope (for example in isolated widget tests) or none use it.
+  /// Names of categories using [iconId], or null when none do (or no
+  /// AppState is in scope, as in isolated widget tests).
   String? _usedBy(String iconId) {
     try {
       final state = Provider.of<AppState>(context, listen: false);
@@ -74,358 +71,261 @@ class _SvgManagerScreenState extends State<SvgManagerScreen> {
     }
   }
 
-  Future<void> _uploadNewCustomSvg() async {
+  AppState? _stateOrNull() {
     try {
-      final result = await FilePicker.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['svg'],
-      );
-
-      // ignore: unnecessary_null_comparison
-      if (result != null && result.isNotEmpty) {
-        final file = result.first;
-        String? content;
-        final bytes = await file.readAsBytes();
-        if (bytes.isNotEmpty) {
-          content = utf8.decode(bytes);
-        } else if (file.path != null) {
-          content = await File(file.path!).readAsString();
-        }
-
-        if (content == null || content.isEmpty) {
-          if (mounted) showErrorSnackbar(context, 'Could not read SVG file.');
-          return;
-        }
-
-        const safeguard = SvgSafeguardService();
-        final val = safeguard.validate(content);
-        if (!val.isValid || val.sanitizedContent == null) {
-          if (mounted) {
-            showErrorSnackbar(
-                context, val.errorMessage ?? 'Invalid SVG file.');
-          }
-          return;
-        }
-
-        final docsDir = await getApplicationDocumentsDirectory();
-        final iconId = await safeguard.saveCustomSvg(
-          sanitizedSvg: val.sanitizedContent!,
-          baseDir: docsDir,
-        );
-
-        await _loadIcons();
-        if (mounted) {
-          showSuccessSnackbar(context, 'New custom SVG added!');
-          final newItem = _allIcons.firstWhere(
-            (i) => i.id == iconId,
-            orElse: () => SvgIconItem(
-              id: iconId,
-              label: 'Custom SVG',
-              type: SvgIconType.custom,
-            ),
-          );
-          SvgEditorDialog.show(context, newItem, usedBy: _usedBy(newItem.id));
-        }
-      }
-    } catch (e) {
-      if (mounted) showErrorSnackbar(context, 'Upload failed: $e');
+      return Provider.of<AppState>(context, listen: false);
+    } catch (_) {
+      return null;
     }
+  }
+
+  Future<void> _upload() async {
+    setState(() => _uploading = true);
+    final result = await pickAndSaveSvg();
+    if (!mounted) return;
+    setState(() => _uploading = false);
+    if (result.error != null) {
+      showErrorSnackbar(context, result.error!);
+    } else if (result.iconId != null) {
+      showSuccessSnackbar(
+          context, 'Icon added. Pick it for any category from the Categories screen.');
+    }
+  }
+
+  Future<void> _delete(SvgIconItem item) async {
+    final usedBy = _usedBy(item.id);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Delete ${item.label}?'),
+        content: Text(usedBy == null
+            ? 'This removes the icon from your phone.'
+            : 'It is used by $usedBy. Those categories will switch to the '
+                '"Other" icon so nothing is left blank.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: ctx.scheme.error,
+              foregroundColor: ctx.scheme.onError,
+            ),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Delete icon'),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    try {
+      await context.read<AppState>().deleteUploadedIcon(item.id);
+    } catch (_) {
+      await SvgCustomizationService.instance.deleteCustomIcon(item.id);
+    }
+    if (mounted) showSuccessSnackbar(context, 'Icon deleted.');
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    final query = _searchController.text.toLowerCase().trim();
-    final filtered = _allIcons.where((item) {
-      if (_filterType == 'preset' && item.type != SvgIconType.preset) {
-        return false;
-      }
-      if (_filterType == 'standard' && item.type != SvgIconType.standard) {
-        return false;
-      }
-      if (_filterType == 'custom' && item.type != SvgIconType.custom) {
-        return false;
-      }
-      if (query.isNotEmpty) {
-        return item.label.toLowerCase().contains(query) ||
-            item.id.toLowerCase().contains(query);
-      }
-      return true;
+    final text = Theme.of(context).textTheme;
+    final scheme = context.scheme;
+    final query = _search.text.toLowerCase().trim();
+    final filtered = _all.where((item) {
+      final yours = item.type == SvgIconType.custom;
+      if (_filter == _Filter.builtIn && yours) return false;
+      if (_filter == _Filter.yours && !yours) return false;
+      if (query.isEmpty) return true;
+      return item.label.toLowerCase().contains(query) ||
+          item.id.toLowerCase().contains(query);
     }).toList();
 
     return Scaffold(
       body: AppBackground(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 120),
-          children: [
-            // Top Bar
-            Row(
-              children: [
-                IconButton(
-                  tooltip: 'Back',
-                  onPressed: () => context.pop(),
-                  icon: const Icon(Icons.arrow_back_rounded),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Icon & SVG Manager',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.w900,
-                      fontSize: 22,
-                    ),
-                  ),
-                ),
-                IconButton(
-                  tooltip: 'Add Custom SVG',
-                  icon: const Icon(Icons.add_circle_outline_rounded),
-                  onPressed: _uploadNewCustomSvg,
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-
-            // Explanatory Banner Card
-            WMGlassSurface.tier1(
-              padding: const EdgeInsets.all(14),
-              child: Row(
+        child: SafeArea(
+          child: ListView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(
+                AppSpacing.md, AppSpacing.md, AppSpacing.md, 120),
+            children: [
+              Row(
                 children: [
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: context.scheme.primary.withValues(alpha: 0.15),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.auto_awesome_rounded,
-                      size: 20,
-                      color: context.scheme.primary,
-                    ),
+                  IconButton(
+                    tooltip: 'Back',
+                    onPressed: () => context.pop(),
+                    icon: const Icon(Icons.arrow_back_rounded),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Across-the-Board SVG Reflection',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w800,
-                            fontSize: 12,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Tap any SVG icon to edit its color, paths, or code. Saved modifications immediately update every category, budget, and transaction tile.',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: context.scheme.onSurfaceVariant,
-                            height: 1.3,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  Expanded(child: Text('Icon library', style: text.titleLarge)),
                 ],
               ),
-            ),
-            const SizedBox(height: 16),
-
-            // Search Box
-            Container(
-              decoration: BoxDecoration(
-                color: context.scheme.surfaceContainer,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: context.scheme.outlineVariant,
-                  width: 1.0,
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
+                child: Text(
+                  'Add your own icons, or tap one to change its colour or '
+                  'shape. Pick which icon a category uses on the '
+                  'Categories screen.',
+                  style: text.bodyMedium
+                      ?.copyWith(color: scheme.onSurfaceVariant),
                 ),
               ),
-              child: TextField(
-                controller: _searchController,
+              const SizedBox(height: AppSpacing.smMd),
+              FilledButton.icon(
+                onPressed: _uploading ? null : _upload,
+                icon: _uploading
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.upload_file_rounded),
+                label: const Text('Upload your own SVG'),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              TextField(
+                controller: _search,
                 onChanged: (_) => setState(() {}),
                 decoration: InputDecoration(
-                  hintText: 'Search icons by name...',
-                  prefixIcon: const Icon(Icons.search_rounded, size: 20),
-                  suffixIcon: _searchController.text.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear_rounded, size: 18),
-                          onPressed: () {
-                            _searchController.clear();
-                            setState(() {});
-                          },
-                        )
-                      : null,
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                  hintText: 'Search icons',
+                  prefixIcon: const Icon(Icons.search_rounded),
+                  suffixIcon: _search.text.isEmpty
+                      ? null
+                      : IconButton(
+                          tooltip: 'Clear search',
+                          icon: const Icon(Icons.close_rounded),
+                          onPressed: () => setState(_search.clear),
+                        ),
                 ),
               ),
-            ),
-            const SizedBox(height: 12),
-
-            // Filter Chips Row
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  _buildFilterChip('all', 'All Icons (${_allIcons.length})'),
-                  const SizedBox(width: 8),
-                  _buildFilterChip('preset', 'Preset SVGs'),
-                  const SizedBox(width: 8),
-                  _buildFilterChip('standard', 'Standard Categories'),
-                  const SizedBox(width: 8),
-                  _buildFilterChip('custom', 'Custom Uploads'),
+              const SizedBox(height: AppSpacing.smMd),
+              SegmentedButton<_Filter>(
+                showSelectedIcon: false,
+                segments: [
+                  ButtonSegment(
+                      value: _Filter.all, label: Text('All (${_all.length})')),
+                  const ButtonSegment(
+                      value: _Filter.builtIn, label: Text('Built in')),
+                  const ButtonSegment(
+                      value: _Filter.yours, label: Text('Yours')),
                 ],
+                selected: {_filter},
+                onSelectionChanged: (s) => setState(() => _filter = s.first),
               ),
-            ),
-            const SizedBox(height: 16),
-
-            // Icon List / Grid
-            if (_isLoading)
-              const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(40),
-                  child: CircularProgressIndicator(),
-                ),
-              )
-            else if (filtered.isEmpty)
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(40),
-                  child: Column(
-                    children: [
-                      Icon(Icons.search_off_rounded,
-                          size: 40, color: context.scheme.onSurfaceVariant),
-                      const SizedBox(height: 8),
-                      Text(
-                        'No icons match "$query"',
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                    ],
+              const SizedBox(height: AppSpacing.md),
+              if (_loading)
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(AppSpacing.xl),
+                    child: CircularProgressIndicator(),
                   ),
-                ),
-              )
-            else
-              ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: filtered.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 8),
-                itemBuilder: (context, index) {
-                  final item = filtered[index];
-                  final isCustomized = SvgCustomizationService.instance
-                      .isCustomized(item.id);
-                  final usedBy = _usedBy(item.id);
-
-                  return WMGlassSurface.tier2(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 12),
-                    onTap: () => SvgEditorDialog.show(context, item, usedBy: usedBy),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 44,
-                          height: 44,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: context.scheme.surfaceContainer,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: isCustomized
-                                  ? context.scheme.primary
-                                  : (context.scheme.outlineVariant),
-                              width: isCustomized ? 1.5 : 1.0,
-                            ),
-                          ),
-                          child: CategoryIcon(
-                            icon: item.id,
-                            size: 24,
-                            color: isCustomized
-                                ? context.scheme.primary
-                                : (context.scheme.onSurface),
-                          ),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                item.label,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 14,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                usedBy != null
-                                    ? 'Used by: $usedBy'
-                                    : (item.type == SvgIconType.custom
-                                        ? 'Custom user SVG'
-                                        : 'Identifier: ${item.id}'),
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: context.scheme.onSurfaceVariant,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        if (isCustomized) ...[
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: context.scheme.primary
-                                  .withValues(alpha: 0.18),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              'EDITED',
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
-                                color: context.scheme.primary,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                        ],
-                        Icon(
-                          Icons.edit_note_rounded,
-                          size: 20,
-                          color: context.scheme.onSurfaceVariant,
-                        ),
-                      ],
+                )
+              else if (filtered.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(AppSpacing.xl),
+                  child: Center(
+                    child: Text(
+                      _filter == _Filter.yours && query.isEmpty
+                          ? 'You have not added any icons yet.'
+                          : 'No icons match "$query"',
+                      style: text.titleMedium,
+                      textAlign: TextAlign.center,
                     ),
-                  );
-                },
-              ),
-          ],
+                  ),
+                )
+              else
+                for (final item in filtered)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                    child: _row(context, item),
+                  ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildFilterChip(String type, String label) {
-    final isSelected = _filterType == type;
+  Widget _row(BuildContext context, SvgIconItem item) {
+    final text = Theme.of(context).textTheme;
+    final scheme = context.scheme;
+    final edited = SvgCustomizationService.instance.isCustomized(item.id);
+    final usedBy = _usedBy(item.id);
+    final yours = item.type == SvgIconType.custom;
 
-    return ChoiceChip(
-      selected: isSelected,
-      label: Text(label),
-      onSelected: (_) => setState(() => _filterType = type),
-      selectedColor: context.scheme.primary,
-      labelStyle: TextStyle(
-        fontSize: 11,
-        fontWeight: FontWeight.w700,
-        color: isSelected
-            ? (context.scheme.onPrimary)
-            : (context.scheme.onSurfaceVariant),
+    return WMCard(
+      padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md, vertical: AppSpacing.smMd),
+      onTap: () async {
+        final state = _stateOrNull();
+        final result =
+            await SvgEditorDialog.show(context, item, usedBy: usedBy);
+        final newId = result?.useIconId;
+        if (newId != null && state != null) {
+          await state.useIconForCategoriesWith(item.id, newId);
+        }
+      },
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: scheme.surfaceContainerHigh,
+              borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+              border: Border.all(
+                color: edited ? scheme.primary : scheme.outlineVariant,
+                width: edited ? 2 : 1,
+              ),
+            ),
+            child: CategoryIcon(
+              icon: item.id,
+              size: 26,
+              color: edited ? scheme.primary : scheme.onSurface,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(item.label, style: text.titleMedium),
+                Text(
+                  usedBy != null
+                      ? 'Used by $usedBy'
+                      : (yours ? 'Added by you' : 'Not used yet'),
+                  style: text.bodySmall
+                      ?.copyWith(color: scheme.onSurfaceVariant),
+                ),
+              ],
+            ),
+          ),
+          if (edited)
+            Padding(
+              padding: const EdgeInsets.only(right: AppSpacing.xs),
+              child: Chip(
+                label: const Text('Edited'),
+                visualDensity: VisualDensity.compact,
+                backgroundColor: scheme.primaryContainer,
+                labelStyle: text.labelMedium
+                    ?.copyWith(color: scheme.onPrimaryContainer),
+                side: BorderSide.none,
+              ),
+            ),
+          if (yours)
+            PopupMenuButton<String>(
+              tooltip: 'More actions',
+              onSelected: (v) {
+                if (v == 'delete') _delete(item);
+              },
+              itemBuilder: (_) => const [
+                PopupMenuItem(value: 'delete', child: Text('Delete icon')),
+              ],
+            )
+          else
+            Icon(Icons.chevron_right_rounded, color: scheme.onSurfaceVariant),
+        ],
       ),
     );
   }

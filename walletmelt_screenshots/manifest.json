@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-18T22:21:32.900077",
+  "generatedAt": "2026-10-27T23:39:11.111553",
   "totalScreenshots": 36,
   "resolution": "1080x2400",
   "outputDirectory": "walletmelt_screenshots",
@@ -12,7 +12,7 @@
       "relativePath": "01_dashboard/01_dashboard_overview_dark.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 176048,
+      "fileSizeBytes": 196152,
       "status": "verified"
     },
     {
@@ -23,7 +23,7 @@
       "relativePath": "01_dashboard/02_dashboard_overview_light.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 170074,
+      "fileSizeBytes": 191238,
       "status": "verified"
     },
     {
@@ -34,7 +34,7 @@
       "relativePath": "01_dashboard/03_dashboard_budget_adjust_sheet.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 171372,
+      "fileSizeBytes": 178611,
       "status": "verified"
     },
     {
@@ -45,7 +45,7 @@
       "relativePath": "01_dashboard/04_dashboard_scrolled_activity.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 215602,
+      "fileSizeBytes": 219869,
       "status": "verified"
     },
     {
@@ -56,7 +56,7 @@
       "relativePath": "02_expenses/01_expenses_add_keypad.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 151572,
+      "fileSizeBytes": 156019,
       "status": "verified"
     },
     {
@@ -67,7 +67,7 @@
       "relativePath": "02_expenses/02_expenses_history_all.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 94885,
+      "fileSizeBytes": 95488,
       "status": "verified"
     },
     {
@@ -78,7 +78,7 @@
       "relativePath": "02_expenses/03_expenses_history_filtered.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 140413,
+      "fileSizeBytes": 147523,
       "status": "verified"
     },
     {
@@ -155,7 +155,7 @@
       "relativePath": "04_essentials/01_essentials_list.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 197167,
+      "fileSizeBytes": 195766,
       "status": "verified"
     },
     {
@@ -166,7 +166,7 @@
       "relativePath": "04_essentials/02_essentials_add_sheet.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 151135,
+      "fileSizeBytes": 151165,
       "status": "verified"
     },
     {
@@ -177,7 +177,7 @@
       "relativePath": "05_debts/01_debts_overview.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 235515,
+      "fileSizeBytes": 236061,
       "status": "verified"
     },
     {
@@ -210,7 +210,7 @@
       "relativePath": "06_obligations/01_subscriptions_list.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 189424,
+      "fileSizeBytes": 191166,
       "status": "verified"
     },
     {
@@ -221,7 +221,7 @@
       "relativePath": "06_obligations/02_subscriptions_add_sheet.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 156305,
+      "fileSizeBytes": 155754,
       "status": "verified"
     },
     {
@@ -265,7 +265,7 @@
       "relativePath": "08_settings/01_settings_overview.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 195299,
+      "fileSizeBytes": 198873,
       "status": "verified"
     },
     {
@@ -287,7 +287,7 @@
       "relativePath": "08_settings/03_settings_merchants_management.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 155210,
+      "fileSizeBytes": 155375,
       "status": "verified"
     },
     {
@@ -298,7 +298,7 @@
       "relativePath": "08_settings/04_settings_payees_management.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 164735,
+      "fileSizeBytes": 163783,
       "status": "verified"
     },
     {
@@ -331,7 +331,7 @@
       "relativePath": "09_security/03_security_settings_enabled.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 206313,
+      "fileSizeBytes": 200409,
       "status": "verified"
     },
     {
@@ -364,7 +364,7 @@
       "relativePath": "11_accounts_income/01_accounts_overview.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 106508,
+      "fileSizeBytes": 106549,
       "status": "verified"
     },
     {
@@ -375,7 +375,7 @@
       "relativePath": "11_accounts_income/02_income_overview.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 118544,
+      "fileSizeBytes": 118606,
       "status": "verified"
     },
     {
@@ -386,7 +386,7 @@
       "relativePath": "11_accounts_income/03_goals_overview.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 113990,
+      "fileSizeBytes": 113975,
       "status": "verified"
     },
     {
@@ -397,7 +397,7 @@
       "relativePath": "11_accounts_income/04_committees_overview.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 54028,
+      "fileSizeBytes": 54076,
       "status": "verified"
     }
   ]

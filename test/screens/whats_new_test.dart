@@ -19,6 +19,14 @@ void main() {
 
       // Check for the current version section badge & items
       expect(find.text('VERSION ${AppVersion.version} UPDATES'), findsOneWidget);
+      expect(find.text('Change a category any time'), findsOneWidget);
+      expect(find.text('Pick from lots of icons'), findsOneWidget);
+      expect(find.text('Your icons are in your backup'), findsOneWidget);
+      expect(find.text('Balance is easy to spot'), findsOneWidget);
+      expect(find.text('A tidier account screen'), findsOneWidget);
+      expect(find.text('Type the amount first'), findsOneWidget);
+      expect(find.text('VERSION 1.7.3 UPDATES'), findsOneWidget);
+
       expect(find.text('Committees (BC)'), findsOneWidget);
       expect(find.text('Confirm each payment'), findsOneWidget);
       expect(find.text('Linked to your balance'), findsOneWidget);

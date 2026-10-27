@@ -45,6 +45,7 @@ class WalletMeltJsonBackupService {
     Directory? directory,
     bool packageReceipts = true,
     String? passphrase,
+    Map<String, List<int>> iconFiles = const {},
   }) async {
     final timestamp = exportedAt ?? DateTime.now();
     final json = _encoder.encode(
@@ -127,6 +128,7 @@ class WalletMeltJsonBackupService {
         'groceryItems': groceryItems.length,
         'budgets': budgets.length,
         'receipts': receiptFiles.length,
+        'icons': iconFiles.length,
       },
       'app_version': _appVersion ?? AppVersion.fullVersion,
       'schema_version': schemaVersion ?? 2,
@@ -137,6 +139,7 @@ class WalletMeltJsonBackupService {
               ? 'Android'
               : (PlatformInfo.isIOS ? 'iOS' : 'Desktop')),
       'receipt_file_count': receiptFiles.length,
+      'icon_file_count': iconFiles.length,
       'database_file_name': 'wallet_melt.db',
       'is_encrypted': passphrase != null && passphrase.isNotEmpty,
     });
@@ -150,6 +153,11 @@ class WalletMeltJsonBackupService {
       final bytes = file.readAsBytesSync();
       archive.addFile(ArchiveFile('receipts/$name', bytes.length, bytes));
     }
+
+    // 4. Add the user's uploaded and edited icons (icons/uploads, icons/overrides)
+    iconFiles.forEach((path, bytes) {
+      archive.addFile(ArchiveFile(path, bytes.length, bytes));
+    });
 
     var zipBytes = ZipEncoder().encode(archive);
 
