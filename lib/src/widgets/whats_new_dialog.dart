@@ -78,7 +78,7 @@ class WhatsNewContent extends StatelessWidget {
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
-                    Icons.auto_awesome_rounded,
+                    Icons.new_releases_outlined,
                     color: context.scheme.primary,
                     size: 24,
                   ),
@@ -96,7 +96,7 @@ class WhatsNewContent extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        'Simpler accounts and balances',
+                        'Your categories, your icons',
                         style: TextStyle(
                           fontSize: 12,
                           color: context.scheme.onSurfaceVariant,
@@ -123,9 +123,77 @@ class WhatsNewContent extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Version 1.7.3 Highlights
+              // Current version highlights
               _buildSectionBadge(
                 label: 'VERSION ${AppVersion.version} UPDATES',
+                color: context.scheme.primary,
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.edit_outlined,
+                iconColor: context.scheme.primary,
+                title: 'Change a category any time',
+                description:
+                    'Wrong icon on Food? Open Settings, then Categories, and change its icon, name or colour. You can also hold a category on the Add expense screen.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.grid_view_rounded,
+                iconColor: context.scheme.secondary,
+                title: 'Pick from lots of icons',
+                description:
+                    'Choose from about 80 icons in groups like Food and Bills, search by word, use an emoji, or upload your own SVG. Colourful icons keep their colours.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.cloud_done_outlined,
+                iconColor: context.money.income,
+                title: 'Your icons are in your backup',
+                description:
+                    'Icons you upload or edit now travel with your backup, so they are still there on a new phone.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.account_balance_wallet_outlined,
+                iconColor: context.scheme.primary,
+                title: 'Balance is easy to spot',
+                description:
+                    'Home now shows your balance right next to what you have spent, with an arrow to open your accounts.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.tune_rounded,
+                iconColor: context.money.caution,
+                title: 'A tidier account screen',
+                description:
+                    'Add money and Spend money sit side by side. Transfer, Correct balance and Edit are clear options below, and every form looks the same.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.pin_outlined,
+                iconColor: context.scheme.secondary,
+                title: 'Type the amount first',
+                description:
+                    'Add expense now starts with the amount, so you do not scroll past every category first. Long names also wrap instead of being cut off.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 24),
+
+              // Version 1.7.3 Highlights
+              _buildSectionBadge(
+                label: 'VERSION 1.7.3 UPDATES',
                 color: context.scheme.primary,
                 isDark: isDark,
               ),

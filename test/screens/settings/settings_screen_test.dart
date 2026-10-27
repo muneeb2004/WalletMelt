@@ -18,6 +18,7 @@ import 'package:wallet_melt/src/services/export/wallet_melt_json_backup_conflict
 import 'package:wallet_melt/src/services/export/wallet_melt_json_backup_import_validation_service.dart';
 import 'package:wallet_melt/src/services/export/wallet_melt_json_backup_preview_service.dart';
 import 'package:wallet_melt/src/services/export/wallet_melt_json_backup_service.dart';
+import 'package:wallet_melt/src/services/svg/svg_customization_service.dart';
 import 'package:wallet_melt/src/services/export/wallet_melt_json_restore_dry_run_planner.dart';
 import 'package:wallet_melt/src/services/export/wallet_melt_json_restore_plan.dart';
 import 'package:wallet_melt/src/services/export/wallet_melt_json_restore_service.dart';
@@ -32,6 +33,14 @@ import 'package:wallet_melt/src/types/monthly_budget.dart';
 import 'package:wallet_melt/src/types/settings.dart';
 
 void main() {
+  // The backup action reads the user's icon files; keep that off path_provider.
+  final iconDir = Directory.systemTemp.createTempSync('wm_settings_icons_');
+  setUpAll(() => SvgCustomizationService.instance.setBaseDirForTesting(iconDir.path));
+  tearDownAll(() {
+    SvgCustomizationService.instance.resetForTesting();
+    iconDir.deleteSync(recursive: true);
+  });
+
   group('SettingsScreen CSV export', () {
     testWidgets('shows export action', (tester) async {
       tester.view.physicalSize = const Size(800, 1200);
@@ -1580,6 +1589,7 @@ class FakeWalletMeltJsonBackupService extends WalletMeltJsonBackupService {
     Directory? directory,
     bool packageReceipts = true,
     String? passphrase,
+    Map<String, List<int>> iconFiles = const {},
   }) async {
     backupCalled = true;
     lastExpenses = expenses.toList();
@@ -1614,6 +1624,7 @@ class FailingWalletMeltJsonBackupService
     Directory? directory,
     bool packageReceipts = true,
     String? passphrase,
+    Map<String, List<int>> iconFiles = const {},
   }) async {
     throw Exception('disk full\n#0 FakeStack');
   }

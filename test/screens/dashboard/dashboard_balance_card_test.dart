@@ -81,6 +81,19 @@ void main() {
     expect(find.byKey(const Key('dashboard_balance')), findsOneWidget);
     expect(find.byKey(const Key('dashboard_balance_prompt')), findsNothing);
     expect(find.textContaining('1,000'), findsWidgets);
+    // The balance sits beside the spend tile and says it can be opened.
+    expect(find.byKey(const Key('dashboard_hero')), findsOneWidget);
+    expect(find.descendant(
+            of: find.byKey(const Key('dashboard_balance')),
+            matching: find.text('1 account')),
+        findsOneWidget);
+    expect(find.descendant(
+            of: find.byKey(const Key('dashboard_balance')),
+            matching: find.byIcon(Icons.chevron_right_rounded)),
+        findsOneWidget);
+    expect(
+        tester.getTopLeft(find.byKey(const Key('dashboard_balance'))).dy,
+        tester.getTopLeft(find.byKey(const Key('dashboard_hero'))).dy);
 
     // Spend 250 from it via AppState: the card must update without a rebuild
     // of the screen (no stale Riverpod copy).

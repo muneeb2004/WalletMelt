@@ -298,6 +298,119 @@ class SvgCustomizationService extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Uploaded and copied icons, oldest first so their numbered names never
+  /// shuffle when more are added.
+  Future<List<SvgIconItem>> listCustomIcons() async {
+    await initialize();
+    final out = <SvgIconItem>[];
+    try {
+      final customDir = await _getCustomIconsDir();
+      final files = customDir
+          .listSync()
+          .whereType<File>()
+          .where((f) => f.path.endsWith('.svg'))
+          .toList()
+        ..sort((a, b) {
+          final byTime = a.statSync().modified.compareTo(b.statSync().modified);
+          return byTime != 0 ? byTime : a.path.compareTo(b.path);
+        });
+      var index = 1;
+      for (final file in files) {
+        final filename = p.basename(file.path);
+        final key = p.basenameWithoutExtension(filename);
+        out.add(SvgIconItem(
+          id: 'custom:$filename',
+          label: 'My icon $index',
+          type: SvgIconType.custom,
+          isCustomized: _overrideCache.containsKey(key),
+        ));
+        index++;
+      }
+    } catch (_) {}
+    return out;
+  }
+
+  static final RegExp _safeIconFile = RegExp(r'^[A-Za-z0-9_\-]+\.svg$');
+
+  /// Files a backup should carry, keyed by their path inside the archive:
+  /// `icons/uploads/<file>.svg` (uploads and copies) and
+  /// `icons/overrides/<key>.svg` (edits to built-in or uploaded icons).
+  /// Never throws; returns what could be read.
+  Future<Map<String, List<int>>> exportableFiles() async {
+    final out = <String, List<int>>{};
+    try {
+      Future<void> collect(Directory dir, String prefix) async {
+        if (!dir.existsSync()) return;
+        for (final f in dir.listSync().whereType<File>()) {
+          final name = p.basename(f.path);
+          if (_safeIconFile.hasMatch(name)) {
+            out['$prefix/$name'] = f.readAsBytesSync();
+          }
+        }
+      }
+
+      await collect(await _getCustomIconsDir(), 'icons/uploads');
+      await collect(await _getOverridesDir(), 'icons/overrides');
+    } catch (e) {
+      debugPrint('SvgCustomizationService export error: $e');
+    }
+    return out;
+  }
+
+  /// Restores icon files from an extracted backup ([extractDir]/icons/...).
+  ///
+  /// Every file is re-validated and sanitized, and only safe file names are
+  /// accepted. With [replace] false (Safe Merge) existing local files win;
+  /// with true (Full Replace) the backup's copy wins. Returns the number of
+  /// files written. Never throws, so a bad icon cannot fail a restore.
+  Future<int> importFiles(Directory extractDir, {required bool replace}) async {
+    var written = 0;
+    try {
+      Future<void> restore(String sub, Directory target) async {
+        final src = Directory(p.join(extractDir.path, 'icons', sub));
+        if (!src.existsSync()) return;
+        for (final f in src.listSync().whereType<File>()) {
+          final name = p.basename(f.path);
+          if (!_safeIconFile.hasMatch(name)) continue;
+          final dest = File(p.join(target.path, name));
+          if (dest.existsSync() && !replace) continue;
+          final result = _safeguard.validate(f.readAsStringSync());
+          if (!result.isValid || result.sanitizedContent == null) continue;
+          dest.writeAsStringSync(result.sanitizedContent!, flush: true);
+          written++;
+        }
+      }
+
+      await restore('uploads', await _getCustomIconsDir());
+      await restore('overrides', await _getOverridesDir());
+      if (written > 0) {
+        _overrideCache.clear();
+        _isInitialized = false;
+        await initialize();
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint('SvgCustomizationService import error: $e');
+    }
+    return written;
+  }
+
+  /// Deletes an uploaded icon and any edit saved for it. Callers reassign
+  /// categories that used it first (see `AppState.deleteUploadedIcon`).
+  Future<void> deleteCustomIcon(String rawId) async {
+    final trimmed = rawId.trim();
+    if (!trimmed.startsWith('custom:')) return;
+    final filename = p.basename(trimmed.substring('custom:'.length));
+    final file = File(p.join((await _getCustomIconsDir()).path, filename));
+    if (file.existsSync()) file.deleteSync();
+    final key = normalizeKey(trimmed);
+    final override =
+        File(p.join((await _getOverridesDir()).path, '$key.svg'));
+    if (override.existsSync()) override.deleteSync();
+    _overrideCache.remove(key);
+    notifyListeners();
+  }
+
   /// Lists all standard, preset, and custom SVGs with customization status.
   Future<List<SvgIconItem>> listAllIcons() async {
     await initialize();
@@ -344,28 +457,7 @@ class SvgCustomizationService extends ChangeNotifier {
     }
 
     // Custom Uploaded Icons
-    try {
-      final customDir = await _getCustomIconsDir();
-      if (customDir.existsSync()) {
-        final files = customDir.listSync();
-        int customIndex = 1;
-        for (final entity in files) {
-          if (entity is File && entity.path.endsWith('.svg')) {
-            final filename = p.basename(entity.path);
-            final key = p.basenameWithoutExtension(filename);
-            list.add(
-              SvgIconItem(
-                id: 'custom:$filename',
-                label: 'Custom SVG $customIndex',
-                type: SvgIconType.custom,
-                isCustomized: _overrideCache.containsKey(key),
-              ),
-            );
-            customIndex++;
-          }
-        }
-      }
-    } catch (_) {}
+    list.addAll(await listCustomIcons());
 
     return list;
   }

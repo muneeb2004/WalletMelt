@@ -2,7 +2,7 @@
 type: adr
 status: accepted
 created: 2026-10-17
-updated: 2026-10-17
+updated: 2026-10-27
 domain: architecture
 related:
   - "[[Balance-Income-and-Auto-Capture-Exploration]]"
@@ -83,3 +83,6 @@ g. **Three account types.** `type` is now `cash|bank|wallet`. `card` and `other`
 h. **Add account** asks for a name and an optional starting balance. Type, currency and include-in-total sit under "More options" (open when editing).
 i. **Add money / Spend money** write one signed `adjustment` movement (`DriftAccountRepository.recordAdjustment`, `AppState.adjustAccountBalance`) with the amount and an optional note. They are not expenses: budgets, daily allowance and Insights ignore them (the sheet says so and points to Add expense). Deleting the entry reverses the balance.
 j. **Correct balance** (the old "Update balance" reconcile) moved into the account's overflow menu for the rare case where the real balance differs.
+
+## Amendment 2026-10-27: balance visibility and account sheet
+User feedback: the balance was easy to miss (it sat below the spend hero and quick actions), gave no sign that it opens, and "Correct balance" was hidden in a three-dot menu. Decision: spend and balance share the top row as equal tiles with a visible chevron; the account sheet lists Transfer, Correct balance and Edit as labelled rows; all account forms share one layout. See [[Design-System-and-UX]]. No data or behaviour change.

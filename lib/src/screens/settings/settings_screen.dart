@@ -20,6 +20,7 @@ import '../../services/export/wallet_melt_json_restore_service.dart';
 import '../../services/export/wallet_melt_json_restore_plan.dart';
 import 'backup_restore_dialog.dart';
 import 'restore_summary_dialog.dart';
+import '../../services/svg/svg_customization_service.dart';
 import '../../state/app_state.dart';
 import '../../theme/wallet_melt_theme.dart';
 import '../../types/settings.dart';
@@ -184,30 +185,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                       width: 0.8,
                                     ),
                                   ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                       Text(
-                                         AppVersion.displayVersion,
-                                         style: TextStyle(
-                                           fontSize: 11,
-                                          fontWeight: FontWeight.w800,
-                                          color:
-                                              theme.brightness == Brightness.dark
-                                                  ? context.scheme.primary
-                                                  : context.scheme.onSurface,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 3),
-                                      Icon(
-                                        Icons.auto_awesome_rounded,
-                                        size: 10,
-                                        color:
-                                            theme.brightness == Brightness.dark
-                                                ? context.scheme.primary
-                                                : context.scheme.onSurface,
-                                      ),
-                                    ],
+                                  child: Text(
+                                    AppVersion.displayVersion,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w800,
+                                      color:
+                                          theme.brightness == Brightness.dark
+                                              ? context.scheme.primary
+                                              : context.scheme.onSurface,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -362,7 +349,60 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Icon & SVG Manager
+                  // Categories
+                  InkWell(
+                    onTap: () => context.push('/categories'),
+                    borderRadius: BorderRadius.circular(12),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 38,
+                            height: 38,
+                            decoration: BoxDecoration(
+                              color: context.scheme.primary.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Icon(
+                              Icons.category_outlined,
+                              size: 20,
+                              color: context.scheme.primary,
+                            ),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Categories',
+                                  style: theme.textTheme.bodyLarge?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  "Change any category's icon, name or colour.",
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: context.scheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(Icons.chevron_right_rounded, color: context.scheme.onSurfaceVariant),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8),
+                    child: Divider(height: 1, thickness: 0.5),
+                  ),
+
+                  // Icon library
                   InkWell(
                     onTap: () => context.push('/settings/icons'),
                     borderRadius: BorderRadius.circular(12),
@@ -389,14 +429,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Icon & SVG Manager',
+                                  'Icon library',
                                   style: theme.textTheme.bodyLarge?.copyWith(
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  'Customize built-in and uploaded SVG icons across the app.',
+                                  'Browse icons, add your own, and tweak colours.',
                                   style: theme.textTheme.bodySmall?.copyWith(
                                     color: context.scheme.onSurfaceVariant,
                                   ),
@@ -1341,6 +1381,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         extendedTables: await state.exportExtendedTables(),
         schemaVersion: state.backupSchemaVersion,
         settings: state.settings,
+        iconFiles: await SvgCustomizationService.instance.exportableFiles(),
       );
       final shareResult = await widget.exportShareService.shareFile(
         file,

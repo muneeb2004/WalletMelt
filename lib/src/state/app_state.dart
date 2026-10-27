@@ -9,6 +9,7 @@ import '../data/repositories/drift/drift_category_repository.dart';
 import '../data/repositories/drift/drift_expense_repository.dart';
 import '../services/receipt_storage/receipt_storage_service.dart';
 import '../services/export/export_file_writer.dart';
+import '../services/svg/svg_customization_service.dart';
 import '../services/export/wallet_melt_json_restore_dry_run_planner.dart';
 import '../services/export/wallet_melt_json_restore_plan.dart';
 import '../services/export/wallet_melt_json_restore_service.dart';
@@ -1004,6 +1005,12 @@ class AppState extends ChangeNotifier {
       );
     }
     if (result.success) {
+      if (zipExtractDir != null) {
+        // Uploaded and edited icons travel in the ZIP; a bad icon never
+        // fails the restore.
+        await SvgCustomizationService.instance.importFiles(zipExtractDir,
+            replace: options.mode == RestoreMode.fullReplace);
+      }
       await refresh();
     }
     return result;
@@ -1034,6 +1041,39 @@ class AppState extends ChangeNotifier {
         name: name, icon: icon, color: color);
     await refresh();
     return category;
+  }
+
+  /// Edits a category's name, icon or colour after it was created.
+  Future<void> updateCategory(
+    String id, {
+    String? name,
+    String? icon,
+    String? color,
+  }) async {
+    await _driftCategoryRepository.updateDetails(id,
+        name: name, icon: icon, color: color);
+    await refresh();
+  }
+
+  /// Points every category showing [iconId] (or an alias of it, such as
+  /// `bolt` for `electricity`) at [newIconId].
+  Future<void> useIconForCategoriesWith(String iconId, String newIconId) async {
+    final key = SvgCustomizationService.instance.normalizeKey(iconId);
+    for (final c in categories.toList()) {
+      if (SvgCustomizationService.instance.normalizeKey(c.icon) == key) {
+        await _driftCategoryRepository.updateDetails(c.id, icon: newIconId);
+      }
+    }
+    await refresh();
+  }
+
+  /// Removes an uploaded icon; categories that used it fall back to
+  /// [replacement] so none is left pointing at a missing file.
+  Future<void> deleteUploadedIcon(String iconId,
+      {String replacement = 'other'}) async {
+    await _driftCategoryRepository.replaceIcon(iconId, replacement);
+    await SvgCustomizationService.instance.deleteCustomIcon(iconId);
+    await refresh();
   }
 
   Future<Expense> addExpense(ExpenseDraft draft) async {

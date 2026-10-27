@@ -23,10 +23,10 @@ class CurrencyInfo {
   /// Optional country flag emoji.
   final String flag;
 
-  /// Display label formatted for selectors and lists.
-  String get displayLabel => flag.isNotEmpty
-      ? '$flag $code - $name ($symbol)'
-      : '$code - $name ($symbol)';
+  /// Display label formatted for selectors and lists. Flags are not shown:
+  /// they render as blank boxes on some devices and a flag is a poor stand-in
+  /// for a currency such as EUR.
+  String get displayLabel => '$code - $name ($symbol)';
 
   @override
   bool operator ==(Object other) =>

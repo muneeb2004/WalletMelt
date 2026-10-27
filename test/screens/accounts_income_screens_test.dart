@@ -116,12 +116,54 @@ void main() {
     expect(bank(), 130000);
     expect(find.text('ATM fee'), findsOneWidget);
 
+    await tester.ensureVisible(find.byTooltip('Delete').first);
+    await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Delete').first);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Delete').last);
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
     expect(bank(), 150000);
+  });
+
+  testWidgets('account sheet shows Correct balance up front and previews the change',
+      (tester) async {
+    tester.view.physicalSize = const Size(360, 800);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+    final state = await makeState(tester);
+    await tester.pumpWidget(host(state, const AccountsScreen()));
+    await tester.pumpAndSettle();
+    int bank() => state.accountBalances
+        .firstWhere((b) => b.account.name == 'Bank')
+        .balanceMinorUnits;
+
+    await tester.tap(find.text('Bank').first);
+    await tester.pumpAndSettle();
+    // The two main actions share one row at equal width on a narrow phone.
+    expect(tester.getSize(find.widgetWithText(FilledButton, 'Add money')).width,
+        tester.getSize(find.widgetWithText(OutlinedButton, 'Spend money')).width);
+    expect(tester.takeException(), isNull);
+    expect(find.byType(PopupMenuButton<String>), findsNothing);
+    expect(find.text('Correct balance'), findsOneWidget);
+    expect(find.text('Match what you really hold'), findsOneWidget);
+    expect(find.text('Edit account'), findsOneWidget);
+
+    await tester.tap(find.text('Correct balance'));
+    await tester.pumpAndSettle();
+    expect(find.text('Cancel'), findsOneWidget);
+    await tester.enterText(
+        find.widgetWithText(TextField, 'Actual balance'), '1100');
+    await tester.pumpAndSettle();
+    expect(find.text('Change'), findsOneWidget);
+    expect(find.textContaining('+'), findsWidgets);
+    await tester.tap(find.widgetWithText(PrimaryButton, 'Save'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(bank(), 110000);
   });
 
   testWidgets('add account needs only a name and keeps options collapsed',

@@ -3,7 +3,7 @@ type: product
 status: stable
 priority: high
 created: 2026-09-13
-updated: 2026-10-19
+updated: 2026-10-27
 domain: product
 related:
   - "[[Product-Requirements]]"
@@ -93,3 +93,16 @@ All list screens use `FluidList` (16 px sides, 12 px card gap, 120 px bottom cle
 
 ## Menus and dropdowns (2026-10-19)
 Popup menus come from `popupMenuTheme`/`menuTheme` (radius 16, hairline, surfaceContainerHigh). Dropdown buttons cannot be themed globally in Flutter, so each passes `borderRadius: radiusMd`, `dropdownColor: surfaceContainerHigh` and `menuMaxHeight: 320`.
+
+## Decorative icons (2026-10-27)
+No decorative sparkle or "AI" glyphs next to product text: the Settings version badge is plain text. Icons must carry meaning (an action or a state).
+
+## Balance on the dashboard and account sheet (2026-10-27)
+- **Dashboard.** Once an account exists, "Total spend" and "Balance" are equal half-width tiles in the first row (`_SpendTile`, `DashboardBalanceCard(fillHeight: true)`); the daily allowance is a full-width row under them. The balance tile is outlined, shows a chevron, "N accounts", and a hide/show eye, so it reads as tappable. Before any account exists the original full-width hero stays and the "Track your balance" prompt shows below it.
+- **Account sheet.** Balance, then Add money (filled) and Spend money (outlined) as equal-width buttons in one row, then a grouped list: Transfer, Correct balance ("Match what you really hold"), Edit account, Remove or Restore. Recent activity shows signed amounts, income-coloured when positive. The old wrapping button row and the hidden three-dot menu are gone.
+- **Form layout.** Add money, Spend money, Correct balance and Transfer share `_SheetForm` / `_SheetActions`: title, one line of help, fields, then Cancel and the primary action at equal size. Correct balance shows a live "Change" preview and its primary button reads "Save".
+
+## UI audit fixes (2026-10-27)
+- **Add expense.** For regular expenses the Amount card comes first, then Category, so the main input is never pushed below a wall of chips. Grocery and fuel keep category first because choosing them changes the form.
+- **Currency labels.** `CurrencyInfo.displayLabel` is `CODE - Name (symbol)`; flag emoji are no longer shown (they render as blank boxes on some devices). The `flag` field remains in the data.
+- **Activity rows.** `ExpenseListTile` title and subtitle wrap to two lines before truncating.

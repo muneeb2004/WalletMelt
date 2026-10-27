@@ -3,7 +3,7 @@ type: work-tracker
 status: active
 priority: high
 created: 2026-09-13
-updated: 2026-10-19
+updated: 2026-10-27
 domain: work
 related:
   - "[[Current-Project-State]]"
@@ -118,3 +118,8 @@ Every release bumps `pubspec.yaml` and ships a plain-language, non-technical Wha
 
 ## Release 1.7.3 (2026-10-19)
 - **Done**: option menus and dropdowns follow the design system. `popupMenuTheme` and `menuTheme` in the theme set a 16 px radius, hairline border and raised surface; every `DropdownButton`/`DropdownButtonFormField` passes the same radius, colour and a 320 px max height. What's New updated in plain language.
+
+## Release 1.8.0 (2026-10-27)
+- **Done**: category editing (name, icon, colour) for all categories including defaults; icon bank (69 SVG presets plus standard icons, emoji, own SVG upload) with picker, Categories screen and Icon library; raw SVG code editor removed; multicolour uploads keep their colours; ZIP backups carry uploaded and edited icons; dashboard shows spend and balance as equal tiles; account sheet and forms redesigned with Correct balance visible; Add expense is amount-first; currency labels drop flags; activity rows wrap to two lines; sparkle removed from the Settings version badge and What's New header. What's New written in plain language. Version 1.8.0+18.
+- **Open**: stable names for uploaded icons; one-time "tap your balance" hint (not built).
+- **Build**: release APKs are produced with `scripts/build_apks.ps1`, which regenerates `lib/src/constants/app_version.dart` from `pubspec.yaml` (1.8.0+18).

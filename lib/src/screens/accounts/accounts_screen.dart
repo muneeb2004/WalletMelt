@@ -3,7 +3,6 @@ import '../../widgets/fluid_list.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../../components/account/compact_button_style.dart';
 import '../../constants/currencies.dart';
 import '../../state/app_state.dart';
 import '../../theme/wallet_melt_theme.dart';
@@ -486,6 +485,28 @@ class _AccountDetailState extends State<_AccountDetail> {
         final account = balance.account;
         final textTheme = Theme.of(context).textTheme;
         final scheme = Theme.of(context).colorScheme;
+        final money = context.money;
+        final locked = account.isArchived;
+        Widget row(IconData icon, String title, String help, VoidCallback? onTap,
+            {Color? color}) {
+          return ListTile(
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+            minVerticalPadding: AppSpacing.smMd,
+            leading: Icon(icon, color: color ?? scheme.primary),
+            title: Text(title,
+                style: textTheme.titleSmall?.copyWith(color: color)),
+            subtitle: help.isEmpty
+                ? null
+                : Text(help,
+                    style: textTheme.bodySmall
+                        ?.copyWith(color: scheme.onSurfaceVariant)),
+            trailing: Icon(Icons.chevron_right_rounded,
+                color: scheme.onSurfaceVariant),
+            onTap: onTap,
+          );
+        }
+
         return SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(
               AppSpacing.lg, AppSpacing.smMd, AppSpacing.lg, AppSpacing.lg),
@@ -494,87 +515,111 @@ class _AccountDetailState extends State<_AccountDetail> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(account.name, style: textTheme.titleLarge),
-              const SizedBox(height: AppSpacing.xs),
+              Text(
+                [
+                  accountTypeLabel(account.type),
+                  if (locked) 'Archived',
+                ].join(' · '),
+                style: textTheme.bodySmall
+                    ?.copyWith(color: scheme.onSurfaceVariant),
+              ),
+              const SizedBox(height: AppSpacing.smMd),
               Text(
                 formatMoneyMinorUnits(balance.balanceMinorUnits, account.currency),
                 style: withTabularFigures(textTheme.headlineMedium),
               ),
               const SizedBox(height: AppSpacing.md),
-              Wrap(
-                spacing: AppSpacing.sm,
-                runSpacing: AppSpacing.sm,
+              Row(
                 children: [
-                  FilledButton.tonalIcon(
-                    style: compactButtonStyle,
-                    onPressed: account.isArchived
-                        ? null
-                        : () async {
-                            await showAdjustSheet(context, account,
-                                isCredit: true);
-                            _reload();
-                          },
-                    icon: const Icon(Icons.add),
-                    label: const Text('Add money'),
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed: locked
+                          ? null
+                          : () async {
+                              await showAdjustSheet(context, account,
+                                  isCredit: true);
+                              _reload();
+                            },
+                      icon: const Icon(Icons.add),
+                      label: const Text('Add money'),
+                    ),
                   ),
-                  FilledButton.tonalIcon(
-                    style: compactButtonStyle,
-                    onPressed: account.isArchived
-                        ? null
-                        : () async {
-                            await showAdjustSheet(context, account,
-                                isCredit: false);
-                            _reload();
-                          },
-                    icon: const Icon(Icons.remove),
-                    label: const Text('Spend money'),
-                  ),
-                  OutlinedButton.icon(
-                    style: compactButtonStyle,
-                    onPressed: account.isArchived
-                        ? null
-                        : () async {
-                            await showTransferSheet(context,
-                                fromAccountId: account.id);
-                            _reload();
-                          },
-                    icon: const Icon(Icons.swap_horiz),
-                    label: const Text('Transfer'),
-                  ),
-                  PopupMenuButton<String>(
-                    tooltip: 'More',
-                    onSelected: (value) async {
-                      switch (value) {
-                        case 'correct':
-                          await showReconcileSheet(
-                              context, account, balance.balanceMinorUnits);
-                          _reload();
-                        case 'edit':
-                          await showAccountEditorSheet(context,
-                              account: account);
-                        case 'restore':
-                          await widget.state.updateAccount(
-                              account.copyWith(isArchived: false));
-                        case 'remove':
-                          await _confirmRemove(context, account);
-                      }
-                    },
-                    itemBuilder: (_) => [
-                      if (!account.isArchived)
-                        const PopupMenuItem(
-                            value: 'correct', child: Text('Correct balance')),
-                      const PopupMenuItem(value: 'edit', child: Text('Edit')),
-                      if (account.isArchived)
-                        const PopupMenuItem(
-                            value: 'restore', child: Text('Restore'))
-                      else
-                        const PopupMenuItem(
-                            value: 'remove', child: Text('Remove')),
-                    ],
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: locked
+                          ? null
+                          : () async {
+                              await showAdjustSheet(context, account,
+                                  isCredit: false);
+                              _reload();
+                            },
+                      icon: const Icon(Icons.remove),
+                      label: const Text('Spend money'),
+                    ),
                   ),
                 ],
               ),
+              const SizedBox(height: AppSpacing.md),
+              WMCard(
+                tone: WMCardTone.surface,
+                padding: EdgeInsets.zero,
+                child: Column(
+                  children: [
+                    row(
+                      Icons.swap_horiz_rounded,
+                      'Transfer',
+                      'Move money between accounts',
+                      locked
+                          ? null
+                          : () async {
+                              await showTransferSheet(context,
+                                  fromAccountId: account.id);
+                              _reload();
+                            },
+                    ),
+                    const Divider(height: 1),
+                    row(
+                      Icons.tune_rounded,
+                      'Correct balance',
+                      'Match what you really hold',
+                      locked
+                          ? null
+                          : () async {
+                              await showReconcileSheet(
+                                  context, account, balance.balanceMinorUnits);
+                              _reload();
+                            },
+                    ),
+                    const Divider(height: 1),
+                    row(
+                      Icons.edit_outlined,
+                      'Edit account',
+                      '',
+                      () => showAccountEditorSheet(context, account: account),
+                    ),
+                    const Divider(height: 1),
+                    if (locked)
+                      row(
+                        Icons.unarchive_outlined,
+                        'Restore account',
+                        '',
+                        () => widget.state
+                            .updateAccount(account.copyWith(isArchived: false)),
+                      )
+                    else
+                      row(
+                        Icons.delete_outline_rounded,
+                        'Remove account',
+                        '',
+                        () => _confirmRemove(context, account),
+                        color: scheme.error,
+                      ),
+                  ],
+                ),
+              ),
               const SizedBox(height: AppSpacing.lg),
-              Text('Balance changes', style: textTheme.titleMedium),
+              Text('Recent activity', style: textTheme.titleMedium),
               const SizedBox(height: AppSpacing.xs),
               Text(
                 'Expenses linked to this account also change the balance; see History.',
@@ -595,7 +640,8 @@ class _AccountDetailState extends State<_AccountDetail> {
                       for (final m in rows)
                         ListTile(
                           contentPadding: EdgeInsets.zero,
-                          title: Text(_movementLabel(m)),
+                          title: Text(_movementLabel(m),
+                              maxLines: 1, overflow: TextOverflow.ellipsis),
                           subtitle: Text(m.date.substring(0, 10)),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -603,7 +649,12 @@ class _AccountDetailState extends State<_AccountDetail> {
                               Text(
                                 formatMoneyMinorUnits(
                                     m.amountMinorUnits, account.currency),
-                                style: withTabularFigures(textTheme.bodyLarge),
+                                style: withTabularFigures(textTheme.titleSmall)
+                                    .copyWith(
+                                  color: m.amountMinorUnits >= 0
+                                      ? money.incomeText
+                                      : scheme.onSurface,
+                                ),
                               ),
                               IconButton(
                                 tooltip: 'Delete',
@@ -661,6 +712,76 @@ class _AccountDetailState extends State<_AccountDetail> {
   }
 }
 
+/// One layout for every account form: title, one line of help, fields, then
+/// Cancel and the primary action at equal size.
+class _SheetForm extends StatelessWidget {
+  const _SheetForm({
+    required this.title,
+    required this.help,
+    required this.primaryLabel,
+    required this.onPrimary,
+    required this.children,
+  });
+
+  final String title;
+  final String help;
+  final String primaryLabel;
+  final VoidCallback onPrimary;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final scheme = Theme.of(context).colorScheme;
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg, AppSpacing.smMd, AppSpacing.lg, AppSpacing.lg),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: textTheme.titleLarge),
+          if (help.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.xs),
+            Text(help,
+                style: textTheme.bodyMedium
+                    ?.copyWith(color: scheme.onSurfaceVariant)),
+          ],
+          const SizedBox(height: AppSpacing.md),
+          ...children,
+          const SizedBox(height: AppSpacing.lg),
+          _SheetActions(primaryLabel: primaryLabel, onPrimary: onPrimary),
+        ],
+      ),
+    );
+  }
+}
+
+class _SheetActions extends StatelessWidget {
+  const _SheetActions({required this.primaryLabel, required this.onPrimary});
+
+  final String primaryLabel;
+  final VoidCallback onPrimary;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: OutlinedButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: PrimaryButton(label: primaryLabel, onPressed: onPrimary),
+        ),
+      ],
+    );
+  }
+}
+
 /// Quick credit ([isCredit]) or debit entry: one amount, optional note.
 Future<void> showAdjustSheet(BuildContext context, Account account,
     {required bool isCredit}) {
@@ -670,63 +791,45 @@ Future<void> showAdjustSheet(BuildContext context, Account account,
   return showAppBottomSheet<void>(
     context,
     builder: (sheetContext) {
-      final textTheme = Theme.of(sheetContext).textTheme;
-      final scheme = Theme.of(sheetContext).colorScheme;
-      return SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(
-            AppSpacing.lg, AppSpacing.smMd, AppSpacing.lg, AppSpacing.lg),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(isCredit ? 'Add money' : 'Spend money',
-                style: textTheme.titleLarge),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              isCredit
-                  ? 'Money coming into ${account.name}. For salary or allowance, use Income so it shows in your records.'
-                  : 'Money leaving ${account.name} that you will not log as an expense. To count it in your budget, add it as an expense instead.',
-              style: textTheme.bodyMedium
-                  ?.copyWith(color: scheme.onSurfaceVariant),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            TextField(
-              controller: amount,
-              autofocus: true,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
-              decoration: InputDecoration(
-                  labelText: 'Amount', prefixText: '${account.currency} '),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            TextField(
-              controller: note,
-              textCapitalization: TextCapitalization.sentences,
-              decoration:
-                  const InputDecoration(labelText: 'Note (optional)'),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            PrimaryButton(
-              label: isCredit ? 'Add money' : 'Spend money',
-              onPressed: () async {
-                final value = parseMinorUnits(amount.text);
-                if (value == null || value <= 0) {
-                  showErrorSnackbar(
-                      sheetContext, 'Enter an amount greater than zero.');
-                  return;
-                }
-                final navigator = Navigator.of(sheetContext);
-                final text = note.text.trim();
-                await state.adjustAccountBalance(
-                  account.id,
-                  isCredit ? value : -value,
-                  notes: text.isEmpty ? null : text,
-                );
-                navigator.pop();
-              },
-            ),
-          ],
-        ),
+      final label = isCredit ? 'Add money' : 'Spend money';
+      return _SheetForm(
+        title: label,
+        help: isCredit
+            ? 'Money coming into ${account.name}. For salary or allowance, use Income so it shows in your records.'
+            : 'Money leaving ${account.name} that you will not log as an expense. To count it in your budget, add it as an expense instead.',
+        primaryLabel: label,
+        onPrimary: () async {
+          final value = parseMinorUnits(amount.text);
+          if (value == null || value <= 0) {
+            showErrorSnackbar(
+                sheetContext, 'Enter an amount greater than zero.');
+            return;
+          }
+          final navigator = Navigator.of(sheetContext);
+          final text = note.text.trim();
+          await state.adjustAccountBalance(
+            account.id,
+            isCredit ? value : -value,
+            notes: text.isEmpty ? null : text,
+          );
+          navigator.pop();
+        },
+        children: [
+          TextField(
+            controller: amount,
+            autofocus: true,
+            keyboardType:
+                const TextInputType.numberWithOptions(decimal: true),
+            decoration: InputDecoration(
+                labelText: 'Amount', prefixText: '${account.currency} '),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          TextField(
+            controller: note,
+            textCapitalization: TextCapitalization.sentences,
+            decoration: const InputDecoration(labelText: 'Note (optional)'),
+          ),
+        ],
       );
     },
   );
@@ -740,45 +843,69 @@ Future<void> showReconcileSheet(
   return showAppBottomSheet<void>(
     context,
     builder: (sheetContext) {
-      final textTheme = Theme.of(sheetContext).textTheme;
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(
-            AppSpacing.lg, AppSpacing.smMd, AppSpacing.lg, AppSpacing.lg),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Correct balance', style: textTheme.titleLarge),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              'Enter what ${account.name} really holds now. WalletMelt records the difference as one adjustment you can delete later.',
-              style: textTheme.bodyMedium,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            TextField(
-              controller: controller,
-              autofocus: true,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
-              decoration: InputDecoration(
-                  labelText: 'Actual balance', prefixText: '${account.currency} '),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            PrimaryButton(
-              label: 'Correct balance',
-              onPressed: () async {
-                final actual = parseMinorUnits(controller.text);
-                if (actual == null) {
-                  showErrorSnackbar(sheetContext, 'Enter a number.');
-                  return;
-                }
-                final navigator = Navigator.of(sheetContext);
-                await state.reconcileAccount(account.id, actual);
-                navigator.pop();
-              },
-            ),
-          ],
-        ),
+      return StatefulBuilder(
+        builder: (context, setSheetState) {
+          final textTheme = Theme.of(context).textTheme;
+          final scheme = Theme.of(context).colorScheme;
+          final actual = parseMinorUnits(controller.text);
+          final diff = actual == null ? null : actual - currentMinorUnits;
+          return _SheetForm(
+            title: 'Correct balance',
+            help:
+                'Enter what ${account.name} really holds. The difference is saved as one adjustment you can delete later.',
+            primaryLabel: 'Save',
+            onPrimary: () async {
+              if (actual == null) {
+                showErrorSnackbar(sheetContext, 'Enter a number.');
+                return;
+              }
+              final navigator = Navigator.of(sheetContext);
+              await state.reconcileAccount(account.id, actual);
+              navigator.pop();
+            },
+            children: [
+              TextField(
+                controller: controller,
+                autofocus: true,
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                onChanged: (_) => setSheetState(() {}),
+                decoration: InputDecoration(
+                    labelText: 'Actual balance',
+                    prefixText: '${account.currency} '),
+              ),
+              const SizedBox(height: AppSpacing.smMd),
+              WMCard(
+                tone: WMCardTone.surface,
+                padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md, vertical: AppSpacing.smMd),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text('Change',
+                          style: textTheme.bodyMedium
+                              ?.copyWith(color: scheme.onSurfaceVariant)),
+                    ),
+                    Text(
+                      diff == null
+                          ? '—'
+                          : diff == 0
+                              ? 'No change'
+                              : '${diff > 0 ? '+' : ''}${formatMoneyMinorUnits(diff, account.currency)}',
+                      style: withTabularFigures(textTheme.titleSmall).copyWith(
+                        color: diff == null || diff == 0
+                            ? scheme.onSurface
+                            : diff > 0
+                                ? context.money.incomeText
+                                : context.money.overText,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
       );
     },
   );
@@ -938,8 +1065,8 @@ class _TransferFormState extends State<_TransferForm> {
                   style: textTheme.bodyMedium
                       ?.copyWith(color: Theme.of(context).colorScheme.error)),
             ),
-          const SizedBox(height: AppSpacing.md),
-          PrimaryButton(label: 'Transfer', onPressed: _submit),
+          const SizedBox(height: AppSpacing.lg),
+          _SheetActions(primaryLabel: 'Transfer', onPrimary: _submit),
         ],
       ),
     );

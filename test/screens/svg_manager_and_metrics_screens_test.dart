@@ -111,14 +111,14 @@ void main() {
       // Allow async _loadIcons to complete and setState
       await tester.pump(const Duration(milliseconds: 200));
 
-      expect(find.text('Icon & SVG Manager'), findsOneWidget);
-      expect(find.text('Across-the-Board SVG Reflection'), findsOneWidget);
+      expect(find.text('Icon library'), findsOneWidget);
+      expect(find.text('Upload your own SVG'), findsOneWidget);
       expect(find.byType(TextField), findsOneWidget); // Search box
-      expect(find.textContaining('All Icons'), findsOneWidget);
-      expect(find.text('Preset SVGs'), findsOneWidget);
-      expect(find.text('Standard Categories'), findsOneWidget);
+      expect(find.textContaining('All ('), findsOneWidget);
+      expect(find.text('Built in'), findsOneWidget);
+      expect(find.text('Yours'), findsOneWidget);
 
-      // Verify standard icons are displayed
+      // Standard icons are listed once each.
       expect(find.text('Electricity / Power'), findsOneWidget);
       expect(find.text('Grocery / Mart'), findsOneWidget);
     });
@@ -189,6 +189,8 @@ void main() {
       expect(find.text('Theme colour'), findsOneWidget);
       expect(find.text('Used by: Food'), findsNothing);
       expect(find.text('Edited'), findsOneWidget);
+      expect(find.text('SVG markup'), findsNothing);
+      expect(find.text('Advanced'), findsNothing);
       expect(tester.takeException(), isNull);
     });
 
