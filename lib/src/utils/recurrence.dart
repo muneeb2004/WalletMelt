@@ -13,6 +13,52 @@ DateTime addMonthsClamped(DateTime from, int months, int anchorDay) {
   return DateTime(year, month, anchorDay > lastDay ? lastDay : anchorDay);
 }
 
+/// Average length of a calendar month (Gregorian year / 12), used only to
+/// express fixed-day cycles as a monthly equivalent. Renewal dates themselves
+/// never use it.
+const double avgDaysPerMonth = 365.25 / 12;
+
+/// Monthly equivalent of [cost] charged every [billingCycle]. Month-based
+/// cycles are exact; weekly and `custom_N` use the average month length.
+double monthlyEquivalent(String billingCycle, double cost) {
+  final cycle = billingCycle.toLowerCase().trim();
+  switch (cycle) {
+    case 'monthly':
+      return cost;
+    case 'quarterly':
+      return cost / 3.0;
+    case 'semi-annual':
+    case 'semi_annual':
+      return cost / 6.0;
+    case 'annual':
+    case 'yearly':
+      return cost / 12.0;
+    case 'weekly':
+      return cost * avgDaysPerMonth / 7.0;
+  }
+  if (cycle.startsWith('custom_')) {
+    final parts = cycle.split('_');
+    final parsed = parts.length == 2 ? int.tryParse(parts[1]) : null;
+    final days = (parsed != null && parsed > 0) ? parsed : 30;
+    return cost * avgDaysPerMonth / days;
+  }
+  return cost;
+}
+
+/// Next [count] renewal dates after [from] (exclusive), anchored to [anchorDay].
+List<DateTime> upcomingRenewals(
+    String billingCycle, DateTime from, int anchorDay, int count) {
+  final out = <DateTime>[];
+  var cursor = from;
+  for (var i = 0; i < count; i++) {
+    final next = advanceByCycle(billingCycle, cursor, anchorDay);
+    if (!next.isAfter(cursor)) break;
+    out.add(next);
+    cursor = next;
+  }
+  return out;
+}
+
 DateTime advanceByCycle(String billingCycle, DateTime current, int anchorDay) {
   final cycle = billingCycle.toLowerCase().trim();
   switch (cycle) {

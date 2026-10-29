@@ -11,6 +11,7 @@ import '../../types/expense.dart';
 import '../../types/insight_action.dart';
 import '../../types/subscription.dart' as wm_sub;
 import '../../utils/currency_format.dart';
+import '../../utils/recurrence.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/insights/insight_card_shell.dart';
 import '../../widgets/insights/insight_content.dart';
@@ -139,35 +140,14 @@ class _InsightsScreenState extends State<InsightsScreen> {
 
     for (final sub in activeSubs) {
       final subTotalCost = sub.amount + (sub.taxAmount ?? 0.0);
-      double monthlyEquivalent = 0.0;
-      final cycle = sub.billingCycle.toLowerCase().trim();
+      final perMonth = monthlyEquivalent(sub.billingCycle, subTotalCost);
 
-      if (cycle == 'monthly') {
-        monthlyEquivalent = subTotalCost;
-      } else if (cycle == 'quarterly') {
-        monthlyEquivalent = subTotalCost / 3.0;
-      } else if (cycle == 'semi-annual' || cycle == 'semi_annual') {
-        monthlyEquivalent = subTotalCost / 6.0;
-      } else if (cycle == 'annual' || cycle == 'yearly') {
-        monthlyEquivalent = subTotalCost / 12.0;
-      } else if (cycle.startsWith('custom_')) {
-        final parts = cycle.split('_');
-        if (parts.length == 2) {
-          final days = int.tryParse(parts[1]) ?? 30;
-          monthlyEquivalent = subTotalCost * (30.0 / days);
-        } else {
-          monthlyEquivalent = subTotalCost;
-        }
-      } else {
-        monthlyEquivalent = subTotalCost;
-      }
-
-      monthlySubSpend += monthlyEquivalent;
+      monthlySubSpend += perMonth;
 
       final category = state.categoryById(sub.categoryId);
       final catName = category?.name ?? 'Uncategorized';
       subSpendByCategory[catName] =
-          (subSpendByCategory[catName] ?? 0.0) + monthlyEquivalent;
+          (subSpendByCategory[catName] ?? 0.0) + perMonth;
 
       if (subTotalCost > highestSubPrice) {
         highestSubPrice = subTotalCost;

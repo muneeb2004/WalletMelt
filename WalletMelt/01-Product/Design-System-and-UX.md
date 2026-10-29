@@ -3,7 +3,7 @@ type: product
 status: stable
 priority: high
 created: 2026-09-13
-updated: 2026-10-27
+updated: 2026-10-29
 domain: product
 related:
   - "[[Product-Requirements]]"
@@ -106,3 +106,6 @@ No decorative sparkle or "AI" glyphs next to product text: the Settings version 
 - **Add expense.** For regular expenses the Amount card comes first, then Category, so the main input is never pushed below a wall of chips. Grocery and fuel keep category first because choosing them changes the form.
 - **Currency labels.** `CurrencyInfo.displayLabel` is `CODE - Name (symbol)`; flag emoji are no longer shown (they render as blank boxes on some devices). The `flag` field remains in the data.
 - **Activity rows.** `ExpenseListTile` title and subtitle wrap to two lines before truncating.
+
+## Subscription form (2026-10-29)
+One sheet, `SubscriptionFormSheet` (`lib/src/screens/subscription/subscription_form_sheet.dart`), creates and edits subscriptions; the old "Update amount" dialog is gone. Layout follows the account-sheet pattern: `titleLarge` title, one help line, fields, then equal Cancel and Save/Add. Fields: name, category chips, amount, tax rate and tax, a raised total card, Repeats (weekly, monthly, every 3 months, every 6 months, yearly, every N days), First renewal / Next renewal date, an outlined "Then" card previewing the next three renewals (with a month-end note), account, reminder, notes. The list card is a `WMCard` with theme text styles; status is a coloured sentence-case word, not a badge. The actions sheet leads with "Edit subscription".

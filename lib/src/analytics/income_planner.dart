@@ -55,19 +55,7 @@ class IncomePlanner {
 
   /// Monthly equivalent of an essential template, in major units.
   static double essentialMonthly(EssentialExpenseTemplate t) {
-    final cycle = t.frequency.toLowerCase().trim();
-    final cost = t.expectedAmount;
-    return switch (cycle) {
-      'monthly' => cost,
-      'weekly' => cost * (52.0 / 12.0),
-      'quarterly' => cost / 3.0,
-      'yearly' || 'annual' => cost / 12.0,
-      _ when cycle.startsWith('custom_') => () {
-          final days = int.tryParse(cycle.split('_').last) ?? 30;
-          return days > 0 ? cost * (30.0 / days) : cost;
-        }(),
-      _ => cost,
-    };
+    return monthlyEquivalent(t.frequency, t.expectedAmount);
   }
 
   /// Advisory monthly budget in major units:
