@@ -1229,6 +1229,18 @@ class AppState extends ChangeNotifier {
     await refresh();
   }
 
+  /// Resumes a paused subscription. Nothing is billed while paused, so the
+  /// next renewal rolls forward to the first cycle on or after today instead
+  /// of the renewals engine back-filling every missed cycle.
+  Future<void> resumeSubscription(wm_sub.Subscription sub, {DateTime? now}) async {
+    final next = sub.nextRenewalOnOrAfter(now ?? DateTime.now());
+    await updateSubscription(sub.copyWith(
+      status: SubscriptionStatus.active,
+      nextOccurrenceDate: next?.toIso8601String().substring(0, 10),
+      updatedAt: DateTime.now().toIso8601String(),
+    ));
+  }
+
   Future<void> deleteSubscription(String id) async {
     await _driftSubscriptionRepository.delete(id);
     await refresh();

@@ -60,6 +60,22 @@ class Subscription {
   DateTime calculateNextRenewalDate(DateTime current) =>
       advanceByCycle(billingCycle, current, _anchorDay);
 
+  /// First renewal on or after [today], stepping from [nextOccurrenceDate]
+  /// without recording anything. Used on resume: nothing is billed while a
+  /// subscription is paused. Returns null when the stored date is unreadable.
+  DateTime? nextRenewalOnOrAfter(DateTime today) {
+    var next = DateTime.tryParse(nextOccurrenceDate);
+    if (next == null) return null;
+    final from = DateTime(today.year, today.month, today.day);
+    var guard = 0;
+    while (next!.isBefore(from) && guard++ < 5000) {
+      final advanced = calculateNextRenewalDate(next);
+      if (!advanced.isAfter(next)) break;
+      next = advanced;
+    }
+    return next;
+  }
+
   Subscription copyWith({
     String? id,
     String? name,

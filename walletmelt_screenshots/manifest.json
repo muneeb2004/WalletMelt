@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-27T23:39:11.111553",
+  "generatedAt": "2026-10-29T10:24:58.996298",
   "totalScreenshots": 36,
   "resolution": "1080x2400",
   "outputDirectory": "walletmelt_screenshots",
@@ -12,7 +12,7 @@
       "relativePath": "01_dashboard/01_dashboard_overview_dark.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 196152,
+      "fileSizeBytes": 195543,
       "status": "verified"
     },
     {
@@ -23,7 +23,7 @@
       "relativePath": "01_dashboard/02_dashboard_overview_light.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 191238,
+      "fileSizeBytes": 190342,
       "status": "verified"
     },
     {
@@ -34,7 +34,7 @@
       "relativePath": "01_dashboard/03_dashboard_budget_adjust_sheet.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 178611,
+      "fileSizeBytes": 177548,
       "status": "verified"
     },
     {
@@ -56,7 +56,7 @@
       "relativePath": "02_expenses/01_expenses_add_keypad.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 156019,
+      "fileSizeBytes": 156371,
       "status": "verified"
     },
     {
@@ -177,7 +177,7 @@
       "relativePath": "05_debts/01_debts_overview.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 236061,
+      "fileSizeBytes": 235444,
       "status": "verified"
     },
     {
@@ -210,7 +210,7 @@
       "relativePath": "06_obligations/01_subscriptions_list.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 191166,
+      "fileSizeBytes": 155688,
       "status": "verified"
     },
     {
@@ -221,7 +221,7 @@
       "relativePath": "06_obligations/02_subscriptions_add_sheet.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 155754,
+      "fileSizeBytes": 163133,
       "status": "verified"
     },
     {
@@ -265,7 +265,7 @@
       "relativePath": "08_settings/01_settings_overview.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 198873,
+      "fileSizeBytes": 198782,
       "status": "verified"
     },
     {
@@ -309,7 +309,7 @@
       "relativePath": "09_security/01_security_pin_lock_screen.png",
       "width": 1080,
       "height": 2400,
-      "fileSizeBytes": 102178,
+      "fileSizeBytes": 101614,
       "status": "verified"
     },
     {

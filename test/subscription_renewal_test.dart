@@ -10,7 +10,9 @@ import 'package:wallet_melt/src/data/repositories/drift/drift_subscription_repos
 import 'package:wallet_melt/src/state/app_state.dart';
 import 'package:wallet_melt/src/types/debt.dart' as wm_debt;
 import 'package:wallet_melt/src/types/expense.dart' as wm_expense;
+import 'package:wallet_melt/src/screens/subscription/subscription_form_sheet.dart';
 import 'package:wallet_melt/src/types/subscription.dart';
+import 'package:wallet_melt/src/utils/recurrence.dart';
 
 Subscription _sub({
   required String start,
@@ -86,6 +88,46 @@ void main() {
       expect(_ymd(_sub(start: '2026-03-01', cycle: 'custom_45').calculateNextRenewalDate(DateTime(2026, 3, 1))), '2026-04-15');
       expect(_ymd(_sub(start: '2026-03-01', cycle: 'custom_0').calculateNextRenewalDate(DateTime(2026, 3, 1))), '2026-03-31');
       expect(_ymd(_sub(start: '2026-03-01', cycle: 'custom_-5').calculateNextRenewalDate(DateTime(2026, 3, 1))), '2026-03-31');
+    });
+  });
+
+  group('anchor, resume and equivalents', () {
+    test('a manual date re-anchors: start on the 15th keeps the 15th', () {
+      final sub = _sub(start: '2026-05-15', next: '2026-05-15');
+      expect(_ymd(sub.calculateNextRenewalDate(DateTime(2026, 5, 15))), '2026-06-15');
+    });
+
+    test('upcomingRenewals clamps then returns to the anchor day', () {
+      final dates = upcomingRenewals('monthly', DateTime(2026, 1, 31), 31, 3);
+      expect(dates.map(_ymd), ['2026-02-28', '2026-03-31', '2026-04-30']);
+      final leap = upcomingRenewals('annual', DateTime(2027, 2, 28), 29, 1);
+      expect(_ymd(leap.single), '2028-02-29');
+    });
+
+    test('resume rolls forward without recording the paused cycles', () {
+      final sub = _sub(start: '2026-01-31', next: '2026-02-28');
+      final next = sub.nextRenewalOnOrAfter(DateTime(2026, 6, 10));
+      expect(_ymd(next!), '2026-06-30');
+      // Already in the future: unchanged.
+      expect(_ymd(sub.nextRenewalOnOrAfter(DateTime(2026, 2, 1))!), '2026-02-28');
+      // Due today stays today.
+      expect(_ymd(sub.nextRenewalOnOrAfter(DateTime(2026, 2, 28))!), '2026-02-28');
+    });
+
+    test('monthly equivalents use calendar-average months, not 30 days', () {
+      expect(monthlyEquivalent('monthly', 100), 100);
+      expect(monthlyEquivalent('annual', 1200), 100);
+      expect(monthlyEquivalent('weekly', 100), closeTo(434.82, 0.01));
+      expect(monthlyEquivalent('custom_30', 100), closeTo(101.46, 0.01));
+      expect(monthlyEquivalent('custom_0', 100), closeTo(101.46, 0.01));
+    });
+
+    test('stored cycle spellings map to form choices', () {
+      expect(SubscriptionCycle.parse('Semi-Annual').$1, SubscriptionCycle.semiAnnual);
+      expect(SubscriptionCycle.parse('yearly').$1, SubscriptionCycle.annual);
+      expect(SubscriptionCycle.parse('weekly').$1, SubscriptionCycle.weekly);
+      expect(SubscriptionCycle.parse('custom_45'), (SubscriptionCycle.custom, 45));
+      expect(subscriptionCycleLabel('custom_45'), 'Every 45 days');
     });
   });
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/wallet_melt_theme.dart';
 import '../utils/budget_period.dart';
+import '../utils/recurrence.dart';
 import '../types/debt.dart';
 import '../types/expense.dart';
 import '../types/subscription.dart';
@@ -226,21 +227,7 @@ class FinancialMetricsCalculator {
   /// Normalizes a subscription's billing cycle to monthly and annual equivalents.
   static double normalizeSubscriptionToMonthly(Subscription sub) {
     final cost = sub.amount + (sub.taxAmount ?? 0.0);
-    final cycle = sub.billingCycle.toLowerCase().trim();
-
-    return switch (cycle) {
-      'monthly' => cost,
-      'quarterly' => cost / 3.0,
-      'semi-annual' || 'semi_annual' => cost / 6.0,
-      'annual' || 'yearly' => cost / 12.0,
-      'weekly' => cost * (52.0 / 12.0),
-      _ when cycle.startsWith('custom_') => () {
-          final parts = cycle.split('_');
-          final days = int.tryParse(parts.length == 2 ? parts[1] : '') ?? 30;
-          return days > 0 ? cost * (30.0 / days) : cost;
-        }(),
-      _ => cost,
-    };
+    return monthlyEquivalent(sub.billingCycle, cost);
   }
 
   /// Computes tax metrics from a list of expenses for a specific month and year.

@@ -3,7 +3,7 @@ type: architecture
 status: stable
 priority: high
 created: 2026-09-13
-updated: 2026-10-18
+updated: 2026-10-29
 domain: architecture
 related:
   - "[[Product-Requirements]]"
@@ -44,6 +44,13 @@ All financial metrics are calculated via [`FinancialMetricsCalculator`](file:///
 ## Subscription Renewal Dates (changed 2026-10-15)
 `Subscription.calculateNextRenewalDate` advances month-based cycles (monthly 1, quarterly 3, semi-annual 6, annual 12 months) from the **anchor day** taken from `startDate`, clamped to the last day of the target month. Jan 31 -> Feb 28/29 -> Mar 31 (no permanent drift, no skipped February). `custom_N` adds N calendar days via `DateTime(y, m, d + N)` (no DST hour shift); `N <= 0` falls back to 30. Renewals are saved **atomically per subscription** (`DriftSubscriptionRepository.applyRenewals`: all renewal expenses + the advanced date in one transaction) and concurrent runs share one in-flight Future. Regression tests: `test/subscription_renewal_test.dart`.
 
+### How real subscriptions behave, and what WalletMelt copies (2026-10-29)
+Researched Stripe Billing: a monthly or yearly subscription keeps its **billing anchor day**; in a shorter month it renews on that month's last day, then returns to the anchor (Jan 31 -> Feb 28/29 -> Mar 31). Google Play (per a RevenueCat write-up, not Google docs) instead drifts: once a 29th-31st renewal falls back to the 28th it stays there. WalletMelt follows the Stripe model because it is predictable and matches how a bill dated "the 31st" really works. Weekly (7 days) and `custom_N` (N calendar days) are fixed intervals, not months.
+- **Manual date edit = new anchor.** Choosing a different next-renewal date in the edit sheet also sets `startDate` to it, so later renewals keep that day. Editing without touching the date keeps the original anchor.
+- **Pause bills nothing.** `AppState.resumeSubscription` rolls `nextOccurrenceDate` to the first cycle on or after today (`Subscription.nextRenewalOnOrAfter`) instead of letting the engine back-fill the paused cycles.
+- **Edit sheet** cannot pick a past next-renewal date (that would record back-dated expenses); create may, as before.
+- `upcomingRenewals` powers the sheet's "Then" preview so the month-end behaviour is visible before saving.
+
 ## Account balance (2026-10-17, [[ADR-0011-Accounts-Derived-Balance-and-Transfers]])
 `balance = openingBalance - expenseOutflow + movementNet + incomeInflow + debtNet`, in integer minor units (`BalanceCalculator`, `lib/src/analytics/balance_calculator.dart`).
 - `expenseOutflow` sums non-deleted expenses with `accountId = account`, `expense.currency = account.currency` and `expense.date >= account.openingDate` (uses `amountMinorUnits`, falling back to `ROUND(amount * 100)` for legacy rows).
@@ -55,7 +62,7 @@ All financial metrics are calculated via [`FinancialMetricsCalculator`](file:///
 ## Income planning (2026-10-17, [[ADR-0012-Income-Schedules-and-Budget-Suggestion]])
 - `incomeInflow` sums non-deleted `incomes` with `accountId = account`, same currency, `date >= openingDate`. Income with no account affects no balance.
 - `IncomePlanner` (`lib/src/analytics/income_planner.dart`, pure): **expected income for a month** = received incomes dated in the month + every active schedule occurrence in the month counted from the schedule's current `nextDueDate` (an overdue, unconfirmed occurrence still counts), per currency.
-- **Suggested budget** (advisory, major units) = `expectedIncome - sum(monthly subscriptions) - sum(monthly essentials)`, floored at 0, null when no income is expected. Essentials' monthly equivalent: weekly x 52/12, quarterly /3, yearly /12, `custom_N` x 30/N. The user's own monthly budget is never overwritten.
+- **Suggested budget** (advisory, major units) = `expectedIncome - sum(monthly subscriptions) - sum(monthly essentials)`, floored at 0, null when no income is expected. Essentials' monthly equivalent uses `monthlyEquivalent` (average month, see above). The user's own monthly budget is never overwritten.
 - Recurrence arithmetic lives in `lib/src/utils/recurrence.dart` (`advanceByCycle`), shared with subscriptions. Weekly now advances 7 days (subscriptions previously treated an unknown/weekly cycle as monthly).
 
 ## Budget periods (2026-10-18, [[ADR-0013-Budget-Period-Start-Day]])

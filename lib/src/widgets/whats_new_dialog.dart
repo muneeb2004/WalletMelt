@@ -132,6 +132,54 @@ class WhatsNewContent extends StatelessWidget {
               const SizedBox(height: 14),
 
               _buildChangelogItem(context,
+                icon: Icons.edit_calendar_outlined,
+                iconColor: context.scheme.primary,
+                title: 'Edit any subscription',
+                description:
+                    'Change the name, price, tax, how often it repeats, the account it pays from, or its next renewal date, all in one place.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.event_repeat_outlined,
+                iconColor: context.scheme.secondary,
+                title: 'Month ends handled properly',
+                description:
+                    'A bill on the 31st now renews on the last day of shorter months, then goes back to the 31st. You also see the next three renewal dates before you save.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.pause_circle_outline_rounded,
+                iconColor: context.money.income,
+                title: 'Pausing costs nothing',
+                description:
+                    'When you resume a paused subscription, it picks up from the next renewal. It no longer adds charges for the months you were paused.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.calculate_outlined,
+                iconColor: context.money.caution,
+                title: 'More accurate monthly totals',
+                description:
+                    'Weekly and every-few-days subscriptions are now counted using the real average month, so your monthly figure is a little more exact. Weekly is also a new choice.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 24),
+
+              // Version 1.8.0 Highlights
+              _buildSectionBadge(
+                label: 'VERSION 1.8.0 UPDATES',
+                color: context.scheme.primary,
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
                 icon: Icons.edit_outlined,
                 iconColor: context.scheme.primary,
                 title: 'Change a category any time',
