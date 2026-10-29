@@ -10,6 +10,7 @@ class WalletMeltSettings {
     this.monthlyBudgetAmount,
     this.lastSeenWhatsNewVersion = '',
     this.budgetPeriodStartDay = 1,
+    this.hideBalance = false,
   });
 
   final String currency;
@@ -23,6 +24,9 @@ class WalletMeltSettings {
   /// Day of month (1 to 28) on which a budget period starts (ADR-0013).
   final int budgetPeriodStartDay;
 
+  /// Whether the dashboard balance tile masks its amounts.
+  final bool hideBalance;
+
   WalletMeltSettings copyWith({
     String? currency,
     ThemePreference? themePreference,
@@ -33,6 +37,7 @@ class WalletMeltSettings {
     bool clearMonthlyBudget = false,
     String? lastSeenWhatsNewVersion,
     int? budgetPeriodStartDay,
+    bool? hideBalance,
   }) {
     return WalletMeltSettings(
       currency: currency ?? this.currency,
@@ -48,6 +53,7 @@ class WalletMeltSettings {
       lastSeenWhatsNewVersion:
           lastSeenWhatsNewVersion ?? this.lastSeenWhatsNewVersion,
       budgetPeriodStartDay: budgetPeriodStartDay ?? this.budgetPeriodStartDay,
+      hideBalance: hideBalance ?? this.hideBalance,
     );
   }
 

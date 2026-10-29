@@ -24,11 +24,10 @@ class DashboardBalanceCard extends StatefulWidget {
 }
 
 class _DashboardBalanceCardState extends State<DashboardBalanceCard> {
-  bool _hidden = false;
-
   @override
   Widget build(BuildContext context) {
     final state = widget.state;
+    final hidden = state.settings.hideBalance;
     if (!state.accountsAvailable) return const SizedBox.shrink();
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
@@ -103,7 +102,7 @@ class _DashboardBalanceCardState extends State<DashboardBalanceCard> {
                 fit: BoxFit.scaleDown,
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  _hidden
+                  hidden
                       ? '••••'
                       : formatMoneyMinorUnits(t.minorUnits, t.currency),
                   style: withTabularFigures(textTheme.titleLarge),
@@ -114,7 +113,7 @@ class _DashboardBalanceCardState extends State<DashboardBalanceCard> {
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
               child: Text(
-                _hidden
+                hidden
                     ? 'Free to spend ••••'
                     : 'Free to spend ${formatMoneyMinorUnits(t.minorUnits, t.currency)}',
                 key: const Key('dashboard_free_to_spend'),
@@ -136,14 +135,14 @@ class _DashboardBalanceCardState extends State<DashboardBalanceCard> {
               ),
               InkResponse(
                 radius: 24,
-                onTap: () => setState(() => _hidden = !_hidden),
+                onTap: () => state.setHideBalance(!hidden),
                 child: Tooltip(
-                  message: _hidden ? 'Show balance' : 'Hide balance',
+                  message: hidden ? 'Show balance' : 'Hide balance',
                   child: SizedBox(
                     width: 32,
                     height: 32,
                     child: Icon(
-                      _hidden
+                      hidden
                           ? Icons.visibility_outlined
                           : Icons.visibility_off_outlined,
                       size: 20,
