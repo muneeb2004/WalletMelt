@@ -127,6 +127,7 @@ void main() {
     await tester.tap(find.byTooltip('Hide balance'));
     await tester.pumpAndSettle();
     expect(find.text('••••'), findsOneWidget);
+    expect(state.settings.hideBalance, isTrue);
   });
 
   testWidgets('no balance UI when accounts are unavailable', (tester) async {

@@ -1447,6 +1447,14 @@ class AppState extends ChangeNotifier {
     await refresh();
   }
 
+  /// Remembers whether the dashboard balance tile is masked.
+  Future<void> setHideBalance(bool hide) async {
+    if (hide == settings.hideBalance) return;
+    settings = settings.copyWith(hideBalance: hide);
+    await _settingsService.save(settings);
+    notifyListeners();
+  }
+
   /// Changes the day on which each budget period starts (ADR-0013). All
   /// history is regrouped; no stored data is rewritten.
   Future<void> setBudgetPeriodStartDay(int day) async {

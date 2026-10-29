@@ -124,6 +124,10 @@ Every release bumps `pubspec.yaml` and ships a plain-language, non-technical Wha
 - **Open**: stable names for uploaded icons; one-time "tap your balance" hint (not built).
 - **Build**: release APKs are produced with `scripts/build_apks.ps1`, which regenerates `lib/src/constants/app_version.dart` from `pubspec.yaml` (1.8.0+18).
 
+## Release 1.10.0 (2026-10-29)
+- **Done**: the dashboard balance hide/show choice is now a saved setting (`WalletMeltSettings.hideBalance`, key `settings.hideBalance` in SharedPreferences, `AppState.setHideBalance`) instead of widget state, so it survives restarts. It is a device preference and is not part of backups. What's New: bug fix entry. Version 1.10.0+20.
+- **Build**: release APKs via `scripts/build_apks.ps1` (1.10.0+20).
+
 ## Release 1.9.0 (2026-10-29)
 - **Done**: renewals confirmed calendar-aware (anchor day, month-end clamp, leap years) and documented against Stripe behaviour; one `SubscriptionFormSheet` creates and edits (name, category, amount, tax, cycle incl. weekly, next renewal date, account, reminder, notes) with a live three-date preview; manual date becomes the new anchor; resume rolls forward instead of back-filling paused cycles; shared `monthlyEquivalent` replaces three hardcoded 30-day formulas (average month 30.4375 days); subscription list card and actions sheet moved to `WMCard` and theme text. What's New written in plain language. Version 1.9.0+19.
 - **Build**: release APKs via `scripts/build_apks.ps1` (1.9.0+19).

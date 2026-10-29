@@ -132,6 +132,24 @@ class WhatsNewContent extends StatelessWidget {
               const SizedBox(height: 14),
 
               _buildChangelogItem(context,
+                icon: Icons.visibility_off_outlined,
+                iconColor: context.scheme.primary,
+                title: 'Bug fix: hidden balance stays hidden',
+                description:
+                    'If you hide your balance on the home screen, it now stays hidden when you come back to the app, instead of showing again.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 24),
+
+              // Version 1.9.0 Highlights
+              _buildSectionBadge(
+                label: 'VERSION 1.9.0 UPDATES',
+                color: context.scheme.primary,
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
                 icon: Icons.edit_calendar_outlined,
                 iconColor: context.scheme.primary,
                 title: 'Edit any subscription',
