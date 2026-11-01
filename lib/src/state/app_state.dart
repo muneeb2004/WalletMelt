@@ -612,9 +612,11 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> confirmIncomeReceived(String scheduleId,
-      {int? amountMinorUnits, DateTime? receivedOn}) async {
+      {int? amountMinorUnits, DateTime? receivedOn, String? accountId}) async {
     await _incomeOrThrow.confirmReceived(scheduleId,
-        amountMinorUnits: amountMinorUnits, receivedOn: receivedOn);
+        amountMinorUnits: amountMinorUnits,
+        receivedOn: receivedOn,
+        accountId: accountId);
     await _afterIncomeChange();
   }
 

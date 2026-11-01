@@ -457,7 +457,7 @@ class DashboardScreen extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.sm),
 
-              if (!hasExpenses)
+              if (!hasExpenses || insights.recentExpenses.isEmpty)
                 WMCard(
                   tone: WMCardTone.outlined,
                   padding: const EdgeInsets.symmetric(
@@ -474,12 +474,16 @@ class DashboardScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: AppSpacing.sm),
                         Text(
-                          'No expenses recorded yet',
+                          hasExpenses
+                              ? 'No expenses this month'
+                              : 'No expenses recorded yet',
                           style: textTheme.titleSmall,
                         ),
                         const SizedBox(height: AppSpacing.xs),
                         Text(
-                          'Tap Add expense above to log your first purchase.',
+                          hasExpenses
+                              ? 'Older expenses are in History.'
+                              : 'Tap Add expense above to log your first purchase.',
                           textAlign: TextAlign.center,
                           style: textTheme.bodySmall,
                         ),

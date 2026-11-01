@@ -131,3 +131,7 @@ Every release bumps `pubspec.yaml` and ships a plain-language, non-technical Wha
 ## Release 1.9.0 (2026-10-29)
 - **Done**: renewals confirmed calendar-aware (anchor day, month-end clamp, leap years) and documented against Stripe behaviour; one `SubscriptionFormSheet` creates and edits (name, category, amount, tax, cycle incl. weekly, next renewal date, account, reminder, notes) with a live three-date preview; manual date becomes the new anchor; resume rolls forward instead of back-filling paused cycles; shared `monthlyEquivalent` replaces three hardcoded 30-day formulas (average month 30.4375 days); subscription list card and actions sheet moved to `WMCard` and theme text. What's New written in plain language. Version 1.9.0+19.
 - **Build**: release APKs via `scripts/build_apks.ps1` (1.9.0+19).
+
+## Release 1.11.0 (2026-11-01)
+- **Done**: income must be deposited to an account (add income and confirm-received sheets), so it changes balances; History time-range filter (this month, 30 days, 3 months, this year, all time, custom); graceful empty states on Recent activity and History. See ADR-0012 amendments. What's New: three entries. Version 1.11.0+21.
+- **Build**: release APKs via `scripts/build_apks.ps1` (1.11.0+21).

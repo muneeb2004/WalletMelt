@@ -155,6 +155,7 @@ class DriftIncomeRepository {
     String scheduleId, {
     int? amountMinorUnits,
     DateTime? receivedOn,
+    String? accountId,
   }) {
     return _db.transaction(() async {
       final schedule = await _requireSchedule(scheduleId);
@@ -165,7 +166,7 @@ class DriftIncomeRepository {
         amountMinorUnits: amountMinorUnits ?? schedule.amountMinorUnits,
         currency: schedule.currency,
         date: receivedOn ?? due,
-        accountId: schedule.accountId,
+        accountId: accountId ?? schedule.accountId,
         scheduleId: schedule.id,
       );
       await _advance(schedule);

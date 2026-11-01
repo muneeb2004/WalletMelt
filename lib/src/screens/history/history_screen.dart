@@ -33,10 +33,16 @@ final class _ExpenseItem extends _ListItem {
   final Expense expense;
 }
 
-final class _ToggleHistoryItem extends _ListItem {
-  _ToggleHistoryItem({required this.showAll, required this.hiddenCount});
-  final bool showAll;
-  final int hiddenCount;
+enum HistoryRange {
+  thisPeriod('This month'),
+  last30('Last 30 days'),
+  last90('Last 3 months'),
+  thisYear('This year'),
+  allTime('All time'),
+  custom('Custom');
+
+  const HistoryRange(this.label);
+  final String label;
 }
 
 // ── Screen ───────────────────────────────────────────────────────────────────
@@ -56,8 +62,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
   ExpenseSort _sort = ExpenseSort.newest;
   bool _showRecycleBin = false;
   String _taxFilter = 'all';
-  bool _showAllHistory = false;
-  int _hiddenOlderCount = 0;
+  HistoryRange _range = HistoryRange.thisPeriod;
+  DateTimeRange? _customRange;
 
   Timer? _debounceTimer;
   String _searchQuery = '';
@@ -69,9 +75,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
   String? _cachedCategoryId;
   ExpenseSort? _cachedSort;
   String? _cachedTaxFilter;
-  bool? _cachedShowAllHistory;
+  HistoryRange? _cachedRange;
+  DateTimeRange? _cachedCustomRange;
   List<_ListItem>? _cachedItems;
   List<Expense>? _cachedFilteredList;
+  int _cachedTotalMatching = 0;
 
   @override
   void initState() {
@@ -117,7 +125,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
         _cachedCategoryId == _categoryId &&
         _cachedSort == _sort &&
         _cachedTaxFilter == _taxFilter &&
-        _cachedShowAllHistory == _showAllHistory &&
+        _cachedRange == _range &&
+        _cachedCustomRange == _customRange &&
         _cachedItems != null) {
       return _cachedItems!;
     }
@@ -149,24 +158,41 @@ class _HistoryScreenState extends State<HistoryScreen> {
       };
     });
 
-    _cachedFilteredList = filtered;
-
     final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
     final currentPeriod = period.periodOf(now);
-
-    List<Expense> displayExpenses;
-    if (!_showAllHistory && _searchQuery.isEmpty && !_showRecycleBin) {
-      displayExpenses = filtered
-          .where((e) {
-            final d = DateTime.tryParse(e.date);
-            return d != null && period.contains(currentPeriod, d);
-          })
-          .toList();
-      _hiddenOlderCount = filtered.length - displayExpenses.length;
-    } else {
-      displayExpenses = filtered;
-      _hiddenOlderCount = 0;
+    bool inRange(DateTime d) {
+      final day = DateTime(d.year, d.month, d.day);
+      switch (_range) {
+        case HistoryRange.thisPeriod:
+          // Searching looks through all history, not just this period.
+          return _searchQuery.isNotEmpty || period.contains(currentPeriod, d);
+        case HistoryRange.last30:
+          return !day.isBefore(today.subtract(const Duration(days: 29))) &&
+              !day.isAfter(today);
+        case HistoryRange.last90:
+          return !day.isBefore(DateTime(today.year, today.month - 3, today.day)) &&
+              !day.isAfter(today);
+        case HistoryRange.thisYear:
+          return day.year == today.year;
+        case HistoryRange.allTime:
+          return true;
+        case HistoryRange.custom:
+          final r = _customRange;
+          if (r == null) return true;
+          return !day.isBefore(r.start) && !day.isAfter(r.end);
+      }
     }
+
+    // The recycle bin always lists everything so deleted items are never hidden.
+    final displayExpenses = _showRecycleBin
+        ? filtered
+        : filtered.where((e) {
+            final d = DateTime.tryParse(e.date);
+            return d == null ? _range == HistoryRange.allTime : inRange(d);
+          }).toList();
+    _cachedFilteredList = displayExpenses;
+    _cachedTotalMatching = filtered.length;
 
     final grouped = groupExpensesByMonth(displayExpenses, period);
     final items = <_ListItem>[];
@@ -180,22 +206,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
       }
     }
 
-    if (_hiddenOlderCount > 0 && !_showAllHistory && _searchQuery.isEmpty && !_showRecycleBin) {
-      items.add(_ToggleHistoryItem(showAll: false, hiddenCount: _hiddenOlderCount));
-    } else if (_showAllHistory && !_showRecycleBin && filtered.any((e) {
-      final d = DateTime.tryParse(e.date);
-      return d == null || !period.contains(currentPeriod, d);
-    })) {
-      items.add(_ToggleHistoryItem(showAll: true, hiddenCount: 0));
-    }
-
     _cachedRawExpenses = rawExpenses;
     _cachedPeriodStartDay = period.startDay;
     _cachedSearchQuery = _searchQuery;
     _cachedCategoryId = _categoryId;
     _cachedSort = _sort;
     _cachedTaxFilter = _taxFilter;
-    _cachedShowAllHistory = _showAllHistory;
+    _cachedRange = _range;
+    _cachedCustomRange = _customRange;
     _cachedItems = items;
 
     return items;
@@ -443,6 +461,37 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       ),
                       const SizedBox(height: 12),
 
+                      // ── Time range filter ─────────────────────────────────
+                      if (!_showRecycleBin) ...[
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          clipBehavior: Clip.none,
+                          child: Row(
+                            children: [
+                              for (final r in HistoryRange.values) ...[
+                                ChoiceChip(
+                                  key: Key('history_range_${r.name}'),
+                                  avatar: r == HistoryRange.custom
+                                      ? const Icon(Icons.date_range_rounded,
+                                          size: 16)
+                                      : null,
+                                  label: Text(r == HistoryRange.custom &&
+                                          _customRange != null
+                                      ? _rangeLabel()
+                                      : r.label),
+                                  selected: _range == r,
+                                  onSelected: (_) => r == HistoryRange.custom
+                                      ? _pickCustomRange()
+                                      : setState(() => _range = r),
+                                ),
+                                const SizedBox(width: 8),
+                              ],
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+
                       // ── Category filter chips ─────────────────────────────
                       SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
@@ -476,69 +525,32 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
                   sliver: SliverToBoxAdapter(
-                    child: _hiddenOlderCount > 0 && !_showAllHistory
-                        ? Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 32),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.calendar_today_outlined,
-                                    size: 48, color: context.scheme.onSurfaceVariant),
-                                const SizedBox(height: 14),
-                                const Text('No expenses this month',
-                                    style: TextStyle(
-                                        fontSize: 17, fontWeight: FontWeight.w700)),
-                                const SizedBox(height: 6),
-                                Text(
-                                    'You have $_hiddenOlderCount older expenses saved.',
-                                    style: TextStyle(
-                                        fontSize: 12,
-                                        color: context.scheme.onSurfaceVariant)),
-                                const SizedBox(height: 16),
-                                FilledButton.icon(
-                                  style: FilledButton.styleFrom(
-                                    backgroundColor: context.scheme.primary,
-                                    foregroundColor: context.scheme.onPrimary,
-                                    minimumSize: const Size(0, 48),
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 24, vertical: 12),
-                                    elevation: 2,
-                                    shadowColor: context.scheme.primary
-                                        .withValues(alpha: isDark ? 0.40 : 0.25),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(
-                                          AppSpacing.radiusPill),
-                                    ),
-                                  ),
-                                  onPressed: () {
-                                    WMHaptics.light();
-                                    setState(() => _showAllHistory = true);
-                                  },
-                                  icon: const Icon(Icons.history_rounded, size: 18),
-                                  label: const Text(
-                                    'Show All History',
-                                    style: TextStyle(
-                                      fontFamily: 'PlusJakartaSans',
-                                      fontWeight: FontWeight.w800,
-                                      fontSize: 14,
-                                      letterSpacing: 0.2,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        : EmptyState(
-                            icon: _showRecycleBin
-                                ? Icons.delete_sweep_outlined
-                                : Icons.search_off_rounded,
-                            title: _showRecycleBin
-                                ? 'Recycle bin is empty'
-                                : 'No expenses found',
-                            subtitle: _showRecycleBin
-                                ? 'Deleted expenses will appear here.'
-                                : 'Try a different search term or category filter.',
-                          ),
+                    child: EmptyState(
+                      icon: _showRecycleBin
+                          ? Icons.delete_sweep_outlined
+                          : (_cachedTotalMatching == 0 && expenses.isEmpty
+                              ? Icons.receipt_long_outlined
+                              : Icons.search_off_rounded),
+                      title: _showRecycleBin
+                          ? 'Recycle bin is empty'
+                          : (expenses.isEmpty
+                              ? 'No expenses yet'
+                              : 'No expenses in this range'),
+                      subtitle: _showRecycleBin
+                          ? 'Deleted expenses will appear here.'
+                          : (expenses.isEmpty
+                              ? 'Expenses you add will show up here.'
+                              : (_range != HistoryRange.allTime
+                                  ? 'Nothing matches ${_rangeLabel()}. Try a wider time range or clear your filters.'
+                                  : 'Try a different search term or category filter.')),
+                      actionLabel: !_showRecycleBin &&
+                              expenses.isNotEmpty &&
+                              _range != HistoryRange.allTime
+                          ? 'Show all time'
+                          : null,
+                      onActionPressed: () =>
+                          setState(() => _range = HistoryRange.allTime),
+                    ),
                   ),
                 )
               else
@@ -564,80 +576,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           ),
                         );
                       }
-                      if (item is _ToggleHistoryItem) {
-                        if (!item.showAll) {
-                          return Center(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 20),
-                              child: FilledButton.icon(
-                                style: FilledButton.styleFrom(
-                                  backgroundColor: context.scheme.primary,
-                                  foregroundColor: context.scheme.onPrimary,
-                                  minimumSize: const Size(0, 48),
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 24, vertical: 12),
-                                  elevation: 2,
-                                  shadowColor: context.scheme.primary
-                                      .withValues(alpha: isDark ? 0.40 : 0.25),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(
-                                        AppSpacing.radiusPill),
-                                  ),
-                                ),
-                                onPressed: () {
-                                  WMHaptics.light();
-                                  setState(() => _showAllHistory = true);
-                                },
-                                icon: const Icon(Icons.history_rounded, size: 18),
-                                label: const Text(
-                                  'Show All',
-                                  style: TextStyle(
-                                    fontFamily: 'PlusJakartaSans',
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 14,
-                                    letterSpacing: 0.2,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          );
-                        } else {
-                          return Center(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 20),
-                              child: OutlinedButton.icon(
-                                style: OutlinedButton.styleFrom(
-                                  minimumSize: const Size(0, 48),
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 24, vertical: 12),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(
-                                        AppSpacing.radiusPill),
-                                  ),
-                                  side: BorderSide(
-                                    color: context.scheme.outlineVariant,
-                                    width: 1.2,
-                                  ),
-                                ),
-                                icon: const Icon(Icons.calendar_today_rounded,
-                                    size: 16),
-                                label: const Text(
-                                  'Show Current Month Only',
-                                  style: TextStyle(
-                                    fontFamily: 'PlusJakartaSans',
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                                onPressed: () {
-                                  WMHaptics.light();
-                                  setState(() => _showAllHistory = false);
-                                },
-                              ),
-                            ),
-                          );
-                        }
-                      }
                       final expItem = item as _ExpenseItem;
                       return ExpenseListTile(
                         expense: expItem.expense,
@@ -662,6 +600,32 @@ class _HistoryScreenState extends State<HistoryScreen> {
         ),
       ),
     );
+  }
+
+  String _rangeLabel() {
+    final r = _customRange;
+    if (_range == HistoryRange.custom && r != null) {
+      String d(DateTime x) =>
+          '${x.day.toString().padLeft(2, '0')}/${x.month.toString().padLeft(2, '0')}/${x.year}';
+      return '${d(r.start)} – ${d(r.end)}';
+    }
+    return _range.label.toLowerCase();
+  }
+
+  Future<void> _pickCustomRange() async {
+    final now = DateTime.now();
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(now.year + 1, 12, 31),
+      initialDateRange: _customRange,
+    );
+    if (picked != null && mounted) {
+      setState(() {
+        _customRange = picked;
+        _range = HistoryRange.custom;
+      });
+    }
   }
 
   void _showQuickCategorySheet(BuildContext context, Expense expense) {
