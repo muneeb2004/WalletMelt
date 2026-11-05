@@ -3,7 +3,7 @@ type: state
 status: stable
 priority: high
 created: 2026-09-13
-updated: 2026-10-29
+updated: 2026-11-05
 domain: control
 related:
   - "[[Project-Constitution]]"

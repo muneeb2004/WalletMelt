@@ -3,7 +3,7 @@ type: work-tracker
 status: active
 priority: high
 created: 2026-09-13
-updated: 2026-10-29
+updated: 2026-11-05
 domain: work
 related:
   - "[[Current-Project-State]]"
@@ -11,7 +11,10 @@ related:
 
 # Active Work & Roadmap Registry
 
-## Now (Current Release v1.7.0)
+## Now (Current Release v1.11.1)
+- [x] v1.11.1 (build 22): History follows the selected month; deterministic expense order (see Release 1.11.1 below).
+
+## Previous Release (v1.7.0)
 - [x] v1.7.0 (build 14): committees (BC) with confirm-on-paid installments and payout.
 
 ## Previous Release (v1.6.0)
@@ -135,3 +138,7 @@ Every release bumps `pubspec.yaml` and ships a plain-language, non-technical Wha
 ## Release 1.11.0 (2026-11-01)
 - **Done**: income must be deposited to an account (add income and confirm-received sheets), so it changes balances; History time-range filter (this month, 30 days, 3 months, this year, all time, custom); graceful empty states on Recent activity and History. See ADR-0012 amendments. What's New: three entries. Version 1.11.0+21.
 - **Build**: release APKs via `scripts/build_apks.ps1` (1.11.0+21).
+
+## Release 1.11.1 (2026-11-05)
+- **Done**: History's "This month" range follows the dashboard month switcher (`AppState.selectedMonth`); one canonical newest-first expense order (`compareExpensesNewestFirst`) shared by Dashboard recent activity and History. Tests in `test/utils/expense_order_test.dart`. Version 1.11.1+22. Portfolio (sheikhmmuneeb.com) updated to v1.11.1 with the new ARM64 APK SHA-256.
+- **Build**: release APKs via `scripts/build_apks.ps1` (1.11.1+22).
