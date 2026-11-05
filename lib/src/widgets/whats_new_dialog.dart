@@ -132,6 +132,34 @@ class WhatsNewContent extends StatelessWidget {
               const SizedBox(height: 14),
 
               _buildChangelogItem(context,
+                icon: Icons.calendar_month_outlined,
+                iconColor: context.scheme.primary,
+                title: 'History follows your month',
+                description:
+                    'When you change the month on the home screen, History now shows that same month.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.swap_vert_rounded,
+                iconColor: context.scheme.secondary,
+                title: 'Same order everywhere',
+                description:
+                    'Expenses now appear in the same order on the home screen and in History, newest first, even when several share a day.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 24),
+
+              // Version 1.11.0 Highlights
+              _buildSectionBadge(
+                label: 'VERSION 1.11.0 UPDATES',
+                color: context.scheme.primary,
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
                 icon: Icons.account_balance_wallet_outlined,
                 iconColor: context.scheme.primary,
                 title: 'Income goes where it belongs',

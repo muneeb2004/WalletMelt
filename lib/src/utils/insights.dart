@@ -122,11 +122,7 @@ MonthlyInsights buildMonthlyInsightsFromSnapshot({
 
   // Chronologically sorted recent expenses with deterministic id ASC tie-breaker
   final recentExpenses = [...snapshot.currentExpenses]
-    ..sort((a, b) {
-      final dateCmp = parseIsoDate(b.date).compareTo(parseIsoDate(a.date));
-      if (dateCmp != 0) return dateCmp;
-      return a.id.compareTo(b.id);
-    });
+    ..sort(compareExpensesNewestFirst);
 
   return MonthlyInsights(
     total: snapshot.currentTotal,
@@ -137,6 +133,21 @@ MonthlyInsights buildMonthlyInsightsFromSnapshot({
     previousMonthTotal:
         snapshot.previousExpenses.isNotEmpty ? snapshot.previousTotal : null,
   );
+}
+
+/// Canonical expense order shared by the dashboard and History: newest date
+/// first, then most recently created, then id as a final stable tie-break.
+int compareExpensesNewestFirst(Expense a, Expense b) {
+  int dateCmp;
+  try {
+    dateCmp = parseIsoDate(b.date).compareTo(parseIsoDate(a.date));
+  } catch (_) {
+    dateCmp = b.date.compareTo(a.date);
+  }
+  if (dateCmp != 0) return dateCmp;
+  final createdCmp = b.createdAt.compareTo(a.createdAt);
+  if (createdCmp != 0) return createdCmp;
+  return a.id.compareTo(b.id);
 }
 
 Map<String, List<Expense>> groupExpensesByMonth(List<Expense> expenses,

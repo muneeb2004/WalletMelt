@@ -70,6 +70,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   // Memoization cache to avoid recalculating sorting/filtering on rebuilds
   List<Expense>? _cachedRawExpenses;
+  DateTime? _cachedSelectedMonth;
+  DateTime? _lastSelectedMonth;
   int? _cachedPeriodStartDay;
   String? _cachedSearchQuery;
   String? _cachedCategoryId;
@@ -117,9 +119,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
     super.dispose();
   }
 
-  List<_ListItem> _getOrCreateItems(List<Expense> rawExpenses) {
+  List<_ListItem> _getOrCreateItems(
+      List<Expense> rawExpenses, DateTime selectedMonth) {
     final period = context.read<AppState>().budgetPeriod;
     if (_cachedRawExpenses == rawExpenses &&
+        _cachedSelectedMonth == selectedMonth &&
         _cachedPeriodStartDay == period.startDay &&
         _cachedSearchQuery == _searchQuery &&
         _cachedCategoryId == _categoryId &&
@@ -150,17 +154,21 @@ class _HistoryScreenState extends State<HistoryScreen> {
     }).toList();
 
     filtered.sort((a, b) {
-      return switch (_sort) {
-        ExpenseSort.newest => b.date.compareTo(a.date),
-        ExpenseSort.oldest => a.date.compareTo(b.date),
+      final byAmount = switch (_sort) {
+        ExpenseSort.newest => 0,
+        ExpenseSort.oldest => 0,
         ExpenseSort.amountHigh => b.amount.compareTo(a.amount),
         ExpenseSort.amountLow => a.amount.compareTo(b.amount),
       };
+      if (byAmount != 0) return byAmount;
+      return _sort == ExpenseSort.oldest
+          ? compareExpensesNewestFirst(b, a)
+          : compareExpensesNewestFirst(a, b);
     });
 
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final currentPeriod = period.periodOf(now);
+    final currentPeriod = selectedMonth;
     bool inRange(DateTime d) {
       final day = DateTime(d.year, d.month, d.day);
       switch (_range) {
@@ -207,6 +215,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     }
 
     _cachedRawExpenses = rawExpenses;
+    _cachedSelectedMonth = selectedMonth;
     _cachedPeriodStartDay = period.startDay;
     _cachedSearchQuery = _searchQuery;
     _cachedCategoryId = _categoryId;
@@ -226,8 +235,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final expenses = context.select<AppState, List<Expense>>((s) => s.expenses);
     final deletedExpenses = context.select<AppState, List<Expense>>((s) => s.deletedExpenses);
     final categories = context.select<AppState, List<wm.Category>>((s) => s.categories);
+    final selectedMonth =
+        context.select<AppState, DateTime>((s) => s.selectedMonth);
+    // Changing the month on the dashboard shows that month here again.
+    if (_lastSelectedMonth != null && _lastSelectedMonth != selectedMonth) {
+      _range = HistoryRange.thisPeriod;
+    }
+    _lastSelectedMonth = selectedMonth;
     final base = _showRecycleBin ? deletedExpenses : expenses;
-    final items = _getOrCreateItems(base);
+    final items = _getOrCreateItems(base, selectedMonth);
     final filteredEmpty = _cachedFilteredList?.isEmpty ?? true;
     final isLoading = context.select<AppState, bool>((s) => s.isLoading);
     final errorMessage = context.select<AppState, String?>((s) => s.errorMessage);
@@ -478,7 +494,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                   label: Text(r == HistoryRange.custom &&
                                           _customRange != null
                                       ? _rangeLabel()
-                                      : r.label),
+                                      : _labelFor(r)),
                                   selected: _range == r,
                                   onSelected: (_) => r == HistoryRange.custom
                                       ? _pickCustomRange()
@@ -609,7 +625,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
           '${x.day.toString().padLeft(2, '0')}/${x.month.toString().padLeft(2, '0')}/${x.year}';
       return '${d(r.start)} – ${d(r.end)}';
     }
-    return _range.label.toLowerCase();
+    return _labelFor(_range).toLowerCase();
+  }
+
+  /// "This month" reads as the dashboard's month when it is not the current one.
+  String _labelFor(HistoryRange r) {
+    final month = _lastSelectedMonth;
+    if (r == HistoryRange.thisPeriod && month != null) {
+      final period = context.read<AppState>().budgetPeriod;
+      if (month != period.periodOf(DateTime.now())) return period.label(month);
+    }
+    return r.label;
   }
 
   Future<void> _pickCustomRange() async {
