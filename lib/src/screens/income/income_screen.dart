@@ -326,6 +326,10 @@ class _IncomeEditorState extends State<_IncomeEditor> {
       setState(() => _error = 'Enter an amount greater than zero.');
       return;
     }
+    if (_eligibleAccounts.isNotEmpty && _accountId == null) {
+      setState(() => _error = 'Choose where this income is deposited.');
+      return;
+    }
     final minor = toMinorUnits(amountValue);
     final navigator = Navigator.of(context);
     try {
@@ -402,10 +406,10 @@ class _IncomeEditorState extends State<_IncomeEditor> {
               key: const ValueKey('income-account'),
               initialValue: _accountId,
               isExpanded: true,
-              decoration: const InputDecoration(labelText: 'Deposited to'),
+              decoration: const InputDecoration(
+                  labelText: 'Deposited to',
+                  hintText: 'Choose cash, bank or wallet'),
               items: [
-                const DropdownMenuItem<String?>(
-                    value: null, child: Text('No account')),
                 for (final a in eligible)
                   DropdownMenuItem<String?>(
                       value: a.id, child: Text(a.name)),
@@ -462,11 +466,18 @@ Future<void> showConfirmIncomeSheet(
   final state = context.read<AppState>();
   final controller = TextEditingController(
       text: fromMinorUnits(schedule.amountMinorUnits).toStringAsFixed(2));
+  final eligible = [
+    for (final a in state.accounts)
+      if (!a.isArchived && a.currency == schedule.currency) a,
+  ];
+  String? accountId = eligible.any((a) => a.id == schedule.accountId)
+      ? schedule.accountId
+      : (eligible.length == 1 ? eligible.first.id : null);
   return showAppBottomSheet<void>(
     context,
     builder: (sheetContext) {
       final textTheme = Theme.of(sheetContext).textTheme;
-      return Padding(
+      return StatefulBuilder(builder: (sheetContext, setSheetState) => Padding(
         padding: const EdgeInsets.fromLTRB(
             AppSpacing.lg, AppSpacing.smMd, AppSpacing.lg, AppSpacing.lg),
         child: Column(
@@ -487,6 +498,26 @@ Future<void> showConfirmIncomeSheet(
                   prefixText: '${schedule.currency} '),
             ),
             const SizedBox(height: AppSpacing.md),
+            if (eligible.isNotEmpty) ...[
+              DropdownButtonFormField<String>(
+                key: const ValueKey('confirm-income-account'),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                dropdownColor:
+                    Theme.of(sheetContext).colorScheme.surfaceContainerHigh,
+                menuMaxHeight: 320,
+                initialValue: accountId,
+                isExpanded: true,
+                decoration: const InputDecoration(
+                    labelText: 'Received into',
+                    hintText: 'Choose cash, bank or wallet'),
+                items: [
+                  for (final a in eligible)
+                    DropdownMenuItem<String>(value: a.id, child: Text(a.name)),
+                ],
+                onChanged: (v) => setSheetState(() => accountId = v),
+              ),
+              const SizedBox(height: AppSpacing.md),
+            ],
             PrimaryButton(
               label: 'Confirm received',
               onPressed: () async {
@@ -495,15 +526,21 @@ Future<void> showConfirmIncomeSheet(
                   showErrorSnackbar(sheetContext, 'Enter a number above zero.');
                   return;
                 }
+                if (eligible.isNotEmpty && accountId == null) {
+                  showErrorSnackbar(
+                      sheetContext, 'Choose where the money was received.');
+                  return;
+                }
                 final navigator = Navigator.of(sheetContext);
                 await state.confirmIncomeReceived(schedule.id,
-                    amountMinorUnits: toMinorUnits(value));
+                    amountMinorUnits: toMinorUnits(value),
+                    accountId: accountId);
                 navigator.pop();
               },
             ),
           ],
         ),
-      );
+      ));
     },
   );
 }

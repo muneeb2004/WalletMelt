@@ -132,6 +132,72 @@ class WhatsNewContent extends StatelessWidget {
               const SizedBox(height: 14),
 
               _buildChangelogItem(context,
+                icon: Icons.calendar_month_outlined,
+                iconColor: context.scheme.primary,
+                title: 'History follows your month',
+                description:
+                    'When you change the month on the home screen, History now shows that same month.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.swap_vert_rounded,
+                iconColor: context.scheme.secondary,
+                title: 'Same order everywhere',
+                description:
+                    'Expenses now appear in the same order on the home screen and in History, newest first, even when several share a day.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 24),
+
+              // Version 1.11.0 Highlights
+              _buildSectionBadge(
+                label: 'VERSION 1.11.0 UPDATES',
+                color: context.scheme.primary,
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.account_balance_wallet_outlined,
+                iconColor: context.scheme.primary,
+                title: 'Income goes where it belongs',
+                description:
+                    'When you add income or tap Received, you now choose whether it came into cash, a bank or a wallet, so your balance goes up. Before, it was saved without any account and the balance never changed.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.date_range_outlined,
+                iconColor: context.scheme.secondary,
+                title: 'Filter history by time',
+                description:
+                    'History now has quick choices for this month, the last 30 days, the last 3 months, this year or all time, plus a custom date range.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.inbox_outlined,
+                iconColor: context.money.caution,
+                title: 'No more empty-looking screens',
+                description:
+                    'When there is nothing to show, Recent activity and History now say so clearly and offer a way to see older expenses.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 24),
+
+              // Version 1.10.0 Highlights
+              _buildSectionBadge(
+                label: 'VERSION 1.10.0 UPDATES',
+                color: context.scheme.primary,
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
                 icon: Icons.visibility_off_outlined,
                 iconColor: context.scheme.primary,
                 title: 'Bug fix: hidden balance stays hidden',

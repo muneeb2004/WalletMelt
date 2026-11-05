@@ -74,24 +74,17 @@ void main() {
     // Older expense should be hidden
     expect(find.text('Older Secret Expense'), findsNothing);
 
-    // Show All button should be visible and centered
-    final showAllFinder = find.text('Show All');
-    expect(showAllFinder, findsOneWidget);
-    expect(find.ancestor(of: showAllFinder, matching: find.byType(Center)), findsWidgets);
-
-    // Tap Show All
-    await tester.tap(showAllFinder);
+    // Pick the All time range chip
+    await tester.ensureVisible(find.byKey(const Key('history_range_allTime')));
+    await tester.tap(find.byKey(const Key('history_range_allTime')));
     await tester.pumpAndSettle();
 
-    // Now both should be visible
     expect(find.text('Current Month Grocery'), findsOneWidget);
     expect(find.text('Older Secret Expense'), findsOneWidget);
-    final showMonthFinder = find.text('Show Current Month Only');
-    expect(showMonthFinder, findsOneWidget);
-    expect(find.ancestor(of: showMonthFinder, matching: find.byType(Center)), findsWidgets);
 
-    // Tap Show Current Month Only
-    await tester.tap(find.text('Show Current Month Only'));
+    // Back to this month
+    await tester.ensureVisible(find.byKey(const Key('history_range_thisPeriod')));
+    await tester.tap(find.byKey(const Key('history_range_thisPeriod')));
     await tester.pumpAndSettle();
 
     // Older expense should be hidden again

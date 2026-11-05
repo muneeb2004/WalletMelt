@@ -206,11 +206,21 @@ void main() {
     await tester.pumpAndSettle();
     await tester.enterText(find.widgetWithText(TextField, 'Title'), 'Pocket money');
     await tester.enterText(find.widgetWithText(TextField, 'Amount'), '2000');
+    // An account must be chosen so the income reaches a balance.
+    await tester.tap(find.widgetWithText(PrimaryButton, 'Add income'));
+    await tester.pumpAndSettle();
+    expect(find.text('Choose where this income is deposited.'), findsOneWidget);
+    expect(state.incomes, isEmpty);
+    await tester.tap(find.byKey(const ValueKey('income-account')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Wallet').last);
+    await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(PrimaryButton, 'Add income'));
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
     expect(state.incomes.single.title, 'Pocket money');
+    expect(state.incomes.single.accountId, isNotNull);
     expect(find.text('Pocket money'), findsOneWidget);
   });
 
@@ -224,6 +234,10 @@ void main() {
     await tester.enterText(find.widgetWithText(TextField, 'Title'), 'Salary');
     await tester.enterText(find.widgetWithText(TextField, 'Amount'), '50000');
     await tester.tap(find.byType(Switch));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('income-account')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Bank').last);
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(PrimaryButton, 'Add repeating income'));
     await tester.pumpAndSettle();

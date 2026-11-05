@@ -53,3 +53,17 @@ Phase 1 ([[ADR-0011-Accounts-Derived-Balance-and-Transfers]]) gives a derived ba
 ## Related Decisions
 - [[ADR-0011-Accounts-Derived-Balance-and-Transfers]]
 - [[ADR-0009-Complete-Backup-v2-and-Safe-Full-Replace]]
+
+## Amendment 2026-11-01: income must land in an account
+
+Bug report: confirming a due income ("Received") never asked where the money arrived, so it was posted with no account and never changed any balance.
+
+- The add-income editor and the confirm-received sheet now require choosing a "Deposited to" / "Received into" account (cash, bank or wallet) whenever an eligible account exists. The "No account" option was removed. The confirm sheet defaults to the schedule's account.
+- `confirmReceived` / `AppState.confirmIncomeReceived` accept an `accountId` override.
+- With no accounts at all, income can still be recorded (it just affects no balance).
+
+## Amendment 2026-11-01: history time range and empty states
+
+- History has a time-range chip row: This month (default), Last 30 days, Last 3 months, This year, All time, Custom (date range picker). It replaces the old "Show All" toggle. Searching under the default range still looks through all history. The recycle bin ignores the range.
+- An empty range shows an empty state with a "Show all time" action instead of a lone button.
+- Dashboard "Recent activity" shows "No expenses this month" when expenses exist but none fall in the current month, instead of an empty card.

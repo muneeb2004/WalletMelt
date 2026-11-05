@@ -19,6 +19,13 @@ void main() {
 
       // Check for the current version section badge & items
       expect(find.text('VERSION ${AppVersion.version} UPDATES'), findsOneWidget);
+      expect(find.text('History follows your month'), findsOneWidget);
+      expect(find.text('Same order everywhere'), findsOneWidget);
+      expect(find.text('VERSION 1.11.0 UPDATES'), findsOneWidget);
+      expect(find.text('Income goes where it belongs'), findsOneWidget);
+      expect(find.text('Filter history by time'), findsOneWidget);
+      expect(find.text('No more empty-looking screens'), findsOneWidget);
+      expect(find.text('VERSION 1.10.0 UPDATES'), findsOneWidget);
       expect(find.text('Edit any subscription'), findsOneWidget);
       expect(find.text('Month ends handled properly'), findsOneWidget);
       expect(find.text('Pausing costs nothing'), findsOneWidget);
