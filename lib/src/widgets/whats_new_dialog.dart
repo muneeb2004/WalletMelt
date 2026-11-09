@@ -132,6 +132,44 @@ class WhatsNewContent extends StatelessWidget {
               const SizedBox(height: 14),
 
               _buildChangelogItem(context,
+                icon: Icons.web_asset_rounded,
+                iconColor: context.scheme.primary,
+                title: 'Questions slide up like everything else',
+                description:
+                    'Confirmations such as moving an expense to the recycle bin now slide up from the bottom, with the same look and buttons as the rest of the app.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.add_circle_outline_rounded,
+                iconColor: context.scheme.secondary,
+                title: 'One Add button',
+                description:
+                    'Debts no longer shows two buttons that do the same thing. Every screen now has a single Add button.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.text_fields_rounded,
+                iconColor: context.scheme.tertiary,
+                title: 'Button text stays on one line',
+                description:
+                    'On small screens or with larger text, buttons now stack instead of splitting a word across two lines.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 24),
+
+              // Version 1.11.1 Highlights
+              _buildSectionBadge(
+                label: 'VERSION 1.11.1 UPDATES',
+                color: context.scheme.primary,
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
                 icon: Icons.calendar_month_outlined,
                 iconColor: context.scheme.primary,
                 title: 'History follows your month',

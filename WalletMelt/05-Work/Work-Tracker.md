@@ -142,3 +142,8 @@ Every release bumps `pubspec.yaml` and ships a plain-language, non-technical Wha
 ## Release 1.11.1 (2026-11-05)
 - **Done**: History's "This month" range follows the dashboard month switcher (`AppState.selectedMonth`); one canonical newest-first expense order (`compareExpensesNewestFirst`) shared by Dashboard recent activity and History. Tests in `test/utils/expense_order_test.dart`. Version 1.11.1+22. Portfolio (sheikhmmuneeb.com) updated to v1.11.1 with the new ARM64 APK SHA-256.
 - **Build**: release APKs via `scripts/build_apks.ps1` (1.11.1+22).
+
+## Release 1.12.0 (2026-11-09)
+- **Done**: every modal is an edge sheet built from `WMSheet`/`WMSheetButton`; `showConfirmDialog` renders a compact sheet with an icon tile (ADR-0018); History change-category, delete contact, archive merchant and delete icon confirmations migrated. One add action per screen, empty states are text only; Debts chooser rebuilt on `WMSheet` (ADR-0019). Button labels no longer wrap: footer stacks when labels do not fit, Restore / Delete forever stacked, budget copy button scales to fit; `test/widgets/label_wrapping_test.dart`. What's New: three entries. Version 1.12.0+23.
+- **Known**: `test/screenshots/publication_screenshot_test.dart` intermittently fails in a parallel `flutter test` run (passes alone and with `--concurrency=1`). Remaining text-field dialogs (add-expense, goals, settings, SVG editor) and the receipt glass sheet are not yet on `WMSheet`.
+- **Build**: release APKs via `scripts/build_apks.ps1` (1.12.0+23).

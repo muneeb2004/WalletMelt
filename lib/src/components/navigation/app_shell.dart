@@ -9,6 +9,7 @@ import '../../constants/app_version.dart';
 import '../../types/debt.dart';
 import '../../screens/debt/debt_screen.dart';
 import '../../widgets/whats_new_dialog.dart';
+import '../../widgets/wm_sheet.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({required this.navigationShell, super.key});
@@ -160,7 +161,7 @@ class ScreenActionResolver {
       case 1:
         return ScreenAction(
           icon: Icons.add_rounded,
-          label: 'Add Expense',
+          label: 'Add expense',
           action: () => context.push('/expense/new'),
         );
       case 2:
@@ -168,7 +169,7 @@ class ScreenActionResolver {
       case 3:
         return ScreenAction(
           icon: Icons.add_rounded,
-          label: 'Add Obligation',
+          label: 'Add',
           action: () => _showDebtActionsSheet(context),
         );
       default:
@@ -180,29 +181,16 @@ class ScreenActionResolver {
     showAppBottomSheet<void>(
       context,
       builder: (sheetContext) {
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.md,
-            AppSpacing.sm,
-            AppSpacing.md,
-            AppSpacing.lg,
-          ),
+        return WMSheet(
+          title: 'Add a debt or loan',
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Add Obligation',
-                style: Theme.of(sheetContext).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
-              ),
-              const SizedBox(height: 16),
               _buildDebtActionTile(
                 sheetContext,
                 icon: Icons.arrow_outward_rounded,
                 color: WalletMeltColors.positive,
-                title: 'Money Owed To Me',
+                title: 'Money owed to me',
                 subtitle: 'A person owes you money',
                 onTap: () {
                   WMHaptics.light();
@@ -216,7 +204,7 @@ class ScreenActionResolver {
                 sheetContext,
                 icon: Icons.call_received_rounded,
                 color: WalletMeltColors.danger,
-                title: 'Money I Owe',
+                title: 'Money I owe',
                 subtitle: 'You owe someone money',
                 onTap: () {
                   WMHaptics.light();
@@ -230,7 +218,7 @@ class ScreenActionResolver {
                 sheetContext,
                 icon: Icons.arrow_outward_rounded,
                 color: WalletMeltColors.positive,
-                title: 'Loan Given',
+                title: 'Loan given',
                 subtitle: 'You lent money to someone',
                 onTap: () {
                   WMHaptics.light();
@@ -244,7 +232,7 @@ class ScreenActionResolver {
                 sheetContext,
                 icon: Icons.call_received_rounded,
                 color: WalletMeltColors.danger,
-                title: 'Loan Taken',
+                title: 'Loan taken',
                 subtitle: 'You borrowed money from someone',
                 onTap: () {
                   WMHaptics.light();

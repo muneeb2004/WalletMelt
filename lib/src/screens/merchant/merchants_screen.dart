@@ -186,34 +186,21 @@ class _MerchantsScreenState extends State<MerchantsScreen> {
 
   void _confirmArchive(BuildContext context, Merchant merchant) {
     final state = context.read<AppState>();
-    showDialog<void>(
-      context: context,
-      builder: (dialogCtx) {
-        return AlertDialog(
-          title: const Text('Archive Merchant?'),
-          content: Text(
-            'Archiving "${merchant.name}" will remove it from suggestions and saved merchants. All past expenses will remain safe and untouched.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogCtx).pop(),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
-              onPressed: () async {
-                Navigator.of(dialogCtx).pop();
-                await state.archiveMerchant(merchant.id);
-                if (context.mounted) {
-                  showSuccessSnackbar(context, 'Archived "${merchant.name}"');
-                }
-              },
-              child: const Text('Archive'),
-            ),
-          ],
-        );
-      },
-    );
+    showConfirmDialog(
+      context,
+      title: 'Archive merchant?',
+      body:
+          'Archiving "${merchant.name}" will remove it from suggestions and saved merchants. All past expenses will remain safe and untouched.',
+      confirmLabel: 'Archive',
+      icon: Icons.archive_outlined,
+      isDestructive: true,
+    ).then((ok) async {
+      if (ok != true) return;
+      await state.archiveMerchant(merchant.id);
+      if (context.mounted) {
+        showSuccessSnackbar(context, 'Archived "${merchant.name}"');
+      }
+    });
   }
 
   @override
@@ -257,7 +244,7 @@ class _MerchantsScreenState extends State<MerchantsScreen> {
                       ),
                     ),
                     IconButton(
-                      tooltip: 'Add Merchant',
+                      tooltip: 'Add merchant',
                       icon: const Icon(Icons.add_rounded),
                       onPressed: () => _showAddEditMerchantSheet(context),
                     ),
@@ -419,7 +406,7 @@ class _MerchantsScreenState extends State<MerchantsScreen> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAddEditMerchantSheet(context),
         icon: const Icon(Icons.add_rounded),
-        label: const Text('Add Merchant'),
+        label: const Text('Add merchant'),
       ),
     );
   }

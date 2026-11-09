@@ -3,7 +3,7 @@ type: product
 status: stable
 priority: high
 created: 2026-09-13
-updated: 2026-10-29
+updated: 2026-11-09
 domain: product
 related:
   - "[[Product-Requirements]]"
@@ -109,3 +109,12 @@ No decorative sparkle or "AI" glyphs next to product text: the Settings version 
 
 ## Subscription form (2026-10-29)
 One sheet, `SubscriptionFormSheet` (`lib/src/screens/subscription/subscription_form_sheet.dart`), creates and edits subscriptions; the old "Update amount" dialog is gone. Layout follows the account-sheet pattern: `titleLarge` title, one help line, fields, then equal Cancel and Save/Add. Fields: name, category chips, amount, tax rate and tax, a raised total card, Repeats (weekly, monthly, every 3 months, every 6 months, yearly, every N days), First renewal / Next renewal date, an outlined "Then" card previewing the next three renewals (with a month-end note), account, reminder, notes. The list card is a `WMCard` with theme text styles; status is a coloured sentence-case word, not a badge. The actions sheet leads with "Edit subscription".
+
+## Modals: one edge-sheet shell (2026-11-09, ADR-0018)
+All modals are edge bottom sheets built from `WMSheet` and `WMSheetButton` (`lib/src/widgets/wm_sheet.dart`): drag handle, optional icon tile, `titleLarge` title, optional subtitle, scrollable body, sticky footer with equal-width buttons (Cancel left, action right). `showConfirmDialog` now renders a compact `WMSheet`, so "Move to recycle bin", "Delete forever", contact, merchant and icon confirmations match the forms. Destructive means a red icon tile and a red action button only. History "Change category" uses the same shell. Receipt viewer glass sheet and the remaining text-field dialogs are exceptions listed in the ADR.
+
+## Add actions: one FAB, one rule (2026-11-09)
+Each screen has at most one add action, the extended FAB, labelled sentence case verb first: "Add expense" (History), "Add" (Debts, opens a `WMSheet` chooser: money owed to me, money I owe, loan given, loan taken), "Add account", "Add income", "Add goal", "Add committee", "Add merchant", "Add contact". Empty states are text only and point at the FAB ("Tap Add to record money lent, borrowed, or split."); they never carry their own add button. The Debts empty state lost its "Record Debt or Loan" button, which competed with the shell FAB.
+
+## Labels never split across lines (2026-11-09)
+Button, FAB and nav labels stay on one line. `WMSheet`'s footer measures its labels with the real font and text scale and stacks the buttons (primary on top) when they would not fit side by side; side-by-side buttons use 16 dp padding. Other half-width pairs with long labels should be stacked or shortened (Restore / Delete forever on a deleted expense is now stacked). `test/widgets/label_wrapping_test.dart` loads PlusJakartaSans and fails if a sheet button or FAB label wraps at 320 and 360 dp, at 1.0x and 1.3x text.

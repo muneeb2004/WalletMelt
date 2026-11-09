@@ -423,33 +423,14 @@ class _PayeesScreenState extends State<PayeesScreen> {
                                         final rootContext = context;
                                         final hasTransactions = linkedCount > 0;
                                         
-                                        final confirm = await showDialog<bool>(
-                                          context: context,
-                                          useRootNavigator: true,
-                                          builder: (dialogContext) {
-                                            return AlertDialog(
-                                              backgroundColor: context.scheme.surfaceContainer,
-                                              title: Text(hasTransactions ? 'Deactivate Contact?' : 'Delete Contact?'),
-                                              content: Text(
-                                                hasTransactions
-                                                    ? 'This contact has linked transactions and cannot be deleted. Do you want to mark them inactive?'
-                                                    : 'Are you sure you want to delete this contact?',
-                                              ),
-                                              actions: [
-                                                TextButton(
-                                                  onPressed: () => Navigator.pop(dialogContext, false),
-                                                  child: const Text('Cancel'),
-                                                ),
-                                                TextButton(
-                                                  style: TextButton.styleFrom(
-                                                    foregroundColor: theme.colorScheme.error,
-                                                  ),
-                                                  onPressed: () => Navigator.pop(dialogContext, true),
-                                                  child: Text(hasTransactions ? 'Deactivate' : 'Delete'),
-                                                ),
-                                              ],
-                                            );
-                                          },
+                                        final confirm = await showConfirmDialog(
+                                          context,
+                                          title: hasTransactions ? 'Deactivate contact?' : 'Delete contact?',
+                                          body: hasTransactions
+                                              ? 'This contact has linked transactions and cannot be deleted. Do you want to mark them inactive?'
+                                              : 'Are you sure you want to delete this contact?',
+                                          confirmLabel: hasTransactions ? 'Deactivate' : 'Delete',
+                                          isDestructive: true,
                                         );
 
                                         if (confirm == true) {
@@ -482,9 +463,10 @@ class _PayeesScreenState extends State<PayeesScreen> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAddEditPayeeSheet(context),
-        child: const Icon(Icons.person_add_rounded),
+        icon: const Icon(Icons.add_rounded),
+        label: const Text('Add contact'),
       ),
     );
   }
