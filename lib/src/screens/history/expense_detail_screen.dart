@@ -297,7 +297,8 @@ class ExpenseDetailScreen extends StatelessWidget {
       context,
       title: 'Move expense to recycle bin?',
       body: 'You can restore it later from History.',
-      confirmLabel: 'Move',
+      confirmLabel: 'Move to recycle bin',
+      icon: Icons.delete_outline_rounded,
       isDestructive: true,
     );
     if (confirmed == true) {
@@ -314,7 +315,8 @@ class ExpenseDetailScreen extends StatelessWidget {
       context,
       title: 'Delete forever?',
       body: 'This removes the expense and its local receipt file.',
-      confirmLabel: 'Delete',
+      confirmLabel: 'Delete forever',
+      icon: Icons.delete_forever_rounded,
       isDestructive: true,
     );
     if (confirmed == true) {

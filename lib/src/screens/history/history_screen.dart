@@ -16,6 +16,7 @@ import '../../types/expense.dart';
 import '../../utils/insights.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/state_views.dart';
+import '../../widgets/wm_sheet.dart';
 
 enum ExpenseSort { newest, oldest, amountHigh, amountLow }
 
@@ -659,38 +660,23 @@ class _HistoryScreenState extends State<HistoryScreen> {
     showAppBottomSheet<void>(
       context,
       builder: (ctx) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
-            vertical: AppSpacing.sm,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+        return WMSheet(
+          title: 'Change category',
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 8,
             children: [
-              Text(
-                'Change Category',
-                style: Theme.of(ctx).textTheme.titleLarge,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  for (final cat in categories)
-                    WalletCategoryChip(
-                      category: cat,
-                      selected: expense.categoryId == cat.id,
-                      onTap: () {
-                        context.read<AppState>().updateExpense(
-                          expense.copyWith(categoryId: cat.id),
-                        );
-                        Navigator.pop(ctx);
-                      },
-                    ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.lg),
+              for (final cat in categories)
+                WalletCategoryChip(
+                  category: cat,
+                  selected: expense.categoryId == cat.id,
+                  onTap: () {
+                    context.read<AppState>().updateExpense(
+                      expense.copyWith(categoryId: cat.id),
+                    );
+                    Navigator.pop(ctx);
+                  },
+                ),
             ],
           ),
         );

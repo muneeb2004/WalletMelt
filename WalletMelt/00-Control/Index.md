@@ -62,6 +62,7 @@ Welcome to the **WalletMelt Engineering Control Plane**. This Obsidian vault ser
 - [[ADR-0015-Savings-Goals-Set-Aside-in-Accounts]]: (accepted) savings goals set aside inside an account; derived reserved and free to spend.
 - [[ADR-0016-Committees-BC-Installments-and-Payout-Turn]]: (accepted) committees (BC) with installments, payout turn and derived balance effect.
 - [[ADR-0017-Optional-Notification-Capture]]: (proposed, on hold) optional on-device notification capture with a review inbox.
+- [[ADR-0018-Unified-Modal-Sheet-System]]: every modal is an edge sheet built from `WMSheet`; confirmations are compact sheets.
 
 ### 6. Work & Knowledge
 - [[Work-Tracker]]: Current status (Now, Next, Later, Blocked).

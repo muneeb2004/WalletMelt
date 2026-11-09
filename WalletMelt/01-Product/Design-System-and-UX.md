@@ -3,7 +3,7 @@ type: product
 status: stable
 priority: high
 created: 2026-09-13
-updated: 2026-10-29
+updated: 2026-11-09
 domain: product
 related:
   - "[[Product-Requirements]]"
@@ -109,3 +109,6 @@ No decorative sparkle or "AI" glyphs next to product text: the Settings version 
 
 ## Subscription form (2026-10-29)
 One sheet, `SubscriptionFormSheet` (`lib/src/screens/subscription/subscription_form_sheet.dart`), creates and edits subscriptions; the old "Update amount" dialog is gone. Layout follows the account-sheet pattern: `titleLarge` title, one help line, fields, then equal Cancel and Save/Add. Fields: name, category chips, amount, tax rate and tax, a raised total card, Repeats (weekly, monthly, every 3 months, every 6 months, yearly, every N days), First renewal / Next renewal date, an outlined "Then" card previewing the next three renewals (with a month-end note), account, reminder, notes. The list card is a `WMCard` with theme text styles; status is a coloured sentence-case word, not a badge. The actions sheet leads with "Edit subscription".
+
+## Modals: one edge-sheet shell (2026-11-09, ADR-0018)
+All modals are edge bottom sheets built from `WMSheet` and `WMSheetButton` (`lib/src/widgets/wm_sheet.dart`): drag handle, optional icon tile, `titleLarge` title, optional subtitle, scrollable body, sticky footer with equal-width buttons (Cancel left, action right). `showConfirmDialog` now renders a compact `WMSheet`, so "Move to recycle bin", "Delete forever", contact, merchant and icon confirmations match the forms. Destructive means a red icon tile and a red action button only. History "Change category" uses the same shell. Receipt viewer glass sheet and the remaining text-field dialogs are exceptions listed in the ADR.

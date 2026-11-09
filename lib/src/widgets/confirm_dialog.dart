@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../theme/wallet_melt_theme.dart';
+import 'wm_sheet.dart';
 
-/// Shows a confirmation [AlertDialog] and returns `true` when the user
-/// confirms, `false` when they cancel, or `null` if dismissed via back.
+/// Shows a confirmation as a compact [WMSheet] (ADR-0018) and returns `true`
+/// when the user confirms, `false` when they cancel, or `null` if dismissed.
 ///
-/// When [isDestructive] is `true` the confirm button is rendered using
-/// [colorScheme.error] so users recognise the irreversibility of the action.
+/// When [isDestructive] is `true` the confirm button and icon use the error
+/// colours so users recognise the irreversibility of the action.
 Future<bool?> showConfirmDialog(
   BuildContext context, {
   required String title,
@@ -14,44 +15,35 @@ Future<bool?> showConfirmDialog(
   required String confirmLabel,
   bool isDestructive = false,
   bool useRootNavigator = true,
+  IconData? icon,
 }) {
-  // Trigger tactile sensory feedback
-  if (isDestructive) {
-    WMHaptics.heavy();
-  } else {
-    WMHaptics.light();
-  }
+  // Heavy haptic for destructive actions; showAppBottomSheet adds a light one.
+  if (isDestructive) WMHaptics.heavy();
 
-  return showDialog<bool>(
-    context: context,
+  return showAppBottomSheet<bool>(
+    context,
     useRootNavigator: useRootNavigator,
-    builder: (dialogContext) => AlertDialog(
-      title: Text(title),
-      content: Text(body),
+    builder: (sheetContext) => WMSheet(
+      title: title,
+      subtitle: body,
+      icon: icon ??
+          (isDestructive
+              ? Icons.delete_outline_rounded
+              : Icons.help_outline_rounded),
+      destructive: isDestructive,
       actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(dialogContext, false),
-          child: const Text('Cancel'),
+        WMSheetButton(
+          label: 'Cancel',
+          kind: WMSheetButtonKind.secondary,
+          onPressed: () => Navigator.pop(sheetContext, false),
         ),
-        if (isDestructive)
-          FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(dialogContext).colorScheme.error,
-              foregroundColor: Theme.of(context).colorScheme.onError,
-            ),
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: Text(confirmLabel),
-          )
-        else
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppSpacing.buttonRadius),
-              ),
-            ),
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: Text(confirmLabel),
-          ),
+        WMSheetButton(
+          label: confirmLabel,
+          kind: isDestructive
+              ? WMSheetButtonKind.destructive
+              : WMSheetButtonKind.primary,
+          onPressed: () => Navigator.pop(sheetContext, true),
+        ),
       ],
     ),
   );

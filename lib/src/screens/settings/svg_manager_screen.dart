@@ -94,29 +94,15 @@ class _SvgManagerScreenState extends State<SvgManagerScreen> {
 
   Future<void> _delete(SvgIconItem item) async {
     final usedBy = _usedBy(item.id);
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('Delete ${item.label}?'),
-        content: Text(usedBy == null
-            ? 'This removes the icon from your phone.'
-            : 'It is used by $usedBy. Those categories will switch to the '
-                '"Other" icon so nothing is left blank.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: ctx.scheme.error,
-              foregroundColor: ctx.scheme.onError,
-            ),
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Delete icon'),
-          ),
-        ],
-      ),
+    final ok = await showConfirmDialog(
+      context,
+      title: 'Delete ${item.label}?',
+      body: usedBy == null
+          ? 'This removes the icon from your phone.'
+          : 'It is used by $usedBy. Those categories will switch to the '
+              '"Other" icon so nothing is left blank.',
+      confirmLabel: 'Delete icon',
+      isDestructive: true,
     );
     if (ok != true || !mounted) return;
     try {
