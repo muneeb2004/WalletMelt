@@ -112,3 +112,9 @@ One sheet, `SubscriptionFormSheet` (`lib/src/screens/subscription/subscription_f
 
 ## Modals: one edge-sheet shell (2026-11-09, ADR-0018)
 All modals are edge bottom sheets built from `WMSheet` and `WMSheetButton` (`lib/src/widgets/wm_sheet.dart`): drag handle, optional icon tile, `titleLarge` title, optional subtitle, scrollable body, sticky footer with equal-width buttons (Cancel left, action right). `showConfirmDialog` now renders a compact `WMSheet`, so "Move to recycle bin", "Delete forever", contact, merchant and icon confirmations match the forms. Destructive means a red icon tile and a red action button only. History "Change category" uses the same shell. Receipt viewer glass sheet and the remaining text-field dialogs are exceptions listed in the ADR.
+
+## Add actions: one FAB, one rule (2026-11-09)
+Each screen has at most one add action, the extended FAB, labelled sentence case verb first: "Add expense" (History), "Add" (Debts, opens a `WMSheet` chooser: money owed to me, money I owe, loan given, loan taken), "Add account", "Add income", "Add goal", "Add committee", "Add merchant", "Add contact". Empty states are text only and point at the FAB ("Tap Add to record money lent, borrowed, or split."); they never carry their own add button. The Debts empty state lost its "Record Debt or Loan" button, which competed with the shell FAB.
+
+## Labels never split across lines (2026-11-09)
+Button, FAB and nav labels stay on one line. `WMSheet`'s footer measures its labels with the real font and text scale and stacks the buttons (primary on top) when they would not fit side by side; side-by-side buttons use 16 dp padding. Other half-width pairs with long labels should be stacked or shortened (Restore / Delete forever on a deleted expense is now stacked). `test/widgets/label_wrapping_test.dart` loads PlusJakartaSans and fails if a sheet button or FAB label wraps at 320 and 360 dp, at 1.0x and 1.3x text.

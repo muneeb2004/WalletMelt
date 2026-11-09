@@ -463,9 +463,10 @@ class _PayeesScreenState extends State<PayeesScreen> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAddEditPayeeSheet(context),
-        child: const Icon(Icons.person_add_rounded),
+        icon: const Icon(Icons.add_rounded),
+        label: const Text('Add contact'),
       ),
     );
   }

@@ -437,7 +437,10 @@ class _BudgetScreenState extends State<BudgetScreen> {
               const SizedBox(height: 12),
               OutlinedButton.icon(
                 icon: const Icon(Icons.history_rounded, size: 18),
-                label: Text('Copy from $prevMonthName (${formatMoney(prevBudget.amount, state.settings.currency)})'),
+                label: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text('Copy from $prevMonthName (${formatMoney(prevBudget.amount, state.settings.currency)})'),
+                ),
                 onPressed: () async {
                   await state.setMonthlyBudgetAmount(prevBudget.amount);
                   if (context.mounted) {

@@ -37,7 +37,8 @@ class ExpenseDetailScreen extends StatelessWidget {
     if (expense == null) {
       return const Scaffold(body: Center(child: Text('Expense not found')));
     }
-    final category = context.select((AppState s) => s.categoryById(expense.categoryId));
+    final category =
+        context.select((AppState s) => s.categoryById(expense.categoryId));
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
@@ -57,175 +58,191 @@ class ExpenseDetailScreen extends StatelessWidget {
                       tooltip: 'Back',
                       onPressed: () => _handleBack(context),
                       icon: const Icon(Icons.arrow_back_rounded)),
-                Expanded(
-                    child: Text(expense.title,
-                        style: Theme.of(context).textTheme.headlineMedium,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis)),
-                if (!expense.isDeleted)
-                  IconButton(
-                      tooltip: 'Edit',
-                      onPressed: () =>
-                          context.push('/expense/${expense.id}/edit'),
-                      icon: const Icon(Icons.edit_rounded)),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.md + 2),
-
-            // ── Digital Fintech Receipt Card ──────────────────────────
-            WMGlassSurface.tier2(
-              padding: const EdgeInsets.all(22),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'TOTAL AMOUNT',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 1.1,
-                          color: context.scheme.onSurfaceVariant,
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: category != null
-                              ? colorFromHex(category.color).withValues(alpha: 0.14)
-                              : context.scheme.surfaceContainerHigh,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (category != null) ...[
-                              CategoryIcon(
-                                icon: category.icon,
-                                size: 14,
-                                color: colorFromHex(category.color),
-                              ),
-                              const SizedBox(width: 5),
-                            ],
-                            Text(
-                              category?.name ?? 'Expense',
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
-                                color: category != null ? colorFromHex(category.color) : null,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    formatMoney(expense.amount, expense.currency),
-                    style: TextStyle(
-                      fontSize: 34,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -0.6,
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? Colors.white
-                          : context.scheme.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  const Divider(height: 1),
-                  const SizedBox(height: 14),
-
-                  // Structured receipt rows
-                  _buildReceiptRow(context, 'Date', '${parseIsoDate(expense.date).day} ${readableMonth(parseIsoDate(expense.date))}'),
-                  if (expense.vendor != null && expense.vendor!.isNotEmpty)
-                    _buildReceiptRow(context, 'Merchant / Vendor', expense.vendor!),
-                  if (expense.taxAmount != null && expense.taxAmount! > 0) ...[
-                    _buildReceiptRow(context, 'Subtotal', formatMoney(expense.subtotalAmount ?? (expense.amount - expense.taxAmount!), expense.currency)),
-                    _buildReceiptRow(context, 'Tax Amount', formatMoney(expense.taxAmount!, expense.currency), isTax: true),
-                  ],
-                  if (expense.notes != null && expense.notes!.isNotEmpty) ...[
-                    const SizedBox(height: 6),
-                    Text(
-                      'Notes',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: context.scheme.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      expense.notes!,
-                      style: const TextStyle(fontSize: 12, height: 1.35),
-                    ),
-                  ],
+                  Expanded(
+                      child: Text(expense.title,
+                          style: Theme.of(context).textTheme.headlineMedium,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis)),
+                  if (!expense.isDeleted)
+                    IconButton(
+                        tooltip: 'Edit',
+                        onPressed: () =>
+                            context.push('/expense/${expense.id}/edit'),
+                        icon: const Icon(Icons.edit_rounded)),
                 ],
               ),
-            ),
-            const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.md + 2),
 
-            if (expense.receiptImageUri != null) ...[
+              // ── Digital Fintech Receipt Card ──────────────────────────
               WMGlassSurface.tier2(
+                padding: const EdgeInsets.all(22),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SectionHeader(
-                        title: 'Receipt',
-                        icon: Icons.receipt_rounded,
-                        padding: EdgeInsets.only(bottom: AppSpacing.xs)),
-                    const SizedBox(height: AppSpacing.sm),
-                    Semantics(
-                      button: true,
-                      label: 'View full receipt image',
-                      child: GestureDetector(
-                        onTap: () => context.push('/receipt/${expense.id}'),
-                        child: Hero(
-                          tag: expense.receiptImageUri!,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(22),
-                            child: ReceiptImage(
-                              receiptUri: expense.receiptImageUri,
-                              height: 320,
-                              width: double.infinity,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => Container(
-                                height: 180,
-                                alignment: Alignment.center,
-                                color: context.scheme.shadow.withValues(alpha: 0.08),
-                                child: const Text(
-                                    'Receipt file is missing or unreadable.'),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'TOTAL AMOUNT',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 1.1,
+                            color: context.scheme.onSurfaceVariant,
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: category != null
+                                ? colorFromHex(category.color)
+                                    .withValues(alpha: 0.14)
+                                : context.scheme.surfaceContainerHigh,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (category != null) ...[
+                                CategoryIcon(
+                                  icon: category.icon,
+                                  size: 14,
+                                  color: colorFromHex(category.color),
+                                ),
+                                const SizedBox(width: 5),
+                              ],
+                              Text(
+                                category?.name ?? 'Expense',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800,
+                                  color: category != null
+                                      ? colorFromHex(category.color)
+                                      : null,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      formatMoney(expense.amount, expense.currency),
+                      style: TextStyle(
+                        fontSize: 34,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.6,
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white
+                            : context.scheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    const Divider(height: 1),
+                    const SizedBox(height: 14),
+
+                    // Structured receipt rows
+                    _buildReceiptRow(context, 'Date',
+                        '${parseIsoDate(expense.date).day} ${readableMonth(parseIsoDate(expense.date))}'),
+                    if (expense.vendor != null && expense.vendor!.isNotEmpty)
+                      _buildReceiptRow(
+                          context, 'Merchant / Vendor', expense.vendor!),
+                    if (expense.taxAmount != null &&
+                        expense.taxAmount! > 0) ...[
+                      _buildReceiptRow(
+                          context,
+                          'Subtotal',
+                          formatMoney(
+                              expense.subtotalAmount ??
+                                  (expense.amount - expense.taxAmount!),
+                              expense.currency)),
+                      _buildReceiptRow(context, 'Tax Amount',
+                          formatMoney(expense.taxAmount!, expense.currency),
+                          isTax: true),
+                    ],
+                    if (expense.notes != null && expense.notes!.isNotEmpty) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        'Notes',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: context.scheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        expense.notes!,
+                        style: const TextStyle(fontSize: 12, height: 1.35),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+
+              if (expense.receiptImageUri != null) ...[
+                WMGlassSurface.tier2(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SectionHeader(
+                          title: 'Receipt',
+                          icon: Icons.receipt_rounded,
+                          padding: EdgeInsets.only(bottom: AppSpacing.xs)),
+                      const SizedBox(height: AppSpacing.sm),
+                      Semantics(
+                        button: true,
+                        label: 'View full receipt image',
+                        child: GestureDetector(
+                          onTap: () => context.push('/receipt/${expense.id}'),
+                          child: Hero(
+                            tag: expense.receiptImageUri!,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(22),
+                              child: ReceiptImage(
+                                receiptUri: expense.receiptImageUri,
+                                height: 320,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => Container(
+                                  height: 180,
+                                  alignment: Alignment.center,
+                                  color: context.scheme.shadow
+                                      .withValues(alpha: 0.08),
+                                  child: const Text(
+                                      'Receipt file is missing or unreadable.'),
+                                ),
                               ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: AppSpacing.md),
-            ],
+                const SizedBox(height: AppSpacing.md),
+              ],
 
-            // ── Grocery items ─────────────────────────────────────────
-            if (category?.id == 'grocery') ...[
-              _GroceryItemsCard(
+              // ── Grocery items ─────────────────────────────────────────
+              if (category?.id == 'grocery') ...[
+                _GroceryItemsCard(
+                    expenseId: expense.id, currency: expense.currency),
+              ],
+
+              // ── Fuel details ──────────────────────────────────────────
+              _FuelDetailsCard(
                   expenseId: expense.id, currency: expense.currency),
-            ],
+              const SizedBox(height: AppSpacing.md + 2),
 
-            // ── Fuel details ──────────────────────────────────────────
-            _FuelDetailsCard(
-                expenseId: expense.id, currency: expense.currency),
-            const SizedBox(height: AppSpacing.md + 2),
-
-            // ── Soft delete / restore actions ─────────────────────────
-            if (expense.isDeleted)
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
+              // ── Soft delete / restore actions ─────────────────────────
+              if (expense.isDeleted)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    ElevatedButton.icon(
                       onPressed: () async {
                         final router = GoRouter.of(context);
                         await state.restoreExpense(expense.id);
@@ -235,10 +252,8 @@ class ExpenseDetailScreen extends StatelessWidget {
                       icon: const Icon(Icons.restore_rounded),
                       label: const Text('Restore'),
                     ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: OutlinedButton.icon(
+                    const SizedBox(height: AppSpacing.sm),
+                    OutlinedButton.icon(
                       style: OutlinedButton.styleFrom(
                         foregroundColor: context.scheme.error,
                       ),
@@ -247,23 +262,23 @@ class ExpenseDetailScreen extends StatelessWidget {
                       icon: const Icon(Icons.delete_forever_rounded),
                       label: const Text('Delete forever'),
                     ),
-                  ),
-                ],
-              )
-            else
-              OutlinedButton.icon(
-                onPressed: () => _confirmSoftDelete(context, state, expense),
-                icon: const Icon(Icons.delete_outline_rounded),
-                label: const Text('Move to recycle bin'),
-              ),
-          ],
+                  ],
+                )
+              else
+                OutlinedButton.icon(
+                  onPressed: () => _confirmSoftDelete(context, state, expense),
+                  icon: const Icon(Icons.delete_outline_rounded),
+                  label: const Text('Move to recycle bin'),
+                ),
+            ],
+          ),
         ),
       ),
-    ),
-  );
+    );
   }
 
-  Widget _buildReceiptRow(BuildContext context, String label, String value, {bool isTax = false}) {
+  Widget _buildReceiptRow(BuildContext context, String label, String value,
+      {bool isTax = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
@@ -372,7 +387,8 @@ class _FuelDetailsCardState extends State<_FuelDetailsCard> {
                     padding: const EdgeInsets.symmetric(vertical: 4.0),
                     child: Row(
                       children: [
-                        Icon(comp.fuelType.icon, size: 18, color: context.scheme.primary),
+                        Icon(comp.fuelType.icon,
+                            size: 18, color: context.scheme.primary),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Column(
@@ -380,18 +396,22 @@ class _FuelDetailsCardState extends State<_FuelDetailsCard> {
                             children: [
                               Text(
                                 comp.fuelType.displayName,
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 12),
                               ),
                               Text(
                                 '${comp.quantityLitres.toStringAsFixed(comp.quantityLitres % 1 == 0 ? 0 : 2)} L @ ${formatMoney(comp.pricePerLitre, widget.currency)}/L',
-                                style: TextStyle(fontSize: 12, color: context.scheme.onSurfaceVariant),
+                                style: TextStyle(
+                                    fontSize: 12,
+                                    color: context.scheme.onSurfaceVariant),
                               ),
                             ],
                           ),
                         ),
                         Text(
                           formatMoney(comp.subtotal, widget.currency),
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 12),
                         ),
                       ],
                     ),
@@ -402,12 +422,15 @@ class _FuelDetailsCardState extends State<_FuelDetailsCard> {
                   children: [
                     Text(
                       'Total: ${tx.totalLitres.toStringAsFixed(tx.totalLitres % 1 == 0 ? 0 : 2)} L',
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 12),
                     ),
                     if (tx.odometerReading != null)
                       Text(
                         'Odometer: ${tx.odometerReading! % 1 == 0 ? tx.odometerReading!.toInt() : tx.odometerReading} km',
-                        style: TextStyle(fontSize: 12, color: context.scheme.onSurfaceVariant),
+                        style: TextStyle(
+                            fontSize: 12,
+                            color: context.scheme.onSurfaceVariant),
                       ),
                   ],
                 ),

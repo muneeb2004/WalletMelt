@@ -1347,20 +1347,14 @@ class _DebtScreenState extends State<DebtScreen> {
                     Icon(Icons.handshake_outlined, size: 64, color: context.scheme.onSurfaceVariant),
                     const SizedBox(height: 16),
                     Text(
-                      'No loans tracked yet',
+                      'No debts or loans yet',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Record money lent, borrowed, or dinner splits here.',
+                      'Tap Add to record money lent, borrowed, or split.',
                       style: TextStyle(color: context.scheme.onSurfaceVariant, fontSize: 12),
                       textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 24),
-                    ElevatedButton.icon(
-                      onPressed: () => DebtScreen.showAddDebtSheet(context),
-                      icon: const Icon(Icons.add),
-                      label: const Text('Record Debt or Loan'),
                     ),
                   ],
                 ),

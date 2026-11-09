@@ -19,6 +19,10 @@ void main() {
 
       // Check for the current version section badge & items
       expect(find.text('VERSION ${AppVersion.version} UPDATES'), findsOneWidget);
+      expect(find.text('Questions slide up like everything else'), findsOneWidget);
+      expect(find.text('One Add button'), findsOneWidget);
+      expect(find.text('Button text stays on one line'), findsOneWidget);
+      expect(find.text('VERSION 1.11.1 UPDATES'), findsOneWidget);
       expect(find.text('History follows your month'), findsOneWidget);
       expect(find.text('Same order everywhere'), findsOneWidget);
       expect(find.text('VERSION 1.11.0 UPDATES'), findsOneWidget);

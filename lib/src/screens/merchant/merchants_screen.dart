@@ -244,7 +244,7 @@ class _MerchantsScreenState extends State<MerchantsScreen> {
                       ),
                     ),
                     IconButton(
-                      tooltip: 'Add Merchant',
+                      tooltip: 'Add merchant',
                       icon: const Icon(Icons.add_rounded),
                       onPressed: () => _showAddEditMerchantSheet(context),
                     ),
@@ -406,7 +406,7 @@ class _MerchantsScreenState extends State<MerchantsScreen> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAddEditMerchantSheet(context),
         icon: const Icon(Icons.add_rounded),
-        label: const Text('Add Merchant'),
+        label: const Text('Add merchant'),
       ),
     );
   }

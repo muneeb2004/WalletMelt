@@ -26,3 +26,8 @@ Forms were edge bottom sheets (`showAppBottomSheet`) but confirmations were stoc
 
 ## Consequences
 Change a confirmation's look once, in `wm_sheet.dart`. Dismissing a confirm by drag or scrim returns `null`, same as before.
+
+## Amendment 2026-11-09 (v1.12.0)
+- The footer is `_WMSheetFooter`: it measures each label with the real font and text scale and stacks the buttons (primary on top, Cancel below) when they would not fit side by side. Buttons use 16 dp horizontal padding. `actions` is now `List<WMSheetButton>`.
+- The Debts add chooser (`_showDebtActionsSheet`) is a `WMSheet`.
+- `test/widgets/label_wrapping_test.dart` guards against wrapped labels at 320 and 360 dp, 1.0x and 1.3x text.

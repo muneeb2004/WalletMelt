@@ -32,7 +32,7 @@ class WMSheet extends StatelessWidget {
   final Widget? child;
 
   /// Footer buttons, laid out as equal-width columns. Use [WMSheetButton].
-  final List<Widget> actions;
+  final List<WMSheetButton> actions;
 
   @override
   Widget build(BuildContext context) {
@@ -106,17 +106,64 @@ class WMSheet extends StatelessWidget {
           ],
           if (actions.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.lg),
-            Row(
-              children: [
-                for (var i = 0; i < actions.length; i++) ...[
-                  if (i > 0) const SizedBox(width: AppSpacing.smMd),
-                  Expanded(child: actions[i]),
-                ],
-              ],
-            ),
+            _WMSheetFooter(actions: actions),
           ],
         ],
       ),
+    );
+  }
+}
+
+/// Lays the buttons side by side, or stacked (primary first) when any label
+/// would not fit on one line at the current width and text scale.
+class _WMSheetFooter extends StatelessWidget {
+  const _WMSheetFooter({required this.actions});
+
+  final List<WMSheetButton> actions;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final gap = AppSpacing.smMd;
+        final each =
+            (constraints.maxWidth - gap * (actions.length - 1)) / actions.length;
+        final available = each - WMSheetButton.horizontalPadding * 2;
+        final style = Theme.of(context).textTheme.labelLarge ??
+            const TextStyle(fontSize: 14, fontWeight: FontWeight.w600);
+        final scaler = MediaQuery.textScalerOf(context);
+        final fits = actions.every((a) {
+          final painter = TextPainter(
+            text: TextSpan(text: a.label, style: style),
+            textDirection: Directionality.of(context),
+            textScaler: scaler,
+            maxLines: 1,
+          )..layout();
+          final width = painter.width;
+          painter.dispose();
+          return width <= available;
+        });
+
+        if (fits) {
+          return Row(
+            children: [
+              for (var i = 0; i < actions.length; i++) ...[
+                if (i > 0) SizedBox(width: gap),
+                Expanded(child: actions[i]),
+              ],
+            ],
+          );
+        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (var i = actions.length - 1; i >= 0; i--) ...[
+              if (i < actions.length - 1) const SizedBox(height: AppSpacing.sm),
+              actions[i],
+            ],
+          ],
+        );
+      },
     );
   }
 }
@@ -136,6 +183,9 @@ class WMSheetButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final WMSheetButtonKind kind;
 
+  /// Horizontal padding inside the button, shared with the footer's fit check.
+  static const double horizontalPadding = 16;
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
@@ -148,7 +198,10 @@ class WMSheetButton extends StatelessWidget {
     switch (kind) {
       case WMSheetButtonKind.secondary:
         return FilledButton.tonal(
-          style: FilledButton.styleFrom(minimumSize: size, shape: shape),
+          style: FilledButton.styleFrom(
+              minimumSize: size,
+              shape: shape,
+              padding: const EdgeInsets.symmetric(horizontal: horizontalPadding)),
           onPressed: onPressed,
           child: child,
         );
@@ -157,6 +210,7 @@ class WMSheetButton extends StatelessWidget {
           style: FilledButton.styleFrom(
             minimumSize: size,
             shape: shape,
+            padding: const EdgeInsets.symmetric(horizontal: horizontalPadding),
             backgroundColor: scheme.error,
             foregroundColor: scheme.onError,
           ),
@@ -165,7 +219,10 @@ class WMSheetButton extends StatelessWidget {
         );
       case WMSheetButtonKind.primary:
         return FilledButton(
-          style: FilledButton.styleFrom(minimumSize: size, shape: shape),
+          style: FilledButton.styleFrom(
+              minimumSize: size,
+              shape: shape,
+              padding: const EdgeInsets.symmetric(horizontal: horizontalPadding)),
           onPressed: onPressed,
           child: child,
         );
