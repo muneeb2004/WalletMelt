@@ -13,6 +13,10 @@ import 'package:wallet_melt/src/theme/wallet_melt_theme.dart';
 const int kRawColorBaseline = 67;
 const int kSmallFontBaseline = 2;
 
+/// Every literal `fontSize:` outside theme/ (AGENTS.md: no ad hoc font sizes;
+/// use `textTheme`). Ratchet: lower it as screens move to the type scale.
+const int kLiteralFontSizeBaseline = 347;
+
 final _rawColor = RegExp(r'Color\(\s*0x[0-9A-Fa-f]{6,8}\s*\)|Colors\.(?!transparent\b)\w+');
 final _fontSize = RegExp(r'fontSize:\s*(\d+(?:\.\d+)?)');
 
@@ -52,6 +56,16 @@ void main() {
     expect(count, lessThanOrEqualTo(kSmallFontBaseline),
         reason: 'The type scale floor is ${WMType.captionSize}. '
             'Found $count, baseline $kSmallFontBaseline.');
+  });
+
+  test('literal font sizes outside theme/ never increase', () {
+    var count = 0;
+    for (final file in _dartFiles()) {
+      count += _fontSize.allMatches(_stripComments(file.readAsStringSync())).length;
+    }
+    expect(count, lessThanOrEqualTo(kLiteralFontSizeBaseline),
+        reason: 'Use Theme.of(context).textTheme instead of fontSize literals. '
+            'Found $count, baseline $kLiteralFontSizeBaseline.');
   });
 
   test('type scale has exactly six distinct sizes', () {
