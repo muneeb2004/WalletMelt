@@ -53,9 +53,29 @@ android {
         }
     }
 
+    // Release builds fall back to the debug key when no keystore is configured
+    // in android/local.properties. Say so loudly, and let release pipelines opt
+    // into failing instead (-Pwalletmelt.requireReleaseSigning=true or
+    // WALLETMELT_REQUIRE_RELEASE_SIGNING=true).
+    val isSigningConfigured = keystoreProperties.getProperty("storeFile") != null
+    val isReleaseBuild = gradle.startParameter.taskNames.any {
+        it.contains("Release", ignoreCase = true)
+    }
+    val requireReleaseSigning =
+        (project.findProperty("walletmelt.requireReleaseSigning") as String?)?.toBoolean() == true ||
+            System.getenv("WALLETMELT_REQUIRE_RELEASE_SIGNING") == "true"
+    if (isReleaseBuild && !isSigningConfigured) {
+        val message = "WalletMelt release build is DEBUG-SIGNED: no storeFile in " +
+            "android/local.properties. Debug-signed APKs cannot be upgraded in place " +
+            "by a properly signed build later."
+        if (requireReleaseSigning) {
+            throw GradleException(message)
+        }
+        logger.warn("WARNING: $message")
+    }
+
     buildTypes {
         release {
-            val isSigningConfigured = keystoreProperties.getProperty("storeFile") != null
             signingConfig = if (isSigningConfigured) {
                 signingConfigs.getByName("release")
             } else {

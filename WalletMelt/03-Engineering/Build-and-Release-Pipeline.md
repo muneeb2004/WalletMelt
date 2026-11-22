@@ -45,3 +45,11 @@ org.gradle.parallel=false
 
 ## Concurrency warning (2026-10-17)
 Run nothing else that invokes the Flutter tool (`flutter test`, `flutter analyze`, `flutter pub get`) while `build_apks` runs; a concurrent run regenerated `GeneratedPluginRegistrant.java` with `integration_test` and failed the production release compile. Re-run the build after fixing.
+
+## Release signing is reported, not silent (2026-11-22)
+When `android/local.properties` has no `storeFile`, release builds are signed with the **debug key**. That is the state on the current build machine.
+- Gradle now prints a `WARNING: WalletMelt release build is DEBUG-SIGNED` line for any `*Release` task.
+- Both `build_apks` scripts end with a `Signing:` line that says `release keystore` or `DEBUG-SIGNED`.
+- To make an unsigned release build fail instead (for a publishing pipeline), pass `-Pwalletmelt.requireReleaseSigning=true` or set `WALLETMELT_REQUIRE_RELEASE_SIGNING=true`.
+
+Debug-signed APKs must not be published. Once users install a build signed with one key, an update signed with another key cannot install over it. Choose the release keystore before the first public release and keep it backed up.

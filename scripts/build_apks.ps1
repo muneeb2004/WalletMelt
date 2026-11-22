@@ -131,3 +131,15 @@ foreach ($apk in $expectedApks) {
     }
 }
 Write-Host ""
+
+# Signing status: release builds use the debug key when no keystore is configured.
+$localProps = "android/local.properties"
+$hasKeystore = (Test-Path $localProps) -and (Select-String -Path $localProps -Pattern "^\s*storeFile\s*=" -Quiet)
+if ($hasKeystore) {
+    Write-Host "Signing: release keystore (android/local.properties storeFile)." -ForegroundColor Green
+} else {
+    Write-Host "Signing: DEBUG-SIGNED. No storeFile in android/local.properties." -ForegroundColor Red
+    Write-Host "  These APKs are fine for testing but must not be published; a later" -ForegroundColor Red
+    Write-Host "  properly signed build cannot upgrade them in place." -ForegroundColor Red
+}
+Write-Host ""
