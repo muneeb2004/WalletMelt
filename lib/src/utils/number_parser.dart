@@ -7,6 +7,20 @@
 /// - Accidental currency prefixes/suffixes: '$1,200', '€45,99', 'Rs 500', '150 USD' -> 1200.0, 45.99, 500.0, 150.0
 /// - Duplicate punctuation typos: '1..50' -> 1.50, '12,,50' -> 12.50
 /// - Whitespace and accidental special characters
+/// Largest absolute amount any money field accepts (one trillion).
+///
+/// Money is stored as `amount * 100` in integer minor units. Keeping amounts
+/// at or below 1e12 keeps those integers far inside the 2^53 range doubles
+/// represent exactly (and that Dart on web can hold), and catches runaway
+/// input such as a pasted long number.
+const double kMaxMoneyAmount = 1e12;
+
+/// Separator rule (deliberate, see tests): a single comma followed by exactly
+/// three digits is a thousands separator ("1,000" -> 1000), while a single
+/// period is always a decimal point ("1.000" -> 1.0), because three-decimal
+/// currencies such as KWD write "1.500" for one and a half.
+///
+/// Returns null for values whose magnitude exceeds [kMaxMoneyAmount].
 double? parseTolerantNumber(String? input) {
   if (input == null) return null;
   var text = input.trim();
@@ -77,6 +91,6 @@ double? parseTolerantNumber(String? input) {
   }
 
   final val = double.tryParse(normalized);
-  if (val == null) return null;
+  if (val == null || !val.isFinite || val.abs() > kMaxMoneyAmount) return null;
   return isNegative ? -val : val;
 }

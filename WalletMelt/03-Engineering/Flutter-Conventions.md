@@ -39,3 +39,10 @@ related:
 - `test/theme/design_token_guard_test.dart` enforces a ratchet; do not raise its baselines.
 - Category icon rendering must consume `CategoryIcon` to ensure user-defined SVG overrides reflect globally.
 - Form inputs must validate non-empty and non-zero positive amounts where appropriate.
+
+## Money input parsing (2026-11-22)
+All money fields go through `parseTolerantNumber` (`lib/src/utils/number_parser.dart`).
+- It returns null, which callers treat as invalid input, for any value whose magnitude is above `kMaxMoneyAmount` (1e12). That keeps `amount * 100` minor units exactly representable and catches pasted runaway numbers.
+- Separator rule, now pinned by tests:
+  - a single comma before exactly three digits is a thousands separator: `1,000` becomes 1000;
+  - a single period is always a decimal point: `1.000` becomes 1, because three-decimal currencies such as KWD write `1.500` for one and a half.
