@@ -936,7 +936,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     }
 
     final validation = validateExpenseInput(
-        amount: _amountController.text, categoryId: _categoryId, date: _date);
+        amount: _amountController.text,
+        categoryId: _categoryId,
+        date: _date,
+        currency: state.settings.currency);
     setState(() => _validation = validation);
     if (!validation.isValid) return;
 
