@@ -57,3 +57,8 @@ Schema v14 adds `committees` and `committee_events` as optional extended keys wi
 
 ## Icon files in ZIP backups (2026-10-27)
 ZIP backups carry the user's uploaded icons (`icons/uploads/`) and icon edits (`icons/overrides/`). `createBackup(iconFiles:)` writes them; after a successful restore `AppState.restoreJsonBackup` calls `SvgCustomizationService.importFiles` (Safe Merge keeps local files, Full Replace uses the backup copy, unsafe names and invalid SVGs are skipped, and an icon problem never fails the restore). JSON-only and safety backups carry no icons. Details: [[Backup-Format-Specification]] section 10, [[ADR-0007-SVG-Customization-and-Global-Overrides]].
+
+## Safety backup fails closed (2026-11-22)
+Before a restore, the dialog copies the new safety backup to `walletmelt_pre_restore_backup.json` with `copyVerifiedSafetyBackup`. If the source file is missing or empty, or the copy comes out short, the restore stops ("Restore did not start") and no data changes.
+
+Previously a missing safety backup was replaced with a placeholder file and the restore went ahead, including Full Replace. The success message now names the mode: Full Replace says the previous data was replaced, and no longer says "Safe merge complete". Tests: `test/screens/settings/safety_backup_copy_test.dart`.
