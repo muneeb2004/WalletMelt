@@ -10,6 +10,7 @@ import '../../theme/wallet_melt_theme.dart';
 import '../../types/account.dart';
 import '../../types/committee.dart';
 import '../../utils/currency_format.dart';
+import '../../utils/expense_validation.dart';
 import '../../utils/number_parser.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/empty_state.dart';
@@ -203,6 +204,12 @@ class _CommitteeEditorState extends State<_CommitteeEditor> {
       setState(() => _error = 'Enter your monthly installment.');
       return;
     }
+    final currency = widget.state.settings.currency;
+    final monthlyPrecision = amountPrecisionError(monthly, currency);
+    if (monthlyPrecision != null) {
+      setState(() => _error = monthlyPrecision);
+      return;
+    }
     if (members < 2 || members > 60) {
       setState(() => _error = 'Members must be between 2 and 60.');
       return;
@@ -216,6 +223,11 @@ class _CommitteeEditorState extends State<_CommitteeEditor> {
       final v = parseTolerantNumber(_pot.text);
       if (v == null || v <= 0) {
         setState(() => _error = 'Enter the payout amount as a number.');
+        return;
+      }
+      final potPrecision = amountPrecisionError(v, currency);
+      if (potPrecision != null) {
+        setState(() => _error = potPrecision);
         return;
       }
       pot = toMinorUnits(v);
@@ -665,6 +677,11 @@ class _AmountConfirmState extends State<_AmountConfirm> {
               final v = parseTolerantNumber(_controller.text);
               if (v == null || v <= 0) {
                 showErrorSnackbar(context, 'Enter a number above zero.');
+                return;
+              }
+              final precision = amountPrecisionError(v, widget.currency);
+              if (precision != null) {
+                showErrorSnackbar(context, precision);
                 return;
               }
               final navigator = Navigator.of(context);

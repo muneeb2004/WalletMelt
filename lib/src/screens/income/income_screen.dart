@@ -7,6 +7,7 @@ import '../../theme/wallet_melt_theme.dart';
 import '../../types/account.dart';
 import '../../types/income.dart';
 import '../../utils/currency_format.dart';
+import '../../utils/expense_validation.dart';
 import '../../utils/number_parser.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/empty_state.dart';
@@ -326,6 +327,12 @@ class _IncomeEditorState extends State<_IncomeEditor> {
       setState(() => _error = 'Enter an amount greater than zero.');
       return;
     }
+    final precision =
+        amountPrecisionError(amountValue, widget.state.settings.currency);
+    if (precision != null) {
+      setState(() => _error = precision);
+      return;
+    }
     if (_eligibleAccounts.isNotEmpty && _accountId == null) {
       setState(() => _error = 'Choose where this income is deposited.');
       return;
@@ -524,6 +531,12 @@ Future<void> showConfirmIncomeSheet(
                 final value = parseTolerantNumber(controller.text);
                 if (value == null || value <= 0) {
                   showErrorSnackbar(sheetContext, 'Enter a number above zero.');
+                  return;
+                }
+                final precision =
+                    amountPrecisionError(value, schedule.currency);
+                if (precision != null) {
+                  showErrorSnackbar(sheetContext, precision);
                   return;
                 }
                 if (eligible.isNotEmpty && accountId == null) {

@@ -6,8 +6,10 @@ import '../../components/account/account_picker_field.dart';
 import '../../components/category/category_chip.dart';
 import '../../state/app_state.dart';
 import '../../theme/wallet_melt_theme.dart';
+import '../../constants/currencies.dart';
 import '../../types/subscription.dart';
 import '../../utils/currency_format.dart';
+import '../../utils/expense_validation.dart';
 import '../../utils/number_parser.dart';
 import '../../utils/recurrence.dart';
 import '../../widgets/app_snackbar.dart';
@@ -180,8 +182,13 @@ class _SubscriptionFormSheetState extends State<SubscriptionFormSheet> {
     final amount = parseTolerantNumber(_amount.text.trim());
     final pct = parseTolerantNumber(_taxPct.text.trim());
     if (amount == null || pct == null) return;
-    _tax.text = _plain(amount * pct / 100);
+    _tax.text =
+        _plain(amount * pct / 100, currencyInputDecimalDigits(_moneyCurrency));
   }
+
+  /// Currency the amounts are saved in: the subscription's own when editing.
+  String get _moneyCurrency =>
+      _existing?.currency ?? context.read<AppState>().settings.currency;
 
   void _syncRateFromTax(String value) {
     final tax = parseTolerantNumber(value);
@@ -348,7 +355,7 @@ class _SubscriptionFormSheetState extends State<SubscriptionFormSheet> {
               validator: (v) {
                 if (v == null || v.trim().isEmpty) return 'Enter an amount.';
                 if (parseTolerantNumber(v) == null) return 'Enter a number.';
-                return null;
+                return moneyTextPrecisionError(v, _moneyCurrency);
               },
               onChanged: (_) => setState(_syncTaxFromRate),
             ),
@@ -371,6 +378,9 @@ class _SubscriptionFormSheetState extends State<SubscriptionFormSheet> {
                     keyboardType:
                         const TextInputType.numberWithOptions(decimal: true),
                     decoration: InputDecoration(labelText: 'Tax ($currency)'),
+                    validator: (v) => v == null || v.trim().isEmpty
+                        ? null
+                        : moneyTextPrecisionError(v, _moneyCurrency),
                     onChanged: (v) => setState(() => _syncRateFromTax(v)),
                   ),
                 ),
