@@ -147,3 +147,21 @@ Every release bumps `pubspec.yaml` and ships a plain-language, non-technical Wha
 - **Done**: every modal is an edge sheet built from `WMSheet`/`WMSheetButton`; `showConfirmDialog` renders a compact sheet with an icon tile (ADR-0018); History change-category, delete contact, archive merchant and delete icon confirmations migrated. One add action per screen, empty states are text only; Debts chooser rebuilt on `WMSheet` (ADR-0019). Button labels no longer wrap: footer stacks when labels do not fit, Restore / Delete forever stacked, budget copy button scales to fit; `test/widgets/label_wrapping_test.dart`. What's New: three entries. Version 1.12.0+23.
 - **Known**: `test/screenshots/publication_screenshot_test.dart` intermittently fails in a parallel `flutter test` run (passes alone and with `--concurrency=1`). Remaining text-field dialogs (add-expense, goals, settings, SVG editor) and the receipt glass sheet are not yet on `WMSheet`.
 - **Build**: release APKs via `scripts/build_apks.ps1` (1.12.0+23).
+
+## Release 1.12.1 (2026-11-22)
+- **Done**: fixes from the 2026-11-22 codebase audit, one PR each (#8 to #20):
+  - ZIP restore validates entries (no path traversal, size and entry caps);
+  - restore fails closed without a real safety backup and names its mode;
+  - PBKDF2 and AES run off the UI thread;
+  - debug-signed release builds are reported, with an opt-in strict mode;
+  - PIN lock is disabled on web;
+  - the screenshot test writes to `build/` unless `UPDATE_SCREENSHOTS` is set;
+  - six unused packages and the unused ledger and clipboard services are removed (TD-006);
+  - a literal `fontSize` ratchet (347);
+  - GitHub Actions CI, and built APKs are no longer tracked;
+  - ISO currency decimals for display and Add expense (TD-011);
+  - money amounts are capped at 1e12;
+  - vault drift corrected.
+- What's New has three plain-language entries. Version 1.12.1+24.
+- **Build**: release APKs via `scripts/build_apks.ps1` (1.12.1+24). They are **debug-signed**: there is no release keystore in `android/local.properties` yet.
+
