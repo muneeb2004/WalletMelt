@@ -165,3 +165,6 @@ Every release bumps `pubspec.yaml` and ships a plain-language, non-technical Wha
 - What's New has three plain-language entries. Version 1.12.1+24.
 - **Build**: release APKs via `scripts/build_apks.ps1` (1.12.1+24). They are **debug-signed**: there is no release keystore in `android/local.properties` yet.
 
+## Release 1.12.2 (2026-11-22)
+- **Done**: every money form checks currency decimal places (#22; TD-011 follow-up), and computed tax rounds to the currency's decimals. What's New has one entry. Version 1.12.2+25.
+- **Build**: release APKs via `scripts/build_apks.ps1` (1.12.2+25), copied to `build/release-1.12.2/`. They are **debug-signed** because there is no release keystore yet.

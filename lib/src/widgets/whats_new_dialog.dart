@@ -132,6 +132,24 @@ class WhatsNewContent extends StatelessWidget {
               const SizedBox(height: 14),
 
               _buildChangelogItem(context,
+                icon: Icons.pin_outlined,
+                iconColor: context.scheme.primary,
+                title: 'Decimals checked everywhere',
+                description:
+                    'Budgets, debts, income, accounts, goals, committees, subscriptions and tax now tell you when an amount has more decimals than your currency uses, instead of quietly rounding it.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 24),
+
+              // Version 1.12.1 Highlights
+              _buildSectionBadge(
+                label: 'VERSION 1.12.1 UPDATES',
+                color: context.scheme.primary,
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
                 icon: Icons.shield_outlined,
                 iconColor: context.scheme.primary,
                 title: 'Safer restores',
