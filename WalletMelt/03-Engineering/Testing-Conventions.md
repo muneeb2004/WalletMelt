@@ -28,7 +28,7 @@ related:
 - Heavy cross-domain regression: `test/services/export/backup_v2_roundtrip_test.dart` (seed every table, export v2, restore, compare per-table counts + `PRAGMA foreign_key_check`). Copy this pattern for any new table: add it to `_tables` and `_seed`.
 - Renewal/minor-unit regressions: `test/subscription_renewal_test.dart` (injects a failing `DriftExpenseRepository` subclass against a real in-memory DB).
 - Long settings lists build lazily: scroll first with the `_reveal` helper in `settings_screen_test.dart` before `ensureVisible`/`expect`.
-- `test/screenshots/publication_screenshot_test.dart` rewrites tracked PNGs in `walletmelt_screenshots/` and is slow; exclude it from routine runs and `git checkout -- walletmelt_screenshots` afterwards.
+- `test/screenshots/publication_screenshot_test.dart` (tag `screenshot`) is slow. A routine run renders and validates every screenshot but writes them to `build/screenshot_check/`, so the tracked `walletmelt_screenshots/` stay untouched. To refresh the publication screenshots, run `flutter test --tags screenshot --dart-define=UPDATE_SCREENSHOTS=true` (2026-11-22). For quick runs use `flutter test --exclude-tags screenshot`.
 - Run the full suite in the background writing to a file (do not pipe through `Select-Object -Last`, which prints nothing until exit).
 
 ## Screenshot tests

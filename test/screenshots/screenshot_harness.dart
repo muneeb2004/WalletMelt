@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:wallet_melt/src/security/pin_lock_controller.dart';
 import 'package:wallet_melt/src/state/app_state.dart';
 import 'package:wallet_melt/src/theme/wallet_melt_theme.dart';
+import 'screenshot_output.dart';
 
 class ScreenshotHarness {
   static bool _fontsLoaded = false;
@@ -117,7 +118,7 @@ class ScreenshotHarness {
         throw StateError('Failed to encode PNG for $relativePath');
       }
 
-      final outputFile = File('walletmelt_screenshots/$relativePath');
+      final outputFile = File('$screenshotOutputDir/$relativePath');
       outputFile.parent.createSync(recursive: true);
       outputFile.writeAsBytesSync(bytes, flush: true);
 
@@ -132,7 +133,7 @@ class ScreenshotHarness {
       print('''
 ================================================================================
 SCREENSHOT GENERATION FAILED
-Target Path: walletmelt_screenshots/$relativePath
+Target Path: $screenshotOutputDir/$relativePath
 Theme: ${isDark ? 'Dark' : 'Light'}
 Error: $e
 Stack Trace:
