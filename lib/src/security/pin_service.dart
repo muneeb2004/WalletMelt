@@ -12,8 +12,12 @@ class PinService {
 
   PinStorage get storage => _storage;
 
+  /// PIN lock needs persistent secure storage. On web the store is only an
+  /// in-memory map, so a PIN would vanish on reload and protect nothing.
+  static bool get isSupported => !kIsWeb;
+
   int get _defaultIterations =>
-      (kIsWeb || Platform.environment.containsKey('FLUTTER_TEST'))
+      (!kIsWeb && Platform.environment.containsKey('FLUTTER_TEST'))
           ? PinKdf.testIterations
           : PinKdf.defaultIterations;
 
@@ -56,6 +60,9 @@ class PinService {
   ///
   /// Atomically updates credential data in secure storage.
   Future<void> setPin(String rawPin, {int? iterations}) async {
+    if (!isSupported) {
+      throw UnsupportedError('PIN lock is not available on web.');
+    }
     if (rawPin.length != 4 || int.tryParse(rawPin) == null) {
       throw ArgumentError('PIN must be exactly 4 numeric digits.');
     }

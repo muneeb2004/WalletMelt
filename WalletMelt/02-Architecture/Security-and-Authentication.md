@@ -33,3 +33,10 @@ related:
 - Release manifest declares only `USE_BIOMETRIC`/`USE_FINGERPRINT`; **no INTERNET** (declared only in debug/profile); `allowBackup=false`; no HTTP/analytics SDK. This is the evidence base for "no telemetry".
 
 > 2026-10-15: the unused `PinHash.hashPin` static-salt compatibility wrapper was removed; `PinKdf` is the only PIN hashing entry point.
+
+## PIN lock is Android/iOS only (2026-11-22)
+On web `PinStorage` is an in-memory map, so a PIN set there disappeared on reload. Web also used the 100-iteration test count, so the PIN protected nothing. `PinService.isSupported` is now false on web:
+- the Settings PIN switch is disabled, with the note "PIN lock is available in the Android app only";
+- `setPin` throws `UnsupportedError`.
+
+The 100-iteration count is used only under `flutter test`. Web keeps the production count for any code path that still hashes there.
