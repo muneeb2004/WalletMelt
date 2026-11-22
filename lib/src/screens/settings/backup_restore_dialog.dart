@@ -197,14 +197,8 @@ class _BackupRestoreDialogState extends State<BackupRestoreDialog> {
 
       // Overwrite exact file path for consistency
       if (!PlatformInfo.isFlutterTest) {
-        if (await safetyBackupFile.exists()) {
-          await safetyBackupFile.delete();
-        }
-        if (await File(safetyBackup.path).exists()) {
-          await File(safetyBackup.path).copy(safetyBackupFile.path);
-        } else {
-          await safetyBackupFile.writeAsString('{"mock": "safety backup"}');
-        }
+        // Fails closed: without a real safety backup the restore must not run.
+        await copyVerifiedSafetyBackup(File(safetyBackup.path), safetyBackupFile);
       }
 
       // 2. Extract ZIP if package has receipts
@@ -250,14 +244,18 @@ class _BackupRestoreDialogState extends State<BackupRestoreDialog> {
         final backupText = safetyBackupName == null
             ? 'A pre-restore safety backup was created.'
             : 'Safety backup created: $safetyBackupName.';
+        final counts = '${result.insertedExpenses} expenses, '
+            '${result.insertedGroceryItems} items, '
+            '${result.insertedCategories} categories, and '
+            '${result.insertedBudgets} budgets';
         showSuccessSnackbar(
           context,
-          'Safe merge complete: ${result.insertedExpenses} expenses, '
-          '${result.insertedGroceryItems} items, '
-          '${result.insertedCategories} categories, and '
-          '${result.insertedBudgets} budgets imported. '
-          'Local data was preserved. $backupText '
-          'Receipt paths remain text references only.',
+          _selectedMode == RestoreMode.fullReplace
+              ? 'Full replace complete: $counts restored. '
+                  'Your previous data was replaced by the backup. $backupText'
+              : 'Safe merge complete: $counts imported. '
+                  'Local data was preserved. $backupText '
+                  'Receipt paths remain text references only.',
         );
 
         final decoded = jsonDecode(widget.backupFile.jsonText) as Map;
@@ -804,4 +802,23 @@ Future<R> _runTask<Q, R>(ComputeCallback<Q, R> callback, Q message) {
     }
   }
   return compute(callback, message);
+}
+
+/// Copies the freshly written safety backup to its fixed location, refusing
+/// to continue when the source is missing or empty. A restore must never run
+/// on the strength of a safety backup that does not exist.
+@visibleForTesting
+Future<void> copyVerifiedSafetyBackup(File source, File destination) async {
+  if (!await source.exists() || await source.length() == 0) {
+    throw StateError(
+        'Safety backup could not be created, so the restore was stopped.');
+  }
+  if (await destination.exists()) {
+    await destination.delete();
+  }
+  await source.copy(destination.path);
+  if (await destination.length() != await source.length()) {
+    throw StateError(
+        'Safety backup copy is incomplete, so the restore was stopped.');
+  }
 }

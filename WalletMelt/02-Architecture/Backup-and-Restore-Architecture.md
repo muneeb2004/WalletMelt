@@ -66,3 +66,8 @@ Restoring a ZIP backup extracts it through `extractBackupZip` (`lib/src/services
 - the archive is over 512 MB uncompressed.
 
 Previously a crafted backup could overwrite any file in the app sandbox. Receipt and icon copies out of the extract folder were already safe (they use `basename`). Tests: `test/services/export/backup_zip_extractor_test.dart`.
+
+## Safety backup fails closed (2026-11-22)
+Before a restore, the dialog copies the new safety backup to `walletmelt_pre_restore_backup.json` with `copyVerifiedSafetyBackup`. If the source file is missing or empty, or the copy comes out short, the restore stops ("Restore did not start") and no data changes.
+
+Previously a missing safety backup was replaced with a placeholder file and the restore went ahead, including Full Replace. The success message now names the mode: Full Replace says the previous data was replaced, and no longer says "Safe merge complete". Tests: `test/screens/settings/safety_backup_copy_test.dart`.
