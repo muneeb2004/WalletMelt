@@ -38,12 +38,10 @@ graph TD
     subgraph Repositories ["Repository Boundary"]
         RiverpodDI["Riverpod Providers (DI Container)"]
         DriftRepos["Drift Repositories (Expense, Budget, Debt, etc.)"]
-        SqfliteFallback["Sqflite Fallback Repositories"]
     end
 
     subgraph Data ["Local Persistence Engine"]
-        DriftDB["WalletMeltDatabase (Singleton, v9)"]
-        SqfliteDB["AppDatabase (wallet_melt.db)"]
+        DriftDB["WalletMeltDatabase (Singleton, v14)"]
         SecureStorage["FlutterSecureStorage (PIN Salt/Hash)"]
         DiskFiles["Local Filesystem (Receipts, Custom SVGs)"]
     end
@@ -51,11 +49,9 @@ graph TD
     Screens --> AppState
     Screens --> PinLock
     AppState --> DriftRepos
-    AppState --> SqfliteFallback
     AppState --> Services
     RiverpodDI --> DriftRepos
     DriftRepos --> DriftDB
-    SqfliteFallback --> SqfliteDB
     Services --> DriftDB
     Services --> SecureStorage
     Services --> DiskFiles
@@ -69,10 +65,10 @@ graph TD
    - Never accesses database queries or sqlite connection handles directly.
 2. **State Management (`lib/src/state/app_state.dart`)**:
    - Central application coordinator.
-   - Dispatches mutations to Drift repositories, synchronizes fallback layers, and notifies listeners.
+   - Dispatches mutations to Drift repositories and notifies listeners.
 3. **Repository Layer (`lib/src/data/repositories/drift/`)**:
    - Implements domain repository contracts.
    - Maps raw database data classes to typed immutable domain objects.
 4. **Local Persistence Engine (`lib/src/data/local/`)**:
    - `WalletMeltDatabase`: Drift SQLite engine managing connection pooling, schemas, foreign keys, and transactions.
-   - `AppDatabase`: Legacy sqflite fallback.
+   - No sqflite fallback database exists (removed earlier; corrected 2026-11-22). `sqflite` supplies only `getDatabasesPath()`.

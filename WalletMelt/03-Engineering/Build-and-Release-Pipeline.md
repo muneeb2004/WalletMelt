@@ -36,6 +36,7 @@ kotlin.incremental=false
 kotlin.compiler.execution.strategy=in-process
 org.gradle.parallel=false
 ```
+> Corrected 2026-11-22: the file currently has `org.gradle.parallel=true` and builds succeed on this machine. Set it back to `false` if cross-drive locks return.
 *(Prevents Windows cross-drive file lock collisions during Flutter/Kotlin builds).*
 
 > Clarification (2026-10-15): the pipeline runs **3 Gradle invocations** (universal, split-per-ABI, screenshots) producing **5 APKs**; scripts also clear `*.apk` and `build/app/intermediates` first, and copy production APKs to legacy `app-*-release.apk` names.

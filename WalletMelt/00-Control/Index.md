@@ -34,7 +34,7 @@ Welcome to the **WalletMelt Engineering Control Plane**. This Obsidian vault ser
 
 ### 3. Architecture & Subsystems
 - [[Application-Architecture]]: Layered architecture, presentation boundaries, and service interactions.
-- [[Database-and-Drift-Architecture]]: Drift schema v9, 22 managed tables, and singleton lifecycle rules.
+- [[Database-and-Drift-Architecture]]: Drift schema v14, 30 managed tables, and singleton lifecycle rules.
 - [[Security-and-Authentication]]: PIN salt hashing, biometric verification, 30s grace window, and fail-closed state.
 - [[Analytics-and-Calculations]]: Deterministic formulas for Days Remaining (+1 logic), Daily Allowance, Pace, and Debt.
 - [[Backup-and-Restore-Architecture]]: Safe-merge transactional restore pipeline and conflict detection.
