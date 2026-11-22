@@ -55,5 +55,18 @@ void main() {
       expect(parseTolerantNumber('abc'), isNull);
       expect(parseTolerantNumber(r'$ --'), isNull);
     });
+  
+    test('rejects amounts above the money limit', () {
+      expect(parseTolerantNumber('1000000000000'), kMaxMoneyAmount);
+      expect(parseTolerantNumber('1000000000001'), isNull);
+      expect(parseTolerantNumber('9' * 40), isNull);
+      expect(parseTolerantNumber('-2000000000000'), isNull);
+    });
+
+    test('single comma with three digits is thousands, single period is decimal', () {
+      expect(parseTolerantNumber('1,000'), 1000.0);
+      expect(parseTolerantNumber('1.000'), 1.0);
+      expect(parseTolerantNumber('1.500'), 1.5);
+    });
   });
 }
