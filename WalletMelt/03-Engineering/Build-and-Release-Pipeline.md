@@ -45,3 +45,8 @@ org.gradle.parallel=false
 
 ## Concurrency warning (2026-10-17)
 Run nothing else that invokes the Flutter tool (`flutter test`, `flutter analyze`, `flutter pub get`) while `build_apks` runs; a concurrent run regenerated `GeneratedPluginRegistrant.java` with `integration_test` and failed the production release compile. Re-run the build after fixing.
+
+## CI and build outputs (2026-11-22)
+- GitHub Actions (`.github/workflows/ci.yml`) runs `flutter analyze` and `flutter test --exclude-tags screenshot` on Flutter 3.44.2 for every pull request and every push to `main`. The screenshot suite stays local.
+- The three split APKs under `build/` were tracked through Git LFS even though `build/` is git-ignored. They are now untracked (`git rm --cached`); APKs are build outputs, not source. Publish them as GitHub release assets if they need to be shared.
+- The local `.git/lfs` store (about 4 GB of old APK versions) is not touched by any of this. Running `git lfs prune` frees it locally once nothing needs those versions.
