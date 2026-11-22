@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 
+import '../utils/background_task.dart';
+
 /// Cryptographically secure Key Derivation Function (PBKDF2-HMAC-SHA256) for low-entropy PINs.
 class PinKdf {
   PinKdf._();
@@ -25,6 +27,15 @@ class PinKdf {
       keyLength: 32,
     );
     return keyBytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
+  }
+
+  /// [hashPin] on a background isolate, so 100,000 rounds do not block the UI.
+  static Future<String> hashPinInBackground({
+    required String pin,
+    required List<int> salt,
+    int iterations = defaultIterations,
+  }) {
+    return runInBackground(_hashPinTask, (pin, salt, iterations));
   }
 
   /// RFC 2898 / RFC 8018 compliant PBKDF2 implementation using HMAC-SHA256.
@@ -78,3 +89,8 @@ class PinKdf {
   }
 }
 
+String _hashPinTask((String, List<int>, int) args) => PinKdf.hashPin(
+      pin: args.$1,
+      salt: args.$2,
+      iterations: args.$3,
+    );

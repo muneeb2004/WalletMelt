@@ -57,3 +57,6 @@ Schema v14 adds `committees` and `committee_events` as optional extended keys wi
 
 ## Icon files in ZIP backups (2026-10-27)
 ZIP backups carry the user's uploaded icons (`icons/uploads/`) and icon edits (`icons/overrides/`). `createBackup(iconFiles:)` writes them; after a successful restore `AppState.restoreJsonBackup` calls `SvgCustomizationService.importFiles` (Safe Merge keeps local files, Full Replace uses the backup copy, unsafe names and invalid SVGs are skipped, and an icon problem never fails the restore). JSON-only and safety backups carry no icons. Details: [[Backup-Format-Specification]] section 10, [[ADR-0007-SVG-Customization-and-Global-Overrides]].
+
+## Encryption off the UI thread (2026-11-22)
+Encrypted backup creation and decryption call `BackupEncryptionService.encryptInBackground` / `decryptInBackground`, so the 100,000-round PBKDF2 no longer blocks the UI. Format `WMENC01` is unchanged. See [[Security-and-Authentication]].

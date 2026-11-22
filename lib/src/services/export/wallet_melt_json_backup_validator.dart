@@ -82,7 +82,7 @@ class WalletMeltBackupFile {
           rawEncryptedBytes: bytes,
         );
       }
-      bytes = encryptionService.decrypt(
+      bytes = await encryptionService.decryptInBackground(
         encryptedBytes: bytes,
         passphrase: passphrase,
       );
@@ -128,7 +128,7 @@ class WalletMeltBackupFile {
   Future<WalletMeltBackupFile> decryptWith(String passphrase) async {
     if (!isEncrypted || rawEncryptedBytes == null) return this;
     const encryptionService = BackupEncryptionService();
-    final decryptedBytes = encryptionService.decrypt(
+    final decryptedBytes = await encryptionService.decryptInBackground(
       encryptedBytes: rawEncryptedBytes!,
       passphrase: passphrase,
     );

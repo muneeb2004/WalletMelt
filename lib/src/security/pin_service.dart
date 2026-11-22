@@ -40,7 +40,7 @@ class PinService {
       if (storedHash == null || storedHash.isEmpty) return false;
 
       final salt = await _storage.getOrCreateSalt();
-      final inputHash = PinKdf.hashPin(
+      final inputHash = await PinKdf.hashPinInBackground(
         pin: rawPin,
         salt: salt,
         iterations: iterations ?? _defaultIterations,
@@ -61,7 +61,7 @@ class PinService {
     }
 
     final salt = await _storage.getOrCreateSalt();
-    final hash = PinKdf.hashPin(
+    final hash = await PinKdf.hashPinInBackground(
       pin: rawPin,
       salt: salt,
       iterations: iterations ?? _defaultIterations,

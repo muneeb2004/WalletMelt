@@ -63,7 +63,7 @@ class WalletMeltJsonBackupService {
 
     if (!packageReceipts) {
       if (passphrase != null && passphrase.isNotEmpty) {
-        final encrypted = _encryptionService.encrypt(
+        final encrypted = await _encryptionService.encryptInBackground(
           plaintext: utf8.encode(json),
           passphrase: passphrase,
         );
@@ -162,7 +162,7 @@ class WalletMeltJsonBackupService {
     var zipBytes = ZipEncoder().encode(archive);
 
     if (passphrase != null && passphrase.isNotEmpty) {
-      zipBytes = _encryptionService.encrypt(
+      zipBytes = await _encryptionService.encryptInBackground(
         plaintext: zipBytes,
         passphrase: passphrase,
       );

@@ -3,6 +3,7 @@ import 'dart:math';
 import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import '../../security/pin_hash.dart';
+import '../../utils/background_task.dart';
 
 class InvalidBackupPassphraseException implements Exception {
   final String message;
@@ -134,6 +135,24 @@ class BackupEncryptionService {
     return Uint8List.fromList(decrypted);
   }
 
+  /// [encrypt] on a background isolate (PBKDF2 and AES are CPU-heavy).
+  Future<Uint8List> encryptInBackground({
+    required List<int> plaintext,
+    required String passphrase,
+    int iterations = defaultIterations,
+  }) {
+    return runInBackground(_encryptTask, (plaintext, passphrase, iterations));
+  }
+
+  /// [decrypt] on a background isolate. Throws the same exceptions.
+  Future<Uint8List> decryptInBackground({
+    required List<int> encryptedBytes,
+    required String passphrase,
+    int iterations = defaultIterations,
+  }) {
+    return runInBackground(_decryptTask, (encryptedBytes, passphrase, iterations));
+  }
+
   bool _constantTimeEquals(List<int> a, List<int> b) {
     if (a.length != b.length) return false;
     var result = 0;
@@ -168,6 +187,14 @@ class BackupEncryptionService {
     }
   }
 }
+
+Uint8List _encryptTask((List<int>, String, int) a) =>
+    const BackupEncryptionService()
+        .encrypt(plaintext: a.$1, passphrase: a.$2, iterations: a.$3);
+
+Uint8List _decryptTask((List<int>, String, int) a) =>
+    const BackupEncryptionService()
+        .decrypt(encryptedBytes: a.$1, passphrase: a.$2, iterations: a.$3);
 
 /// Standard AES-256 block encryption implementation.
 class _Aes256 {
