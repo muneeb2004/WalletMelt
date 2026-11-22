@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 
 import '../utils/background_task.dart';
 
@@ -35,7 +36,7 @@ class PinKdf {
     required List<int> salt,
     int iterations = defaultIterations,
   }) {
-    return runInBackground(_hashPinTask, (pin, salt, iterations));
+    return runInBackground(hashPinTask, (pin, salt, iterations));
   }
 
   /// RFC 2898 / RFC 8018 compliant PBKDF2 implementation using HMAC-SHA256.
@@ -89,7 +90,9 @@ class PinKdf {
   }
 }
 
-String _hashPinTask((String, List<int>, int) args) => PinKdf.hashPin(
+/// Isolate entry point for [PinKdf.hashPinInBackground].
+@visibleForTesting
+String hashPinTask((String, List<int>, int) args) => PinKdf.hashPin(
       pin: args.$1,
       salt: args.$2,
       iterations: args.$3,

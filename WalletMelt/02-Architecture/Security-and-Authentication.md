@@ -39,4 +39,4 @@ PIN hashing (PBKDF2-HMAC-SHA256, 100,000 rounds, pure Dart) and backup encryptio
 - PIN entry and set: `PinKdf.hashPinInBackground`.
 - Backups: `BackupEncryptionService.encryptInBackground` and `decryptInBackground`.
 
-Previously these ran on the UI isolate and could freeze the PIN screen and the backup dialogs. The iteration count and hash format are unchanged, so existing PINs and encrypted backups still verify. Under `flutter test` and on web the work runs inline. Tests: `test/security/pin_kdf_background_test.dart`.
+Previously these ran on the UI isolate and could freeze the PIN screen and the backup dialogs. The iteration count and hash format are unchanged, so existing PINs and encrypted backups still verify. Under `flutter test` and on web the work runs inline. Tests: `test/security/pin_kdf_background_test.dart`. It also calls `compute` on the isolate entry points (`hashPinTask`, `encryptTask`, `decryptTask`) directly, so the real isolate path, sendable arguments and the `InvalidBackupPassphraseException` type are covered.

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import '../../security/pin_hash.dart';
 import '../../utils/background_task.dart';
 
@@ -141,7 +142,7 @@ class BackupEncryptionService {
     required String passphrase,
     int iterations = defaultIterations,
   }) {
-    return runInBackground(_encryptTask, (plaintext, passphrase, iterations));
+    return runInBackground(encryptTask, (plaintext, passphrase, iterations));
   }
 
   /// [decrypt] on a background isolate. Throws the same exceptions.
@@ -150,7 +151,7 @@ class BackupEncryptionService {
     required String passphrase,
     int iterations = defaultIterations,
   }) {
-    return runInBackground(_decryptTask, (encryptedBytes, passphrase, iterations));
+    return runInBackground(decryptTask, (encryptedBytes, passphrase, iterations));
   }
 
   bool _constantTimeEquals(List<int> a, List<int> b) {
@@ -188,11 +189,15 @@ class BackupEncryptionService {
   }
 }
 
-Uint8List _encryptTask((List<int>, String, int) a) =>
+/// Isolate entry point for [BackupEncryptionService.encryptInBackground].
+@visibleForTesting
+Uint8List encryptTask((List<int>, String, int) a) =>
     const BackupEncryptionService()
         .encrypt(plaintext: a.$1, passphrase: a.$2, iterations: a.$3);
 
-Uint8List _decryptTask((List<int>, String, int) a) =>
+/// Isolate entry point for [BackupEncryptionService.decryptInBackground].
+@visibleForTesting
+Uint8List decryptTask((List<int>, String, int) a) =>
     const BackupEncryptionService()
         .decrypt(encryptedBytes: a.$1, passphrase: a.$2, iterations: a.$3);
 

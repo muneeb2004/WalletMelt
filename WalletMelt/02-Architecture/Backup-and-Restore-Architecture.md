@@ -64,4 +64,4 @@ Before a restore, the dialog copies the new safety backup to `walletmelt_pre_res
 Previously a missing safety backup was replaced with a placeholder file and the restore went ahead, including Full Replace. The success message now names the mode: Full Replace says the previous data was replaced, and no longer says "Safe merge complete". Tests: `test/screens/settings/safety_backup_copy_test.dart`.
 
 ## Encryption off the UI thread (2026-11-22)
-Encrypted backup creation and decryption call `BackupEncryptionService.encryptInBackground` / `decryptInBackground`, so the 100,000-round PBKDF2 no longer blocks the UI. Format `WMENC01` is unchanged. See [[Security-and-Authentication]].
+Encrypted backup creation and decryption call `BackupEncryptionService.encryptInBackground` / `decryptInBackground`, so the 100,000-round PBKDF2 no longer blocks the UI. Format `WMENC01` is unchanged, and a wrong passphrase still surfaces as `InvalidBackupPassphraseException` across the isolate (tested). See [[Security-and-Authentication]].
