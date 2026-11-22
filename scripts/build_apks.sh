@@ -40,3 +40,12 @@ echo "======================================================="
 echo "  Generated APK Artifacts in $OUTPUT_DIR:"
 echo "======================================================="
 ls -lh "$OUTPUT_DIR"/*.apk
+
+# Signing status: release builds use the debug key when no keystore is configured.
+if [ -f android/local.properties ] && grep -qE '^[[:space:]]*storeFile[[:space:]]*=' android/local.properties; then
+  echo "Signing: release keystore (android/local.properties storeFile)."
+else
+  echo "Signing: DEBUG-SIGNED. No storeFile in android/local.properties."
+  echo "  These APKs are fine for testing but must not be published; a later"
+  echo "  properly signed build cannot upgrade them in place."
+fi
