@@ -33,3 +33,10 @@ related:
 - Release manifest declares only `USE_BIOMETRIC`/`USE_FINGERPRINT`; **no INTERNET** (declared only in debug/profile); `allowBackup=false`; no HTTP/analytics SDK. This is the evidence base for "no telemetry".
 
 > 2026-10-15: the unused `PinHash.hashPin` static-salt compatibility wrapper was removed; `PinKdf` is the only PIN hashing entry point.
+
+## PBKDF2 runs off the UI thread (2026-11-22)
+PIN hashing (PBKDF2-HMAC-SHA256, 100,000 rounds, pure Dart) and backup encryption and decryption now run on a background isolate through `runInBackground` (`lib/src/utils/background_task.dart`).
+- PIN entry and set: `PinKdf.hashPinInBackground`.
+- Backups: `BackupEncryptionService.encryptInBackground` and `decryptInBackground`.
+
+Previously these ran on the UI isolate and could freeze the PIN screen and the backup dialogs. The iteration count and hash format are unchanged, so existing PINs and encrypted backups still verify. Under `flutter test` and on web the work runs inline. Tests: `test/security/pin_kdf_background_test.dart`. It also calls `compute` on the isolate entry points (`hashPinTask`, `encryptTask`, `decryptTask`) directly, so the real isolate path, sendable arguments and the `InvalidBackupPassphraseException` type are covered.
