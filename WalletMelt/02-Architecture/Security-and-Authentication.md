@@ -17,7 +17,8 @@ related:
 - No remote credential verification exists.
 
 ## 2. Authentication Architecture
-- **Master PIN**: 4-digit code derived with **PBKDF2-HMAC-SHA256** (100,000 iterations, 32-byte output; `pin_hash.dart`) using a random 32-byte per-device salt (`Random.secure()`), both stored in `FlutterSecureStorage`. Iterations drop to 100 on web/`FLUTTER_TEST`. *(Corrected 2026-10-15: earlier note said deterministic SHA-256.)*
+- **Master PIN**: 4-digit code derived with **PBKDF2-HMAC-SHA256** (100,000 iterations, 32-byte output; `pin_hash.dart`) using a random 32-byte per-device salt (`Random.secure()`), both stored in `FlutterSecureStorage`. Iterations drop to 100 only under `FLUTTER_TEST`. PIN lock is unavailable on web (see below). *(Corrected 2026-10-15: earlier note said deterministic SHA-256.)*
+- **Web (2026-11-22)**: PIN lock is unavailable on web. There `PinStorage` is only an in-memory map, so a PIN vanished on reload and protected nothing. `PinService.isSupported` is false on web: the Settings PIN switch is disabled with the note "PIN lock is available in the Android app only", and `setPin` throws `UnsupportedError`.
 - **Biometric Authentication**: Local biometric evaluation via `local_auth`. Enabled only when the device reports support (`canCheckBiometrics || isDeviceSupported()`), biometrics are enrolled, and the user has an active PIN configured as fallback.
 - **Fail-Closed Principle**: If secure storage reads fail, device hardware state cannot be queried, or exceptions occur, `PinLockController` immediately forces `isLocked = true`.
 

@@ -29,6 +29,7 @@ import '../../widgets/whats_new_dialog.dart';
 import '../security/create_pin_screen.dart';
 import '../security/verify_pin_screen.dart';
 import '../../security/pin_lock_controller.dart';
+import '../../security/pin_service.dart';
 import '../../security/root_detection_service.dart';
 import '../../utils/platform_info.dart';
 
@@ -571,14 +572,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           subtitle: Padding(
                             padding: const EdgeInsets.only(top: 4),
                             child: Text(
-                              'Protect WalletMelt with a 4-digit PIN.',
+                              PinService.isSupported
+                                  ? 'Protect WalletMelt with a 4-digit PIN.'
+                                  : 'PIN lock is available in the Android app only.',
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: context.scheme.onSurfaceVariant,
                               ),
                             ),
                           ),
                           value: isPinEnabled,
-                          onChanged: (bool value) async {
+                          onChanged: !PinService.isSupported ? null : (bool value) async {
                             if (value) {
                               final wasSet = await Navigator.push<bool>(
                                 context,
