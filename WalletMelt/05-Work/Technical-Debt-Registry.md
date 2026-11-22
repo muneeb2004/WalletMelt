@@ -91,3 +91,6 @@ related:
 - **TD-009** renewal bugs: month-end drift **fixed**; renewals now atomic with an in-flight guard; debt/expense/subscription repositories write minor units (restore back-fills them). Tests: `test/subscription_renewal_test.dart`.
 - **TD-006** unused `PinHash.hashPin` static-salt wrapper **removed**; `LedgerIntegrityService` and `SecureClipboardService` still unreferenced (open).
 - Open low items: undisposed method-local `TextEditingController`s in sheets (disposing after pop risks use-after-dispose; left as is), remaining `catch (_) {}` in UI/file services, category-budget/grocery repositories do not write minor units (restore back-fills).
+
+## Resolution log (2026-11-22)
+- **TD-006** unreferenced security services: **resolved**. `LedgerIntegrityService`, the `keystore_mac` MethodChannel and its Keystore HMAC key code in `MainActivity.kt`, and `SecureClipboardService` were deleted with their tests. If tamper detection or clipboard clearing is wanted later, it should come back as a decision (ADR), wired into a real flow.
