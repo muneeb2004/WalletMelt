@@ -49,6 +49,13 @@ void main() {
       expect(amountPrecisionError(0.1 + 0.2, 'USD'), isNull);
     });
 
+    test('large amounts with valid decimals are accepted', () {
+      expect(amountPrecisionError(123456789.12, 'PKR'), isNull);
+      expect(amountPrecisionError(999999999999.99, 'USD'), isNull);
+      expect(amountPrecisionError(123456789.125, 'PKR'), isNotNull);
+      expect(amountPrecisionError(987654321, 'JPY'), isNull);
+    });
+
     test('expense validation applies the currency rule', () {
       final result = validateExpenseInput(
         amount: '1500.5',

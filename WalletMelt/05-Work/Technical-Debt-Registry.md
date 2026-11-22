@@ -86,7 +86,8 @@ related:
 - **Problem**: Every `*MinorUnits` column and `toMinorUnits` uses `amount * 100` for all currencies. That is not ISO 4217 minor units. Three-decimal currencies (KWD, BHD, OMR, JOD, TND, LYD, IQD) cannot keep their third decimal.
 - **Mitigation (2026-11-22)**: `currencyDecimalDigits` (`lib/src/constants/currencies.dart`) gives the ISO decimal places.
   - `formatMoney` shows 0 decimals for JPY-style currencies and 3 for KWD-style currencies.
-  - Expense entry rejects more decimals than `currencyInputDecimalDigits` allows (0 for JPY, at most 2 everywhere else), so storage never silently drops a digit.
+  - The **Add expense** form rejects more decimals than `currencyInputDecimalDigits` allows (0 for JPY, at most 2 everywhere else), and fuel totals are formatted the same way.
+  - Other money fields (budgets, debts, income, accounts, goals, committees) still round silently at 1/100. Applying `amountPrecisionError` to them is open work.
 - **Full fix**: store a per-currency exponent, or move to a 1/1000 scale. That needs a schema migration across about 10 tables, a backup format bump and an ADR.
 - **Priority**: Low while users are PKR-first; raise it before marketing to Gulf users.
 - **Related Code**: `lib/src/utils/currency_format.dart`, `lib/src/data/local/wallet_melt_database.dart`

@@ -42,11 +42,11 @@ ExpenseValidationResult validateExpenseInput({
 /// otherwise null.
 String? amountPrecisionError(double amount, String currency) {
   final allowed = currencyInputDecimalDigits(currency);
-  var scaled = amount;
-  for (var i = 0; i < allowed; i++) {
-    scaled *= 10;
-  }
-  if ((scaled - scaled.roundToDouble()).abs() < 1e-6) return null;
+  // Round in decimal (toStringAsFixed) and compare with a tolerance of a few
+  // ulps relative to the amount, so large values such as 123456789.12 and
+  // computed sums such as 0.1 + 0.2 are not mistaken for extra precision.
+  final rounded = double.parse(amount.toStringAsFixed(allowed));
+  if ((amount - rounded).abs() <= amount.abs() * 4e-16) return null;
   return allowed == 0
       ? '${currency.toUpperCase()} amounts are whole numbers.'
       : 'Use at most $allowed decimal places.';
