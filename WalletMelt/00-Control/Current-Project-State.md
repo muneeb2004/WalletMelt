@@ -157,3 +157,8 @@ The dashboard balance hide/show toggle is persisted as `settings.hideBalance` (S
 - History's "This month" range now follows `AppState.selectedMonth` (the dashboard month switcher) instead of today's period; changing the month resets the range to it. The memo cache keys on the selected month.
 - One canonical expense order, `compareExpensesNewestFirst` in `lib/src/utils/insights.dart`: date desc, `createdAt` desc, `id`. Dashboard recent activity and History (all sorts, as tie-break) use it, so order is deterministic and identical.
 - Tests: `test/utils/expense_order_test.dart`; What's New updated.
+
+## 32. Unused dependencies removed (2026-11-22)
+- Removed packages that nothing imports: `fl_chart`, `flutter_animate`, `flutter_staggered_animations`, `percent_indicator`, `animated_flip_counter`, `flex_color_scheme`.
+- `cupertino_icons` stays because the screenshot harness loads its font.
+- `sqflite` stays: `getDatabasesPath()` decides where the database file lives on Android, so swapping it for `path_provider` would point existing installs at an empty database.
