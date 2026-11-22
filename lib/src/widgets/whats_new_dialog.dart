@@ -132,6 +132,44 @@ class WhatsNewContent extends StatelessWidget {
               const SizedBox(height: 14),
 
               _buildChangelogItem(context,
+                icon: Icons.shield_outlined,
+                iconColor: context.scheme.primary,
+                title: 'Safer restores',
+                description:
+                    'Restoring a backup now checks the file first and stops if anything looks wrong, and it only goes ahead once a safety copy of your current data has really been saved.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.bolt_rounded,
+                iconColor: context.scheme.secondary,
+                title: 'Smoother PIN unlock',
+                description:
+                    'Unlocking with your PIN and opening protected backups no longer freezes the screen while WalletMelt checks them.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
+                icon: Icons.payments_outlined,
+                iconColor: context.scheme.tertiary,
+                title: 'Amounts look right in every currency',
+                description:
+                    'Yen and other whole-number currencies no longer show cents, and WalletMelt tells you when an amount has more decimals than your currency uses instead of quietly cutting them off.',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 24),
+
+              // Version 1.12.0 Highlights
+              _buildSectionBadge(
+                label: 'VERSION 1.12.0 UPDATES',
+                color: context.scheme.primary,
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+
+              _buildChangelogItem(context,
                 icon: Icons.web_asset_rounded,
                 iconColor: context.scheme.primary,
                 title: 'Questions slide up like everything else',
