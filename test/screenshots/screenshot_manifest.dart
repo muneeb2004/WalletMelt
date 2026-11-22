@@ -33,6 +33,7 @@ import 'package:wallet_melt/src/services/export/wallet_melt_json_backup_validato
 import 'package:wallet_melt/src/services/export/wallet_melt_json_restore_service.dart';
 
 import 'screenshot_demo_data.dart';
+import 'screenshot_output.dart';
 
 class ScreenshotTarget {
   final String id;
@@ -532,7 +533,7 @@ final List<ScreenshotTarget> screenshotTargets = [
 
 /// Generates and validates the publication manifest JSON file.
 Future<File> writeManifestJson(List<ScreenshotTarget> targets) async {
-  final baseDir = Directory('walletmelt_screenshots');
+  final baseDir = Directory(screenshotOutputDir);
   baseDir.createSync(recursive: true);
 
   final List<Map<String, dynamic>> manifestEntries = [];
