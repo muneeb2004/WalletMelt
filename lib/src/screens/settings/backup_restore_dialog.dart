@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:archive/archive.dart';
 
 import '../../theme/wallet_melt_theme.dart';
 import '../../services/export/wallet_melt_json_backup_conflict_service.dart';
 import '../../services/export/wallet_melt_json_backup_preview_service.dart';
+import '../../services/export/backup_zip_extractor.dart';
 import '../../services/export/export_file_writer.dart';
 import '../../services/export/wallet_melt_json_backup_service.dart';
 import '../../services/export/wallet_melt_json_backup_validator.dart';
@@ -211,8 +211,8 @@ class _BackupRestoreDialogState extends State<BackupRestoreDialog> {
         await zipExtractDir.create(recursive: true);
 
         await _runTask(
-          _extractZipInBackground,
-          _ZipExtractorArgs(widget.backupFile.zipBytes!, zipExtractDir.path),
+          extractBackupZip,
+          BackupZipExtractArgs(widget.backupFile.zipBytes!, zipExtractDir.path),
         );
       }
 
@@ -791,25 +791,6 @@ class _ModeTab extends StatelessWidget {
 
 extension on BackupRestoreDialog {
   WalletMeltJsonRestoreDryRunPlanner get restoreDryRunPlanner => const WalletMeltJsonRestoreDryRunPlanner();
-}
-
-class _ZipExtractorArgs {
-  final List<int> zipBytes;
-  final String extractPath;
-  const _ZipExtractorArgs(this.zipBytes, this.extractPath);
-}
-
-void _extractZipInBackground(_ZipExtractorArgs args) {
-  final archive = ZipDecoder().decodeBytes(args.zipBytes);
-  for (final entry in archive) {
-    final entryPath = entry.name;
-    if (entry.isFile) {
-      final data = entry.content as List<int>;
-      final file = File(p.join(args.extractPath, entryPath));
-      file.createSync(recursive: true);
-      file.writeAsBytesSync(data);
-    }
-  }
 }
 
 Future<R> _runTask<Q, R>(ComputeCallback<Q, R> callback, Q message) {
