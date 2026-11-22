@@ -57,3 +57,12 @@ Schema v14 adds `committees` and `committee_events` as optional extended keys wi
 
 ## Icon files in ZIP backups (2026-10-27)
 ZIP backups carry the user's uploaded icons (`icons/uploads/`) and icon edits (`icons/overrides/`). `createBackup(iconFiles:)` writes them; after a successful restore `AppState.restoreJsonBackup` calls `SvgCustomizationService.importFiles` (Safe Merge keeps local files, Full Replace uses the backup copy, unsafe names and invalid SVGs are skipped, and an icon problem never fails the restore). JSON-only and safety backups carry no icons. Details: [[Backup-Format-Specification]] section 10, [[ADR-0007-SVG-Customization-and-Global-Overrides]].
+
+## ZIP extraction is validated (2026-11-22)
+Restoring a ZIP backup extracts it through `extractBackupZip` (`lib/src/services/export/backup_zip_extractor.dart`). Every entry is checked before anything is written. The restore is refused with `UnsafeBackupArchiveException`, and nothing is written, if any of these is true:
+- an entry would land outside the temporary restore folder (`../`, absolute paths, drive letters);
+- an entry is a symbolic link;
+- the archive has more than 20,000 entries;
+- the archive is over 512 MB uncompressed.
+
+Previously a crafted backup could overwrite any file in the app sandbox. Receipt and icon copies out of the extract folder were already safe (they use `basename`). Tests: `test/services/export/backup_zip_extractor_test.dart`.
