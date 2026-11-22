@@ -19,6 +19,8 @@ void main() {
 
       // Check for the current version section badge & items
       expect(find.text('VERSION ${AppVersion.version} UPDATES'), findsOneWidget);
+      expect(find.text('Decimals checked everywhere'), findsOneWidget);
+      expect(find.text('VERSION 1.12.1 UPDATES'), findsOneWidget);
       expect(find.text('Safer restores'), findsOneWidget);
       expect(find.text('Smoother PIN unlock'), findsOneWidget);
       expect(find.text('Amounts look right in every currency'), findsOneWidget);
