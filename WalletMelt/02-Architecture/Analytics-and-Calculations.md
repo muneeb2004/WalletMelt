@@ -79,3 +79,11 @@ Everything that was "the calendar month" is now "the budget period": `SpendingAn
 
 ## Committees (2026-10-18, [[ADR-0016-Committees-BC-Installments-and-Payout-Turn]])
 Balance gains `committeeNet`: for a committee linked to the account (same currency, events dated on or after the opening date) installments are minus, the payout is plus. `CommitteePlanner` (pure): installment `k` is due on `startDate` plus `k - 1` months with the start day as anchor (month-end safe); due items are every unrecorded installment due on or before today plus the payout once its month has arrived, oldest first (installment before payout on the same day); `expectedNet = payout - monthly x members`; `netSoFar = received - paid`. Committee flows are not spending.
+
+## Currency decimal places (2026-11-22)
+`formatMoney` uses each currency's ISO 4217 decimal places through `currencyDecimalDigits`:
+- 0 decimals for JPY, KRW, VND and similar;
+- 3 decimals for KWD, BHD, OMR and similar;
+- 2 decimals otherwise.
+
+Whole amounts still print without decimals. The Add expense form rejects amounts with more decimal places than the currency allows (`amountPrecisionError`); other money forms do not check yet (TD-011). Storage stays at a fixed 1/100 scale; see [[Technical-Debt-Registry]] TD-011.

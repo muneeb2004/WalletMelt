@@ -1257,3 +1257,30 @@ String currencySymbolFor(String currency) {
   }
   return '$currency ';
 }
+
+/// ISO 4217 currencies with no minor unit (amounts are whole numbers).
+const Set<String> _zeroDecimalCurrencies = {
+  'BIF', 'CLP', 'DJF', 'GNF', 'ISK', 'JPY', 'KMF', 'KRW', 'PYG', 'RWF',
+  'UGX', 'VND', 'VUV', 'XAF', 'XOF',
+};
+
+/// ISO 4217 currencies with three decimal places.
+const Set<String> _threeDecimalCurrencies = {
+  'BHD', 'IQD', 'JOD', 'KWD', 'LYD', 'OMR', 'TND',
+};
+
+/// ISO 4217 decimal places for [currency] (0, 2 or 3); unknown codes use 2.
+int currencyDecimalDigits(String currency) {
+  final code = currency.toUpperCase();
+  if (_zeroDecimalCurrencies.contains(code)) return 0;
+  if (_threeDecimalCurrencies.contains(code)) return 3;
+  return 2;
+}
+
+/// Decimal places an amount in [currency] may be entered with. Storage keeps
+/// money at a fixed 1/100 scale (`*MinorUnits`), so three-decimal currencies
+/// are limited to two entered decimals (TD-011).
+int currencyInputDecimalDigits(String currency) {
+  final digits = currencyDecimalDigits(currency);
+  return digits > 2 ? 2 : digits;
+}

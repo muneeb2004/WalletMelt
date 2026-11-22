@@ -15,6 +15,7 @@ import '../../types/merchant.dart';
 import '../../utils/merchant_normalizer.dart';
 import '../../state/app_state.dart';
 import '../../theme/wallet_melt_theme.dart';
+import '../../constants/currencies.dart';
 import '../../utils/expense_validation.dart';
 import '../../utils/number_parser.dart';
 import '../../widgets/app_snackbar.dart';
@@ -931,12 +932,16 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
         _fuelTransactionDraft != null &&
         _fuelTransactionDraft!.components.isNotEmpty) {
       final fuelSub = _fuelTransactionDraft!.totalAmount;
-      _amountController.text =
-          fuelSub.toStringAsFixed(fuelSub % 1 == 0 ? 0 : 2);
+      _amountController.text = fuelSub.toStringAsFixed(fuelSub % 1 == 0
+          ? 0
+          : currencyInputDecimalDigits(state.settings.currency));
     }
 
     final validation = validateExpenseInput(
-        amount: _amountController.text, categoryId: _categoryId, date: _date);
+        amount: _amountController.text,
+        categoryId: _categoryId,
+        date: _date,
+        currency: state.settings.currency);
     setState(() => _validation = validation);
     if (!validation.isValid) return;
 

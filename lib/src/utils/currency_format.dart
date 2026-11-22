@@ -29,7 +29,10 @@ String formatMoneyMinorUnits(int minorUnits, String currency) {
 }
 
 String formatMoney(num value, String currency) {
-  final decimals = value % 1 == 0 ? 0 : 2;
+  // Whole amounts stay compact ("Rs 500"); fractional amounts use the
+  // currency's ISO decimal places, and zero-decimal currencies never show any.
+  final isoDigits = currencyDecimalDigits(currency);
+  final decimals = (isoDigits == 0 || value % 1 == 0) ? 0 : isoDigits;
   final key = '${currency}_$decimals';
   final formatter = _formatCache.putIfAbsent(
     key,
