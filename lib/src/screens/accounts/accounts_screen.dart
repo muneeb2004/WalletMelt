@@ -9,6 +9,7 @@ import '../../theme/wallet_melt_theme.dart';
 import '../../types/account.dart';
 import '../../utils/currency_format.dart';
 import '../../utils/number_parser.dart';
+import '../../utils/expense_validation.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/primary_button.dart';
@@ -315,6 +316,11 @@ class _AccountEditorState extends State<_AccountEditor> {
         _opening.text.trim().isEmpty ? 0 : parseMinorUnits(_opening.text);
     if (opening == null) {
       setState(() => _error = 'Enter the balance as a number.');
+      return;
+    }
+    final openingPrecision = moneyTextPrecisionError(_opening.text, _currency);
+    if (openingPrecision != null) {
+      setState(() => _error = openingPrecision);
       return;
     }
     final navigator = Navigator.of(context);
@@ -805,6 +811,12 @@ Future<void> showAdjustSheet(BuildContext context, Account account,
                 sheetContext, 'Enter an amount greater than zero.');
             return;
           }
+          final precision =
+              moneyTextPrecisionError(amount.text, account.currency);
+          if (precision != null) {
+            showErrorSnackbar(sheetContext, precision);
+            return;
+          }
           final navigator = Navigator.of(sheetContext);
           final text = note.text.trim();
           await state.adjustAccountBalance(
@@ -857,6 +869,12 @@ Future<void> showReconcileSheet(
             onPrimary: () async {
               if (actual == null) {
                 showErrorSnackbar(sheetContext, 'Enter a number.');
+                return;
+              }
+              final precision =
+                  moneyTextPrecisionError(controller.text, account.currency);
+              if (precision != null) {
+                showErrorSnackbar(sheetContext, precision);
                 return;
               }
               final navigator = Navigator.of(sheetContext);
@@ -971,11 +989,22 @@ class _TransferFormState extends State<_TransferForm> {
       setState(() => _error = 'Enter an amount greater than zero.');
       return;
     }
+    final amountPrecision = moneyTextPrecisionError(_amount.text, from.currency);
+    if (amountPrecision != null) {
+      setState(() => _error = amountPrecision);
+      return;
+    }
     int? received;
     if (from.currency != to.currency) {
       received = parseMinorUnits(_received.text);
       if (received == null || received <= 0) {
         setState(() => _error = 'Enter the amount received in ${to.currency}.');
+        return;
+      }
+      final receivedPrecision =
+          moneyTextPrecisionError(_received.text, to.currency);
+      if (receivedPrecision != null) {
+        setState(() => _error = receivedPrecision);
         return;
       }
     }

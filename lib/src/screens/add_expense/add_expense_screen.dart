@@ -944,6 +944,13 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
         currency: state.settings.currency);
     setState(() => _validation = validation);
     if (!validation.isValid) return;
+    final taxPrecision = _taxController.text.trim().isEmpty
+        ? null
+        : moneyTextPrecisionError(_taxController.text, state.settings.currency);
+    if (taxPrecision != null) {
+      showErrorSnackbar(context, 'Tax: $taxPrecision');
+      return;
+    }
 
     setState(() => _saving = true);
     final router = GoRouter.of(context);
@@ -1239,7 +1246,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                 final calculatedTax = subtotal * (pct / 100.0);
                 setState(() {
                   _taxController.text = calculatedTax.toStringAsFixed(
-                    calculatedTax % 1 == 0 ? 0 : 2,
+                    calculatedTax % 1 == 0
+                        ? 0
+                        : currencyInputDecimalDigits(
+                            context.read<AppState>().settings.currency),
                   );
                 });
               } else if (val.trim().isEmpty) {

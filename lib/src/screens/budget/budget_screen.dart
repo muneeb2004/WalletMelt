@@ -11,6 +11,7 @@ import '../../utils/budget_period.dart';
 import '../../utils/currency_format.dart';
 import '../../utils/date_utils.dart';
 import '../../utils/number_parser.dart';
+import '../../utils/expense_validation.dart';
 import '../../types/budget.dart';
 import '../../types/monthly_budget.dart';
 import '../../components/category/category_icon.dart';
@@ -199,6 +200,12 @@ class BudgetScreen extends StatefulWidget {
                               if (parsed == null || parsed <= 0) {
                                 showErrorSnackbar(sheetContext,
                                     'Please enter a valid amount greater than 0.');
+                                return;
+                              }
+                              final precision = amountPrecisionError(
+                                  parsed, state.settings.currency);
+                              if (precision != null) {
+                                showErrorSnackbar(sheetContext, precision);
                                 return;
                               }
                               await state.setMonthlyBudgetAmount(parsed);
@@ -1026,6 +1033,12 @@ class _BudgetScreenState extends State<BudgetScreen> {
                                   parsed <= 0) {
                                 showErrorSnackbar(context,
                                     'Please select a category and enter an amount > 0.');
+                                return;
+                              }
+                              final precision = amountPrecisionError(
+                                  parsed, state.settings.currency);
+                              if (precision != null) {
+                                showErrorSnackbar(context, precision);
                                 return;
                               }
                               if (!isEdit) {

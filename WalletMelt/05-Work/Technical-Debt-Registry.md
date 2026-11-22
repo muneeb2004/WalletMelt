@@ -87,7 +87,17 @@ related:
 - **Mitigation (2026-11-22)**: `currencyDecimalDigits` (`lib/src/constants/currencies.dart`) gives the ISO decimal places.
   - `formatMoney` shows 0 decimals for JPY-style currencies and 3 for KWD-style currencies.
   - The **Add expense** form rejects more decimals than `currencyInputDecimalDigits` allows (0 for JPY, at most 2 everywhere else), and fuel totals are formatted the same way.
-  - Other money fields (budgets, debts, income, accounts, goals, committees) still round silently at 1/100. Applying `amountPrecisionError` to them is open work.
+  - Since 2026-11-22 every money form checks precision with `amountPrecisionError` / `moneyTextPrecisionError` in the currency the amount is saved in:
+    - Add expense (amount and tax);
+    - budgets (overall and per category);
+    - debts and repayments;
+    - income and confirm-received;
+    - accounts (opening balance, add and spend money, correct balance, transfers on both sides);
+    - savings goals (target, set aside and release);
+    - committees (installment, payout and confirm);
+    - subscriptions (amount and tax);
+    - essentials.
+  - Computed tax is rounded to the currency's input decimals. Fuel litres and price per litre are quantities and rates, so they are not checked.
 - **Full fix**: store a per-currency exponent, or move to a 1/1000 scale. That needs a schema migration across about 10 tables, a backup format bump and an ADR.
 - **Priority**: Low while users are PKR-first; raise it before marketing to Gulf users.
 - **Related Code**: `lib/src/utils/currency_format.dart`, `lib/src/data/local/wallet_melt_database.dart`

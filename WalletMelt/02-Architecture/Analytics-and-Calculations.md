@@ -86,4 +86,4 @@ Balance gains `committeeNet`: for a committee linked to the account (same curren
 - 3 decimals for KWD, BHD, OMR and similar;
 - 2 decimals otherwise.
 
-Whole amounts still print without decimals. The Add expense form rejects amounts with more decimal places than the currency allows (`amountPrecisionError`); other money forms do not check yet (TD-011). Storage stays at a fixed 1/100 scale; see [[Technical-Debt-Registry]] TD-011.
+Whole amounts still print without decimals. Every money form rejects amounts with more decimal places than the currency allows (`amountPrecisionError`, or `moneyTextPrecisionError` for typed text) in the currency the amount is saved in (TD-011). Storage stays at a fixed 1/100 scale; see [[Technical-Debt-Registry]] TD-011.

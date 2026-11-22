@@ -9,6 +9,7 @@ import '../../theme/wallet_melt_theme.dart';
 import '../../types/account.dart';
 import '../../types/savings_goal.dart';
 import '../../utils/currency_format.dart';
+import '../../utils/expense_validation.dart';
 import '../../utils/number_parser.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/empty_state.dart';
@@ -235,6 +236,16 @@ class _GoalEditorState extends State<_GoalEditor> {
       setState(() => _error = 'Enter a target amount above zero.');
       return;
     }
+    final goalCurrency = _accounts
+            .where((a) => a.id == _accountId)
+            .map((a) => a.currency)
+            .firstOrNull ??
+        widget.state.settings.currency;
+    final precision = amountPrecisionError(value, goalCurrency);
+    if (precision != null) {
+      setState(() => _error = precision);
+      return;
+    }
     if (_accountId == null) {
       setState(() => _error = 'Choose an account.');
       return;
@@ -361,11 +372,13 @@ class _GoalDetailState extends State<_GoalDetail> {
   Future<void> _amountDialog({
     required String title,
     required String actionLabel,
+    required String currency,
     required Future<void> Function(int minor) onConfirm,
   }) async {
     final result = await showDialog<int>(
       context: context,
-      builder: (_) => _AmountDialog(title: title, actionLabel: actionLabel),
+      builder: (_) => _AmountDialog(
+          title: title, actionLabel: actionLabel, currency: currency),
     );
     if (result == null) return;
     try {
@@ -414,6 +427,7 @@ class _GoalDetailState extends State<_GoalDetail> {
                       onPressed: () => _amountDialog(
                         title: 'Set money aside',
                         actionLabel: 'Set aside',
+                        currency: goal.currency,
                         onConfirm: (m) =>
                             widget.state.setAsideForGoal(goal.id, m),
                       ),
@@ -427,6 +441,7 @@ class _GoalDetailState extends State<_GoalDetail> {
                           : () => _amountDialog(
                                 title: 'Release money',
                                 actionLabel: 'Release',
+                                currency: goal.currency,
                                 onConfirm: (m) =>
                                     widget.state.releaseFromGoal(goal.id, m),
                               ),
@@ -525,10 +540,12 @@ class _GoalDetailState extends State<_GoalDetail> {
 /// Asks for a money amount. Owns its controller so it is disposed only after
 /// the dialog's closing animation has finished.
 class _AmountDialog extends StatefulWidget {
-  const _AmountDialog({required this.title, required this.actionLabel});
+  const _AmountDialog(
+      {required this.title, required this.actionLabel, required this.currency});
 
   final String title;
   final String actionLabel;
+  final String currency;
 
   @override
   State<_AmountDialog> createState() => _AmountDialogState();
@@ -536,6 +553,7 @@ class _AmountDialog extends StatefulWidget {
 
 class _AmountDialogState extends State<_AmountDialog> {
   final _controller = TextEditingController();
+  String? _error;
 
   @override
   void dispose() {
@@ -551,7 +569,7 @@ class _AmountDialogState extends State<_AmountDialog> {
         controller: _controller,
         autofocus: true,
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
-        decoration: const InputDecoration(labelText: 'Amount'),
+        decoration: InputDecoration(labelText: 'Amount', errorText: _error),
       ),
       actions: [
         TextButton(
@@ -562,6 +580,11 @@ class _AmountDialogState extends State<_AmountDialog> {
           onPressed: () {
             final v = parseTolerantNumber(_controller.text);
             if (v == null || v <= 0) return;
+            final precision = amountPrecisionError(v, widget.currency);
+            if (precision != null) {
+              setState(() => _error = precision);
+              return;
+            }
             Navigator.pop(context, toMinorUnits(v));
           },
           child: Text(widget.actionLabel),

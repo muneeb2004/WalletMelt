@@ -38,6 +38,13 @@ ExpenseValidationResult validateExpenseInput({
   );
 }
 
+/// [amountPrecisionError] for typed money [text]. Returns null when the text
+/// is empty or not a number (callers report those themselves) or is fine.
+String? moneyTextPrecisionError(String text, String currency) {
+  final value = parseTolerantNumber(text);
+  return value == null ? null : amountPrecisionError(value, currency);
+}
+
 /// Error text when [amount] has more decimal places than [currency] allows,
 /// otherwise null.
 String? amountPrecisionError(double amount, String currency) {

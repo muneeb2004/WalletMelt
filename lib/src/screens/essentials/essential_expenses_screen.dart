@@ -10,6 +10,7 @@ import '../../theme/wallet_melt_theme.dart';
 import '../../types/essential_expense.dart';
 import '../../types/fuel.dart';
 import '../../utils/currency_format.dart';
+import '../../utils/expense_validation.dart';
 import '../../utils/number_parser.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/primary_button.dart';
@@ -807,6 +808,14 @@ class _AddEditEssentialSheetState extends State<_AddEditEssentialSheet> {
     if (expectedAmt <= 0 && !_isFuel) {
       showErrorSnackbar(context, 'Please enter a valid expected amount');
       return;
+    }
+    if (!_isFuel) {
+      final precision = amountPrecisionError(
+          expectedAmt, context.read<AppState>().settings.currency);
+      if (precision != null) {
+        showErrorSnackbar(context, precision);
+        return;
+      }
     }
 
     final day = int.tryParse(_dayController.text.trim());

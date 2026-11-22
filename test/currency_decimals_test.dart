@@ -67,4 +67,18 @@ void main() {
       expect(result.amountError, contains('whole numbers'));
     });
   });
+
+  group('moneyTextPrecisionError (shared by every money form)', () {
+    test('passes empty and non-numeric text through for the form to report', () {
+      expect(moneyTextPrecisionError('', 'PKR'), isNull);
+      expect(moneyTextPrecisionError('abc', 'PKR'), isNull);
+    });
+
+    test('flags typed precision the currency cannot hold', () {
+      expect(moneyTextPrecisionError('1,250.5', 'JPY'), contains('whole numbers'));
+      expect(moneyTextPrecisionError('Rs 99.999', 'PKR'), isNotNull);
+      expect(moneyTextPrecisionError('1,250.50', 'PKR'), isNull);
+      expect(moneyTextPrecisionError('-20.25', 'USD'), isNull);
+    });
+  });
 }
