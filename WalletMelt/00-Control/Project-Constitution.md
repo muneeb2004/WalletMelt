@@ -24,7 +24,7 @@ related:
 2. **Determinism in Calculations**: All financial calculations (allowances, pace, tax, repayments, unit pricing) must use deterministic integer or strict rounding models (e.g. `FinancialMetricsCalculator`, minor-unit database columns).
 3. **Database Integrity & Lifecycle**:
    - Drift (`WalletMeltDatabase`) is the primary persistence engine.
-   - The sqflite fallback layer (`AppDatabase`) remains intact for legacy migration safety.
+   - There is no sqflite fallback database any more; `sqflite` stays only for `getDatabasesPath()`, which must not change because it fixes the database file location on Android. *(Corrected 2026-11-22: earlier text described an `AppDatabase` fallback that no longer exists.)*
    - `WalletMeltDatabase.open()` must always return the unified static singleton instance. Dual-instance creation is strictly prohibited.
 4. **State Layer Coexistence**:
    - Screen-level UI state is coordinated by Provider (`AppState`).

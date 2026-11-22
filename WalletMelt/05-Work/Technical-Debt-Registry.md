@@ -29,7 +29,7 @@ related:
 ### TD-002: Windows Gradle Cross-Drive Execution Constraints
 - **Problem**: Kotlin daemon parallel/incremental compilation can collide across Windows drive letters and pub cache.
 - **Impact**: Compilations can fail with file lock errors if parallel builds are enabled on certain Windows hosts.
-- **Workaround**: `android/gradle.properties` sets `kotlin.incremental=false`, `kotlin.compiler.execution.strategy=in-process`, and `org.gradle.parallel=false`.
+- **Workaround**: `android/gradle.properties` sets `kotlin.incremental=false`, `kotlin.compiler.execution.strategy=in-process`, and originally `org.gradle.parallel=false` (now `true`; corrected 2026-11-22).
 - **Risk**: Build times take slightly longer (~50s per flavor), but builds are 100% reliable.
 - **Priority**: Low
 - **Proposed Direction**: Maintain these flags as standard build invariants for Windows hosts.

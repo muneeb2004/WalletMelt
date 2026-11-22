@@ -29,15 +29,15 @@ related:
   - `Riverpod` (`ProviderScope`) wraps root to provide Drift repositories via dependency injection.
 - **Persistence**:
   - **Drift**: Primary database engine (`WalletMeltDatabase`, schema version 14) with singleton lifecycle guard (`open()`).
-  - **sqflite**: Legacy fallback database (`AppDatabase`) preserved across all repositories.
+  - **sqflite**: no database of its own any more; there is no `AppDatabase` class. The package is kept only for `getDatabasesPath()`, which fixes where the Drift file lives on Android. *(Corrected 2026-11-22.)*
   - **Receipt Files**: Local filesystem storage in app documents directory under `receipts/`.
   - **SVG Overrides**: Persisted in `custom_icons/overrides/<id>.svg` and managed by `SvgCustomizationService`.
 - **Security & Integrity**:
-  - PIN storage using SHA-256 with salt in `flutter_secure_storage`.
+  - PIN storage using PBKDF2-HMAC-SHA256 (100,000 iterations, random 32-byte salt) in `flutter_secure_storage`. *(Corrected 2026-11-22: earlier text said SHA-256.)*
   - `PinLockController` with 30-second background grace period, 5-attempt / 30-second lockout throttle, and `FLAG_SECURE` window protection.
 
-## 3. Database Schema State (Drift v11)
-26 Managed Tables (the 22 below plus `Accounts`, `AccountMovements`, `Incomes`, `IncomeSchedules`, see sections 11 and 12):
+## 3. Database Schema State (Drift v14)
+30 managed tables: the 22 below plus `Accounts`, `AccountMovements`, `Incomes`, `IncomeSchedules` (sections 11 and 12), `SavingsGoals`, `SavingsContributions` (section 17) and `Committees`, `CommitteeEvents` (section 18). *(Corrected 2026-11-22.)*
 1. `Categories`
 2. `Expenses` (supports subtotal, taxAmount, minor units, soft delete `deletedAt`)
 3. `GroceryItems` (itemized lines under expenses)
@@ -70,7 +70,7 @@ related:
 ## 5. Known Constraints & Limitations
 - **No Remote Backend**: App is completely local-first.
 - **KGP Build Warnings**: Upstream plugins (`flutter_image_compress_common`, `share_plus`) emit deprecation warnings for Kotlin Gradle Plugin; non-blocking for current builds.
-- **Windows Gradle Properties**: Retains `kotlin.incremental=false`, `kotlin.compiler.execution.strategy=in-process`, `org.gradle.parallel=false` to prevent cross-drive compile locks.
+- **Windows Gradle Properties**: Retains `kotlin.incremental=false`, `kotlin.compiler.execution.strategy=in-process`, and `org.gradle.parallel` to prevent cross-drive compile locks. `android/gradle.properties` currently sets `org.gradle.parallel=true` and builds succeed; set it back to `false` if cross-drive locks return. *(Corrected 2026-11-22.)*
 
 ## 6. Strategy Context
 Product direction (best student finance tracker, Pakistan then international) is tracked in [[Student-Market-Strategy]]; verified capability gaps in [[Gap-Analysis-vs-Code]]. Strategy items are `proposed` and do not alter the stable scope.
